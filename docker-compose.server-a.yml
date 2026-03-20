@@ -1,0 +1,46 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_URLS=worker-1|http://worker-1:3001
+    depends_on:
+      - redis
+
+  worker-1:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-1
+      - WORKER_ACCOUNT_USER=${WORKER_1_USER}
+      - WORKER_ACCOUNT_PWD=${WORKER_1_PWD}
+      - WORKER_ACCOUNT_FILE=session.json
+      - HEADLESS=true
+    volumes:
+      - ./assets:/app/assets
+      - ./auth:/app/auth
+    depends_on:
+      - redis
+
+volumes:
+  redis-data:

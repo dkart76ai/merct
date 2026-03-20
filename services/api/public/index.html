@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mercenaries Found - Total Battle Scanner</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+      }
+
+      .stat-box {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px 25px;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+      }
+
+      .stat-box .number {
+        font-size: 28px;
+        font-weight: bold;
+        display: block;
+      }
+
+      .stat-box .label {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .controls {
+        padding: 20px 30px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 500;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+      }
+
+      .btn-danger {
+        background: #dc3545;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #c82333;
+      }
+
+      .btn-success {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #218838;
+      }
+
+      .btn-warning {
+        background: #ffc107;
+        color: #212529;
+      }
+
+      .btn-warning:hover {
+        background: #e0a800;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+      }
+
+      .empty-state svg {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background: #f8f9fa;
+      }
+
+      th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+      }
+
+      td {
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      tbody tr:hover {
+        background: #f8f9fa;
+      }
+
+      .confidence {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .confidence.high {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .confidence.medium {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .timestamp {
+        color: #6c757d;
+        font-size: 14px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .last-updated {
+        text-align: center;
+        padding: 15px;
+        color: #6c757d;
+        font-size: 13px;
+        background: #f8f9fa;
+      }
+
+      .workers-panel {
+        padding: 15px 30px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .worker-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 20px;
+        background: white;
+        border: 1px solid #dee2e6;
+        font-size: 13px;
+      }
+
+      .worker-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .dot-online { background: #28a745; }
+      .dot-offline { background: #dc3545; }
+
+      .btn-wake {
+        padding: 3px 10px;
+        font-size: 12px;
+        border: none;
+        border-radius: 10px;
+        background: #667eea;
+        color: white;
+        cursor: pointer;
+      }
+
+      .btn-wake:disabled { background: #adb5bd; cursor: default; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>⚔️ Mercenaries Scanner</h1>
+        <p>Total Battle - Real-time Mercenary Detection</p>
+        <div class="stats">
+          <div class="stat-box">
+            <span class="number" id="total-found">0</span>
+            <span class="label">Found</span>
+          </div>
+          <div class="stat-box">
+            <span class="number" id="coords-total">0</span>
+            <span class="label">Coordinates</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="workers-panel" id="workers-panel">
+        <strong style="color:#495057">Workers:</strong>
+        <span style="color:#6c757d;font-size:13px">Loading...</span>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
+        <button class="btn btn-success" onclick="initScan()">▶️ Start Scan</button>
+        <button class="btn btn-warning" id="btn-pause" onclick="pauseScan()">⏸️ Pause</button>
+        <button class="btn btn-danger" onclick="stopScan()">⏹️ Stop</button>
+        <button class="btn btn-danger" onclick="clearMercenaries()">🗑️ Clear Results</button>
+        <span style="margin-left: auto; color: #6c757d">Status: <strong id="scan-status">Unknown</strong> &nbsp;|&nbsp; Auto-refresh: <strong>5s</strong></span>
+      </div>
+
+      <div class="content" id="content">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading mercenaries data...</p>
+        </div>
+      </div>
+
+      <div class="last-updated">Last updated: <span id="last-updated">Never</span></div>
+    </div>
+
+    <script>
+      let autoRefreshInterval = null
+
+      async function fetchMercenaries() {
+        const response = await fetch('/api/mercenaries')
+        return await response.json()
+      }
+
+      async function fetchScanStats() {
+        const response = await fetch('/api/scan/stats')
+        return await response.json()
+      }
+
+      async function refreshData() {
+        try {
+          const [mercenariesRes, statsRes] = await Promise.all([
+            fetchMercenaries(),
+            fetchScanStats()
+          ])
+
+          // Update stats
+          document.getElementById('total-found').textContent = mercenariesRes.count || 0
+          document.getElementById('coords-total').textContent = statsRes.stats?.total || 0
+
+          const paused = statsRes.stats?.paused
+          const active = (statsRes.stats?.total || 0) > 0
+          document.getElementById('scan-status').textContent = !active ? 'Stopped' : paused ? 'Paused' : 'Running'
+          document.getElementById('btn-pause').textContent = paused ? '▶️ Resume' : '⏸️ Pause'
+          document.getElementById('btn-pause').onclick = paused ? resumeScan : pauseScan
+
+          // Update table
+          const content = document.getElementById('content')
+          if (mercenariesRes.count === 0) {
+            content.innerHTML = `
+                        <div class="empty-state">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <h3>No mercenaries found yet</h3>
+                            <p>Workers are scanning the map. Results will appear here when mercenaries are detected.</p>
+                        </div>
+                    `
+          } else {
+            const rows = mercenariesRes.data
+              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+              .map(
+                m => `
+                            <tr>
+                                <td><strong>K${m.k}</strong></td>
+                                <td><strong>${m.x}</strong></td>
+                                <td><strong>${m.y}</strong></td>
+                                <td>
+                                    <span class="confidence ${m.confidence >= 0.9 ? 'high' : 'medium'}">
+                                        ${(m.confidence * 100).toFixed(1)}%
+                                    </span>
+                                </td>
+                                <td class="timestamp">${new Date(m.timestamp).toLocaleString()}</td>
+                            </tr>
+                        `
+              )
+              .join('')
+
+            content.innerHTML = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Kingdom</th>
+                                    <th>X</th>
+                                    <th>Y</th>
+                                    <th>Confidence</th>
+                                    <th>Found At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                    `
+          }
+
+          document.getElementById('last-updated').textContent = new Date().toLocaleTimeString()
+        } catch (error) {
+          console.error('Error refreshing data:', error)
+        }
+      }
+
+      async function initScan() {
+        if (!confirm('This will reset and start scanning all coordinates. Continue?')) return
+        try {
+          const response = await fetch('/api/scan/init', { method: 'POST' })
+          const result = await response.json()
+          alert(result.message)
+          refreshData()
+        } catch (error) {
+          alert('Error starting scan: ' + error.message)
+        }
+      }
+
+      async function pauseScan() {
+        await fetch('/api/scan/pause', { method: 'POST' })
+        refreshData()
+      }
+
+      async function resumeScan() {
+        await fetch('/api/scan/resume', { method: 'POST' })
+        refreshData()
+      }
+
+      async function stopScan() {
+        if (!confirm('Stop scanning and clear the coordinate list?')) return
+        await fetch('/api/scan/stop', { method: 'POST' })
+        refreshData()
+      }
+
+      async function clearMercenaries() {
+        if (!confirm('Are you sure you want to clear all mercenaries data?')) return
+
+        try {
+          const response = await fetch('/api/mercenaries/clear', { method: 'POST' })
+          const result = await response.json()
+          alert(result.message)
+          refreshData()
+        } catch (error) {
+          alert('Error clearing mercenaries: ' + error.message)
+        }
+      }
+
+      async function refreshWorkers() {
+        try {
+          const res = await fetch('/api/workers')
+          const { workers } = await res.json()
+          const panel = document.getElementById('workers-panel')
+          if (!workers.length) {
+            panel.innerHTML = '<strong style="color:#495057">Workers:</strong><span style="color:#6c757d;font-size:13px">No workers configured</span>'
+            return
+          }
+          panel.innerHTML = '<strong style="color:#495057">Workers:</strong>' + workers.map(w => `
+            <div class="worker-badge">
+              <span class="worker-dot ${w.online ? 'dot-online' : 'dot-offline'}"></span>
+              <span>${w.id}</span>
+              <span style="color:#6c757d">${w.online ? (w.browserReady ? '🎮 ready' : '⏳ starting') : 'offline'}</span>
+              ${w.online ? `<a href="/api/workers/${w.id}/screenshot" target="_blank" style="font-size:12px;color:#667eea">📷 view</a>` : ''}
+              <input type="text" placeholder="code" value="${w.code || ''}" id="code-${w.id}" style="width:80px;padding:3px 6px;font-size:12px;border:1px solid #dee2e6;border-radius:4px">
+              <button class="btn-wake" onclick="sendCode('${w.id}')" ${!w.online ? 'disabled' : ''}>Set</button>
+              <button class="btn-wake" onclick="wakeWorker('${w.id}', this)" ${w.online ? 'disabled' : ''}>Wake</button>
+            </div>`).join('')
+        } catch {
+          document.getElementById('workers-panel').innerHTML = '<strong style="color:#495057">Workers:</strong><span style="color:#dc3545;font-size:13px">Could not fetch worker status</span>'
+        }
+      }
+
+      async function sendCode(workerId) {
+        const code = document.getElementById(`code-${workerId}`).value.trim()
+        try {
+          const res = await fetch(`/api/workers/code/${workerId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+          })
+          const data = await res.json()
+          if (!data.success) alert('Failed to set code: ' + data.error)
+        } catch (error) {
+          alert('Error: ' + error.message)
+        }
+      }
+
+      async function wakeWorker(workerId, btn) {
+        btn.disabled = true
+        btn.textContent = '...'
+        try {
+          const res = await fetch(`/api/workers/wake/${workerId}`, { method: 'POST' })
+          const data = await res.json()
+          btn.textContent = data.success ? '✅' : '❌'
+        } catch {
+          btn.textContent = '❌'
+        }
+        setTimeout(refreshWorkers, 3000)
+      }
+
+      // Initial load
+      refreshData()
+      refreshWorkers()
+
+      // Auto-refresh every 5 seconds
+      autoRefreshInterval = setInterval(() => { refreshData(); refreshWorkers() }, 5000)
+    </script>
+  </body>
+</html>

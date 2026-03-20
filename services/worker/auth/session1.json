@@ -1,0 +1,144 @@
+{
+  "cookies": [
+    {
+      "name": "PTBHSSID",
+      "value": "bf060d723ef5e1848f8b006021e86d92",
+      "domain": "totalbattle.com",
+      "path": "/",
+      "expires": 1776729451.904593,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "totalbattle_referrer",
+      "value": "empty_referrer",
+      "domain": ".totalbattle.com",
+      "path": "/",
+      "expires": 1776729422.719463,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "log_cookie",
+      "value": "fpc69bf304da70559.60861489",
+      "domain": "totalbattle.com",
+      "path": "/",
+      "expires": 1805673451.384678,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "first_web_visit_rnd",
+      "value": "1774137423159",
+      "domain": "totalbattle.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "first_web_visit_ts",
+      "value": "1774137423",
+      "domain": "totalbattle.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_gcl_au",
+      "value": "1.1.154298991.1774137423",
+      "domain": ".totalbattle.com",
+      "path": "/",
+      "expires": 1781913423,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_fbp",
+      "value": "fb.1.1774137423507.997515612928795826",
+      "domain": ".totalbattle.com",
+      "path": "/",
+      "expires": 1781913451,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.521694204.1774137424",
+      "domain": ".totalbattle.com",
+      "path": "/",
+      "expires": 1808697423.818026,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "g_state",
+      "value": "{\"i_l\":0,\"i_ll\":1774137424505,\"i_b\":\"dthRpGTy1thjiUIbHSoKF8RSOqsWlhq/QljoJSeR/ik\",\"i_e\":{\"enable_itp_optimization\":0}}",
+      "domain": "totalbattle.com",
+      "path": "/",
+      "expires": 1789689424,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_8Y861WR30W",
+      "value": "GS2.1.s1774137423$o1$g1$t1774137451$j60$l0$h2063063202",
+      "domain": ".totalbattle.com",
+      "path": "/",
+      "expires": 1808697451.389648,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://totalbattle.com",
+      "localStorage": [
+        {
+          "name": "lastExternalReferrer",
+          "value": "empty"
+        },
+        {
+          "name": "_gcl_ls",
+          "value": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"creationTimeMs\":1774137423403},\"expires\":1781913423403}}"
+        },
+        {
+          "name": "lastExternalReferrerTime",
+          "value": "1774137423502"
+        },
+        {
+          "name": "first_web_visit_rnd",
+          "value": "1774137423159"
+        },
+        {
+          "name": "first_web_visit_ts",
+          "value": "1774137423"
+        }
+      ]
+    },
+    {
+      "origin": "https://hs-widget.helpshift.com",
+      "localStorage": [
+        {
+          "name": "di",
+          "value": "693edf21-ae4f-4d65-b6a9-c710484b0b7d"
+        },
+        {
+          "name": "aui",
+          "value": "hsft_anon_1774137452004-d9db3517250b409"
+        }
+      ]
+    }
+  ]
+}

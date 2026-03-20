@@ -1,0 +1,29 @@
+npx playwright install-deps chromium
+
+// generador d codigo
+npx playwright codegen --viewport-size="1360,1024" totalbattle.com/es
+
+// abre playwright junto con navegador
+npx playwright test --debug
+
+
+npx playwright test --ui
+
+--save-storage=auth.json
+
+
+-------------------------------------
+# linux and osx:
+export OPENCV4NODEJS_DISABLE_AUTOBUILD=1
+# on windows:
+set OPENCV4NODEJS_DISABLE_AUTOBUILD=1
+npm install --save @u4/opencv4nodejs
+
+
+//-------------
+Escalabilidad: Si la lista es muy grande, puedes usar el Sharding de Playwright para dividir la ejecución en múltiples máquinas físicas o contenedores.
+
+------
+Para ejecutar esto como un script de Node puro (sin el test runner de Playwright), la mejor opción es usar
+p-limit o una estructura de Workers manual. Esto te da control total sobre cuántas cuentas/ventanas se abren simultáneamente.
+

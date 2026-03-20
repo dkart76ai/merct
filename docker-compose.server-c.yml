@@ -1,0 +1,19 @@
+services:
+  worker-3:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-3
+      - WORKER_ACCOUNT_USER=${WORKER_3_USER}
+      - WORKER_ACCOUNT_PWD=${WORKER_3_PWD}
+      - WORKER_ACCOUNT_FILE=session.json
+      - HEADLESS=true
+    volumes:
+      - ./assets:/app/assets
+      - ./auth:/app/auth

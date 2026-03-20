@@ -1,0 +1,27 @@
+{
+  "name": "playwtb",
+  "version": "1.0.0",
+  "main": "main3.js",
+  "scripts": {
+    "start": "node main3.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.4.0"
+  },
+  "opencv4nodejs": {
+    "disableAutoBuild": "1"
+  },
+  "dependencies": {
+    "@u4/opencv4nodejs": "^7.1.2",
+    "jimp": "^1.6.0",
+    "opencv-wasm": "^4.3.0-10",
+    "p-limit": "^7.3.0",
+    "workerpool": "^10.0.1"
+  }
+}
