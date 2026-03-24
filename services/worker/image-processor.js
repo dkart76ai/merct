@@ -3,6 +3,7 @@ import path from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { createWorker } from 'tesseract.js'
+import { Jimp } from 'jimp'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -209,9 +210,16 @@ export class ImageProcessor {
   }
 
   async runOCROnRegion(imageSrc, rect) {
-    const worker = await createWorker('eng') // Specify language
+    const worker = await createWorker('eng')
     try {
-      // The rectangle object defines the region: { left, top, width, height }
+      // Crop and save debug image using Jimp
+
+      const img = await Jimp.read(imageSrc)
+      const cropped = img.crop({ x: rect.left, y: rect.top, w: rect.width, h: rect.height })
+      const debugPath = path.join(process.cwd(), 'assets', 'debug_ocr_region.png')
+      await cropped.write(debugPath)
+      console.log(`[OCR] debug region saved to ${debugPath}`)
+
       const {
         data: { text }
       } = await worker.recognize(imageSrc, {
@@ -220,13 +228,12 @@ export class ImageProcessor {
         width: rect.width,
         height: rect.height
       })
-
       console.log('Text from region:', text)
       return text
     } catch (error) {
       console.error('OCR Error:', error)
     } finally {
-      await worker.terminate() // Terminate the worker to clean up
+      await worker.terminate()
     }
   }
 
