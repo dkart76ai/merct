@@ -364,7 +364,7 @@ export class BrowserHandler {
       await this.page.waitForTimeout(10000)
 
       // check if OTP is needed
-      if (
+      while (
         await this.page
           .locator('#otp_2fa_login')
           .isVisible({ timeout: 5000 })
@@ -402,8 +402,10 @@ export class BrowserHandler {
 
           //clear code
           this.code = null
-          await this.page.waitForTimeout(10000)
         }
+        await this.page.waitForTimeout(10000)
+
+        // if the code repeats, keep inside while otp screen, means the code is wrong
       }
 
       try {
