@@ -246,8 +246,12 @@
         border-radius: 50%;
       }
 
-      .dot-online { background: #28a745; }
-      .dot-offline { background: #dc3545; }
+      .dot-online {
+        background: #28a745;
+      }
+      .dot-offline {
+        background: #dc3545;
+      }
 
       .btn-wake {
         padding: 3px 10px;
@@ -259,7 +263,10 @@
         cursor: pointer;
       }
 
-      .btn-wake:disabled { background: #adb5bd; cursor: default; }
+      .btn-wake:disabled {
+        background: #adb5bd;
+        cursor: default;
+      }
     </style>
   </head>
   <body>
@@ -280,8 +287,8 @@
       </div>
 
       <div class="workers-panel" id="workers-panel">
-        <strong style="color:#495057">Workers:</strong>
-        <span style="color:#6c757d;font-size:13px">Loading...</span>
+        <strong style="color: #495057">Workers:</strong>
+        <span style="color: #6c757d; font-size: 13px">Loading...</span>
       </div>
 
       <div class="controls">
@@ -290,7 +297,10 @@
         <button class="btn btn-warning" id="btn-pause" onclick="pauseScan()">⏸️ Pause</button>
         <button class="btn btn-danger" onclick="stopScan()">⏹️ Stop</button>
         <button class="btn btn-danger" onclick="clearMercenaries()">🗑️ Clear Results</button>
-        <span style="margin-left: auto; color: #6c757d">Status: <strong id="scan-status">Unknown</strong> &nbsp;|&nbsp; Auto-refresh: <strong>5s</strong></span>
+        <span style="margin-left: auto; color: #6c757d"
+          >Status: <strong id="scan-status">Unknown</strong> &nbsp;|&nbsp; Auto-refresh:
+          <strong>5s</strong></span
+        >
       </div>
 
       <div class="content" id="content">
@@ -329,7 +339,11 @@
 
           const paused = statsRes.stats?.paused
           const active = (statsRes.stats?.total || 0) > 0
-          document.getElementById('scan-status').textContent = !active ? 'Stopped' : paused ? 'Paused' : 'Running'
+          document.getElementById('scan-status').textContent = !active
+            ? 'Stopped'
+            : paused
+              ? 'Paused'
+              : 'Running'
           document.getElementById('btn-pause').textContent = paused ? '▶️ Resume' : '⏸️ Pause'
           document.getElementById('btn-pause').onclick = paused ? resumeScan : pauseScan
 
@@ -359,6 +373,7 @@
                                         ${(m.confidence * 100).toFixed(1)}%
                                     </span>
                                 </td>
+                                <td>${m.text}</td>
                                 <td class="timestamp">${new Date(m.timestamp).toLocaleString()}</td>
                             </tr>
                         `
@@ -436,10 +451,15 @@
           const { workers } = await res.json()
           const panel = document.getElementById('workers-panel')
           if (!workers.length) {
-            panel.innerHTML = '<strong style="color:#495057">Workers:</strong><span style="color:#6c757d;font-size:13px">No workers configured</span>'
+            panel.innerHTML =
+              '<strong style="color:#495057">Workers:</strong><span style="color:#6c757d;font-size:13px">No workers configured</span>'
             return
           }
-          panel.innerHTML = '<strong style="color:#495057">Workers:</strong>' + workers.map(w => `
+          panel.innerHTML =
+            '<strong style="color:#495057">Workers:</strong>' +
+            workers
+              .map(
+                w => `
             <div class="worker-badge">
               <span class="worker-dot ${w.online ? 'dot-online' : 'dot-offline'}"></span>
               <span>${w.id}</span>
@@ -448,9 +468,12 @@
               <input type="text" placeholder="code" value="${w.code || ''}" id="code-${w.id}" style="width:80px;padding:3px 6px;font-size:12px;border:1px solid #dee2e6;border-radius:4px">
               <button class="btn-wake" onclick="sendCode('${w.id}')" ${!w.online ? 'disabled' : ''}>Set</button>
               <button class="btn-wake" onclick="wakeWorker('${w.id}', this)" ${w.online ? 'disabled' : ''}>Wake</button>
-            </div>`).join('')
+            </div>`
+              )
+              .join('')
         } catch {
-          document.getElementById('workers-panel').innerHTML = '<strong style="color:#495057">Workers:</strong><span style="color:#dc3545;font-size:13px">Could not fetch worker status</span>'
+          document.getElementById('workers-panel').innerHTML =
+            '<strong style="color:#495057">Workers:</strong><span style="color:#dc3545;font-size:13px">Could not fetch worker status</span>'
         }
       }
 
@@ -487,7 +510,10 @@
       refreshWorkers()
 
       // Auto-refresh every 5 seconds
-      autoRefreshInterval = setInterval(() => { refreshData(); refreshWorkers() }, 5000)
+      autoRefreshInterval = setInterval(() => {
+        refreshData()
+        refreshWorkers()
+      }, 5000)
     </script>
   </body>
 </html>

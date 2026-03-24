@@ -76,7 +76,14 @@ async function run() {
       if (result.found) {
         await redis.lpush(
           REDIS_KEYS.MERCENARIES_LIST,
-          JSON.stringify({ k, x, y, text: result.text, timestamp: new Date().toISOString() })
+          JSON.stringify({
+            k,
+            x,
+            y,
+            confidence: result.confidence,
+            text: result.text,
+            timestamp: new Date().toISOString()
+          })
         )
         console.log(
           `[${config.workerId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y} coord:${result.text} `
@@ -112,30 +119,37 @@ http
 
     if (req.method === 'POST' && req.url === '/code') {
       let body = ''
-      req.on('data', chunk => { body += chunk })
+      req.on('data', chunk => {
+        body += chunk
+      })
       req.on('end', () => {
         try {
           const { code } = JSON.parse(body)
           workerCode = code || null
+
+          if (browserHandler) browserHandler.setWorkerCode(workerCode)
+
           console.log(`[${config.workerId}] 🔑 Code set to: ${workerCode}`)
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ success: true, code: workerCode }))
-        } catch {
+        } catch (e) {
           res.writeHead(400, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify({ success: false, error: 'Invalid JSON' }))
+          res.end(JSON.stringify({ success: false, error: e.message }))
         }
       })
       return
     }
 
     res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify({
-      workerId: config.workerId,
-      status: 'ok',
-      browserReady: !!browser,
-      code: workerCode,
-      timestamp: new Date().toISOString()
-    }))
+    res.end(
+      JSON.stringify({
+        workerId: config.workerId,
+        status: 'ok',
+        browserReady: !!browser,
+        code: workerCode,
+        timestamp: new Date().toISOString()
+      })
+    )
   })
   .listen(process.env.PORT || 3001, () => {
     console.log(`[${config.workerId}] 🏥 Health server on port ${process.env.PORT || 3001}`)
