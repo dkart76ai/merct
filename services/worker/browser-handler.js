@@ -45,7 +45,7 @@ export class BrowserHandler {
     return screenshotBuffer
   }
 
-  async closeScreen(times = 10, delay = 2500, captureScreenshotForDebug = false) {
+  async closeScreen(times = 20, delay = 2500, captureScreenshotForDebug = false) {
     console.log(
       `[${this.config.workerId}] Found close button... sending escape to close the screen`
     )
@@ -58,11 +58,11 @@ export class BrowserHandler {
         const debugPath = path.join(
           process.cwd(),
           'assets',
-          `${this.config.workerId}_debug_shopping.png`
+          `${this.config.workerId}_4_debug_shopping.png`
         )
         await fs.writeFile(debugPath, screenshotBuffer)
         console.log(
-          `[${this.config.workerId}] ⚠️ shopping close button  — debug screenshot saved to ${debugPath}`
+          `[${this.config.workerId}] ⚠️ shopping close button ${attempts} — debug screenshot saved to ${debugPath}`
         )
       }
 
@@ -85,7 +85,7 @@ export class BrowserHandler {
     }
   }
 
-  async waitForSplashLoading(times = 100, delay = 1000, captureScreenshotForDebug = false) {
+  async waitForSplashLoading(times = 300, delay = 1000, captureScreenshotForDebug = false) {
     console.log(`[${this.config.workerId}] Checking splash screen... `)
     let attempts = times
     while (attempts-- > 0) {
@@ -96,11 +96,11 @@ export class BrowserHandler {
         const debugPath = path.join(
           process.cwd(),
           'assets',
-          `${this.config.workerId}_debug_splash_loading.png`
+          `${this.config.workerId}_1_debug_splash_loading.png`
         )
         await fs.writeFile(debugPath, screenshotBuffer)
         console.log(
-          `[${this.config.workerId}] ⚠️ splash screen  — debug screenshot saved to ${debugPath}`
+          `[${this.config.workerId}] ⚠️ splash screen ${attempts}— debug screenshot saved to ${debugPath}`
         )
       }
 
@@ -127,7 +127,7 @@ export class BrowserHandler {
     }
   }
 
-  async waitForLoading(times = 50, delay = 1000, captureScreenshotForDebug = false) {
+  async waitForLoading(times = 200, delay = 1000, captureScreenshotForDebug = false) {
     console.log(`[${this.config.workerId}] Checking loading screen... `)
     let attempts = times
     while (attempts-- > 0) {
@@ -138,11 +138,11 @@ export class BrowserHandler {
         const debugPath = path.join(
           process.cwd(),
           'assets',
-          `${this.config.workerId}_debug_loading.png`
+          `${this.config.workerId}_3_debug_loading.png`
         )
         await fs.writeFile(debugPath, screenshotBuffer)
         console.log(
-          `[${this.config.workerId}] ⚠️ loading screen — debug screenshot saved to ${debugPath}`
+          `[${this.config.workerId}] ⚠️ loading screen ${attempts}— debug screenshot saved to ${debugPath}`
         )
       }
 
@@ -172,7 +172,7 @@ export class BrowserHandler {
       const debugPath = path.join(
         process.cwd(),
         'assets',
-        `${this.config.workerId}_debug_verify_account.png`
+        `${this.config.workerId}_5_debug_verify_account.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer)
       console.log(
@@ -224,7 +224,7 @@ export class BrowserHandler {
       const debugPath = path.join(
         process.cwd(),
         'assets',
-        `${this.config.workerId}_debug_worldmap.png`
+        `${this.config.workerId}_6_debug_worldmap.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer)
       console.log(
@@ -291,7 +291,7 @@ export class BrowserHandler {
       const debugPath = path.join(
         process.cwd(),
         'assets',
-        `${this.config.workerId}_debug_zoomin.png`
+        `${this.config.workerId}_7_debug_zoomin.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer)
       console.log(`[${this.config.workerId}] ⚠️ zooming  — debug screenshot saved to ${debugPath}`)
@@ -350,7 +350,7 @@ export class BrowserHandler {
     console.log(`[${this.config.workerId}] Loading game...`)
     await this.page.goto('https://totalbattle.com/es', { timeout: 70000 })
     await this.page.waitForTimeout(60000) //splash screen
-    await this.waitForSplashLoading(200, 1000, true)
+    await this.waitForSplashLoading(300, 1000, true)
 
     // Handle login if needed
     const loginInput = this.page.getByRole('textbox', { name: 'E-mail' })
@@ -361,6 +361,8 @@ export class BrowserHandler {
       await this.page.getByRole('textbox', { name: 'Contraseña' }).fill(this.config.accountPwd)
       await this.page.getByRole('button', { name: 'Iniciar sesión' }).click()
 
+      await this.page.waitForTimeout(10000)
+
       // check if OTP is needed
       if (
         await this.page
@@ -368,9 +370,11 @@ export class BrowserHandler {
           .isVisible({ timeout: 5000 })
           .catch(() => false)
       ) {
+        console.log(`[${this.config.workerId}] ⚠️ OTP window found`)
         //repeat OTP check until the user enters the code
-        while (this.code === null) {
-          if (this.code !== null) {
+        while (!this.code) {
+          if (!!this.code) {
+            console.log(`[${this.config.workerId}] ⚠️ entering OTP code...`)
             const inputs = this.page.getByRole('textbox')
 
             await inputs.first().click()
@@ -385,6 +389,7 @@ export class BrowserHandler {
             //clear code
             this.code = null
           } else {
+            console.log(`[${this.config.workerId}] ⚠️ requesting OTP code...`)
             if (
               await this.page
                 .getByRole('link', { name: 'Reenviar' })
@@ -392,6 +397,7 @@ export class BrowserHandler {
                 .catch(() => false)
             ) {
               await this.page.getByRole('link', { name: 'Reenviar' }).click()
+              console.log(`[${this.config.workerId}] ⚠️ request OTP code sent`)
             }
           }
           await this.page.waitForTimeout(60000)
@@ -406,7 +412,7 @@ export class BrowserHandler {
         const debugPath = path.join(
           process.cwd(),
           'assets',
-          `${this.config.workerId}_debug_login.png`
+          `${this.config.workerId}_2_debug_login.png`
         )
         const screenshotBuffer = await this.page.screenshot({ animations: 'disabled' })
         await fs.writeFile(debugPath, screenshotBuffer)
@@ -422,11 +428,11 @@ export class BrowserHandler {
     await this.page.waitForTimeout(10000) // Wait for Unity to load, shopping ads
     this.canvas = this.page.locator('canvas')
 
-    await this.waitForLoading(50, 1000, true)
+    await this.waitForLoading(200, 1000, true)
 
     // Clear popups
     await this.page.waitForTimeout(2000)
-    await this.closeScreen(10, 2500, true)
+    await this.closeScreen(20, 2500, true)
     await this.page.waitForTimeout(5000)
     await this.closeVerifyAccount(true)
     await this.page.waitForTimeout(2000)
@@ -442,8 +448,11 @@ export class BrowserHandler {
     console.log(`[${this.config.workerId}] ✅ Browser initialized and ready`)
   }
 
-  async scanCoordinate(k, x, y, code = null) {
+  setWorkerCode(code) {
     this.code = code
+  }
+
+  async scanCoordinate(k, x, y) {
     if (!this.isInitialized) {
       throw new Error('Browser not initialized')
     }
@@ -464,8 +473,6 @@ export class BrowserHandler {
       { x: 684, val: x },
       { x: 787, val: y }
     ]
-
-    if (code) inputs.unshift({ x: 488, val: code })
 
     for (const input of inputs) {
       await this.canvas.click({ clickCount: 1, position: { x: input.x, y: 446 } })
