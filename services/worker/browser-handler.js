@@ -373,34 +373,36 @@ export class BrowserHandler {
         console.log(`[${this.config.workerId}] ⚠️ OTP window found`)
         //repeat OTP check until the user enters the code
         while (!this.code) {
-          if (!!this.code) {
-            console.log(`[${this.config.workerId}] ⚠️ entering OTP code...`)
-            const inputs = this.page.getByRole('textbox')
-
-            await inputs.first().click()
-            for (const char of this.code) {
-              // Enfocamos el primero y luego simplemente enviamos las teclas
-              // El auto-tab se encargará de mover el cursor por nosotros
-              await this.page.keyboard.press(char)
-              await this.page.waitForTimeout(200)
-            }
-            await this.page.getByRole('button', { name: 'Iniciar sesión' }).click()
-
-            //clear code
-            this.code = null
-          } else {
-            console.log(`[${this.config.workerId}] ⚠️ requesting OTP code...`)
-            if (
-              await this.page
-                .getByRole('link', { name: 'Reenviar' })
-                .isVisible({ timeout: 5000 })
-                .catch(() => false)
-            ) {
-              await this.page.getByRole('link', { name: 'Reenviar' }).click()
-              console.log(`[${this.config.workerId}] ⚠️ request OTP code sent`)
-            }
+          console.log(`[${this.config.workerId}] ⚠️ requesting OTP code...`)
+          if (
+            await this.page
+              .getByRole('link', { name: 'Reenviar' })
+              .isVisible({ timeout: 5000 })
+              .catch(() => false)
+          ) {
+            await this.page.getByRole('link', { name: 'Reenviar' }).click()
+            console.log(`[${this.config.workerId}] ⚠️ request OTP code sent`)
           }
+
           await this.page.waitForTimeout(60000)
+        }
+
+        if (!!this.code) {
+          console.log(`[${this.config.workerId}] ⚠️ entering OTP code... ${this.code}`)
+          const inputs = this.page.getByRole('textbox')
+
+          await inputs.first().click()
+          for (const char of this.code) {
+            // Enfocamos el primero y luego simplemente enviamos las teclas
+            // El auto-tab se encargará de mover el cursor por nosotros
+            await this.page.keyboard.press(char)
+            await this.page.waitForTimeout(200)
+          }
+          await this.page.getByRole('button', { name: 'Iniciar sesión' }).click()
+
+          //clear code
+          this.code = null
+          await this.page.waitForTimeout(10000)
         }
       }
 
@@ -450,6 +452,7 @@ export class BrowserHandler {
 
   setWorkerCode(code) {
     this.code = code
+    console.log(`[${this.config.workerId}] OTP code received on BHdlr: ${code}`)
   }
 
   async scanCoordinate(k, x, y) {
