@@ -221,7 +221,7 @@ export class ImageProcessor {
       console.log(`[OCR] debug region saved to ${debugPath}`)
 
       // Conviertes la imagen de Jimp a un Buffer (en formato PNG o JPG)
-      const bufferParaTesseract = await cropped.getBufferAsync(Jimp.MIME_PNG)
+      const bufferParaTesseract = await cropped.getBuffer('image/png')
 
       const {
         data: { text }
@@ -248,7 +248,7 @@ export class ImageProcessor {
     // const img = await Jimp.read(imageSrc)
     // const width = img.bitmap.width
     // const height = img.bitmap.height
-    const region = { left: 0, top: pageSize.height - 200, width: 400, height: 200 }
+    const region = { left: 12, top: pageSize.height - 30, width: 160, height: 20 }
     return await this.runOCROnRegion(screenshot, region)
   }
 
