@@ -220,14 +220,20 @@ export class ImageProcessor {
       await cropped.write(debugPath)
       console.log(`[OCR] debug region saved to ${debugPath}`)
 
+      // Conviertes la imagen de Jimp a un Buffer (en formato PNG o JPG)
+      const bufferParaTesseract = await cropped.getBufferAsync(Jimp.MIME_PNG)
+
       const {
         data: { text }
-      } = await worker.recognize(imageSrc, {
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height
-      })
+      } = await worker.recognize(
+        bufferParaTesseract
+        //   , {
+        //   left: rect.left,
+        //   top: rect.top,
+        //   width: rect.width,
+        //   height: rect.height
+        // }
+      )
       console.log('Text from region:', text)
       return text
     } catch (error) {
@@ -237,9 +243,12 @@ export class ImageProcessor {
     }
   }
 
-  async detectCoordinates(screenshot) {
+  async detectCoordinates(screenshot, pageSize) {
     //use tesseract to get values from screenshot at 0,bottom-200, 300, bottom
-    const region = { left: 0, top: screenshot.height - 200, width: 400, height: 200 }
+    // const img = await Jimp.read(imageSrc)
+    // const width = img.bitmap.width
+    // const height = img.bitmap.height
+    const region = { left: 0, top: pageSize.height - 200, width: 400, height: 200 }
     return await this.runOCROnRegion(screenshot, region)
   }
 
