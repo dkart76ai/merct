@@ -206,7 +206,7 @@ export class BrowserHandler {
       const debugPath = path.join(
         process.cwd(),
         'assets',
-        `${this.config.workerId}_debug_verify_account_after.png`
+        `${this.config.workerId}_5_debug_verify_account_after.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer2)
       console.log(
@@ -246,7 +246,7 @@ export class BrowserHandler {
       const debugPath = path.join(
         process.cwd(),
         'assets',
-        `${this.config.workerId}_debug_worldmap_button.png`
+        `${this.config.workerId}_6_debug_worldmap_button.png`
       )
       const result2 = await this.page.screenshot({
         path: debugPath,
@@ -264,7 +264,7 @@ export class BrowserHandler {
         const debugPath = path.join(
           process.cwd(),
           'assets',
-          `${this.config.workerId}_debug_worldmap_after.png`
+          `${this.config.workerId}_6_debug_worldmap_after.png`
         )
         await fs.writeFile(debugPath, screenshotBuffer2)
         console.log(
@@ -321,7 +321,7 @@ export class BrowserHandler {
       const debugPath = path.join(
         process.cwd(),
         'assets',
-        `${this.config.workerId}_debug_zoomin_after.png`
+        `${this.config.workerId}_7_debug_zoomin_after.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer2)
       console.log(`[${this.config.workerId}] ⚠️ zoomin — debug screenshot saved to ${debugPath}`)
@@ -466,11 +466,11 @@ export class BrowserHandler {
     for (let i = 0; i < 5; i++) {
       await this.page.keyboard.press('Escape')
     }
-    await this.page.waitForTimeout(100)
+    await this.page.waitForTimeout(10)
 
     // Open search (magnifying glass)
     await this.canvas.click({ position: { x: 87, y: 757 } })
-    await this.page.waitForTimeout(500)
+    await this.page.waitForTimeout(200)
 
     // Enter coordinates
     const inputs = [
@@ -488,7 +488,7 @@ export class BrowserHandler {
 
     // Click GO button
     await this.canvas.click({ position: { x: 680, y: 490 } })
-    await this.page.waitForTimeout(1000) // Wait for camera to move
+    await this.page.waitForTimeout(500) // Wait for camera to move
 
     // Take screenshot
     // const screenshotBuffer = await this.page.screenshot({
@@ -506,17 +506,20 @@ export class BrowserHandler {
     // and convert with OCR to coordinates
     if (result.found) {
       await this.page.mouse.move(result.x, result.y)
-      await this.page.waitForTimeout(300) // Wait for camera to move
+      await this.page.waitForTimeout(100) // Wait for camera to move
 
-      const screenshotBuffer = await this.page.screenshot({
-        animations: 'disabled',
-        type: 'png'
-      })
+      // const screenshotBuffer = await this.page.screenshot({
+      //   animations: 'disabled',
+      //   type: 'png'
+      // })
 
-      this.lastScreenshot = screenshotBuffer
+      // this.lastScreenshot = screenshotBuffer
 
       // use tesseract to get coordinates from bottom left of screenshot
-      const ocrResult = await this.imageProcessor.detectCoordinates(screenshotBuffer)
+      const ocrResult = await this.imageProcessor.detectCoordinates(
+        screenshotBuffer,
+        this.page.viewportSize()
+      )
 
       result.text = ocrResult
     }
