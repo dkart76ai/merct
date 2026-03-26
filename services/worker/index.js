@@ -33,7 +33,22 @@ fs.mkdirSync(path.join(process.cwd(), 'debug'), { recursive: true })
 const DEBUG_PATH = path.join(process.cwd(), 'debug')
 fs.mkdirSync(path.dirname(DEBUG_PATH), { recursive: true })
 
-console.log(`🤖 Worker starting: ${config.workerId}`)
+const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK || ''
+
+async function notifyDiscord(k, x, y, texto) {
+  if (!DISCORD_WEBHOOK) return
+  try {
+    await fetch(DISCORD_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: `⚔️ K:${k} X:${x} Y:${y} (${texto})`
+      })
+    })
+  } catch (error) {
+    console.error(`[${config.workerId}] Discord notify failed:`, error.message)
+  }
+}
 
 async function claimAccount() {
   const item = await redis.blpop(REDIS_KEYS.ACCOUNTS_LIST, 10)
@@ -121,6 +136,7 @@ async function run() {
           })
         )
         console.log(`[${config.workerId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y}`)
+        await notifyDiscord(k, x, y, result.text)
       } else {
         console.log(`[${config.workerId}] ❌ No mercenario at K:${k} X:${x} Y:${y}`)
       }
