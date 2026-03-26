@@ -11,3 +11,4 @@ services/worker/.env
 services/api/.env
 worker*.png
 auth/*.json
+/accounts.json

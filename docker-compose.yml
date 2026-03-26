@@ -6,6 +6,11 @@ services:
     volumes:
       - redis-data:/data
     command: redis-server --requirepass ${REDIS_PASSWORD}
+    # Redis en RAM es rápido, pero con 128GB puedes darle persistencia sin miedo
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 
   api:
     build:
@@ -24,11 +29,14 @@ services:
     build:
       context: .
       dockerfile: services/worker/Dockerfile
+    shm_size: '2gb' # Evita que Playwright crashee
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - HEADLESS=true
+      - OMP_THREAD_LIMIT=1 # Optimiza Tesseract para no saturar CPU
+      - NODE_OPTIONS=--max-old-space-size=4096 # Dale 4GB de heap a cada Node
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
@@ -36,6 +44,10 @@ services:
       - redis
     deploy:
       replicas: 6
+      resources:
+        limits:
+          cpus: '1.5' # Límite para que Tesseract/Playwright no maten el host
+          memory: 6G  # Tienes 128GB, sé generoso para evitar fugas de memoria
 
 volumes:
   redis-data:
