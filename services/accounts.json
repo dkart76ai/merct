@@ -1,0 +1,5 @@
+[
+  { "user": "user1@mail.com", "pwd": "password1", "session": "session1.json" },
+  { "user": "user2@mail.com", "pwd": "password2", "session": "session2.json" },
+  { "user": "user3@mail.com", "pwd": "password3", "session": "session3.json" }
+]

@@ -6,7 +6,9 @@ export const QUEUE_NAMES = {
 export const REDIS_KEYS = {
   MERCENARIES_LIST: 'mercenaries:found',
   COORDINATES_LIST: 'scan:coordinates',
-  SCAN_PAUSED: 'scan:paused'
+  SCAN_PAUSED: 'scan:paused',
+  ACCOUNTS_LIST: 'accounts:available',
+  WORKERS_REGISTRY: 'workers:registry'
 }
 
 export const KINGDOMS = [
