@@ -41,6 +41,7 @@ services:
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
+      - ./debug:/app/debug
     depends_on:
       - redis
     deploy:

@@ -14,3 +14,4 @@ services:
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
+      - ./debug:/app/debug

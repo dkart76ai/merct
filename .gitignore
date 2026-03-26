@@ -12,3 +12,5 @@ services/api/.env
 worker*.png
 auth/*.json
 services/accounts.json
+/debug/
+assets/debug_ocr_region.png

@@ -28,6 +28,7 @@ let accountFile = process.env.WORKER_ACCOUNT_FILE || 'session.json'
 
 const SCREENSHOT_PATH = path.join(process.cwd(), 'screenshots', 'latest.jpg')
 fs.mkdirSync(path.dirname(SCREENSHOT_PATH), { recursive: true })
+fs.mkdirSync(path.join(process.cwd(), 'debug'), { recursive: true })
 
 const DEBUG_PATH = path.join(process.cwd(), 'debug')
 fs.mkdirSync(path.dirname(DEBUG_PATH), { recursive: true })
@@ -130,7 +131,13 @@ async function run() {
       browserHandler = null
     }
 
-    await redis.rpush(REDIS_KEYS.COORDINATES_LIST, item[1])
+    // Only push back if the list still exists (not stopped)
+    const listExists = await redis.exists(REDIS_KEYS.COORDINATES_LIST)
+    if (listExists) {
+      await redis.rpush(REDIS_KEYS.COORDINATES_LIST, item[1])
+    } else {
+      console.log(`[${config.workerId}] 🛑 Scan stopped — worker going idle`)
+    }
   }
 }
 
