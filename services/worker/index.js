@@ -11,19 +11,42 @@ const redis = getRedisClient()
 let browser = null
 let browserHandler = null
 let running = true
+let workerCode = null
+let claimedAccount = null  // holds the raw JSON string to push back on shutdown
 
 const config = {
-  accountUser: process.env.WORKER_ACCOUNT_USER,
-  accountPwd: process.env.WORKER_ACCOUNT_PWD,
-  accountFile: process.env.WORKER_ACCOUNT_FILE,
   headless: process.env.HEADLESS === 'true',
-  workerId: process.env.WORKER_ID || 'worker-unknown'
+  workerId: process.env.WORKER_ID || process.env.HOSTNAME || 'worker-unknown',
+  port: parseInt(process.env.PORT || '3001')
 }
+
+const workerUrl = `http://${process.env.HOSTNAME || 'localhost'}:${config.port}`
+
+let accountUser = process.env.WORKER_ACCOUNT_USER
+let accountPwd = process.env.WORKER_ACCOUNT_PWD
+let accountFile = process.env.WORKER_ACCOUNT_FILE || 'session.json'
 
 const SCREENSHOT_PATH = path.join(process.cwd(), 'screenshots', 'latest.jpg')
 fs.mkdirSync(path.dirname(SCREENSHOT_PATH), { recursive: true })
 
-console.log(`🤖 Worker starting with account: ${config.accountUser}`)
+console.log(`🤖 Worker starting: ${config.workerId}`)
+
+async function claimAccount() {
+  const item = await redis.blpop(REDIS_KEYS.ACCOUNTS_LIST, 10)
+  if (!item) {
+    if (accountUser && accountPwd) {
+      console.log(`[${config.workerId}] No accounts in Redis, using env vars`)
+      return
+    }
+    throw new Error('No accounts available — stopping worker')
+  }
+  const account = JSON.parse(item[1])
+  accountUser = account.user
+  accountPwd = account.pwd
+  accountFile = account.session || 'session.json'
+  claimedAccount = item[1]  // save raw string for returning on shutdown
+  console.log(`[${config.workerId}] ✅ Claimed account: ${accountUser}`)
+}
 
 async function initBrowser() {
   browser = await chromium.launch({
@@ -40,19 +63,27 @@ async function initBrowser() {
       '--ignore-gpu-blocklist'
     ]
   })
-  browserHandler = new BrowserHandler(browser, config)
+  const browserConfig = { ...config, accountUser, accountPwd, accountFile }
+  browserHandler = new BrowserHandler(browser, browserConfig)
   await browserHandler.initialize()
 }
 
 async function run() {
+  await claimAccount()
+
+  await redis.hset(
+    REDIS_KEYS.WORKERS_REGISTRY,
+    config.workerId,
+    JSON.stringify({ url: workerUrl, startedAt: new Date().toISOString() })
+  )
+  console.log(`[${config.workerId}] 📋 Registered at ${workerUrl}`)
+
   while (running) {
-    // BLPOP blocks up to 5s waiting for an item — naturally pauses when list is empty
     const item = await redis.blpop(REDIS_KEYS.COORDINATES_LIST, 5)
     if (!item) continue
 
     const paused = await redis.exists(REDIS_KEYS.SCAN_PAUSED)
     if (paused) {
-      // Put it back and wait before retrying
       await redis.rpush(REDIS_KEYS.COORDINATES_LIST, item[1])
       await new Promise(r => setTimeout(r, 2000))
       continue
@@ -76,84 +107,61 @@ async function run() {
       if (result.found) {
         await redis.lpush(
           REDIS_KEYS.MERCENARIES_LIST,
-          JSON.stringify({
-            k,
-            x,
-            y,
-            confidence: result.confidence,
-            text: result.text,
-            timestamp: new Date().toISOString()
-          })
+          JSON.stringify({ k, x, y, confidence: result.confidence, text: result.text, timestamp: new Date().toISOString() })
         )
-        console.log(
-          `[${config.workerId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y} coord:${result.text} `
-        )
+        console.log(`[${config.workerId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y}`)
       } else {
-        console.log(
-          `[${config.workerId}] ❌ No mercenario at K:${k} X:${x} Y:${y} coord:${result.text}`
-        )
+        console.log(`[${config.workerId}] ❌ No mercenario at K:${k} X:${x} Y:${y}`)
       }
     } catch (error) {
       console.error(`[${config.workerId}] ❌ Error at K:${k} X:${x} Y:${y}:`, error)
-      // Reset browser on error so it reinitializes on next iteration
       if (browserHandler) await browserHandler.close().catch(() => {})
       browser = null
       browserHandler = null
     }
 
-    // Always push back to end of list for circular scanning
     await redis.rpush(REDIS_KEYS.COORDINATES_LIST, item[1])
   }
 }
 
-let workerCode = null
-
 // Health + screenshot + code endpoint
-http
-  .createServer((req, res) => {
-    if (req.url === '/screenshot' && fs.existsSync(SCREENSHOT_PATH)) {
-      res.writeHead(200, { 'Content-Type': 'image/jpeg' })
-      fs.createReadStream(SCREENSHOT_PATH).pipe(res)
-      return
-    }
+http.createServer((req, res) => {
+  if (req.url === '/screenshot' && fs.existsSync(SCREENSHOT_PATH)) {
+    res.writeHead(200, { 'Content-Type': 'image/jpeg' })
+    fs.createReadStream(SCREENSHOT_PATH).pipe(res)
+    return
+  }
 
-    if (req.method === 'POST' && req.url === '/code') {
-      let body = ''
-      req.on('data', chunk => {
-        body += chunk
-      })
-      req.on('end', () => {
-        try {
-          const { code } = JSON.parse(body)
-          workerCode = code || null
+  if (req.method === 'POST' && req.url === '/code') {
+    let body = ''
+    req.on('data', chunk => { body += chunk })
+    req.on('end', () => {
+      try {
+        const { code } = JSON.parse(body)
+        workerCode = code || null
+        if (browserHandler) browserHandler.setWorkerCode(workerCode)
+        console.log(`[${config.workerId}] 🔑 Code set to: ${workerCode}`)
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ success: true, code: workerCode }))
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ success: false, error: e.message }))
+      }
+    })
+    return
+  }
 
-          if (browserHandler) browserHandler.setWorkerCode(workerCode)
-
-          console.log(`[${config.workerId}] 🔑 Code set to: ${workerCode}`)
-          res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify({ success: true, code: workerCode }))
-        } catch (e) {
-          res.writeHead(400, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify({ success: false, error: e.message }))
-        }
-      })
-      return
-    }
-
-    res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(
-      JSON.stringify({
-        workerId: config.workerId,
-        status: 'ok',
-        browserReady: !!browser,
-        code: workerCode,
-        timestamp: new Date().toISOString()
-      })
-    )
-  })
-  .listen(process.env.PORT || 3001, () => {
-    console.log(`[${config.workerId}] 🏥 Health server on port ${process.env.PORT || 3001}`)
-  })
+  res.writeHead(200, { 'Content-Type': 'application/json' })
+  res.end(JSON.stringify({
+    workerId: config.workerId,
+    status: 'ok',
+    browserReady: !!browser,
+    code: workerCode,
+    timestamp: new Date().toISOString()
+  }))
+}).listen(config.port, () => {
+  console.log(`[${config.workerId}] 🏥 Health server on port ${config.port}`)
+})
 
 run().catch(err => {
   console.error(`[${config.workerId}] Fatal error:`, err)
@@ -163,8 +171,13 @@ run().catch(err => {
 async function shutdown() {
   console.log(`[${config.workerId}] 🛑 Shutting down...`)
   running = false
-  if (browserHandler) await browserHandler.close()
-  if (browser) await browser.close()
+  if (claimedAccount) {
+    await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, claimedAccount).catch(() => {})
+    console.log(`[${config.workerId}] 🔄 Account returned to pool`)
+  }
+  await redis.hdel(REDIS_KEYS.WORKERS_REGISTRY, config.workerId).catch(() => {})
+  if (browserHandler) await browserHandler.close().catch(() => {})
+  if (browser) await browser.close().catch(() => {})
   await redis.quit()
   process.exit(0)
 }

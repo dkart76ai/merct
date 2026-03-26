@@ -13,14 +13,15 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 const redis = getRedisClient()
 
-// Parse worker URLs from env: WORKER_URLS=worker-1|http://serverA:3001,worker-2|http://serverB:3001
-const workerUrls = (process.env.WORKER_URLS || '').split(',').filter(Boolean).map(entry => {
-  const [id, url] = entry.split('|')
-  return { id, url }
-})
+async function getWorkers() {
+  const registry = await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY)
+  if (!registry) return []
+  return Object.entries(registry).map(([id, val]) => ({ id, url: JSON.parse(val).url }))
+}
 
 app.get('/api/workers', async (req, res) => {
-  const statuses = await Promise.all(workerUrls.map(async ({ id, url }) => {
+  const workers = await getWorkers()
+  const statuses = await Promise.all(workers.map(async ({ id, url }) => {
     try {
       const r = await fetch(url, { signal: AbortSignal.timeout(5000) })
       const data = await r.json()
@@ -33,7 +34,8 @@ app.get('/api/workers', async (req, res) => {
 })
 
 app.post('/api/workers/code/:workerId', async (req, res) => {
-  const worker = workerUrls.find(w => w.id === req.params.workerId)
+  const workers = await getWorkers()
+  const worker = workers.find(w => w.id === req.params.workerId)
   if (!worker) return res.status(404).json({ success: false, error: 'Worker not found' })
   try {
     const r = await fetch(`${worker.url}/code`, {
@@ -50,7 +52,8 @@ app.post('/api/workers/code/:workerId', async (req, res) => {
 })
 
 app.post('/api/workers/wake/:workerId', async (req, res) => {
-  const worker = workerUrls.find(w => w.id === req.params.workerId)
+  const workers = await getWorkers()
+  const worker = workers.find(w => w.id === req.params.workerId)
   if (!worker) return res.status(404).json({ success: false, error: 'Worker not found' })
   try {
     const r = await fetch(worker.url, { signal: AbortSignal.timeout(10000) })
@@ -62,7 +65,8 @@ app.post('/api/workers/wake/:workerId', async (req, res) => {
 })
 
 app.get('/api/workers/:workerId/screenshot', async (req, res) => {
-  const worker = workerUrls.find(w => w.id === req.params.workerId)
+  const workers = await getWorkers()
+  const worker = workers.find(w => w.id === req.params.workerId)
   if (!worker) return res.status(404).json({ success: false, error: 'Worker not found' })
   try {
     const r = await fetch(`${worker.url}/screenshot`, { signal: AbortSignal.timeout(5000) })

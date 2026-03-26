@@ -10,9 +10,6 @@ services:
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - WORKER_ID=worker-2
-      - WORKER_ACCOUNT_USER=${WORKER_2_USER}
-      - WORKER_ACCOUNT_PWD=${WORKER_2_PWD}
-      - WORKER_ACCOUNT_FILE=session.json
       - HEADLESS=true
     volumes:
       - ./assets:/app/assets

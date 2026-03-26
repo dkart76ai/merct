@@ -83,3 +83,17 @@ set HEADLESS=false
 
 cd g:\delphiprojs\playWTB
 node services/worker/index.js
+
+
+
+
+//-------------
+
+# start with 6 workers
+docker compose up --build
+
+# scale to 10 without rebuilding
+docker compose up --scale worker=10
+
+# scale down to 3
+docker compose up --scale worker=3
