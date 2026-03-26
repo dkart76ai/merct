@@ -84,6 +84,9 @@ set HEADLESS=false
 cd g:\delphiprojs\playWTB
 node services/worker/index.js
 
+//------------
+cd g:\delphiprojs\playWTB\services\worker
+node seed-accounts.js
 
 
 

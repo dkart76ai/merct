@@ -12,7 +12,7 @@ let browser = null
 let browserHandler = null
 let running = true
 let workerCode = null
-let claimedAccount = null  // holds the raw JSON string to push back on shutdown
+let claimedAccount = null // holds the raw JSON string to push back on shutdown
 
 const config = {
   headless: process.env.HEADLESS === 'true',
@@ -29,6 +29,9 @@ let accountFile = process.env.WORKER_ACCOUNT_FILE || 'session.json'
 const SCREENSHOT_PATH = path.join(process.cwd(), 'screenshots', 'latest.jpg')
 fs.mkdirSync(path.dirname(SCREENSHOT_PATH), { recursive: true })
 
+const DEBUG_PATH = path.join(process.cwd(), 'debug')
+fs.mkdirSync(path.dirname(DEBUG_PATH), { recursive: true })
+
 console.log(`🤖 Worker starting: ${config.workerId}`)
 
 async function claimAccount() {
@@ -44,7 +47,7 @@ async function claimAccount() {
   accountUser = account.user
   accountPwd = account.pwd
   accountFile = account.session || 'session.json'
-  claimedAccount = item[1]  // save raw string for returning on shutdown
+  claimedAccount = item[1] // save raw string for returning on shutdown
   console.log(`[${config.workerId}] ✅ Claimed account: ${accountUser}`)
 }
 
@@ -107,7 +110,14 @@ async function run() {
       if (result.found) {
         await redis.lpush(
           REDIS_KEYS.MERCENARIES_LIST,
-          JSON.stringify({ k, x, y, confidence: result.confidence, text: result.text, timestamp: new Date().toISOString() })
+          JSON.stringify({
+            k,
+            x,
+            y,
+            confidence: result.confidence,
+            text: result.text,
+            timestamp: new Date().toISOString()
+          })
         )
         console.log(`[${config.workerId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y}`)
       } else {
@@ -125,43 +135,49 @@ async function run() {
 }
 
 // Health + screenshot + code endpoint
-http.createServer((req, res) => {
-  if (req.url === '/screenshot' && fs.existsSync(SCREENSHOT_PATH)) {
-    res.writeHead(200, { 'Content-Type': 'image/jpeg' })
-    fs.createReadStream(SCREENSHOT_PATH).pipe(res)
-    return
-  }
+http
+  .createServer((req, res) => {
+    if (req.url === '/screenshot' && fs.existsSync(SCREENSHOT_PATH)) {
+      res.writeHead(200, { 'Content-Type': 'image/jpeg' })
+      fs.createReadStream(SCREENSHOT_PATH).pipe(res)
+      return
+    }
 
-  if (req.method === 'POST' && req.url === '/code') {
-    let body = ''
-    req.on('data', chunk => { body += chunk })
-    req.on('end', () => {
-      try {
-        const { code } = JSON.parse(body)
-        workerCode = code || null
-        if (browserHandler) browserHandler.setWorkerCode(workerCode)
-        console.log(`[${config.workerId}] 🔑 Code set to: ${workerCode}`)
-        res.writeHead(200, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ success: true, code: workerCode }))
-      } catch (e) {
-        res.writeHead(400, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ success: false, error: e.message }))
-      }
-    })
-    return
-  }
+    if (req.method === 'POST' && req.url === '/code') {
+      let body = ''
+      req.on('data', chunk => {
+        body += chunk
+      })
+      req.on('end', () => {
+        try {
+          const { code } = JSON.parse(body)
+          workerCode = code || null
+          if (browserHandler) browserHandler.setWorkerCode(workerCode)
+          console.log(`[${config.workerId}] 🔑 Code set to: ${workerCode}`)
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ success: true, code: workerCode }))
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ success: false, error: e.message }))
+        }
+      })
+      return
+    }
 
-  res.writeHead(200, { 'Content-Type': 'application/json' })
-  res.end(JSON.stringify({
-    workerId: config.workerId,
-    status: 'ok',
-    browserReady: !!browser,
-    code: workerCode,
-    timestamp: new Date().toISOString()
-  }))
-}).listen(config.port, () => {
-  console.log(`[${config.workerId}] 🏥 Health server on port ${config.port}`)
-})
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(
+      JSON.stringify({
+        workerId: config.workerId,
+        status: 'ok',
+        browserReady: !!browser,
+        code: workerCode,
+        timestamp: new Date().toISOString()
+      })
+    )
+  })
+  .listen(config.port, () => {
+    console.log(`[${config.workerId}] 🏥 Health server on port ${config.port}`)
+  })
 
 run().catch(err => {
   console.error(`[${config.workerId}] Fatal error:`, err)

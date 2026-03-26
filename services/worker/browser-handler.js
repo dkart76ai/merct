@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { ImageProcessor } from './image-processor.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const DEBUG = process.env.DEBUG || false
 
 export class BrowserHandler {
   constructor(browser, config) {
@@ -57,7 +58,7 @@ export class BrowserHandler {
       if (captureScreenshotForDebug) {
         const debugPath = path.join(
           process.cwd(),
-          'assets',
+          'debug',
           `${this.config.workerId}_4_debug_shopping.png`
         )
         await fs.writeFile(debugPath, screenshotBuffer)
@@ -95,7 +96,7 @@ export class BrowserHandler {
       if (captureScreenshotForDebug) {
         const debugPath = path.join(
           process.cwd(),
-          'assets',
+          'debug',
           `${this.config.workerId}_1_debug_splash_loading.png`
         )
         await fs.writeFile(debugPath, screenshotBuffer)
@@ -137,7 +138,7 @@ export class BrowserHandler {
       if (captureScreenshotForDebug) {
         const debugPath = path.join(
           process.cwd(),
-          'assets',
+          'debug',
           `${this.config.workerId}_3_debug_loading.png`
         )
         await fs.writeFile(debugPath, screenshotBuffer)
@@ -171,7 +172,7 @@ export class BrowserHandler {
     if (captureScreenshotForDebug) {
       const debugPath = path.join(
         process.cwd(),
-        'assets',
+        'debug',
         `${this.config.workerId}_5_debug_verify_account.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer)
@@ -205,7 +206,7 @@ export class BrowserHandler {
     if (captureScreenshotForDebug) {
       const debugPath = path.join(
         process.cwd(),
-        'assets',
+        'debug',
         `${this.config.workerId}_5_debug_verify_account_after.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer2)
@@ -223,7 +224,7 @@ export class BrowserHandler {
     if (captureScreenshotForDebug) {
       const debugPath = path.join(
         process.cwd(),
-        'assets',
+        'debug',
         `${this.config.workerId}_6_debug_worldmap.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer)
@@ -245,7 +246,7 @@ export class BrowserHandler {
       await this.page.mouse.click(result.x, result.y)
       const debugPath = path.join(
         process.cwd(),
-        'assets',
+        'debug',
         `${this.config.workerId}_6_debug_worldmap_button.png`
       )
       const result2 = await this.page.screenshot({
@@ -263,7 +264,7 @@ export class BrowserHandler {
         const screenshotBuffer2 = await this.screenshot()
         const debugPath = path.join(
           process.cwd(),
-          'assets',
+          'debug',
           `${this.config.workerId}_6_debug_worldmap_after.png`
         )
         await fs.writeFile(debugPath, screenshotBuffer2)
@@ -290,7 +291,7 @@ export class BrowserHandler {
     if (captureScreenshotForDebug) {
       const debugPath = path.join(
         process.cwd(),
-        'assets',
+        'debug',
         `${this.config.workerId}_7_debug_zoomin.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer)
@@ -320,7 +321,7 @@ export class BrowserHandler {
     if (captureScreenshotForDebug) {
       const debugPath = path.join(
         process.cwd(),
-        'assets',
+        'debug',
         `${this.config.workerId}_7_debug_zoomin_after.png`
       )
       await fs.writeFile(debugPath, screenshotBuffer2)
@@ -350,7 +351,7 @@ export class BrowserHandler {
     console.log(`[${this.config.workerId}] Loading game...`)
     await this.page.goto('https://totalbattle.com/es', { timeout: 70000 })
     await this.page.waitForTimeout(60000) //splash screen
-    await this.waitForSplashLoading(300, 1000, true)
+    await this.waitForSplashLoading(300, 1000, DEBUG)
 
     // Handle login if needed
     const loginInput = this.page.getByRole('textbox', { name: 'E-mail' })
@@ -415,7 +416,7 @@ export class BrowserHandler {
       } catch (e) {
         const debugPath = path.join(
           process.cwd(),
-          'assets',
+          'debug',
           `${this.config.workerId}_2_debug_login.png`
         )
         const screenshotBuffer = await this.page.screenshot({ animations: 'disabled' })
@@ -432,20 +433,20 @@ export class BrowserHandler {
     await this.page.waitForTimeout(10000) // Wait for Unity to load, shopping ads
     this.canvas = this.page.locator('canvas')
 
-    await this.waitForLoading(200, 1000, true)
+    await this.waitForLoading(200, 1000, DEBUG)
 
     // Clear popups
     await this.page.waitForTimeout(2000)
-    await this.closeScreen(20, 2500, true)
+    await this.closeScreen(20, 2500, DEBUG)
     await this.page.waitForTimeout(5000)
-    await this.closeVerifyAccount(true)
+    await this.closeVerifyAccount(DEBUG)
     await this.page.waitForTimeout(2000)
     await this.clearPopups()
-    await this.openWorldMap(true)
+    await this.openWorldMap(DEBUG)
     await this.page.waitForTimeout(4000)
     await this.clearPopups()
     await this.page.waitForTimeout(2000)
-    await this.zoomingIn(true)
+    await this.zoomingIn(DEBUG)
     await this.page.waitForTimeout(2000)
 
     this.isInitialized = true
