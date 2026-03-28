@@ -303,6 +303,14 @@
         >
       </div>
 
+      <div class="controls" style="border-top: none; padding-top: 10px">
+        <span style="color: #495057; font-weight: 600">🔑 Chat Keyword:</span>
+        <input type="text" id="keyword-input" placeholder="e.g. mercenario" style="padding:6px 10px;font-size:14px;border:1px solid #dee2e6;border-radius:5px;width:200px">
+        <button class="btn btn-primary" onclick="setKeyword()">Set</button>
+        <button class="btn btn-warning" onclick="clearKeyword()">Clear</button>
+        <span style="color: #6c757d; font-size: 13px">Current: <strong id="keyword-display">none</strong></span>
+      </div>
+
       <div class="content" id="content">
         <div class="loading">
           <div class="spinner"></div>
@@ -445,6 +453,35 @@
         }
       }
 
+      async function setKeyword() {
+        const keyword = document.getElementById('keyword-input').value.trim()
+        try {
+          const res = await fetch('/api/keyword', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keyword })
+          })
+          const data = await res.json()
+          document.getElementById('keyword-display').textContent = data.keyword || 'none'
+        } catch (error) {
+          alert('Error: ' + error.message)
+        }
+      }
+
+      async function clearKeyword() {
+        document.getElementById('keyword-input').value = ''
+        await setKeyword()
+      }
+
+      async function loadKeyword() {
+        try {
+          const res = await fetch('/api/keyword')
+          const data = await res.json()
+          document.getElementById('keyword-display').textContent = data.keyword || 'none'
+          document.getElementById('keyword-input').value = data.keyword || ''
+        } catch {}
+      }
+
       async function refreshWorkers() {
         try {
           const res = await fetch('/api/workers')
@@ -508,6 +545,7 @@
       // Initial load
       refreshData()
       refreshWorkers()
+      loadKeyword()
 
       // Auto-refresh every 5 seconds
       autoRefreshInterval = setInterval(() => {

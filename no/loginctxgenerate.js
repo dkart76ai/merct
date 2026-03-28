@@ -18,7 +18,9 @@ const fs = require('fs')
     const context = await browser.newContext({
       screen: { width: 1600, height: 1200 },
       viewport: { width: 1600, height: 1200 },
-      deviceScaleFactor: 1
+      deviceScaleFactor: 1,
+      userAgent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36'
     })
     const page = await context.newPage()
 

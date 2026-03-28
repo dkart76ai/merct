@@ -83,6 +83,29 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+app.get('/api/keyword', async (req, res) => {
+  try {
+    const keyword = await redis.get(REDIS_KEYS.SCAN_KEYWORD)
+    res.json({ success: true, keyword: keyword || '' })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+app.post('/api/keyword', async (req, res) => {
+  try {
+    const { keyword } = req.body
+    if (keyword) {
+      await redis.set(REDIS_KEYS.SCAN_KEYWORD, keyword)
+    } else {
+      await redis.del(REDIS_KEYS.SCAN_KEYWORD)
+    }
+    res.json({ success: true, keyword: keyword || '' })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
 app.get('/api/mercenaries', async (req, res) => {
   try {
     const mercenaries = await redis.lrange(REDIS_KEYS.MERCENARIES_LIST, 0, -1)

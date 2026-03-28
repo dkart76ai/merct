@@ -50,6 +50,19 @@ async function notifyDiscord(k, x, y, texto) {
   }
 }
 
+async function recoverAbandonedAccounts() {
+  const registry = await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY) || {}
+  const activeWorkerIds = new Set(Object.keys(registry))
+  const inUse = await redis.hgetall(REDIS_KEYS.ACCOUNTS_INUSE) || {}
+  for (const [workerId, account] of Object.entries(inUse)) {
+    if (!activeWorkerIds.has(workerId)) {
+      await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, account)
+      await redis.hdel(REDIS_KEYS.ACCOUNTS_INUSE, workerId)
+      console.log(`[${config.workerId}] 🔄 Recovered account from dead worker: ${workerId}`)
+    }
+  }
+}
+
 async function claimAccount() {
   const item = await redis.blpop(REDIS_KEYS.ACCOUNTS_LIST, 10)
   if (!item) {
@@ -63,11 +76,13 @@ async function claimAccount() {
   accountUser = account.user
   accountPwd = account.pwd
   accountFile = account.session || 'session.json'
-  claimedAccount = item[1] // save raw string for returning on shutdown
+  claimedAccount = item[1]
+  await redis.hset(REDIS_KEYS.ACCOUNTS_INUSE, config.workerId, claimedAccount)
   console.log(`[${config.workerId}] ✅ Claimed account: ${accountUser}`)
 }
 
 async function initBrowser() {
+  const keyword = await redis.get(REDIS_KEYS.SCAN_KEYWORD).catch(() => null)
   browser = await chromium.launch({
     headless: config.headless,
     args: [
@@ -82,12 +97,13 @@ async function initBrowser() {
       '--ignore-gpu-blocklist'
     ]
   })
-  const browserConfig = { ...config, accountUser, accountPwd, accountFile }
+  const browserConfig = { ...config, accountUser, accountPwd, accountFile, keyword }
   browserHandler = new BrowserHandler(browser, browserConfig)
   await browserHandler.initialize()
 }
 
 async function run() {
+  await recoverAbandonedAccounts()
   await claimAccount()
 
   await redis.hset(
@@ -119,6 +135,10 @@ async function run() {
 
       const result = await browserHandler.scanCoordinate(k, x, y, workerCode)
 
+      // sync keyword from Redis to browser
+      const keyword = await redis.get(REDIS_KEYS.SCAN_KEYWORD)
+      await browserHandler.setKeyword(keyword || null)
+
       if (browserHandler.lastScreenshot) {
         fs.writeFileSync(SCREENSHOT_PATH, browserHandler.lastScreenshot)
       }
@@ -137,6 +157,7 @@ async function run() {
         )
         console.log(`[${config.workerId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y}`)
         await notifyDiscord(k, x, y, result.text)
+        await browserHandler.sendChatMessage(`⚔️ Mercenario found!`, { k, x, y })
       } else {
         console.log(`[${config.workerId}] ❌ No mercenario at K:${k} X:${x} Y:${y}`)
       }
@@ -212,6 +233,7 @@ async function shutdown() {
   running = false
   if (claimedAccount) {
     await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, claimedAccount).catch(() => {})
+    await redis.hdel(REDIS_KEYS.ACCOUNTS_INUSE, config.workerId).catch(() => {})
     console.log(`[${config.workerId}] 🔄 Account returned to pool`)
   }
   await redis.hdel(REDIS_KEYS.WORKERS_REGISTRY, config.workerId).catch(() => {})

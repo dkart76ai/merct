@@ -8,7 +8,9 @@ export const REDIS_KEYS = {
   COORDINATES_LIST: 'scan:coordinates',
   SCAN_PAUSED: 'scan:paused',
   ACCOUNTS_LIST: 'accounts:available',
-  WORKERS_REGISTRY: 'workers:registry'
+  ACCOUNTS_INUSE: 'accounts:inuse',
+  WORKERS_REGISTRY: 'workers:registry',
+  SCAN_KEYWORD: 'scan:keyword'
 }
 
 export const KINGDOMS = [
