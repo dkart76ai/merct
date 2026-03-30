@@ -10,7 +10,8 @@ export const REDIS_KEYS = {
   ACCOUNTS_LIST: 'accounts:available',
   ACCOUNTS_INUSE: 'accounts:inuse',
   WORKERS_REGISTRY: 'workers:registry',
-  SCAN_KEYWORD: 'scan:keyword'
+  SCAN_KEYWORD: 'scan:keyword',
+  CHAT_PENDING_LIST: 'chat:pending'
 }
 
 export const KINGDOMS = [

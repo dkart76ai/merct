@@ -15,21 +15,24 @@ const redis = getRedisClient()
 
 async function getWorkers() {
   const registry = await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY)
+  console.log('Worker registry:', registry)
   if (!registry) return []
   return Object.entries(registry).map(([id, val]) => ({ id, url: JSON.parse(val).url }))
 }
 
 app.get('/api/workers', async (req, res) => {
   const workers = await getWorkers()
-  const statuses = await Promise.all(workers.map(async ({ id, url }) => {
-    try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(5000) })
-      const data = await r.json()
-      return { id, url, online: true, browserReady: data.browserReady, code: data.code ?? null }
-    } catch {
-      return { id, url, online: false, browserReady: false, code: null }
-    }
-  }))
+  const statuses = await Promise.all(
+    workers.map(async ({ id, url }) => {
+      try {
+        const r = await fetch(url, { signal: AbortSignal.timeout(5000) })
+        const data = await r.json()
+        return { id, url, online: true, browserReady: data.browserReady, code: data.code ?? null }
+      } catch {
+        return { id, url, online: false, browserReady: false, code: null }
+      }
+    })
+  )
   res.json({ success: true, workers: statuses })
 })
 
@@ -133,7 +136,11 @@ app.post('/api/scan/init', async (req, res) => {
     const serialized = coordinates.map(c => JSON.stringify(c))
     await redis.rpush(REDIS_KEYS.COORDINATES_LIST, ...serialized)
     await redis.del(REDIS_KEYS.SCAN_PAUSED)
-    res.json({ success: true, message: `Initialized with ${coordinates.length} coordinates`, count: coordinates.length })
+    res.json({
+      success: true,
+      message: `Initialized with ${coordinates.length} coordinates`,
+      count: coordinates.length
+    })
   } catch (error) {
     res.status(500).json({ success: false, error: error.message })
   }

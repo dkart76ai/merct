@@ -6,11 +6,6 @@ services:
     volumes:
       - redis-data:/data
     command: redis-server --requirepass ${REDIS_PASSWORD}
-    # Redis en RAM es rápido, pero con 128GB puedes darle persistencia sin miedo
-    deploy:
-      resources:
-        limits:
-          memory: 2G
 
   api:
     build:
@@ -25,31 +20,163 @@ services:
     depends_on:
       - redis
 
-  worker:
+  worker-chat:
     build:
       context: .
-      dockerfile: services/worker/Dockerfile
-    shm_size: '2gb' # Evita que Playwright crashee
+      dockerfile: services/worker-chat/Dockerfile
+    shm_size: '2gb'
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-chat
       - HEADLESS=true
       - DISCORD_WEBHOOK=${DISCORD_WEBHOOK}
-      - OMP_THREAD_LIMIT=1 # Optimiza Tesseract para no saturar CPU
-      - NODE_OPTIONS=--max-old-space-size=4096 # Dale 4GB de heap a cada Node
+      - CHAT_ACCOUNT_USER=${CHAT_ACCOUNT_USER}
+      - CHAT_ACCOUNT_PWD=${CHAT_ACCOUNT_PWD}
+      - CHAT_CHANNEL_URL=${CHAT_CHANNEL_URL}
+    volumes:
+      - ./auth:/app/auth
+    depends_on:
+      - redis
+
+  worker-1:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    shm_size: '2gb'
+    expose:
+      - "3001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-1
+      - HEADLESS=true
+      - OMP_THREAD_LIMIT=1
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - DEBUG=false
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
       - ./debug:/app/debug
     depends_on:
       - redis
-    deploy:
-      replicas: 6
-      resources:
-        limits:
-          cpus: '1.5' # Límite para que Tesseract/Playwright no maten el host
-          memory: 6G  # Tienes 128GB, sé generoso para evitar fugas de memoria
+
+  worker-2:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    shm_size: '2gb'
+    expose:
+      - "3001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-2
+      - HEADLESS=true
+      - OMP_THREAD_LIMIT=1
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - DEBUG=false
+    volumes:
+      - ./assets:/app/assets
+      - ./auth:/app/auth
+      - ./debug:/app/debug
+    depends_on:
+      - redis
+
+  worker-3:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    shm_size: '2gb'
+    expose:
+      - "3001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-3
+      - HEADLESS=true
+      - OMP_THREAD_LIMIT=1
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - DEBUG=false
+    volumes:
+      - ./assets:/app/assets
+      - ./auth:/app/auth
+      - ./debug:/app/debug
+    depends_on:
+      - redis
+
+  worker-4:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    shm_size: '2gb'
+    expose:
+      - "3001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-4
+      - HEADLESS=true
+      - OMP_THREAD_LIMIT=1
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - DEBUG=false
+    volumes:
+      - ./assets:/app/assets
+      - ./auth:/app/auth
+      - ./debug:/app/debug
+    depends_on:
+      - redis
+
+  worker-5:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    shm_size: '2gb'
+    expose:
+      - "3001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-5
+      - HEADLESS=true
+      - OMP_THREAD_LIMIT=1
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - DEBUG=false
+    volumes:
+      - ./assets:/app/assets
+      - ./auth:/app/auth
+      - ./debug:/app/debug
+    depends_on:
+      - redis
+
+  worker-6:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    shm_size: '2gb'
+    expose:
+      - "3001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - WORKER_ID=worker-6
+      - HEADLESS=true
+      - OMP_THREAD_LIMIT=1
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - DEBUG=false
+    volumes:
+      - ./assets:/app/assets
+      - ./auth:/app/auth
+      - ./debug:/app/debug
+    depends_on:
+      - redis
 
 volumes:
   redis-data:

@@ -20,7 +20,7 @@ const config = {
   port: parseInt(process.env.PORT || '3001')
 }
 
-const workerUrl = `http://${process.env.HOSTNAME || 'localhost'}:${config.port}`
+const workerUrl = `http://${config.workerId}:${config.port}`
 
 let accountUser = process.env.WORKER_ACCOUNT_USER
 let accountPwd = process.env.WORKER_ACCOUNT_PWD
@@ -33,27 +33,10 @@ fs.mkdirSync(path.join(process.cwd(), 'debug'), { recursive: true })
 const DEBUG_PATH = path.join(process.cwd(), 'debug')
 fs.mkdirSync(path.dirname(DEBUG_PATH), { recursive: true })
 
-const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK || ''
-
-async function notifyDiscord(k, x, y, texto) {
-  if (!DISCORD_WEBHOOK) return
-  try {
-    await fetch(DISCORD_WEBHOOK, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: `⚔️ K:${k} X:${x} Y:${y} (${texto})`
-      })
-    })
-  } catch (error) {
-    console.error(`[${config.workerId}] Discord notify failed:`, error.message)
-  }
-}
-
 async function recoverAbandonedAccounts() {
-  const registry = await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY) || {}
+  const registry = (await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY)) || {}
   const activeWorkerIds = new Set(Object.keys(registry))
-  const inUse = await redis.hgetall(REDIS_KEYS.ACCOUNTS_INUSE) || {}
+  const inUse = (await redis.hgetall(REDIS_KEYS.ACCOUNTS_INUSE)) || {}
   for (const [workerId, account] of Object.entries(inUse)) {
     if (!activeWorkerIds.has(workerId)) {
       await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, account)
@@ -132,9 +115,6 @@ async function run() {
         console.log(`[${config.workerId}] 🌐 Launching browser...`)
         await initBrowser()
       }
-
-      const result = await browserHandler.scanCoordinate(k, x, y, workerCode)
-
       // sync keyword from Redis to browser
       const keyword = await redis.get(REDIS_KEYS.SCAN_KEYWORD)
       await browserHandler.setKeyword(keyword || null)
@@ -143,21 +123,20 @@ async function run() {
         fs.writeFileSync(SCREENSHOT_PATH, browserHandler.lastScreenshot)
       }
 
+      const result = await browserHandler.scanCoordinate(k, x, y, workerCode).catch(() => ({}))
+
       if (result.found) {
-        await redis.lpush(
-          REDIS_KEYS.MERCENARIES_LIST,
-          JSON.stringify({
-            k,
-            x,
-            y,
-            confidence: result.confidence,
-            text: result.text,
-            timestamp: new Date().toISOString()
-          })
-        )
+        const mercData = {
+          k,
+          x,
+          y,
+          confidence: result.confidence,
+          text: result.text,
+          timestamp: new Date().toISOString()
+        }
+        await redis.lpush(REDIS_KEYS.MERCENARIES_LIST, JSON.stringify(mercData))
+        await redis.rpush(REDIS_KEYS.CHAT_PENDING_LIST, JSON.stringify({ k, x, y }))
         console.log(`[${config.workerId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y}`)
-        await notifyDiscord(k, x, y, result.text)
-        await browserHandler.sendChatMessage(`⚔️ Mercenario found!`, { k, x, y })
       } else {
         console.log(`[${config.workerId}] ❌ No mercenario at K:${k} X:${x} Y:${y}`)
       }

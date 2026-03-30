@@ -249,6 +249,8 @@ export class BrowserHandler {
         'debug',
         `${this.config.workerId}_6_debug_worldmap_button.png`
       )
+      await this.page.waitForTimeout(100)
+
       const result2 = await this.page.screenshot({
         path: debugPath,
         clip: { x: 384, y: 978, width: 300, height: 300 }
@@ -272,16 +274,8 @@ export class BrowserHandler {
           `[${this.config.workerId}] ⚠️ World map button  — debug screenshot saved to ${debugPath}`
         )
       }
-
-      // await this.zoomIn()
     }
   }
-
-  // async zoomIn() {
-  //   // Zoom to 25%
-  //   console.log(`[${this.config.workerId}] Setting zoom to 25%...`)
-  //   for (let i = 0; i < 4; i++) await this.canvas.click({ position: { x: 1257, y: 924 } })
-  // }
 
   async zoomingIn(captureScreenshotForDebug = false) {
     console.log(`[${this.config.workerId}] zooming in ...`)
@@ -357,125 +351,6 @@ export class BrowserHandler {
         console.log(`[${this.config.workerId}] [browser] ${text}`)
       }
     })
-
-    // Capture Sendbird App-ID and Api-Token from network requests
-    this.sendbirdAppId = null
-    this.sendbirdApiToken = null
-    this.sendbirdUserId = null
-    this.page.on('request', request => {
-      const url = request.url()
-      if (url.includes('.sendbird.com')) {
-        // if (!this.sendbirdAppId) {
-        const match = url.match(/api-([A-F0-9\-]+)\.sendbird\.com/i)
-        if (match) {
-          // this.sendbirdAppId = match[1]
-          console.log('MIO: --------------------------------')
-          console.log(`MIO: [${this.config.workerId}] 📡 Sendbird App-ID: ${this.sendbirdAppId}`)
-          console.log('MIO: --------------------------------')
-          console.log('MIO:', JSON.stringify(request.headers()))
-          console.log('MIO: --------------------------------')
-        }
-        // }
-
-        if (!this.sendbirdApiToken) {
-          const token = request.headers()['access-token'] //['api-token']
-          if (token) {
-            this.sendbirdApiToken = token
-            console.log('MIO: --------------------------------')
-            console.log(
-              `MIO: [${this.config.workerId}] 🔑 Sendbird Api-Token: ${this.sendbirdApiToken}`
-            )
-            console.log('MIO: --------------------------------')
-          }
-        }
-        if (!this.sendbirdAppId) {
-          const token = request.headers()['app-id']
-          if (token) {
-            this.sendbirdAppId = token
-            console.log('MIO: --------------------------------')
-            console.log(
-              `MIO: [${this.config.workerId}] 🔑 Sendbird Api-Token: ${this.sendbirdApiToken}`
-            )
-            console.log('MIO: --------------------------------')
-          }
-        }
-        if (!this.sendbirdUserId) {
-          const match = url.match(/\/users\/([^/]+)\//)
-          if (match) {
-            this.sendbirdUserId = match[1]
-            console.log(
-              `MIO: [${this.config.workerId}] 👤 Sendbird User-ID: ${this.sendbirdUserId}`
-            )
-          }
-        }
-      }
-    })
-
-    // Capture Sendbird WebSocket
-    const initialKeyword = this.config.keyword || null
-    await this.page.addInitScript(keyword => {
-      const OriginalWS = window.WebSocket
-      window.WebSocket = class extends OriginalWS {
-        constructor(url, protocols) {
-          super(url, protocols)
-          if (url.includes('sendbird')) {
-            window.__sendbirdSocket = this
-            window.__sendbirdChannelUrl = null
-            window.__sendbirdChannelId = null
-            window.__sendbirdKeyword = keyword
-            // capture channel_url from messages matching the keyword
-            this.addEventListener('message', event => {
-              // capture user_id from login response
-              if (event.data.startsWith('LOGI')) {
-                try {
-                  const json = JSON.parse(event.data.slice(4))
-                  if (json.user_id) {
-                    window.__sendbirdUserId = json.user_id
-                    console.log('MIO: Sendbird User-ID captured:', json.user_id)
-                  }
-                  if (json.key) {
-                    window.__sendbirdSessionKey = json.key
-                    console.log('MIO: Sendbird Session-Key captured:', json.key)
-                  }
-                } catch {}
-              }
-              if (event.data.startsWith('MESG')) {
-                if (!window.__sendbirdChannelUrl) {
-                  try {
-                    const json = JSON.parse(event.data.slice(4))
-                    const kw = window.__sendbirdKeyword
-                    const matches =
-                      !kw || (json.message && json.message.toLowerCase().includes(kw.toLowerCase()))
-                    if (json.channel_url && matches) {
-                      window.__sendbirdChannelUrl = json.channel_url
-                      window.__sendbirdChannelId = json.channel_id
-                      console.log(
-                        'MIO: Sendbird channel captured from keyword match:',
-                        json.channel_url
-                      )
-                    } else {
-                      console.log('MIO: nokey: Sendbird message received:', event.data)
-                    }
-                  } catch {}
-                } else {
-                  console.log('MIO: with/chan: Sendbird message received:', event.data)
-                  const json = JSON.parse(event.data.slice(4))
-                  if (json.message.toLowerCase().includes('p1.')) {
-                    console.log('MIO: repling with: ', json.message.toUpperCase())
-                    // this.sendChatMessage(json.message.toUpperCase())
-                    // this.sendChatMessageREST('hello ', window.__sendbirdChannelUrl)
-                  }
-                }
-              } else {
-                console.log('MIO: nomesg: Sendbird message received: ', event.data)
-              }
-            })
-            // fallback channel URL if no message received yet
-            // window.__sendbirdChannelUrl = window.__sendbirdChannelUrl || 'sendbird_group_channel_XXXXXX_XXXXXXXX'
-          }
-        }
-      }
-    }, initialKeyword)
 
     // Block resources to speed up loading
     // await this.page.route('**/*.{png,jpg,jpeg,gif,webp,svg,woff,pdf,mp4}', route => route.abort())
@@ -583,7 +458,7 @@ export class BrowserHandler {
     await this.page.waitForTimeout(2000)
 
     // monitor for waiting delay
-    await page.evaluate(() => {
+    await this.page.evaluate(() => {
       window.unityStatus = {
         isStable: false,
         frameHistory: [],
@@ -620,16 +495,6 @@ export class BrowserHandler {
     console.log(`[${this.config.workerId}] OTP code received on BHdlr: ${code}`)
   }
 
-  async setKeyword(keyword) {
-    this.keyword = keyword
-    if (this.page) {
-      await this.page.evaluate(kw => {
-        window.__sendbirdKeyword = kw
-      }, keyword)
-      console.log(`[${this.config.workerId}] 🔑 Keyword set to: ${keyword}`)
-    }
-  }
-
   async scanCoordinate(k, x, y) {
     if (!this.isInitialized) {
       throw new Error('Browser not initialized')
@@ -638,21 +503,24 @@ export class BrowserHandler {
     // Clear any popups
     let start = Date.now()
     for (let i = 0; i < 5; i++) {
-      await this.page.keyboard.press('Escape')
+      await this.page.keyboard.press('Escape', { delay: 0 })
     }
-    console.log(`[${config.workerId}] scanCoordinate:clearPopups took ${Date.now() - start}ms`)
+    console.log(`[${this.config.workerId}] scanCoordinate:clearPopups took ${Date.now() - start}ms`)
 
     await this.page.waitForTimeout(10)
 
     // A. Forzamos estado inestable antes del clic para evitar falsos positivos
-    await page.evaluate(() => {
-      window.unityStatus.isStable = false
-      window.unityStatus.frameHistory = []
+    await this.page.evaluate(() => {
+      if (window.unityStatus) {
+        window.unityStatus.isStable = false
+        window.unityStatus.frameHistory = []
+      }
     })
 
     // Open search (magnifying glass)
-    await this.canvas.click({ position: { x: 87, y: 757 } })
+    await this.canvas.click({ delay: 0, position: { x: 87, y: 757 } })
     await this.page.waitForTimeout(200)
+    console.log(`[${this.config.workerId}] scanCoordinate:search opened`)
 
     // Enter coordinates
     const inputs = [
@@ -663,27 +531,31 @@ export class BrowserHandler {
 
     start = Date.now()
     for (const input of inputs) {
-      await this.canvas.click({ clickCount: 1, position: { x: input.x, y: 446 } })
+      await this.canvas.click({ delay: 0, clickCount: 1, position: { x: input.x, y: 446 } })
       // Clear current input
       for (let i = 0; i < 4; i++) await this.canvas.press('Backspace', { delay: 0 })
-      await this.page.keyboard.type(input.val.toString(), { delay: 0 })
+      // await this.page.keyboard.type(input.val.toString(), { delay: 0 })
+      await this.page.keyboard.insertText(input.val.toString(), { delay: 0 })
     }
-    console.log(`[${config.workerId}] scanCoordinate:inputs took ${Date.now() - start}ms`)
+    console.log(`[${this.config.workerId}] scanCoordinate:inputs took ${Date.now() - start}ms`)
 
     // Click GO button
     start = Date.now()
-    await this.canvas.click({ position: { x: 680, y: 490 } })
+    await this.canvas.click({ delay: 0, position: { x: 680, y: 490 } })
 
     // await this.page.waitForTimeout(500) // Wait for camera to move
 
     // C. ESPERA CRÍTICA:
     // Esperamos a que 'isStable' sea TRUE.
     // Playwright consultará este valor en el contexto del navegador.
-    await page.waitForFunction(() => window.unityStatus.isStable === true, {
-      timeout: 30000,
-      polling: 'raf' // Esto hace que Playwright chequee sincronizado con el renderizado
-    })
-    console.log(`[${config.workerId}] scanCoordinate:go button took ${Date.now() - start}ms`)
+    await this.page.waitForFunction(
+      () => !window.unityStatus || window.unityStatus.isStable === true,
+      {
+        timeout: 30000,
+        polling: 'raf' // Esto hace que Playwright chequee sincronizado con el renderizado
+      }
+    )
+    console.log(`[${this.config.workerId}] scanCoordinate:go button took ${Date.now() - start}ms`)
 
     // Take screenshot
     // const screenshotBuffer = await this.page.screenshot({
@@ -698,7 +570,9 @@ export class BrowserHandler {
 
     // Process with OpenCV
     const result = await this.imageProcessor.detectMercenario(screenshotBuffer)
-    console.log(`[${config.workerId}] scanCoordinate:detectMercenario took ${Date.now() - start}ms`)
+    console.log(
+      `[${this.config.workerId}] scanCoordinate:detectMercenario took ${Date.now() - start}ms`
+    )
 
     // if merc found on screeen, move mouse to that position, to capture game coordinates from bottom left,
     // and convert with OCR to coordinates
@@ -719,149 +593,13 @@ export class BrowserHandler {
         screenshotBuffer,
         this.page.viewportSize()
       )
-      console.log(`[${config.workerId}] scanCoordinate:OCRCoordinates took ${Date.now() - start}ms`)
+      console.log(
+        `[${this.config.workerId}] scanCoordinate:OCRCoordinates took ${Date.now() - start}ms`
+      )
 
       result.text = ocrResult
     }
     return result
-  }
-
-  async sendChatMessage(message, coord = null) {
-    try {
-      const result = await this.page.evaluate(
-        ({ msg, coord }) => {
-          if (!window.__sendbirdSocket || window.__sendbirdSocket.readyState !== WebSocket.OPEN) {
-            return { success: false, error: 'Sendbird WebSocket not connected' }
-          }
-          if (!window.__sendbirdChannelUrl) {
-            return { success: false, error: 'Channel URL not captured yet' }
-          }
-
-          let messageText = msg
-          let data = ''
-
-          if (coord) {
-            messageText = `${msg} /%0%/`
-            data = JSON.stringify({
-              subs: {
-                '/%0%/': {
-                  type: 'coord',
-                  entryType: 'poi', //'tile',
-                  x: coord.x,
-                  y: coord.y,
-                  realmId: coord.k,
-                  staticId: 400, //6,
-                  name: 'Mercenary Exchange',
-                  v: 1
-                }
-              }
-            })
-          }
-
-          const requestId = 'rq-' + crypto.randomUUID()
-          const payload = JSON.stringify({
-            channel_Id: window.__sendbirdChannelId,
-            scrap_id: '',
-            user: {
-              name: 'Moginn',
-              image: '',
-              require_auth_for_profile_image: false,
-              guest_id: 'tb:67606149',
-              id: 411122123,
-              role: '',
-              metadata: {
-                color: '0',
-                hideTitlesTs: '0',
-                memberInfo: '115,11500022611,0,0,0,',
-                titles: ''
-              },
-              is_bot: false,
-              is_ai_bot: false,
-              is_active: true,
-              is_blocked_by_me: false,
-              friend_name: null,
-              friend_discovery_key: null
-            },
-            silent: false,
-            check_reactions: false,
-            is_op_msg: false,
-            is_guest_msg: true,
-            data,
-            sts: Date.now(),
-            channel_url: window.__sendbirdChannelUrl,
-            channel_type: 'group',
-            is_super: true,
-            mention_type: 'users',
-            mentioned_users: [],
-            message_events: {
-              send_push_notification: 'receivers',
-              update_unread_count: true,
-              update_mention_count: true,
-              update_last_message: true
-            },
-            message_retention_hour: -1,
-            request_id: requestId,
-            translations: {},
-            custom_type: 'user',
-            is_removed: false,
-            last_updated_at: Date.now(),
-            message: messageText,
-            // msg_id:1111111,
-            ts: Date.now(),
-            mention_type: 'users',
-            mentioned_user_ids: []
-          })
-          window.__sendbirdSocket.send('MESG' + payload)
-          return { success: true }
-        },
-        { msg: message, coord }
-      )
-      console.log(`[${this.config.workerId}] 💬 Chat message sent: ${message}`, result)
-      return result
-    } catch (error) {
-      console.error(`[${this.config.workerId}] ❌ Failed to send chat message:`, error.message)
-      return { success: false, error: error.message }
-    }
-  }
-
-  async sendChatMessageREST(message, channelUrl) {
-    if (!this.sendbirdAppId || !this.sendbirdApiToken) {
-      console.log(`MIO: [${this.config.workerId}] ⚠️ Sendbird REST credentials not captured yet`)
-      return { success: false, error: 'Credentials not captured' }
-    }
-    const url =
-      channelUrl || (this.page && (await this.page.evaluate(() => window.__sendbirdChannelUrl)))
-    const userId =
-      this.sendbirdUserId ||
-      (this.page && (await this.page.evaluate(() => window.__sendbirdUserId)))
-    const sessionKey = this.page && (await this.page.evaluate(() => window.__sendbirdSessionKey))
-    const apiToken = sessionKey || this.sendbirdApiToken
-    if (!url) return { success: false, error: 'Channel URL not available' }
-    if (!userId) return { success: false, error: 'User ID not captured yet' }
-    if (!apiToken) return { success: false, error: 'No API token available' }
-    try {
-      const res = await fetch(
-        `https://api-${this.sendbirdAppId}.sendbird.com/v3/group_channels/${encodeURIComponent(url)}/messages`,
-        {
-          method: 'POST',
-          headers: {
-            'Api-Token': apiToken,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message_type: 'MESG',
-            user_id: userId,
-            message
-          })
-        }
-      )
-      const data = await res.json()
-      console.log(`MIO: [${this.config.workerId}] 💬 REST message sent:`, data.message_id || data)
-      return { success: true, data }
-    } catch (error) {
-      console.error(`MIO: [${this.config.workerId}] ❌ REST message failed:`, error.message)
-      return { success: false, error: error.message }
-    }
   }
 
   async reinitialize() {
