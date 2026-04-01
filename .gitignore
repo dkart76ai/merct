@@ -14,3 +14,5 @@ auth/*.json
 services/accounts.json
 /debug/
 assets/debug_ocr_region.png
+services/worker/test-results/
+Triumph.framework.js

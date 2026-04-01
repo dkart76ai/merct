@@ -244,21 +244,21 @@ export class BrowserHandler {
       // await this.page.mouse.move(result.x, result.y)
       // await this.canvas.click({ position: { x: result.x, y: result.y } }) //384,978
       await this.page.mouse.click(result.x, result.y)
-      const debugPath = path.join(
-        process.cwd(),
-        'debug',
-        `${this.config.workerId}_6_debug_worldmap_button.png`
-      )
-      await this.page.waitForTimeout(100)
+      // const debugPath = path.join(
+      //   process.cwd(),
+      //   'debug',
+      //   `${this.config.workerId}_6_debug_worldmap_button.png`
+      // )
+      // await this.page.waitForTimeout(100)
 
-      const result2 = await this.page.screenshot({
-        path: debugPath,
-        clip: { x: 384, y: 978, width: 300, height: 300 }
-      })
-      // await fs.writeFile(debugPath, screenshotBuffer)
-      console.log(
-        `[${this.config.workerId}] ⚠️ World map button found — debug screenshot saved to ${debugPath}`
-      )
+      // const result2 = await this.page.screenshot({
+      //   path: debugPath,
+      //   clip: { x: 384, y: 978, width: 300, height: 300 }
+      // })
+      // // await fs.writeFile(debugPath, screenshotBuffer)
+      // console.log(
+      //   `[${this.config.workerId}] ⚠️ World map button found — debug screenshot saved to ${debugPath}`
+      // )
 
       await this.page.waitForTimeout(3500)
 
@@ -379,10 +379,10 @@ export class BrowserHandler {
           .isVisible({ timeout: 5000 })
           .catch(() => false)
       ) {
-        console.log(`[${this.config.workerId}] ⚠️ OTP window found`)
+        // console.log(`[${this.config.workerId}] ⚠️ OTP window found`)
         //repeat OTP check until the user enters the code
         while (!this.code) {
-          console.log(`[${this.config.workerId}] ⚠️ requesting OTP code...`)
+          // console.log(`[${this.config.workerId}] ⚠️ requesting OTP code...`)
           if (
             await this.page
               .getByRole('link', { name: 'Reenviar' })
@@ -500,12 +500,12 @@ export class BrowserHandler {
       throw new Error('Browser not initialized')
     }
 
-    // Clear any popups
+    // Clear any popups, takes 1.5 seconds average
     let start = Date.now()
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 2; i++) {
       await this.page.keyboard.press('Escape', { delay: 0 })
     }
-    console.log(`[${this.config.workerId}] scanCoordinate:clearPopups took ${Date.now() - start}ms`)
+    // console.log(`[${this.config.workerId}] scanCoordinate:clearPopups took ${Date.now() - start}ms`)
 
     await this.page.waitForTimeout(10)
 
@@ -518,9 +518,9 @@ export class BrowserHandler {
     })
 
     // Open search (magnifying glass)
-    await this.canvas.click({ delay: 0, position: { x: 87, y: 757 } })
+    await this.page.mouse.click(87, 757)
     await this.page.waitForTimeout(200)
-    console.log(`[${this.config.workerId}] scanCoordinate:search opened`)
+    // console.log(`[${this.config.workerId}] scanCoordinate:search opened`)
 
     // Enter coordinates
     const inputs = [
@@ -531,17 +531,21 @@ export class BrowserHandler {
 
     start = Date.now()
     for (const input of inputs) {
-      await this.canvas.click({ delay: 0, clickCount: 1, position: { x: input.x, y: 446 } })
-      // Clear current input
-      for (let i = 0; i < 4; i++) await this.canvas.press('Backspace', { delay: 0 })
-      // await this.page.keyboard.type(input.val.toString(), { delay: 0 })
-      await this.page.keyboard.insertText(input.val.toString(), { delay: 0 })
+      await this.page.mouse.click(input.x, 446)
+      for (let i = 0; i < 4; i++) await this.page.keyboard.press('Backspace', { delay: 0 })
+      await this.page.evaluate(t => navigator.clipboard.writeText(t), input.val.toString())
+      await this.page.keyboard.press('Control+V')
     }
     console.log(`[${this.config.workerId}] scanCoordinate:inputs took ${Date.now() - start}ms`)
+    // process.stdout.write('')
+
+    //TODO: remove this screenshot (2 lines)
+    const debugPath = path.join(process.cwd(), 'debug', `${this.config.workerId}_after_inputs.png`)
+    await this.page.screenshot({ path: debugPath })
 
     // Click GO button
     start = Date.now()
-    await this.canvas.click({ delay: 0, position: { x: 680, y: 490 } })
+    await this.page.mouse.click(680, 490)
 
     // await this.page.waitForTimeout(500) // Wait for camera to move
 
@@ -557,14 +561,14 @@ export class BrowserHandler {
     )
     console.log(`[${this.config.workerId}] scanCoordinate:go button took ${Date.now() - start}ms`)
 
-    // Take screenshot
-    // const screenshotBuffer = await this.page.screenshot({
-    //   animations: 'disabled',
-    //   type: 'png'
-    // })
+    //TODO: remove this screenshot (1 lines)
+
+    await this.page.screenshot({
+      path: path.join(process.cwd(), 'debug', `${this.config.workerId}_after_gobutton.png`)
+    })
 
     start = Date.now()
-    const screenshotBuffer = await this.screenshot()
+    screenshotBuffer = await this.screenshot()
 
     this.lastScreenshot = screenshotBuffer
 
@@ -580,12 +584,9 @@ export class BrowserHandler {
       await this.page.mouse.move(result.x, result.y)
       await this.page.waitForTimeout(100) // Wait for camera to move
 
-      // const screenshotBuffer = await this.page.screenshot({
-      //   animations: 'disabled',
-      //   type: 'png'
-      // })
-
-      // this.lastScreenshot = screenshotBuffer
+      //TODO: remove this screenshot (2 lines)
+      const debugPath = path.join(process.cwd(), 'debug', `${this.config.workerId}_merc_found.png`)
+      await this.page.screenshot({ path: debugPath })
 
       // use tesseract to get coordinates from bottom left of screenshot
       start = Date.now()

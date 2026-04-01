@@ -65,7 +65,6 @@ async function claimAccount() {
 }
 
 async function initBrowser() {
-  const keyword = await redis.get(REDIS_KEYS.SCAN_KEYWORD).catch(() => null)
   browser = await chromium.launch({
     headless: config.headless,
     args: [
@@ -80,7 +79,7 @@ async function initBrowser() {
       '--ignore-gpu-blocklist'
     ]
   })
-  const browserConfig = { ...config, accountUser, accountPwd, accountFile, keyword }
+  const browserConfig = { ...config, accountUser, accountPwd, accountFile }
   browserHandler = new BrowserHandler(browser, browserConfig)
   await browserHandler.initialize()
 }
@@ -98,26 +97,24 @@ async function run() {
 
   while (running) {
     const item = await redis.blpop(REDIS_KEYS.COORDINATES_LIST, 5)
-    if (!item) continue
-
-    const paused = await redis.exists(REDIS_KEYS.SCAN_PAUSED)
-    if (paused) {
-      await redis.rpush(REDIS_KEYS.COORDINATES_LIST, item[1])
-      await new Promise(r => setTimeout(r, 2000))
-      continue
-    }
-
-    const { k, x, y } = JSON.parse(item[1])
-    console.log(`[${config.workerId}] 🔍 Scanning K:${k} X:${x} Y:${y}`)
 
     try {
       if (!browser) {
         console.log(`[${config.workerId}] 🌐 Launching browser...`)
         await initBrowser()
       }
-      // sync keyword from Redis to browser
-      const keyword = await redis.get(REDIS_KEYS.SCAN_KEYWORD)
-      await browserHandler.setKeyword(keyword || null)
+
+      if (!item) continue
+
+      const paused = await redis.exists(REDIS_KEYS.SCAN_PAUSED)
+      if (paused) {
+        await redis.rpush(REDIS_KEYS.COORDINATES_LIST, item[1])
+        await new Promise(r => setTimeout(r, 2000))
+        continue
+      }
+
+      const { k, x, y } = JSON.parse(item[1])
+      console.log(`[${config.workerId}] 🔍 Scanning K:${k} X:${x} Y:${y}`)
 
       if (browserHandler.lastScreenshot) {
         fs.writeFileSync(SCREENSHOT_PATH, browserHandler.lastScreenshot)
@@ -126,6 +123,12 @@ async function run() {
       const result = await browserHandler.scanCoordinate(k, x, y, workerCode).catch(() => ({}))
 
       if (result.found) {
+        if (browserHandler.lastScreenshot) {
+          const LASTCOORD_PATH = path.join(process.cwd(), 'screenshots', 'lastCoord.jpg')
+
+          fs.writeFileSync(LASTCOORD_PATH, browserHandler.lastScreenshot)
+        }
+
         const mercData = {
           k,
           x,
@@ -135,12 +138,13 @@ async function run() {
           timestamp: new Date().toISOString()
         }
         await redis.lpush(REDIS_KEYS.MERCENARIES_LIST, JSON.stringify(mercData))
-        await redis.rpush(REDIS_KEYS.CHAT_PENDING_LIST, JSON.stringify({ k, x, y }))
+        await redis.rpush(REDIS_KEYS.CHAT_PENDING_LIST, JSON.stringify(mercData))
         console.log(`[${config.workerId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y}`)
       } else {
         console.log(`[${config.workerId}] ❌ No mercenario at K:${k} X:${x} Y:${y}`)
       }
     } catch (error) {
+      const { k, x, y } = JSON.parse(item[1])
       console.error(`[${config.workerId}] ❌ Error at K:${k} X:${x} Y:${y}:`, error)
       if (browserHandler) await browserHandler.close().catch(() => {})
       browser = null

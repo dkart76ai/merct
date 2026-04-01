@@ -85,7 +85,7 @@ cd g:\delphiprojs\playWTB
 node services/worker/index.js
 
 //------------
-cd g:\delphiprojs\playWTB\services\worker
+cd services/worker
 node seed-accounts.js
 
 

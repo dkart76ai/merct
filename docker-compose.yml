@@ -24,6 +24,10 @@ services:
     build:
       context: .
       dockerfile: services/worker-chat/Dockerfile
+    tty: true
+    stdin_open: true
+    logging:
+      driver: "json-file"
     shm_size: '2gb'
     environment:
       - REDIS_HOST=redis
@@ -35,8 +39,10 @@ services:
       - CHAT_ACCOUNT_USER=${CHAT_ACCOUNT_USER}
       - CHAT_ACCOUNT_PWD=${CHAT_ACCOUNT_PWD}
       - CHAT_CHANNEL_URL=${CHAT_CHANNEL_URL}
+      # - OTP=
     volumes:
       - ./auth:/app/auth
+      - ./debug:/app/debug
     depends_on:
       - redis
 
@@ -44,6 +50,10 @@ services:
     build:
       context: .
       dockerfile: services/worker/Dockerfile
+    tty: true
+    stdin_open: true
+    logging:
+      driver: "json-file"
     shm_size: '2gb'
     expose:
       - "3001"
@@ -55,11 +65,12 @@ services:
       - HEADLESS=true
       - OMP_THREAD_LIMIT=1
       - NODE_OPTIONS=--max-old-space-size=4096
-      - DEBUG=false
+      - DEBUG=true
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
       - ./debug:/app/debug
+      - ./screenshots:/app/screenshots
     depends_on:
       - redis
 
@@ -67,6 +78,10 @@ services:
     build:
       context: .
       dockerfile: services/worker/Dockerfile
+    tty: true
+    stdin_open: true
+    logging:
+      driver: "json-file"
     shm_size: '2gb'
     expose:
       - "3001"
@@ -78,7 +93,7 @@ services:
       - HEADLESS=true
       - OMP_THREAD_LIMIT=1
       - NODE_OPTIONS=--max-old-space-size=4096
-      - DEBUG=false
+      - DEBUG=true
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
@@ -90,6 +105,10 @@ services:
     build:
       context: .
       dockerfile: services/worker/Dockerfile
+    tty: true
+    stdin_open: true
+    logging:
+      driver: "json-file"
     shm_size: '2gb'
     expose:
       - "3001"
@@ -101,7 +120,7 @@ services:
       - HEADLESS=true
       - OMP_THREAD_LIMIT=1
       - NODE_OPTIONS=--max-old-space-size=4096
-      - DEBUG=false
+      - DEBUG=true
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
@@ -113,6 +132,10 @@ services:
     build:
       context: .
       dockerfile: services/worker/Dockerfile
+    tty: true
+    stdin_open: true
+    logging:
+      driver: "json-file"
     shm_size: '2gb'
     expose:
       - "3001"
@@ -124,7 +147,7 @@ services:
       - HEADLESS=true
       - OMP_THREAD_LIMIT=1
       - NODE_OPTIONS=--max-old-space-size=4096
-      - DEBUG=false
+      - DEBUG=true
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
@@ -136,6 +159,10 @@ services:
     build:
       context: .
       dockerfile: services/worker/Dockerfile
+    tty: true
+    stdin_open: true
+    logging:
+      driver: "json-file"
     shm_size: '2gb'
     expose:
       - "3001"
@@ -147,7 +174,7 @@ services:
       - HEADLESS=true
       - OMP_THREAD_LIMIT=1
       - NODE_OPTIONS=--max-old-space-size=4096
-      - DEBUG=false
+      - DEBUG=true
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
@@ -159,6 +186,10 @@ services:
     build:
       context: .
       dockerfile: services/worker/Dockerfile
+    tty: true
+    stdin_open: true
+    logging:
+      driver: "json-file"
     shm_size: '2gb'
     expose:
       - "3001"
@@ -170,7 +201,7 @@ services:
       - HEADLESS=true
       - OMP_THREAD_LIMIT=1
       - NODE_OPTIONS=--max-old-space-size=4096
-      - DEBUG=false
+      - DEBUG=true
     volumes:
       - ./assets:/app/assets
       - ./auth:/app/auth
