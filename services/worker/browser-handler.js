@@ -192,6 +192,7 @@ export class BrowserHandler {
           `(${(result.confidence * 100).toFixed(1)}%)`
         )
         // await this.page.mouse.move(result.x, result.y)
+
         await this.page.mouse.click(result.x, result.y)
         // await this.canvas.click({ position: { x: result.x, y: result.y }, force: true }) //581, 572
 
@@ -275,6 +276,8 @@ export class BrowserHandler {
         )
       }
     }
+
+    return result
   }
 
   async zoomingIn(captureScreenshotForDebug = false) {
@@ -325,6 +328,14 @@ export class BrowserHandler {
 
   async openGoToCoords(captureScreenshotForDebug = false) {
     console.log(`[${this.config.workerId}] GoToCoords window...`)
+
+    // use cached position if available
+    if (this.cachedGoToCoordPos) {
+      await this.page.mouse.click(this.cachedGoToCoordPos.x, this.cachedGoToCoordPos.y)
+      await this.page.waitForTimeout(200)
+      return this.cachedGoToCoordPos
+    }
+
     const screenshotBuffer = await this.screenshot()
 
     const result = await this.imageProcessor.detectGotoCoordButton(screenshotBuffer)
@@ -337,7 +348,7 @@ export class BrowserHandler {
       )
 
       await this.page.mouse.click(result.x, result.y)
-
+      this.cachedGoToCoordPos = result
       await this.page.waitForTimeout(200)
 
       if (captureScreenshotForDebug) {
@@ -358,10 +369,18 @@ export class BrowserHandler {
         )
       }
     }
+
+    return result
   }
 
   async getKCoordPosition(captureScreenshotForDebug = false) {
     console.log(`[${this.config.workerId}] KCoord Position window...`)
+
+    // use cached position if available
+    if (this.cachedKCoordPosition) {
+      return this.cachedKCoordPosition
+    }
+
     const screenshotBuffer = await this.screenshot()
 
     const result = await this.imageProcessor.detectCoordsInput(screenshotBuffer)
@@ -372,6 +391,7 @@ export class BrowserHandler {
         result.y,
         `(${(result.confidence * 100).toFixed(1)}%)`
       )
+      this.cachedKCoordPosition = result
 
       if (captureScreenshotForDebug) {
         // const screenshotBuffer2 = await this.screenshot()
@@ -567,7 +587,8 @@ export class BrowserHandler {
   }
 
   async inputData(value) {
-    await this.page.keyboard.press('End', { delay: 0 })
+    await this.page.keyboard.press('End', { delay: 10 })
+    await this.page.waitForTimeout(30)
     for (let i = 0; i < 3; i++) await this.page.keyboard.press('Backspace', { delay: 0 })
     // await this.page.evaluate(t => navigator.clipboard.writeText(t), value.toString())
     // await this.page.keyboard.press('Control+V') //se come los numeros
@@ -575,7 +596,7 @@ export class BrowserHandler {
     // await this.page.keyboard.type(value.toString()) //lento
 
     for (const caracter of value.toString()) {
-      await this.page.keyboard.press(caracter, { delay: 10 })
+      await this.page.keyboard.press(caracter, { delay: 5 })
     }
   }
 
@@ -657,10 +678,10 @@ export class BrowserHandler {
     //     console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
     //   }
 
-    //   await this.page.screenshot({
-    //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Kinput.png`),
-    //     clip: { x: KCoordPosition.x + 25, y: KCoordPosition.y, width: 300, height: 60 }
-    //   })
+    await this.page.screenshot({
+      path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Kinput.png`),
+      clip: { x: KCoordPosition.x + 40, y: KCoordPosition.y, width: 300, height: 60 }
+    })
     //   await this.page.screenshot({
     //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Xinput.png`),
     //     clip: { x: KCoordPosition.x + 25 + 120, y: KCoordPosition.y, width: 300, height: 60 }
@@ -675,40 +696,43 @@ export class BrowserHandler {
     //   })
     // }
     //--
+    if (KCoordPosition.found) {
+      await this.page.mouse.click(KCoordPosition.x + 40, KCoordPosition.y)
+      await this.inputData(k) //X
+      // await this.page.waitForTimeout(300)
+      await this.page.mouse.click(KCoordPosition.x + 145, KCoordPosition.y)
+      await this.inputData(x) // Y
+      // await this.page.waitForTimeout(300)
+      await this.page.mouse.click(KCoordPosition.x + 235, KCoordPosition.y)
+      await this.inputData(y) // K
+      await this.page.waitForTimeout(30)
 
-    await this.page.mouse.click(KCoordPosition.x + 25, KCoordPosition.y)
-    await this.inputData(k) //X
-    // await this.page.waitForTimeout(300)
-    await this.page.mouse.click(KCoordPosition.x + 25 + 120, KCoordPosition.y)
-    await this.inputData(x) // Y
-    // await this.page.waitForTimeout(300)
-    await this.page.mouse.click(KCoordPosition.x + 25 + 210, KCoordPosition.y)
-    await this.inputData(y) // K
-    await this.page.waitForTimeout(300)
+      // for (const input of inputs) {
+      //   await this.page.mouse.click(input.x, 486)
+      //   for (let i = 0; i < 4; i++) await this.page.keyboard.press('Backspace', { delay: 0 })
+      //   await this.page.evaluate(t => navigator.clipboard.writeText(t), input.val.toString())
+      //   await this.page.keyboard.press('Control+V')
+      // }
+      console.log(`[${this.config.workerId}] scanCoordinate:inputs took ${Date.now() - start}ms`)
+      // process.stdout.write('')
 
-    // for (const input of inputs) {
-    //   await this.page.mouse.click(input.x, 486)
-    //   for (let i = 0; i < 4; i++) await this.page.keyboard.press('Backspace', { delay: 0 })
-    //   await this.page.evaluate(t => navigator.clipboard.writeText(t), input.val.toString())
-    //   await this.page.keyboard.press('Control+V')
-    // }
-    console.log(`[${this.config.workerId}] scanCoordinate:inputs took ${Date.now() - start}ms`)
-    // process.stdout.write('')
-
-    if (DEBUG) {
-      try {
-        await this.page.screenshot({
-          path: path.join(process.cwd(), 'debug', `${this.config.workerId}_after_inputs.png`)
-        })
-      } catch (e) {
-        console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
+      if (DEBUG) {
+        try {
+          await this.page.screenshot({
+            path: path.join(process.cwd(), 'debug', `${this.config.workerId}_after_inputs.png`)
+          })
+        } catch (e) {
+          console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
+        }
       }
+
+      // Click GO button
+      start = Date.now()
+
+      await this.page.mouse.click(KCoordPosition.x + 138, KCoordPosition.y + 45) //680, 526)
+    } else {
+      console.log(`[${this.config.workerId}] no inputs found:`)
     }
-
-    // Click GO button
-    start = Date.now()
-
-    await this.page.mouse.click(KCoordPosition.x + 138, KCoordPosition.y + 45) //680, 526)
 
     await this.page.waitForTimeout(500) // Wait for camera to move
 
@@ -749,7 +773,7 @@ export class BrowserHandler {
     // and convert with OCR to coordinates
     if (result.found) {
       await this.page.mouse.move(result.x, result.y)
-      await this.page.waitForTimeout(100) // Wait for camera to move
+      await this.page.waitForTimeout(400) // Wait for camera to move
 
       //TODO: remove this screenshot (2 lines)
       const debugPath = path.join(process.cwd(), 'debug', `${this.config.workerId}_merc_found.png`)

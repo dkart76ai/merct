@@ -24,8 +24,8 @@ export class ImageProcessor {
       workerTerminateTimeout: 30000
     })
 
-    // const mercPath = path.join(process.cwd(), 'assets', 'mercenary.png')
-    const mercPath = path.join(process.cwd(), 'assets', 'citadel.png')
+    const mercPath = path.join(process.cwd(), 'assets', 'mercenary.png')
+    // const mercPath = path.join(process.cwd(), 'assets', 'citadel.png')
     const mapaPath = path.join(process.cwd(), 'assets', 'mapaButton.png')
     const closePath = path.join(process.cwd(), 'assets', 'closeButton.png')
     const loadingPath = path.join(process.cwd(), 'assets', 'loading.png')
