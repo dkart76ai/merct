@@ -32,15 +32,25 @@ console.log(`🤖 Worker starting: ${config.workerId} (${config.instances} insta
 const instances = [] // [{ id, browser, browserHandler, workerCode, claimedAccount }]
 
 async function recoverAbandonedAccounts() {
-  const registry = (await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY)) || {}
-  const activeWorkerIds = new Set(Object.keys(registry))
-  const inUse = (await redis.hgetall(REDIS_KEYS.ACCOUNTS_INUSE)) || {}
-  for (const [workerId, account] of Object.entries(inUse)) {
-    if (!activeWorkerIds.has(workerId)) {
-      await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, account)
-      await redis.hdel(REDIS_KEYS.ACCOUNTS_INUSE, workerId)
-      console.log(`[${config.workerId}] 🔄 Recovered account from dead worker: ${workerId}`)
+  // Use a Redis lock so only one worker runs recovery at a time
+  const locked = await redis.set('recovery:lock', config.workerId, 'NX', 'EX', 30)
+  if (!locked) {
+    console.log(`[${config.workerId}] Recovery already running on another worker, skipping`)
+    return
+  }
+  try {
+    const registry = (await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY)) || {}
+    const activeWorkerIds = new Set(Object.keys(registry))
+    const inUse = (await redis.hgetall(REDIS_KEYS.ACCOUNTS_INUSE)) || {}
+    for (const [workerId, account] of Object.entries(inUse)) {
+      if (!activeWorkerIds.has(workerId)) {
+        await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, account)
+        await redis.hdel(REDIS_KEYS.ACCOUNTS_INUSE, workerId)
+        console.log(`[${config.workerId}] 🔄 Recovered account from dead worker: ${workerId}`)
+      }
     }
+  } finally {
+    await redis.del('recovery:lock')
   }
 }
 
@@ -118,9 +128,9 @@ async function runInstance(instanceId) {
       const { k, x, y } = JSON.parse(item[1])
       console.log(`[${instanceId}] 🔍 Scanning K:${k} X:${x} Y:${y}`)
 
-      console.time('scanCoordinate')
+      console.time(`scanCoordinate${instanceId}`)
       const result = await instance.browserHandler.scanCoordinate(k, x, y, instance.workerCode)
-      console.timeEnd('scanCoordinate')
+      console.timeEnd(`scanCoordinate${instanceId}`)
 
       if (instance.browserHandler.lastScreenshot) {
         fs.writeFileSync(screenshotPath, instance.browserHandler.lastScreenshot)
@@ -158,14 +168,17 @@ async function runInstance(instanceId) {
 }
 
 async function run() {
-  await recoverAbandonedAccounts()
-
+  // Register first, then recover — so other workers don't recover our accounts
   await redis.hset(
     REDIS_KEYS.WORKERS_REGISTRY,
     config.workerId,
     JSON.stringify({ url: workerUrl, startedAt: new Date().toISOString() })
   )
   console.log(`[${config.workerId}] 📋 Registered at ${workerUrl}`)
+
+  // Small delay so all workers can register before recovery runs
+  await new Promise(r => setTimeout(r, 3000))
+  await recoverAbandonedAccounts()
 
   // Launch all instances in parallel
   const promises = []
