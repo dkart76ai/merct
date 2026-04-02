@@ -29,7 +29,7 @@ fs.mkdirSync(path.join(process.cwd(), 'debug'), { recursive: true })
 console.log(`🤖 Worker starting: ${config.workerId} (${config.instances} instances)`)
 
 // Track all instances
-const instances = []  // [{ id, browser, browserHandler, workerCode, claimedAccount }]
+const instances = [] // [{ id, browser, browserHandler, workerCode, claimedAccount }]
 
 async function recoverAbandonedAccounts() {
   const registry = (await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY)) || {}
@@ -118,14 +118,23 @@ async function runInstance(instanceId) {
       const { k, x, y } = JSON.parse(item[1])
       console.log(`[${instanceId}] 🔍 Scanning K:${k} X:${x} Y:${y}`)
 
+      console.time('scanCoordinate')
       const result = await instance.browserHandler.scanCoordinate(k, x, y, instance.workerCode)
+      console.timeEnd('scanCoordinate')
 
       if (instance.browserHandler.lastScreenshot) {
         fs.writeFileSync(screenshotPath, instance.browserHandler.lastScreenshot)
       }
 
       if (result.found) {
-        const mercData = { k, x, y, confidence: result.confidence, text: result.text, timestamp: new Date().toISOString() }
+        const mercData = {
+          k,
+          x,
+          y,
+          confidence: result.confidence,
+          text: result.text,
+          timestamp: new Date().toISOString()
+        }
         await redis.lpush(REDIS_KEYS.MERCENARIES_LIST, JSON.stringify(mercData))
         await redis.rpush(REDIS_KEYS.CHAT_PENDING_LIST, JSON.stringify(mercData))
         console.log(`[${instanceId}] ✅ MERCENARIO FOUND! K:${k} X:${x} Y:${y}`)
@@ -162,63 +171,71 @@ async function run() {
   const promises = []
   for (let i = 0; i < config.instances; i++) {
     const instanceId = `${config.workerId}-${i}`
-    promises.push(runInstance(instanceId).catch(err => {
-      console.error(`[${instanceId}] Fatal:`, err.message)
-    }))
+    promises.push(
+      runInstance(instanceId).catch(err => {
+        console.error(`[${instanceId}] Fatal:`, err.message)
+      })
+    )
   }
   await Promise.all(promises)
 }
 
 // Health + screenshot + code endpoint
-http.createServer((req, res) => {
-  // serve screenshot for specific instance: /screenshot/worker-1-0
-  const screenshotMatch = req.url.match(/^\/screenshot\/(.+)$/)
-  if (screenshotMatch) {
-    const p = path.join(process.cwd(), 'screenshots', `${screenshotMatch[1]}_latest.jpg`)
-    if (fs.existsSync(p)) {
-      res.writeHead(200, { 'Content-Type': 'image/jpeg' })
-      fs.createReadStream(p).pipe(res)
+http
+  .createServer((req, res) => {
+    // serve screenshot for specific instance: /screenshot/worker-1-0
+    const screenshotMatch = req.url.match(/^\/screenshot\/(.+)$/)
+    if (screenshotMatch) {
+      const p = path.join(process.cwd(), 'screenshots', `${screenshotMatch[1]}_latest.jpg`)
+      if (fs.existsSync(p)) {
+        res.writeHead(200, { 'Content-Type': 'image/jpeg' })
+        fs.createReadStream(p).pipe(res)
+        return
+      }
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/code/')) {
+      const instanceId = req.url.slice(6)
+      let body = ''
+      req.on('data', chunk => {
+        body += chunk
+      })
+      req.on('end', () => {
+        try {
+          const { code } = JSON.parse(body)
+          const instance = instances.find(i => i.id === instanceId) || instances[0]
+          if (instance) {
+            instance.workerCode = code || null
+            if (instance.browserHandler) instance.browserHandler.setWorkerCode(instance.workerCode)
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ success: true, code }))
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ success: false, error: e.message }))
+        }
+      })
       return
     }
-  }
 
-  if (req.method === 'POST' && req.url.startsWith('/code/')) {
-    const instanceId = req.url.slice(6)
-    let body = ''
-    req.on('data', chunk => { body += chunk })
-    req.on('end', () => {
-      try {
-        const { code } = JSON.parse(body)
-        const instance = instances.find(i => i.id === instanceId) || instances[0]
-        if (instance) {
-          instance.workerCode = code || null
-          if (instance.browserHandler) instance.browserHandler.setWorkerCode(instance.workerCode)
-        }
-        res.writeHead(200, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ success: true, code }))
-      } catch (e) {
-        res.writeHead(400, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ success: false, error: e.message }))
-      }
-    })
-    return
-  }
-
-  res.writeHead(200, { 'Content-Type': 'application/json' })
-  res.end(JSON.stringify({
-    workerId: config.workerId,
-    status: 'ok',
-    browserReady: instances.some(i => !!i.browser),
-    instances: instances.map(i => ({
-      id: i.id,
-      browserReady: !!i.browser,
-      code: i.workerCode
-    })),
-    timestamp: new Date().toISOString()
-  }))
-}).listen(config.port, () => {
-  console.log(`[${config.workerId}] 🏥 Health server on port ${config.port}`)
-})
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(
+      JSON.stringify({
+        workerId: config.workerId,
+        status: 'ok',
+        browserReady: instances.some(i => !!i.browser),
+        instances: instances.map(i => ({
+          id: i.id,
+          browserReady: !!i.browser,
+          code: i.workerCode
+        })),
+        timestamp: new Date().toISOString()
+      })
+    )
+  })
+  .listen(config.port, () => {
+    console.log(`[${config.workerId}] 🏥 Health server on port ${config.port}`)
+  })
 
 run().catch(err => {
   console.error(`[${config.workerId}] Fatal error:`, err)

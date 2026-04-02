@@ -665,38 +665,38 @@ export class BrowserHandler {
 */
     start = Date.now()
     const KCoordPosition = await this.getKCoordPosition(DEBUG)
-
-    // if (DEBUG) {
-    //   try {
-    //     const debugPath = path.join(process.cwd(), 'debug', `${this.config.workerId}_inputs.png`)
-    //     await this.page.screenshot({
-    //       path: debugPath,
-    //       clip: { x: KCoordPosition.x - 20, y: KCoordPosition.y - 20, width: 300, height: 60 }
-    //     })
-    //     console.log(`[${this.config.workerId}] screenshot saved: ${debugPath}`)
-    //   } catch (e) {
-    //     console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
-    //   }
-
-    await this.page.screenshot({
-      path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Kinput.png`),
-      clip: { x: KCoordPosition.x + 40, y: KCoordPosition.y, width: 300, height: 60 }
-    })
-    //   await this.page.screenshot({
-    //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Xinput.png`),
-    //     clip: { x: KCoordPosition.x + 25 + 120, y: KCoordPosition.y, width: 300, height: 60 }
-    //   })
-    //   await this.page.screenshot({
-    //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Yinput.png`),
-    //     clip: { x: KCoordPosition.x + 25 + 210, y: KCoordPosition.y, width: 300, height: 60 }
-    //   })
-    //   await this.page.screenshot({
-    //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_gobutton.png`),
-    //     clip: { x: KCoordPosition.x + 138, y: KCoordPosition.y + 45, width: 300, height: 60 }
-    //   })
-    // }
-    //--
     if (KCoordPosition.found) {
+      // if (DEBUG) {
+      //   try {
+      //     const debugPath = path.join(process.cwd(), 'debug', `${this.config.workerId}_inputs.png`)
+      //     await this.page.screenshot({
+      //       path: debugPath,
+      //       clip: { x: KCoordPosition.x - 20, y: KCoordPosition.y - 20, width: 300, height: 60 }
+      //     })
+      //     console.log(`[${this.config.workerId}] screenshot saved: ${debugPath}`)
+      //   } catch (e) {
+      //     console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
+      //   }
+
+      await this.page.screenshot({
+        path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Kinput.png`),
+        clip: { x: KCoordPosition.x + 40, y: KCoordPosition.y, width: 300, height: 60 }
+      })
+      //   await this.page.screenshot({
+      //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Xinput.png`),
+      //     clip: { x: KCoordPosition.x + 25 + 120, y: KCoordPosition.y, width: 300, height: 60 }
+      //   })
+      //   await this.page.screenshot({
+      //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Yinput.png`),
+      //     clip: { x: KCoordPosition.x + 25 + 210, y: KCoordPosition.y, width: 300, height: 60 }
+      //   })
+      //   await this.page.screenshot({
+      //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_gobutton.png`),
+      //     clip: { x: KCoordPosition.x + 138, y: KCoordPosition.y + 45, width: 300, height: 60 }
+      //   })
+      // }
+      //--
+
       await this.page.mouse.click(KCoordPosition.x + 40, KCoordPosition.y)
       await this.inputData(k) //X
       // await this.page.waitForTimeout(300)
@@ -789,7 +789,7 @@ export class BrowserHandler {
         `[${this.config.workerId}] scanCoordinate:OCRCoordinates took ${Date.now() - start}ms`
       )
 
-      result.text = ocrResult
+      result.text = ocrResult?.trim() ?? ''
     }
     return result
   }
