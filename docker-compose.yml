@@ -63,6 +63,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - WORKER_ID=worker-1
       - HEADLESS=true
+      - WORKER_INSTANCES=2
       - OMP_THREAD_LIMIT=1
       - NODE_OPTIONS=--max-old-space-size=4096
       - DEBUG=true
