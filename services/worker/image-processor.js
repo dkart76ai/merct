@@ -32,30 +32,48 @@ export class ImageProcessor {
     const splashLoadingPath = path.join(process.cwd(), 'assets', 'splashLoading.png')
     const verifyAccountPath = path.join(process.cwd(), 'assets', 'rejectButton.png')
     const zoomInPath = path.join(process.cwd(), 'assets', 'zoomInButton.png')
-    const [mercBuf, mapaBuf, closeBuf, loadingBuf, splashLoadingBuf, verifyAccountBuf, zoomInBuf] =
-      await Promise.all([
-        readFile(mercPath).catch(() => {
-          throw new Error('Missing asset: ' + mercPath)
-        }),
-        readFile(mapaPath).catch(() => {
-          throw new Error('Missing asset: ' + mapaPath)
-        }),
-        readFile(closePath).catch(() => {
-          throw new Error('Missing asset: ' + closePath)
-        }),
-        readFile(loadingPath).catch(() => {
-          throw new Error('Missing asset: ' + loadingPath)
-        }),
-        readFile(splashLoadingPath).catch(() => {
-          throw new Error('Missing asset: ' + splashLoadingPath)
-        }),
-        readFile(verifyAccountPath).catch(() => {
-          throw new Error('Missing asset: ' + verifyAccountPath)
-        }),
-        readFile(zoomInPath).catch(() => {
-          throw new Error('Missing asset: ' + zoomInPath)
-        })
-      ])
+
+    const gotoCoordButtonPath = path.join(process.cwd(), 'assets', 'gotoCoordButton.png')
+    const coordsInputPath = path.join(process.cwd(), 'assets', 'coordsInput.png')
+    const [
+      mercBuf,
+      mapaBuf,
+      closeBuf,
+      loadingBuf,
+      splashLoadingBuf,
+      verifyAccountBuf,
+      zoomInBuf,
+      gotoCoordButtonBuf,
+      coordsInputBuf
+    ] = await Promise.all([
+      readFile(mercPath).catch(() => {
+        throw new Error('Missing asset: ' + mercPath)
+      }),
+      readFile(mapaPath).catch(() => {
+        throw new Error('Missing asset: ' + mapaPath)
+      }),
+      readFile(closePath).catch(() => {
+        throw new Error('Missing asset: ' + closePath)
+      }),
+      readFile(loadingPath).catch(() => {
+        throw new Error('Missing asset: ' + loadingPath)
+      }),
+      readFile(splashLoadingPath).catch(() => {
+        throw new Error('Missing asset: ' + splashLoadingPath)
+      }),
+      readFile(verifyAccountPath).catch(() => {
+        throw new Error('Missing asset: ' + verifyAccountPath)
+      }),
+      readFile(zoomInPath).catch(() => {
+        throw new Error('Missing asset: ' + zoomInPath)
+      }),
+      readFile(gotoCoordButtonPath).catch(() => {
+        throw new Error('Missing asset: ' + gotoCoordButtonPath)
+      }),
+      readFile(coordsInputPath).catch(() => {
+        throw new Error('Missing asset: ' + coordsInputPath)
+      })
+    ])
 
     this.mercTemplateBuffer = Array.from(mercBuf)
     this.mapaButtonTemplateBuffer = Array.from(mapaBuf)
@@ -65,7 +83,50 @@ export class ImageProcessor {
     this.verifyAccountTemplateBuffer = Array.from(verifyAccountBuf)
     this.zoomInTemplateBuffer = Array.from(zoomInBuf)
 
+    this.gotoCoordButtonTemplateBuffer = Array.from(gotoCoordButtonBuf)
+    this.coordsInputTemplateBuffer = Array.from(coordsInputBuf)
+
     this.initialized = true
+  }
+
+  async detectCoordsInput(screenshotBuffer) {
+    if (!this.initialized) await this.initialize()
+    try {
+      const result = await this.pool.exec('detectarElementoUnity', [
+        Array.from(screenshotBuffer),
+        this.coordsInputTemplateBuffer,
+        0.8
+      ])
+      return {
+        found: result.encontrado,
+        confidence: result.confianza,
+        x: result.x || null,
+        y: result.y || null
+      }
+    } catch (error) {
+      console.error('Error in image processing:', error.message)
+      return { found: false, confidence: 0 }
+    }
+  }
+
+  async detectGotoCoordButton(screenshotBuffer) {
+    if (!this.initialized) await this.initialize()
+    try {
+      const result = await this.pool.exec('detectarElementoUnity', [
+        Array.from(screenshotBuffer),
+        this.gotoCoordButtonTemplateBuffer,
+        0.8
+      ])
+      return {
+        found: result.encontrado,
+        confidence: result.confianza,
+        x: result.x || null,
+        y: result.y || null
+      }
+    } catch (error) {
+      console.error('Error in image processing:', error.message)
+      return { found: false, confidence: 0 }
+    }
   }
 
   async detectZoomIn(screenshotBuffer) {

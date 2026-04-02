@@ -323,6 +323,76 @@ export class BrowserHandler {
     }
   }
 
+  async openGoToCoords(captureScreenshotForDebug = false) {
+    console.log(`[${this.config.workerId}] GoToCoords window...`)
+    const screenshotBuffer = await this.screenshot()
+
+    const result = await this.imageProcessor.detectGotoCoordButton(screenshotBuffer)
+    if (result.found) {
+      console.log(
+        `[${this.config.workerId}] go to coords button found at`,
+        result.x,
+        result.y,
+        `(${(result.confidence * 100).toFixed(1)}%)`
+      )
+
+      await this.page.mouse.click(result.x, result.y)
+
+      await this.page.waitForTimeout(200)
+
+      if (captureScreenshotForDebug) {
+        // const screenshotBuffer2 = await this.screenshot()
+        const debugPath = path.join(
+          process.cwd(),
+          'debug',
+          `${this.config.workerId}_debug_gotocoordbutton.png`
+        )
+        // await fs.writeFile(debugPath, screenshotBuffer2)
+
+        await this.page.screenshot({
+          path: debugPath,
+          clip: { x: result.x - 10, y: result.y - 10, width: 40, height: 40 }
+        })
+        console.log(
+          `[${this.config.workerId}] ⚠️ go to coords button  — debug screenshot saved to ${debugPath}`
+        )
+      }
+    }
+  }
+
+  async getKCoordPosition(captureScreenshotForDebug = false) {
+    console.log(`[${this.config.workerId}] KCoord Position window...`)
+    const screenshotBuffer = await this.screenshot()
+
+    const result = await this.imageProcessor.detectCoordsInput(screenshotBuffer)
+    if (result.found) {
+      console.log(
+        `[${this.config.workerId}] KCoordPosition found at`,
+        result.x,
+        result.y,
+        `(${(result.confidence * 100).toFixed(1)}%)`
+      )
+
+      if (captureScreenshotForDebug) {
+        // const screenshotBuffer2 = await this.screenshot()
+        const debugPath = path.join(
+          process.cwd(),
+          'debug',
+          `${this.config.workerId}_debug_KCoordPosition.png`
+        )
+        // await fs.writeFile(debugPath, screenshotBuffer2)
+        await this.page.screenshot({
+          path: debugPath,
+          clip: { x: result.x + 25, y: result.y, width: 340, height: 80 }
+        })
+        console.log(
+          `[${this.config.workerId}] ⚠️ go to coords button  — debug screenshot saved to ${debugPath}`
+        )
+      }
+    }
+    return result
+  }
+
   async initialize() {
     const options = {
       screen: { width: 1360, height: 1024 },
@@ -343,6 +413,7 @@ export class BrowserHandler {
 
     this.context = await this.browser.newContext(options)
     this.page = await this.context.newPage()
+    await this.context.grantPermissions(['clipboard-read', 'clipboard-write'])
 
     // Forward browser console to Node.js stdout
     this.page.on('console', msg => {
@@ -458,33 +529,33 @@ export class BrowserHandler {
     await this.page.waitForTimeout(2000)
 
     // monitor for waiting delay
-    await this.page.evaluate(() => {
-      window.unityStatus = {
-        isStable: false,
-        frameHistory: [],
-        lastTime: performance.now()
-      }
+    // await this.page.evaluate(() => {
+    //   window.unityStatus = {
+    //     isStable: false,
+    //     frameHistory: [],
+    //     lastTime: performance.now()
+    //   }
 
-      function checkStability(currentTime) {
-        const delta = currentTime - window.unityStatus.lastTime
-        window.unityStatus.lastTime = currentTime
+    //   function checkStability(currentTime) {
+    //     const delta = currentTime - window.unityStatus.lastTime
+    //     window.unityStatus.lastTime = currentTime
 
-        // Guardamos los últimos 10 deltas de tiempo
-        window.unityStatus.frameHistory.push(delta)
-        if (window.unityStatus.frameHistory.length > 10) window.unityStatus.frameHistory.shift()
+    //     // Guardamos los últimos 10 deltas de tiempo
+    //     window.unityStatus.frameHistory.push(delta)
+    //     if (window.unityStatus.frameHistory.length > 10) window.unityStatus.frameHistory.shift()
 
-        // Calculamos el promedio de los últimos 10 frames
-        const avg = window.unityStatus.frameHistory.reduce((a, b) => a + b, 0) / 10
+    //     // Calculamos el promedio de los últimos 10 frames
+    //     const avg = window.unityStatus.frameHistory.reduce((a, b) => a + b, 0) / 10
 
-        // ESTABILIDAD: Si la diferencia entre el frame actual y el promedio es mínima (< 2ms)
-        // y tenemos suficientes frames para promediar.
-        window.unityStatus.isStable =
-          window.unityStatus.frameHistory.length === 10 && Math.abs(delta - avg) < 2
+    //     // ESTABILIDAD: Si la diferencia entre el frame actual y el promedio es mínima (< 2ms)
+    //     // y tenemos suficientes frames para promediar.
+    //     window.unityStatus.isStable =
+    //       window.unityStatus.frameHistory.length === 10 && Math.abs(delta - avg) < 2
 
-        requestAnimationFrame(checkStability)
-      }
-      requestAnimationFrame(checkStability)
-    })
+    //     requestAnimationFrame(checkStability)
+    //   }
+    //   requestAnimationFrame(checkStability)
+    // })
 
     this.isInitialized = true
     console.log(`[${this.config.workerId}] ✅ Browser initialized and ready`)
@@ -495,80 +566,176 @@ export class BrowserHandler {
     console.log(`[${this.config.workerId}] OTP code received on BHdlr: ${code}`)
   }
 
+  async inputData(value) {
+    await this.page.keyboard.press('End', { delay: 0 })
+    for (let i = 0; i < 3; i++) await this.page.keyboard.press('Backspace', { delay: 0 })
+    // await this.page.evaluate(t => navigator.clipboard.writeText(t), value.toString())
+    // await this.page.keyboard.press('Control+V') //se come los numeros
+
+    // await this.page.keyboard.type(value.toString()) //lento
+
+    for (const caracter of value.toString()) {
+      await this.page.keyboard.press(caracter, { delay: 10 })
+    }
+  }
+
   async scanCoordinate(k, x, y) {
     if (!this.isInitialized) {
       throw new Error('Browser not initialized')
     }
-
+    123
     // Clear any popups, takes 1.5 seconds average
     let start = Date.now()
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 5; i++) {
       await this.page.keyboard.press('Escape', { delay: 0 })
     }
-    // console.log(`[${this.config.workerId}] scanCoordinate:clearPopups took ${Date.now() - start}ms`)
+    console.log(`[${this.config.workerId}] scanCoordinate:clearPopups took ${Date.now() - start}ms`)
 
     await this.page.waitForTimeout(10)
 
     // A. Forzamos estado inestable antes del clic para evitar falsos positivos
-    await this.page.evaluate(() => {
-      if (window.unityStatus) {
-        window.unityStatus.isStable = false
-        window.unityStatus.frameHistory = []
-      }
-    })
+    // await this.page.evaluate(() => {
+    //   if (window.unityStatus) {
+    //     window.unityStatus.isStable = false
+    //     window.unityStatus.frameHistory = []
+    //   }
+    // })
 
     // Open search (magnifying glass)
-    await this.page.mouse.click(87, 757)
-    await this.page.waitForTimeout(200)
-    // console.log(`[${this.config.workerId}] scanCoordinate:search opened`)
+    // await this.page.mouse.click(95, 787)
+    await this.openGoToCoords(DEBUG)
+    await this.page.waitForTimeout(100)
+    console.log(`[${this.config.workerId}] scanCoordinate:search opened`)
+
+    // try {
+    //   const debugPath0 = path.join(
+    //     process.cwd(),
+    //     'debug',
+    //     `${this.config.workerId}_after_search_open.png`
+    //   )
+    //   await this.page.screenshot({
+    //     path: debugPath0,
+    //     clip: { x: 95, y: 787, width: 40, height: 40 }
+    //   })
+    //   console.log(`[${this.config.workerId}] screenshot saved: ${debugPath0}`)
+    // } catch (e) {
+    //   console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
+    // }
 
     // Enter coordinates
-    const inputs = [
-      { x: 586, val: k },
-      { x: 684, val: x },
-      { x: 787, val: y }
-    ]
+    // const inputs = [
+    //   { x: 546, val: 123 },
+    //   { x: 536, val: 111 },
+    //   { x: 636, val: 222 }
+    // ]
 
+    /*
+    window.gameInstance.Module.SendMessage(
+      'UnityBrowserApi',
+      'Receive',
+      JSON.stringify({ method: 'pasteClipboardContent', params: { content: '222' } })
+    )
+ gameObject: UnityBrowserApi
+ func: Receive
+ param: {"method":"pasteClipboardContent","params":{"content":"123"}}
+ paramType: string
+ ---
+
+*/
     start = Date.now()
-    for (const input of inputs) {
-      await this.page.mouse.click(input.x, 446)
-      for (let i = 0; i < 4; i++) await this.page.keyboard.press('Backspace', { delay: 0 })
-      await this.page.evaluate(t => navigator.clipboard.writeText(t), input.val.toString())
-      await this.page.keyboard.press('Control+V')
-    }
+    const KCoordPosition = await this.getKCoordPosition(DEBUG)
+
+    // if (DEBUG) {
+    //   try {
+    //     const debugPath = path.join(process.cwd(), 'debug', `${this.config.workerId}_inputs.png`)
+    //     await this.page.screenshot({
+    //       path: debugPath,
+    //       clip: { x: KCoordPosition.x - 20, y: KCoordPosition.y - 20, width: 300, height: 60 }
+    //     })
+    //     console.log(`[${this.config.workerId}] screenshot saved: ${debugPath}`)
+    //   } catch (e) {
+    //     console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
+    //   }
+
+    //   await this.page.screenshot({
+    //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Kinput.png`),
+    //     clip: { x: KCoordPosition.x + 25, y: KCoordPosition.y, width: 300, height: 60 }
+    //   })
+    //   await this.page.screenshot({
+    //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Xinput.png`),
+    //     clip: { x: KCoordPosition.x + 25 + 120, y: KCoordPosition.y, width: 300, height: 60 }
+    //   })
+    //   await this.page.screenshot({
+    //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_Yinput.png`),
+    //     clip: { x: KCoordPosition.x + 25 + 210, y: KCoordPosition.y, width: 300, height: 60 }
+    //   })
+    //   await this.page.screenshot({
+    //     path: path.join(process.cwd(), 'debug', `${this.config.workerId}_gobutton.png`),
+    //     clip: { x: KCoordPosition.x + 138, y: KCoordPosition.y + 45, width: 300, height: 60 }
+    //   })
+    // }
+    //--
+
+    await this.page.mouse.click(KCoordPosition.x + 25, KCoordPosition.y)
+    await this.inputData(k) //X
+    // await this.page.waitForTimeout(300)
+    await this.page.mouse.click(KCoordPosition.x + 25 + 120, KCoordPosition.y)
+    await this.inputData(x) // Y
+    // await this.page.waitForTimeout(300)
+    await this.page.mouse.click(KCoordPosition.x + 25 + 210, KCoordPosition.y)
+    await this.inputData(y) // K
+    await this.page.waitForTimeout(300)
+
+    // for (const input of inputs) {
+    //   await this.page.mouse.click(input.x, 486)
+    //   for (let i = 0; i < 4; i++) await this.page.keyboard.press('Backspace', { delay: 0 })
+    //   await this.page.evaluate(t => navigator.clipboard.writeText(t), input.val.toString())
+    //   await this.page.keyboard.press('Control+V')
+    // }
     console.log(`[${this.config.workerId}] scanCoordinate:inputs took ${Date.now() - start}ms`)
     // process.stdout.write('')
 
-    //TODO: remove this screenshot (2 lines)
-    const debugPath = path.join(process.cwd(), 'debug', `${this.config.workerId}_after_inputs.png`)
-    await this.page.screenshot({ path: debugPath })
+    if (DEBUG) {
+      try {
+        await this.page.screenshot({
+          path: path.join(process.cwd(), 'debug', `${this.config.workerId}_after_inputs.png`)
+        })
+      } catch (e) {
+        console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
+      }
+    }
 
     // Click GO button
     start = Date.now()
-    await this.page.mouse.click(680, 490)
 
-    // await this.page.waitForTimeout(500) // Wait for camera to move
+    await this.page.mouse.click(KCoordPosition.x + 138, KCoordPosition.y + 45) //680, 526)
+
+    await this.page.waitForTimeout(500) // Wait for camera to move
 
     // C. ESPERA CRÍTICA:
     // Esperamos a que 'isStable' sea TRUE.
     // Playwright consultará este valor en el contexto del navegador.
-    await this.page.waitForFunction(
-      () => !window.unityStatus || window.unityStatus.isStable === true,
-      {
-        timeout: 30000,
-        polling: 'raf' // Esto hace que Playwright chequee sincronizado con el renderizado
-      }
-    )
+    // await this.page.waitForFunction(
+    //   () => !window.unityStatus || window.unityStatus.isStable === true,
+    //   {
+    //     timeout: 30000,
+    //     polling: 'raf' // Esto hace que Playwright chequee sincronizado con el renderizado
+    //   }
+    // )
     console.log(`[${this.config.workerId}] scanCoordinate:go button took ${Date.now() - start}ms`)
 
-    //TODO: remove this screenshot (1 lines)
-
-    await this.page.screenshot({
-      path: path.join(process.cwd(), 'debug', `${this.config.workerId}_after_gobutton.png`)
-    })
+    if (DEBUG) {
+      try {
+        await this.page.screenshot({
+          path: path.join(process.cwd(), 'debug', `${this.config.workerId}_after_inputsAndGo.png`)
+        })
+      } catch (e) {
+        console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
+      }
+    }
 
     start = Date.now()
-    screenshotBuffer = await this.screenshot()
+    const screenshotBuffer = await this.screenshot()
 
     this.lastScreenshot = screenshotBuffer
 

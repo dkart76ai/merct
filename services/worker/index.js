@@ -7,6 +7,9 @@ import { getRedisClient } from '../shared/redis-client.js'
 import { REDIS_KEYS } from '../shared/constants.js'
 import { BrowserHandler } from './browser-handler.js'
 
+// Force unbuffered stdout in Docker
+if (process.stdout._handle) process.stdout._handle.setBlocking(true)
+
 const redis = getRedisClient()
 let browser = null
 let browserHandler = null
@@ -120,7 +123,7 @@ async function run() {
         fs.writeFileSync(SCREENSHOT_PATH, browserHandler.lastScreenshot)
       }
 
-      const result = await browserHandler.scanCoordinate(k, x, y, workerCode).catch(() => ({}))
+      const result = await browserHandler.scanCoordinate(k, x, y, workerCode)
 
       if (result.found) {
         if (browserHandler.lastScreenshot) {
