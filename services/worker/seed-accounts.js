@@ -12,6 +12,8 @@ try {
   const raw = await readFile(path.join(__dirname, '..', 'accounts.json'), 'utf-8')
   const accounts = JSON.parse(raw)
   await redis.del(REDIS_KEYS.ACCOUNTS_LIST)
+  await redis.del(REDIS_KEYS.ACCOUNTS_INUSE)
+  await redis.del(REDIS_KEYS.WORKERS_REGISTRY)
   await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, ...accounts.map(a => JSON.stringify(a)))
   console.log(`✅ Seeded ${accounts.length} accounts into Redis`)
   accounts.forEach(a => console.log(`   - ${a.user} (${a.session})`))

@@ -32,7 +32,6 @@ console.log(`🤖 Worker starting: ${config.workerId} (${config.instances} insta
 const instances = [] // [{ id, browser, browserHandler, workerCode, claimedAccount }]
 
 async function recoverAbandonedAccounts() {
-  // Use a Redis lock so only one worker runs recovery at a time
   const locked = await redis.set('recovery:lock', config.workerId, 'NX', 'EX', 30)
   if (!locked) {
     console.log(`[${config.workerId}] Recovery already running on another worker, skipping`)
@@ -40,13 +39,27 @@ async function recoverAbandonedAccounts() {
   }
   try {
     const registry = (await redis.hgetall(REDIS_KEYS.WORKERS_REGISTRY)) || {}
-    const activeWorkerIds = new Set(Object.keys(registry))
     const inUse = (await redis.hgetall(REDIS_KEYS.ACCOUNTS_INUSE)) || {}
-    for (const [workerId, account] of Object.entries(inUse)) {
-      if (!activeWorkerIds.has(workerId)) {
-        await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, account)
-        await redis.hdel(REDIS_KEYS.ACCOUNTS_INUSE, workerId)
-        console.log(`[${config.workerId}] 🔄 Recovered account from dead worker: ${workerId}`)
+    for (const [instanceId, account] of Object.entries(inUse)) {
+      // instanceId format is worker-1-0, workerId is worker-1
+      const workerId = instanceId.replace(/-\d+$/, '')
+      const isRegistered = !!registry[workerId]
+      if (!isRegistered) {
+        // also try to ping the worker to be sure
+        let isAlive = false
+        const workerEntry = Object.entries(registry).find(([id]) => id === workerId)
+        if (workerEntry) {
+          try {
+            const url = JSON.parse(workerEntry[1]).url
+            const r = await fetch(url, { signal: AbortSignal.timeout(3000) })
+            isAlive = r.ok
+          } catch {}
+        }
+        if (!isAlive) {
+          await redis.rpush(REDIS_KEYS.ACCOUNTS_LIST, account)
+          await redis.hdel(REDIS_KEYS.ACCOUNTS_INUSE, instanceId)
+          console.log(`[${config.workerId}] 🔄 Recovered account from dead instance: ${instanceId}`)
+        }
       }
     }
   } finally {
@@ -88,6 +101,14 @@ async function initBrowser(instanceId, account) {
     accountFile: account.session || 'session.json'
   }
   const browserHandler = new BrowserHandler(browser, browserConfig)
+
+  // assign to instance immediately so OTP code can be set via HTTP while initialize() is running
+  const instance = instances.find(i => i.id === instanceId)
+  if (instance) instance.browserHandler = browserHandler
+
+  // apply any code already set before browser started
+  if (instance?.workerCode) browserHandler.setWorkerCode(instance.workerCode)
+
   await browserHandler.initialize()
   return { browser, browserHandler }
 }
@@ -113,7 +134,8 @@ async function runInstance(instanceId) {
         console.log(`[${instanceId}] 🌐 Launching browser...`)
         const { browser, browserHandler } = await initBrowser(instanceId, account)
         instance.browser = browser
-        instance.browserHandler = browserHandler
+        // browserHandler already assigned inside initBrowser
+        if (!instance.browserHandler) instance.browserHandler = browserHandler
       }
 
       if (!item) continue
@@ -177,7 +199,7 @@ async function run() {
   console.log(`[${config.workerId}] 📋 Registered at ${workerUrl}`)
 
   // Small delay so all workers can register before recovery runs
-  await new Promise(r => setTimeout(r, 3000))
+  await new Promise(r => setTimeout(r, 10000))
   await recoverAbandonedAccounts()
 
   // Launch all instances in parallel
@@ -196,7 +218,6 @@ async function run() {
 // Health + screenshot + code endpoint
 http
   .createServer((req, res) => {
-    // serve screenshot for specific instance: /screenshot/worker-1-0
     const screenshotMatch = req.url.match(/^\/screenshot\/(.+)$/)
     if (screenshotMatch) {
       const p = path.join(process.cwd(), 'screenshots', `${screenshotMatch[1]}_latest.jpg`)
@@ -206,9 +227,9 @@ http
         return
       }
     }
-
     if (req.method === 'POST' && req.url.startsWith('/code/')) {
       const instanceId = req.url.slice(6)
+      console.log(`[${config.workerId}] Code request for instanceId: ${instanceId}`)
       let body = ''
       req.on('data', chunk => {
         body += chunk
@@ -219,18 +240,31 @@ http
           const instance = instances.find(i => i.id === instanceId) || instances[0]
           if (instance) {
             instance.workerCode = code || null
-            if (instance.browserHandler) instance.browserHandler.setWorkerCode(instance.workerCode)
+            if (instance.browserHandler) {
+              instance.browserHandler.setWorkerCode(instance.workerCode)
+            } else {
+              console.log(
+                `[${config.workerId}] browserHandler not ready yet, code stored for later`
+              )
+            }
+            console.log(`[${config.workerId}] Code set on instance ${instance.id}: ${code}`)
+          } else {
+            console.log(`[${config.workerId}] No instance ${instanceId} found no ${req.url}`)
           }
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ success: true, code }))
         } catch (e) {
           res.writeHead(400, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ success: false, error: e.message }))
+          if (instance.browserHandler) {
+            instance.browserHandler.setWorkerCode(instance.workerCode)
+          } else {
+            console.log(`[${config.workerId}] browserHandler not ready yet, code stored for later`)
+          }
         }
       })
       return
     }
-
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(
       JSON.stringify({
@@ -247,7 +281,7 @@ http
     )
   })
   .listen(config.port, () => {
-    console.log(`[${config.workerId}] 🏥 Health server on port ${config.port}`)
+    console.log(`[${config.workerId}] Health server on port ${config.port}`)
   })
 
 run().catch(err => {

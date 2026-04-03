@@ -27,21 +27,21 @@ app.get('/api/workers', async (req, res) => {
       try {
         const r = await fetch(url, { signal: AbortSignal.timeout(5000) })
         const data = await r.json()
-        return { id, url, online: true, browserReady: data.browserReady, code: data.code ?? null }
+        return { id, url, online: true, browserReady: data.browserReady, instances: data.instances ?? [] }
       } catch {
-        return { id, url, online: false, browserReady: false, code: null }
+        return { id, url, online: false, browserReady: false, instances: [] }
       }
     })
   )
   res.json({ success: true, workers: statuses })
 })
 
-app.post('/api/workers/code/:workerId', async (req, res) => {
+app.post('/api/workers/code/:workerId/:instanceId', async (req, res) => {
   const workers = await getWorkers()
   const worker = workers.find(w => w.id === req.params.workerId)
   if (!worker) return res.status(404).json({ success: false, error: 'Worker not found' })
   try {
-    const r = await fetch(`${worker.url}/code`, {
+    const r = await fetch(`${worker.url}/code/${req.params.instanceId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: req.body.code }),

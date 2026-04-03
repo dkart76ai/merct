@@ -502,9 +502,12 @@
               <span>${w.id}</span>
               <span style="color:#6c757d">${w.online ? (w.browserReady ? '🎮 ready' : '⏳ starting') : 'offline'}</span>
               ${w.online ? `<a href="/api/workers/${w.id}/screenshot" target="_blank" style="font-size:12px;color:#667eea">📷 view</a>` : ''}
-              <input type="text" placeholder="code" value="${w.code || ''}" id="code-${w.id}" style="width:80px;padding:3px 6px;font-size:12px;border:1px solid #dee2e6;border-radius:4px">
-              <button class="btn-wake" onclick="sendCode('${w.id}')" ${!w.online ? 'disabled' : ''}>Set</button>
               <button class="btn-wake" onclick="wakeWorker('${w.id}', this)" ${w.online ? 'disabled' : ''}>Wake</button>
+              ${w.online && w.instances.length ? w.instances.map(inst => `
+                <span style="font-size:11px;color:#6c757d;margin-left:4px">${inst.id}</span>
+                <input type="text" placeholder="code" value="${inst.code || ''}" id="code-${inst.id}" style="width:70px;padding:2px 5px;font-size:11px;border:1px solid #dee2e6;border-radius:4px">
+                <button class="btn-wake" onclick="sendCode('${w.id}','${inst.id}')">${inst.browserReady ? 'Set' : '⏳'}</button>
+              `).join('') : ''}
             </div>`
               )
               .join('')
@@ -514,10 +517,10 @@
         }
       }
 
-      async function sendCode(workerId) {
-        const code = document.getElementById(`code-${workerId}`).value.trim()
+      async function sendCode(workerId, instanceId) {
+        const code = document.getElementById(`code-${instanceId}`).value.trim()
         try {
-          const res = await fetch(`/api/workers/code/${workerId}`, {
+          const res = await fetch(`/api/workers/code/${workerId}/${instanceId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code })

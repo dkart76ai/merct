@@ -51,7 +51,10 @@ async function notifyDiscord(k, x, y, texto) {
     console.error(`[${config.workerId}] Discord notify failed:`, error.message)
   }
 }
-async function screenshot() {
+
+async function screenshot(page) {
+  if (!page) return
+
   const client = await page.context().newCDPSession(page) // CDP=chrome devtools protocol
   const { data } = await client.send('Page.captureScreenshot', {
     format: 'png',
@@ -135,7 +138,7 @@ async function initPage() {
 
   console.log(`[${config.workerId}] Loading game...`)
   await page.goto('https://totalbattle.com/es', { timeout: 70000 })
-  await page.waitForTimeout(90000)
+  await page.waitForTimeout(120000)
 
   // Login if needed
   const loginInput = page.getByRole('textbox', { name: 'E-mail' })
@@ -208,10 +211,35 @@ async function initPage() {
 
   // Wait for Sendbird to connect and LOGI to be received
   console.log(`[${config.workerId}] Waiting for Sendbird credentials...`)
-  await page.waitForFunction(
-    () => !!window.__sbUserId && !!window.__sbSessionKey && !!window.__sbAppId,
-    { timeout: 60000 }
-  )
+  // await page.waitForFunction(
+  //   () => !!window.__sbUserId && !!window.__sbSessionKey && !!window.__sbAppId,
+  //   { timeout: 60000 * 5 }
+  // )
+
+  let attempts = 0
+  const maxAttempts = 250 // Por ejemplo
+  while (attempts < maxAttempts) {
+    const [userId, appId, key] = await page.evaluate(() => [
+      window['__sbUserId'],
+      window['__sbAppId'],
+      window['__sbSessionKey']
+    ])
+
+    if (userId && appId && key) {
+      break
+    }
+
+    // await page.screenshot({ animations: 'disabled', path: debugPath })
+    const screenshotBuffer = await screenshot(page)
+    if (screenshotBuffer) {
+      const debugPath = path.join(process.cwd(), 'debug', `${config.workerId}_worker_chat.png`)
+      await fs.promises.writeFile(debugPath, screenshotBuffer)
+    }
+    await page.waitForTimeout(5000)
+    await page.keyboard.press('Escape')
+
+    attempts++
+  }
 
   const appId = await page.evaluate(() => window.__sbAppId)
 
