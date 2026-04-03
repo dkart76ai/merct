@@ -46,230 +46,6 @@ export class BrowserHandler {
     return screenshotBuffer
   }
 
-  async closeScreen(times = 40, delay = 2500, captureScreenshotForDebug = false) {
-    console.log(
-      `[${this.config.workerId}] Found close button... sending escape to close the screen`
-    )
-    let attempts = times
-    while (attempts-- > 0) {
-      // const screenshotBuffer = await this.page.screenshot({ animations: 'disabled' })
-      const screenshotBuffer = await this.screenshot()
-
-      if (captureScreenshotForDebug) {
-        const debugPath = path.join(
-          process.cwd(),
-          'debug',
-          `${this.config.workerId}_4_debug_closing.png`
-        )
-        await fs.writeFile(debugPath, screenshotBuffer)
-        console.log(
-          `[${this.config.workerId}] ⚠️ close button ${attempts} — debug screenshot saved to ${debugPath}`
-        )
-      }
-
-      const result = await this.imageProcessor.detectCloseButton(screenshotBuffer)
-      if (result.found) {
-        console.log(
-          `[${this.config.workerId}] Close button found at`,
-          result.x,
-          result.y,
-          `(${(result.confidence * 100).toFixed(1)}%)`
-        )
-        // await this.canvas.click({ position: { x: result.x, y: result.y } })
-        await this.page.keyboard.press('Escape')
-
-        await this.page.waitForTimeout(delay)
-        break
-      } else {
-        await this.page.waitForTimeout(delay)
-      }
-    }
-  }
-
-  async waitForSplashLoading(times = 800, delay = 1500, captureScreenshotForDebug = false) {
-    console.log(`[${this.config.workerId}] Checking splash screen... `)
-    let attempts = times
-    // while (attempts-- > 0) {
-    while (!!this.context) {
-      //wait until splashscreen is gone
-      // const screenshotBuffer = await this.page.screenshot({ animations: 'disabled' })
-      const screenshotBuffer = await this.screenshot()
-
-      if (captureScreenshotForDebug) {
-        const debugPath = path.join(
-          process.cwd(),
-          'debug',
-          `${this.config.workerId}_1_debug_splash_loading.png`
-        )
-        await fs.writeFile(debugPath, screenshotBuffer)
-        console.log(
-          `[${this.config.workerId}] ⚠️ splash screen ${attempts}— debug screenshot saved to ${debugPath}`
-        )
-      }
-
-      let isLoginScreen = false
-      const loginInput = this.page.getByRole('textbox', { name: 'E-mail' })
-      if (await loginInput.isVisible({ timeout: 5000 })) {
-        isLoginScreen = true
-      }
-
-      const result = await this.imageProcessor.detectSplashLoading(screenshotBuffer)
-      if (result.found && !isLoginScreen) {
-        console.log(
-          `[${this.config.workerId}] splash screen found at`,
-          result.x,
-          result.y,
-          `(${(result.confidence * 100).toFixed(1)}%)`,
-          '...waiting'
-        )
-
-        await this.page.waitForTimeout(delay)
-      } else {
-        break
-      }
-    }
-  }
-
-  async waitForLoading(times = 400, delay = 1000, captureScreenshotForDebug = false) {
-    console.log(`[${this.config.workerId}] Checking loading screen... `)
-    let attempts = times
-    // while (attempts-- > 0) {
-    while (!!this.context) {
-      //waits until loading (AD) screen is gone
-      // const screenshotBuffer = await this.page.screenshot({ animations: 'disabled' })
-      const screenshotBuffer = await this.screenshot()
-
-      if (captureScreenshotForDebug) {
-        const debugPath = path.join(
-          process.cwd(),
-          'debug',
-          `${this.config.workerId}_3_debug_loading.png`
-        )
-        await fs.writeFile(debugPath, screenshotBuffer)
-        console.log(
-          `[${this.config.workerId}] ⚠️ loading screen ${attempts}— debug screenshot saved to ${debugPath}`
-        )
-      }
-
-      const result = await this.imageProcessor.detectLoading(screenshotBuffer)
-      if (result.found) {
-        console.log(
-          `[${this.config.workerId}] loading screen found at`,
-          result.x,
-          result.y,
-          `(${(result.confidence * 100).toFixed(1)}%)`,
-          '...waiting'
-        )
-
-        await this.page.waitForTimeout(delay)
-      } else {
-        break
-      }
-    }
-  }
-
-  async closeVerifyAccount(captureScreenshotForDebug = false) {
-    console.log(`[${this.config.workerId}] checking verify account window...`)
-    // const screenshotBuffer = await this.page.screenshot({ animations: 'disabled' })
-    const screenshotBuffer = await this.screenshot()
-
-    if (captureScreenshotForDebug) {
-      const debugPath = path.join(
-        process.cwd(),
-        'debug',
-        `${this.config.workerId}_5_debug_verify_account.png`
-      )
-      await fs.writeFile(debugPath, screenshotBuffer)
-      console.log(
-        `[${this.config.workerId}] ⚠️ verify account window — debug screenshot saved to ${debugPath}`
-      )
-    }
-
-    const result = await this.imageProcessor.detectVerifyAccount(screenshotBuffer)
-    if (result.found) {
-      console.log(
-        `[${this.config.workerId}] Verify account (reject button ${i}) found at`,
-        result.x,
-        result.y,
-        `(${(result.confidence * 100).toFixed(1)}%)`
-      )
-      // await this.page.mouse.move(result.x, result.y)
-
-      await this.page.mouse.click(result.x, result.y)
-      // await this.canvas.click({ position: { x: result.x, y: result.y }, force: true }) //581, 572
-
-      await this.page.waitForTimeout(4000)
-    }
-
-    await this.page.keyboard.press('Escape')
-
-    const screenshotBuffer2 = await this.screenshot()
-
-    if (captureScreenshotForDebug) {
-      const debugPath = path.join(
-        process.cwd(),
-        'debug',
-        `${this.config.workerId}_5_debug_verify_account_after.png`
-      )
-      await fs.writeFile(debugPath, screenshotBuffer2)
-      console.log(
-        `[${this.config.workerId}] ⚠️ verify account window — debug screenshot saved to ${debugPath}`
-      )
-    }
-  }
-
-  async openWorldMap(captureScreenshotForDebug = false) {
-    console.log(`[${this.config.workerId}] Opening world map...`)
-    // const screenshotBuffer = await this.page.screenshot({ animations: 'disabled' })
-    const screenshotBuffer = await this.screenshot()
-
-    if (captureScreenshotForDebug) {
-      const debugPath = path.join(
-        process.cwd(),
-        'debug',
-        `${this.config.workerId}_6_debug_worldmap.png`
-      )
-      await fs.writeFile(debugPath, screenshotBuffer)
-      console.log(
-        `[${this.config.workerId}] ⚠️ World map button  — debug screenshot saved to ${debugPath}`
-      )
-    }
-
-    let result = { found: false }
-
-    while (!!this.context) {
-      result = await this.imageProcessor.detectMapaButton(screenshotBuffer)
-      if (result.found) {
-        console.log(
-          `[${this.config.workerId}] World map button found at`,
-          result.x,
-          result.y,
-          `(${(result.confidence * 100).toFixed(1)}%)`
-        )
-
-        await this.page.mouse.click(result.x, result.y)
-
-        await this.page.waitForTimeout(3500)
-
-        if (captureScreenshotForDebug) {
-          const screenshotBuffer2 = await this.screenshot()
-          const debugPath = path.join(
-            process.cwd(),
-            'debug',
-            `${this.config.workerId}_6_debug_worldmap_after.png`
-          )
-          await fs.writeFile(debugPath, screenshotBuffer2)
-          console.log(
-            `[${this.config.workerId}] ⚠️ World map button  — debug screenshot saved to ${debugPath}`
-          )
-        }
-        break
-      }
-    }
-
-    return result
-  }
-
   async zoomingIn(captureScreenshotForDebug = false) {
     console.log(`[${this.config.workerId}] zooming in ...`)
     // const screenshotBuffer = await this.page.screenshot({ animations: 'disabled' })
@@ -406,45 +182,35 @@ export class BrowserHandler {
     return result
   }
 
-  async initialize() {
-    const options = {
-      screen: { width: 1360, height: 1024 },
-      viewport: { width: 1360, height: 1024 },
-      deviceScaleFactor: 1,
-      userAgent:
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36',
-      extraHTTPHeaders: {
-        'Accept-Language': 'en-US,en;q=0.9',
-        'sec-ch-ua': '"Chromium";v="125", "Not(A:Brand";v="99", "Google Chrome";v="125"' // Remove "HeadlessChrome"
-      }
-    }
+  async detectCurrentState(screenshotBuffer) {
+    const [splash, loading, closeBtn, verifyAccount, mapaButton, cityButton, loginInput] =
+      await Promise.all([
+        this.imageProcessor.detectSplashLoading(screenshotBuffer),
+        this.imageProcessor.detectLoading(screenshotBuffer),
+        this.imageProcessor.detectCloseButton(screenshotBuffer),
+        this.imageProcessor.detectVerifyAccount(screenshotBuffer),
+        this.imageProcessor.detectMapaButton(screenshotBuffer),
+        this.imageProcessor.detectCityButton(screenshotBuffer),
 
-    const authPath = path.join(process.cwd(), 'auth', this.config.accountFile)
-    if (await this.fileExists(authPath)) {
-      options.storageState = authPath
-    }
+        this.page
+          .getByRole('textbox', { name: 'E-mail' })
+          .isVisible({ timeout: 500 })
+          .catch(() => false)
+      ])
 
-    this.context = await this.browser.newContext(options)
-    this.page = await this.context.newPage()
-    await this.context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    if (splash.found) return { state: 'SPLASH', ...splash }
+    if (loginInput) return { state: 'LOGIN', ...loginInput }
 
-    // Forward browser console to Node.js stdout
-    this.page.on('console', msg => {
-      const text = msg.text()
-      if (text.startsWith('MIO:')) {
-        console.log(`[${this.config.workerId}] [browser] ${text}`)
-      }
-    })
+    // if (loading.found)     return{state: 'LOADING',...loading}
+    if (closeBtn.found) return { state: 'CLOSE', ...closeBtn }
+    if (verifyAccount.found) return { state: 'VERIFY_ACCOUNT', ...verifyAccount }
+    if (mapaButton.found) return { state: 'MAPA', ...mapaButton }
+    if (cityButton.found) return { state: 'CITY', ...cityButton }
 
-    // Block resources to speed up loading
-    // await this.page.route('**/*.{png,jpg,jpeg,gif,webp,svg,woff,pdf,mp4}', route => route.abort())
-    await this.page.route('**/*.{woff,woff2,pdf,mp4}', route => route.abort())
+    return { state: 'UNKNOWN', found: false }
+  }
 
-    console.log(`[${this.config.workerId}] Loading game...`)
-    await this.page.goto('https://totalbattle.com/es', { timeout: 70000 })
-    await this.page.waitForTimeout(60000) //splash screen
-    await this.waitForSplashLoading(800, 1500, DEBUG)
-
+  async handleLogin() {
     // Handle login if needed
     const loginInput = this.page.getByRole('textbox', { name: 'E-mail' })
     if (await loginInput.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -520,59 +286,146 @@ export class BrowserHandler {
 
       await this.context.storageState({ path: authPath })
     }
+  }
 
-    console.log(`[${this.config.workerId}] Waiting for Unity to load...`)
-    await this.page.waitForTimeout(10000) // Wait for Unity to load, shopping ads
+  async handleVerifyAccount(result) {
+    console.log(
+      `[${this.config.workerId}] Verify account (reject button) found at`,
+      result.x,
+      result.y,
+      `(${(result.confidence * 100).toFixed(1)}%)`
+    )
+    await this.page.mouse.click(result.x, result.y)
+    await this.page.waitForTimeout(1000)
+  }
+
+  async handleMapa(result) {
+    console.log(
+      `[${this.config.workerId}] World map button found at`,
+      result.x,
+      result.y,
+      `(${(result.confidence * 100).toFixed(1)}%)`
+    )
+
+    await this.page.mouse.click(result.x, result.y)
+
+    await this.page.waitForTimeout(3500)
+  }
+
+  async waitForState(
+    targetState,
+    timeout = 1000 * 60 * 20 /*20 minutes */,
+    captureScreenshotForDebug = false
+  ) {
+    const start = Date.now()
+    while (Date.now() - start < timeout) {
+      const screenshot = await this.screenshot()
+      const state = await this.detectCurrentState(screenshot)
+      console.log(
+        `[${this.config.workerId}] State: ${state.state} (${(state.confidence * 100).toFixed(1)}%)`
+      )
+
+      if (captureScreenshotForDebug) {
+        const debugPath = path.join(
+          process.cwd(),
+          'debug',
+          `${this.config.workerId}_${state.state}.png`
+        )
+        await fs.writeFile(debugPath, screenshot)
+        console.log(
+          `[${this.config.workerId}] ⚠️ ${state.state} — debug screenshot saved to ${debugPath}`
+        )
+      }
+
+      switch (state.state) {
+        case 'SPLASH':
+          await this.page.waitForTimeout(1000)
+          break
+        case 'LOGIN':
+          // if (targetState === 'LOGIN') return state
+          await this.handleLogin()
+          break
+
+        case 'LOADING':
+          await this.page.waitForTimeout(1000)
+          break
+        case 'CLOSE':
+          console.log(
+            `[${this.config.workerId}] Close button found at`,
+            state.x,
+            state.y,
+            `(${(state.confidence * 100).toFixed(1)}%)`
+          )
+          await this.page.keyboard.press('Escape')
+          await this.page.waitForTimeout(500)
+          break
+        case 'VERIFY_ACCOUNT':
+          // if (targetState === 'VERIFY_ACCOUNT') return state
+          await this.handleVerifyAccount(state)
+          break
+        case 'MAPA':
+          // if (targetState === 'MAPA') return state
+          await this.handleMapa(state)
+          break
+        case 'CITY':
+          if (targetState === 'CITY') return state
+          break
+      }
+
+      if (state.state === targetState) return state
+      await this.page.waitForTimeout(500)
+      await this.clearPopups()
+    }
+    throw new Error(`Timeout waiting for state: ${targetState}`)
+  }
+
+  async initialize() {
+    const options = {
+      screen: { width: 1360, height: 1024 },
+      viewport: { width: 1360, height: 1024 },
+      deviceScaleFactor: 1,
+      userAgent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36',
+      extraHTTPHeaders: {
+        'Accept-Language': 'en-US,en;q=0.9',
+        'sec-ch-ua': '"Chromium";v="125", "Not(A:Brand";v="99", "Google Chrome";v="125"' // Remove "HeadlessChrome"
+      }
+    }
+
+    const authPath = path.join(process.cwd(), 'auth', this.config.accountFile)
+    if (await this.fileExists(authPath)) {
+      options.storageState = authPath
+    }
+
+    this.context = await this.browser.newContext(options)
+    this.page = await this.context.newPage()
+    await this.context.grantPermissions(['clipboard-read', 'clipboard-write'])
+
+    // Forward browser console to Node.js stdout
+    this.page.on('console', msg => {
+      const text = msg.text()
+      if (text.startsWith('MIO:')) {
+        console.log(`[${this.config.workerId}] [browser] ${text}`)
+      }
+    })
+
+    // Block resources to speed up loading
+    // await this.page.route('**/*.{png,jpg,jpeg,gif,webp,svg,woff,pdf,mp4}', route => route.abort())
+    await this.page.route('**/*.{woff,woff2,pdf,mp4}', route => route.abort())
+
+    console.log(`[${this.config.workerId}] Loading game...`)
+    await this.page.goto('https://totalbattle.com/es', { timeout: 70000 })
+    await this.page.waitForTimeout(60000) //splash screen
+
+    const state = await this.waitForState('CITY', 1000 * 60 * 20 /*20 minutes */, DEBUG)
+
     this.canvas = this.page.locator('canvas')
 
-    await this.waitForLoading(400, 1000, DEBUG)
-
-    // Clear popups
-    await this.page.waitForTimeout(2000)
-    await this.closeScreen(100, 2500, DEBUG)
-    await this.page.waitForTimeout(8000)
-    await this.closeVerifyAccount(DEBUG)
-    await this.page.waitForTimeout(2000)
-    await this.clearPopups()
-    await this.openWorldMap(DEBUG)
-    await this.page.waitForTimeout(10000)
-
-    // when first login, loading bar and close button appear
-    // if gaming for a while, log back and forth to city/worldmap it wont appear
-    await this.closeScreen(50, 2000, DEBUG)
     await this.clearPopups()
     await this.page.waitForTimeout(2000)
+
     await this.zoomingIn(DEBUG)
     await this.page.waitForTimeout(2000)
-
-    // monitor for waiting delay
-    // await this.page.evaluate(() => {
-    //   window.unityStatus = {
-    //     isStable: false,
-    //     frameHistory: [],
-    //     lastTime: performance.now()
-    //   }
-
-    //   function checkStability(currentTime) {
-    //     const delta = currentTime - window.unityStatus.lastTime
-    //     window.unityStatus.lastTime = currentTime
-
-    //     // Guardamos los últimos 10 deltas de tiempo
-    //     window.unityStatus.frameHistory.push(delta)
-    //     if (window.unityStatus.frameHistory.length > 10) window.unityStatus.frameHistory.shift()
-
-    //     // Calculamos el promedio de los últimos 10 frames
-    //     const avg = window.unityStatus.frameHistory.reduce((a, b) => a + b, 0) / 10
-
-    //     // ESTABILIDAD: Si la diferencia entre el frame actual y el promedio es mínima (< 2ms)
-    //     // y tenemos suficientes frames para promediar.
-    //     window.unityStatus.isStable =
-    //       window.unityStatus.frameHistory.length === 10 && Math.abs(delta - avg) < 2
-
-    //     requestAnimationFrame(checkStability)
-    //   }
-    //   requestAnimationFrame(checkStability)
-    // })
 
     this.isInitialized = true
     console.log(`[${this.config.workerId}] ✅ Browser initialized and ready`)
@@ -602,22 +455,7 @@ export class BrowserHandler {
       throw new Error('Browser not initialized')
     }
 
-    // Clear any popups, takes 1.5 seconds average
     let start = Date.now()
-    // for (let i = 0; i < 2; i++) {
-    //   await this.page.keyboard.press('Escape', { delay: 0 })
-    // }
-    // console.log(`[${this.config.workerId}] scanCoordinate:clearPopups took ${Date.now() - start}ms`)
-
-    // await this.page.waitForTimeout(10)
-
-    // A. Forzamos estado inestable antes del clic para evitar falsos positivos
-    // await this.page.evaluate(() => {
-    //   if (window.unityStatus) {
-    //     window.unityStatus.isStable = false
-    //     window.unityStatus.frameHistory = []
-    //   }
-    // })
 
     // Open search (magnifying glass)
     // await this.page.mouse.click(95, 787)
@@ -625,41 +463,6 @@ export class BrowserHandler {
     await this.page.waitForTimeout(200)
     console.log(`[${this.config.workerId}] scanCoordinate:search opened`)
 
-    // try {
-    //   const debugPath0 = path.join(
-    //     process.cwd(),
-    //     'debug',
-    //     `${this.config.workerId}_after_search_open.png`
-    //   )
-    //   await this.page.screenshot({
-    //     path: debugPath0,
-    //     clip: { x: 95, y: 787, width: 40, height: 40 }
-    //   })
-    //   console.log(`[${this.config.workerId}] screenshot saved: ${debugPath0}`)
-    // } catch (e) {
-    //   console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
-    // }
-
-    // Enter coordinates
-    // const inputs = [
-    //   { x: 546, val: 123 },
-    //   { x: 536, val: 111 },
-    //   { x: 636, val: 222 }
-    // ]
-
-    /*
-    window.gameInstance.Module.SendMessage(
-      'UnityBrowserApi',
-      'Receive',
-      JSON.stringify({ method: 'pasteClipboardContent', params: { content: '222' } })
-    )
- gameObject: UnityBrowserApi
- func: Receive
- param: {"method":"pasteClipboardContent","params":{"content":"123"}}
- paramType: string
- ---
-
-*/
     start = Date.now()
     const KCoordPosition = await this.getKCoordPosition(DEBUG)
     if (KCoordPosition.found) {
@@ -704,14 +507,7 @@ export class BrowserHandler {
       await this.inputData(y) // K
       // await this.page.waitForTimeout(30)
 
-      // for (const input of inputs) {
-      //   await this.page.mouse.click(input.x, 486)
-      //   for (let i = 0; i < 4; i++) await this.page.keyboard.press('Backspace', { delay: 0 })
-      //   await this.page.evaluate(t => navigator.clipboard.writeText(t), input.val.toString())
-      //   await this.page.keyboard.press('Control+V')
-      // }
       console.log(`[${this.config.workerId}] scanCoordinate:inputs took ${Date.now() - start}ms`)
-      // process.stdout.write('')
 
       if (DEBUG) {
         try {
@@ -727,68 +523,69 @@ export class BrowserHandler {
       start = Date.now()
 
       await this.page.mouse.click(KCoordPosition.x + 138, KCoordPosition.y + 45) //680, 526)
+
+      await this.page.waitForTimeout(10000) // Wait for camera to move
+
+      console.log(`[${this.config.workerId}] scanCoordinate:go button took ${Date.now() - start}ms`)
+
+      start = Date.now()
+      const screenshotBuffer = await this.screenshot()
+
+      this.lastScreenshot = screenshotBuffer
+
+      if (DEBUG) {
+        try {
+          const debugPath = path.join(
+            process.cwd(),
+            'debug',
+            `${this.config.workerId}_after_inputsAndGo.png`
+          )
+
+          await fs.writeFile(debugPath, screenshotBuffer)
+          console.log(
+            `[${this.config.workerId}] ⚠️  scanCoordinate — debug screenshot saved to ${debugPath}`
+          )
+        } catch (e) {
+          console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
+        }
+      }
+
+      // Process with OpenCV
+      const resultMerc = await this.imageProcessor.detectMercenario(screenshotBuffer)
+      console.log(
+        `[${this.config.workerId}] scanCoordinate:detectMercenario took ${Date.now() - start}ms`
+      )
+
+      // if merc found on screeen, move mouse to that position, to capture game coordinates from bottom left,
+      // and convert with OCR to coordinates
+      if (resultMerc.found) {
+        await this.page.mouse.move(resultMerc.x, resultMerc.y)
+        await this.page.waitForTimeout(200) // Wait for camera to move
+
+        //TODO: remove this screenshot (2 lines)
+        const debugPath = path.join(
+          process.cwd(),
+          'debug',
+          `${this.config.workerId}_merc_found.png`
+        )
+        await this.page.screenshot({ path: debugPath })
+
+        // use tesseract to get coordinates from bottom left of screenshot
+        start = Date.now()
+        const ocrResult = await this.imageProcessor.detectCoordinates(
+          screenshotBuffer,
+          this.page.viewportSize()
+        )
+        console.log(
+          `[${this.config.workerId}] scanCoordinate:OCRCoordinates took ${Date.now() - start}ms`
+        )
+
+        resultMerc.text = ocrResult?.trim() ?? ''
+      }
+      return resultMerc
     } else {
       console.log(`[${this.config.workerId}] no inputs found:`)
     }
-
-    await this.page.waitForTimeout(1000) // Wait for camera to move
-
-    // C. ESPERA CRÍTICA:
-    // Esperamos a que 'isStable' sea TRUE.
-    // Playwright consultará este valor en el contexto del navegador.
-    // await this.page.waitForFunction(
-    //   () => !window.unityStatus || window.unityStatus.isStable === true,
-    //   {
-    //     timeout: 30000,
-    //     polling: 'raf' // Esto hace que Playwright chequee sincronizado con el renderizado
-    //   }
-    // )
-    console.log(`[${this.config.workerId}] scanCoordinate:go button took ${Date.now() - start}ms`)
-
-    if (DEBUG) {
-      try {
-        await this.page.screenshot({
-          path: path.join(process.cwd(), 'debug', `${this.config.workerId}_after_inputsAndGo.png`)
-        })
-      } catch (e) {
-        console.error(`[${this.config.workerId}] screenshot failed:`, e.message)
-      }
-    }
-
-    start = Date.now()
-    const screenshotBuffer = await this.screenshot()
-
-    this.lastScreenshot = screenshotBuffer
-
-    // Process with OpenCV
-    const result = await this.imageProcessor.detectMercenario(screenshotBuffer)
-    console.log(
-      `[${this.config.workerId}] scanCoordinate:detectMercenario took ${Date.now() - start}ms`
-    )
-
-    // if merc found on screeen, move mouse to that position, to capture game coordinates from bottom left,
-    // and convert with OCR to coordinates
-    if (result.found) {
-      await this.page.mouse.move(result.x, result.y)
-      await this.page.waitForTimeout(200) // Wait for camera to move
-
-      //TODO: remove this screenshot (2 lines)
-      const debugPath = path.join(process.cwd(), 'debug', `${this.config.workerId}_merc_found.png`)
-      await this.page.screenshot({ path: debugPath })
-
-      // use tesseract to get coordinates from bottom left of screenshot
-      start = Date.now()
-      const ocrResult = await this.imageProcessor.detectCoordinates(
-        screenshotBuffer,
-        this.page.viewportSize()
-      )
-      console.log(
-        `[${this.config.workerId}] scanCoordinate:OCRCoordinates took ${Date.now() - start}ms`
-      )
-
-      result.text = ocrResult?.trim() ?? ''
-    }
-    return result
   }
 
   async reinitialize() {

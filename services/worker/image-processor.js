@@ -27,9 +27,10 @@ export class ImageProcessor {
     const mercPath = path.join(process.cwd(), 'assets', 'mercenary2.png')
     // const mercPath = path.join(process.cwd(), 'assets', 'citadel.png')
     const mapaPath = path.join(process.cwd(), 'assets', 'mapaButton.png')
+    const cityPath = path.join(process.cwd(), 'assets', 'cityButton.png')
     const closePath = path.join(process.cwd(), 'assets', 'closeButton.png')
     const loadingPath = path.join(process.cwd(), 'assets', 'loading.png')
-    const splashLoadingPath = path.join(process.cwd(), 'assets', 'splashLoading.png')
+    const splashLoadingPath = path.join(process.cwd(), 'assets', 'splashLoading0.png')
     const verifyAccountPath = path.join(process.cwd(), 'assets', 'rejectButton.png')
     const zoomInPath = path.join(process.cwd(), 'assets', 'zoomInButton.png')
 
@@ -38,6 +39,7 @@ export class ImageProcessor {
     const [
       mercBuf,
       mapaBuf,
+      cityBuf,
       closeBuf,
       loadingBuf,
       splashLoadingBuf,
@@ -51,6 +53,9 @@ export class ImageProcessor {
       }),
       readFile(mapaPath).catch(() => {
         throw new Error('Missing asset: ' + mapaPath)
+      }),
+      readFile(cityPath).catch(() => {
+        throw new Error('Missing asset: ' + cityPath)
       }),
       readFile(closePath).catch(() => {
         throw new Error('Missing asset: ' + closePath)
@@ -77,6 +82,7 @@ export class ImageProcessor {
 
     this.mercTemplateBuffer = Array.from(mercBuf)
     this.mapaButtonTemplateBuffer = Array.from(mapaBuf)
+    this.cityButtonTemplateBuffer = Array.from(cityBuf)
     this.closeButtonTemplateBuffer = Array.from(closeBuf)
     this.loadingTemplateBuffer = Array.from(loadingBuf)
     this.splashLoadingTemplateBuffer = Array.from(splashLoadingBuf)
@@ -235,6 +241,26 @@ export class ImageProcessor {
       const result = await this.pool.exec('detectarElementoUnity', [
         Array.from(screenshotBuffer),
         this.mapaButtonTemplateBuffer,
+        0.8
+      ])
+      return {
+        found: result.encontrado,
+        confidence: result.confianza,
+        x: result.x || null,
+        y: result.y || null
+      }
+    } catch (error) {
+      console.error('Error in image processing:', error.message)
+      return { found: false, confidence: 0 }
+    }
+  }
+
+  async detectCityButton(screenshotBuffer) {
+    if (!this.initialized) await this.initialize()
+    try {
+      const result = await this.pool.exec('detectarElementoUnity', [
+        Array.from(screenshotBuffer),
+        this.cityButtonTemplateBuffer,
         0.8
       ])
       return {
