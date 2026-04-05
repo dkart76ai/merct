@@ -28,3 +28,18 @@ export function generateCoordinates() {
   }
   return coordinates
 }
+
+// generates valid tile coordinates for direct HTTP scanning
+// follows the offset grid: odd x → odd y, even x → even y
+export function generateTileCoordinates() {
+  const coordinates = []
+  for (const k of KINGDOMS) {
+    for (let x = 10; x < 990; x += 2) {
+      const yStart = (x % 2 === 0) ? 10 : 11
+      for (let y = yStart; y < 990; y += 4) {
+        coordinates.push({ k, x, y })
+      }
+    }
+  }
+  return coordinates
+}
