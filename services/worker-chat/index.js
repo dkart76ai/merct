@@ -37,14 +37,18 @@ async function fileExists(filePath) {
 
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK || ''
 
-async function notifyDiscord(k, x, y, texto) {
+async function notifyDiscord( texto='',coord=null) {
   if (!DISCORD_WEBHOOK) return
   try {
+    let message = texto
+    if(coord){
+      message=`K:${coord.k} X:${coord.x} Y:${coord.y} (${texto})`
+    }
     await fetch(DISCORD_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        content: ` K:${k} X:${x} Y:${y} (${texto})`
+        content: message
       })
     })
   } catch (error) {
@@ -105,34 +109,20 @@ async function initPage() {
     if (text.startsWith('MIO:')) console.log(`[${config.workerId}] [browser] ${text}`)
   })
 
-  // Capture Sendbird credentials from WebSocket
-  await page.addInitScript(() => {
-    const OriginalWS = window.WebSocket
-    window.WebSocket = class extends OriginalWS {
-      constructor(url, protocols) {
-        super(url, protocols)
-        if (url.includes('sendbird')) {
-          // capture appId from WebSocket URL: wss://ws-{APP_ID}.sendbird.com
-          if (!window.__sbAppId) {
-            const match = url.match(/ws-([a-f0-9\-]+)\.sendbird\.com/i)
-            if (match) {
-              window.__sbAppId = match[1].toUpperCase()
-              console.log('MIO: Sendbird App-ID captured:', window.__sbAppId)
-            }
-          }
-          this.addEventListener('message', event => {
-            if (event.data.startsWith('LOGI')) {
-              try {
-                const json = JSON.parse(event.data.slice(4))
-                if (json.user_id) window.__sbUserId = json.user_id
-                if (json.key) window.__sbSessionKey = json.key
-                console.log('MIO: LOGI captured userId:', json.user_id)
-                console.log('MIO: LOGI captured sessionKey:', json.key)
-              } catch {}
-            }
-          })
-        }
-      }
+  // Patch Triumph.framework.js to expose SendBirdHelper globally
+  await page.route('**/Triumph.framework.js', async route => {
+    try {
+      const response = await route.fetch()
+      let body = await response.text()
+      body = body.replace(
+        'var SendBirdHelper = {',
+        'var SendBirdHelper = window.SendBirdHelper = {'
+      )
+      await route.fulfill({ response, body })
+      console.log(`[${config.workerId}] 🔧 Triumph.framework.js patched`)
+    } catch (e) {
+      console.error(`[${config.workerId}] Failed to patch framework:`, e.message)
+      await route.continue()
     }
   })
 
@@ -209,97 +199,87 @@ async function initPage() {
 
   await context.storageState({ path: authPath })
 
-  // Wait for Sendbird to connect and LOGI to be received
-  console.log(`[${config.workerId}] Waiting for Sendbird credentials...`)
-  // await page.waitForFunction(
-  //   () => !!window.__sbUserId && !!window.__sbSessionKey && !!window.__sbAppId,
-  //   { timeout: 60000 * 5 }
-  // )
-
-  let attempts = 0
-  const maxAttempts = 250 // Por ejemplo
-  while (attempts < maxAttempts) {
-    const [userId, appId, key] = await page.evaluate(() => [
-      window['__sbUserId'],
-      window['__sbAppId'],
-      window['__sbSessionKey']
-    ])
-
-    if (userId && appId && key) {
-      break
-    }
-
-    // await page.screenshot({ animations: 'disabled', path: debugPath })
-    const screenshotBuffer = await screenshot(page)
-    if (screenshotBuffer) {
-      const debugPath = path.join(process.cwd(), 'debug', `${config.workerId}_worker_chat.png`)
-      await fs.promises.writeFile(debugPath, screenshotBuffer)
-    }
-    await page.waitForTimeout(5000)
-    await page.keyboard.press('Escape')
-
-    attempts++
-  }
-
-  const appId = await page.evaluate(() => window.__sbAppId)
-
-  console.log(`[${config.workerId}] ✅ Sendbird credentials captured`)
-
-  // Initialize Sendbird SDK once
-  await page.evaluate(async () => {
-    const sb = WebglSendbirdApi.SendbirdChat.init({
-      appId: window.__sbAppId,
-      modules: [new WebglSendbirdApi.GroupChannelModule()]
-    })
-
-    //list all channels the user have access to
-    const query = sb.groupChannel.createMyGroupChannelListQuery()
-    const channels = await query.next()
-    console.log('MIO: available chat channels')
-    channels.forEach(c => console.log(`Nombre: ${c.name} | URL: ${c.url}`))
-
-    await sb.connect(window.__sbUserId, window.__sbSessionKey)
-    window.__sb = sb
-    console.log('MIO: Sendbird SDK initialized and connected')
-    console.log(`config: 💬
-     sbAppId:${window.__sbAppId}
-     sbUserId:${window.__sbUserId}
-     sbSessionKey:${window.__sbSessionKey}`)
-  })
-
-  await sendMessage(100, 200, 300)
-  await notifyDiscord(100, 200, 300, 'Prueba de notificacion')
+  // Wait for SendBirdHelper to be ready (game initializes it on login)
+  console.log(`[${config.workerId}] Waiting for SendBirdHelper...`)
+  await page.waitForFunction(() => !!window.SendBirdHelper?.sb, { timeout: 120000 })
+  console.log(`[${config.workerId}] SendBirdHelper ready`)
+  await sendMessage('hello')
+  await notifyDiscord(  'olleh')
   return { appId }
 }
 
-async function sendMessage(k, x, y) {
+/*
+MESG{"channel_url":"sendbird_group_channel_410194735_97bcbeb14fc041a2c9c680d4983eb9c9606b3bf2",
+"message":"Deyernus: /%0%/",
+"data":"{\"subs\":{\"/%0%/\":{\"type\":\"coord\",
+\"entryType\":\"poi\",
+\"x\":200,
+\"y\":300,
+\"realmId\":100
+\"staticId\":400
+\"name\":\"Mercenary Exchange\"
+\"v\":1}}}"
+"custom_type":"user"
+"mention_type":"users"
+"mentioned_user_ids":[],
+"reply_to_channel":false,
+"req_id":"rq-c50a20e6-216f-40fc-b1cf-54fc6ceb64d2",
+"pin_message":false}
+
+
+MESG{"channel_url":"sendbird_group_channel_410194735_97bcbeb14fc041a2c9c680d4983eb9c9606b3bf2",
+"message":"asdf",
+"data":"",
+"custom_type":"user",
+"mention_type":"users",
+"mentioned_user_ids":[],
+"reply_to_channel":false,
+"req_id":"rq-d660ef43-0a41-4bba-8592-17d69c4b680a",
+"pin_message":false}
+
+
+*/
+async function sendMessage(msg = '', coord = null) {
   const channelUrl = config.channelUrl
   if (!channelUrl) {
     console.log(`[${config.workerId}] ⚠️ No channel URL configured`)
     return
   }
 
-  const data = JSON.stringify({
-    subs: {
-      '/%0%/': {
-        type: 'coord',
-        entryType: 'poi',
-        x,
-        y,
-        realmId: k,
-        staticId: 400,
-        name: 'Mercenary Exchange',
-        v: 1
+  let data = ''
+  let message = msg
+  if (coord) {
+    data = JSON.stringify({
+      subs: {
+        '/%0%/': {
+          type: 'coord',
+          entryType: 'poi',
+          coord.x,
+          coord.y,
+          realmId: coord.k,
+          staticId: 400,
+          name: 'Mercenary Exchange',
+          v: 1
+        }
       }
-    }
-  })
+    })
+    message = '/%0%/'
+  }
 
   const result = await page.evaluate(
-    async ({ channelUrl, data }) => {
+    async ({ channelUrl, data,message }) => {
       try {
-        const channel = await window.__sb.groupChannel.getChannel(channelUrl)
+        // use game's own SendBirdHelper — no new connection needed
+        if (!window.SendBirdHelper?.sb) {
+          return { success: false, error: 'SendBirdHelper not ready' }
+        }
+        // find channel in existing list or fetch it
+        let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
+        if (!channel) {
+          channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
+        }
         const msg = await channel.sendUserMessage({
-          message: '/%0%/',
+          message,
           customType: 'user',
           data
         })
@@ -308,7 +288,7 @@ async function sendMessage(k, x, y) {
         return { success: false, error: e.message }
       }
     },
-    { channelUrl, data }
+    { channelUrl, data, message }
   )
 
   console.log(`[${config.workerId}] 💬 Message sent K:${k} X:${x} Y:${y}`, result)
@@ -325,8 +305,8 @@ async function run() {
     console.log(`[${config.workerId}] 📤 Sending chat for K:${k} X:${x} Y:${y} - ${text}`)
 
     try {
-      await sendMessage(k, x, y)
-      await notifyDiscord(k, x, y, text)
+      await sendMessage('',{k, x, y})
+      await notifyDiscord(text,{k, x, y})
     } catch (error) {
       console.error(`[${config.workerId}] ❌ Failed to send:`, error.message)
     }
