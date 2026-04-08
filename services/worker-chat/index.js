@@ -205,7 +205,6 @@ async function initPage() {
   console.log(`[${config.workerId}] SendBirdHelper ready`)
   await sendMessage('hello')
   await notifyDiscord('olleh')
-  return { appId }
 }
 
 /*
@@ -273,6 +272,11 @@ async function sendMessage(msg = '', coord = null) {
         if (!window.SendBirdHelper?.sb) {
           return { success: false, error: 'SendBirdHelper not ready' }
         }
+        const state = window.SendBirdHelper?.sb.connectionState
+        if (state !== 'OPEN') {
+          return { success: false, error: 'SendBirdHelper not ready', state }
+        }
+
         // find channel in existing list or fetch it
         let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
         if (!channel) {
