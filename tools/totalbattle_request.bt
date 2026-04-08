@@ -1,0 +1,97 @@
+//------------------------------------------------
+//---    010 Editor v16.0 Binary Template
+//
+//      File: TotalBattle Request Payload
+//   Authors: AI Assistant
+//   Version: 6.0
+//   Purpose: Parse Total Battle tile scanner request payloads
+//            with complete msgpack structure decoding
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct {
+    uint32 totalSize;
+    uint32 baseMsgpackSize;
+} Header <bgcolor=cLtGray>;
+
+typedef struct {
+    byte marker;
+    uint16 value;
+} UInt16Field <bgcolor=cLtCyan>;
+
+typedef struct {
+    byte marker;
+    uint64 value;
+} UInt64Field <bgcolor=cLtYellow>;
+
+typedef struct {
+    byte marker;
+    byte length;
+    byte data[length];
+} Bin8Field <bgcolor=cLtGreen>;
+
+typedef struct {
+    byte marker;
+    UInt64Field staticId;
+} FixArray1_UInt64 <bgcolor=cLtYellow>;
+
+typedef struct {
+    FixArray1_UInt64 staticIdArray;
+    Bin8Field token;
+} SessionInfo <bgcolor=cLtMagenta>;
+
+typedef struct {
+    byte fixarray4_marker;
+    UInt16Field viewX;
+    UInt16Field viewY;
+    byte fixarray2_marker;
+    SessionInfo session;
+    byte emptyStr_marker;
+} BaseRequest <bgcolor=cLtBlue>;
+
+typedef struct {
+    byte fixarray1_marker;
+    UInt64Field tileId;
+    byte uint32_marker;
+    uint32 version;
+} TileCacheEntry <bgcolor=cLtYellow>;
+
+typedef struct {
+    byte fixarrayN_marker;
+    TileCacheEntry entries[];
+} ExtraData <bgcolor=cLtYellow>;
+
+// Main structure
+Header header;
+BaseRequest request;
+
+// Parse extra tile cache if present
+uint32 extraSize = header.totalSize - 8 - header.baseMsgpackSize;
+if (extraSize > 0) {
+    ExtraData extra;
+}
+
+// Display info
+Printf("\n=== TotalBattle Request ===\n");
+Printf("Total size: %d bytes\n", header.totalSize);
+Printf("Base msgpack size: %d bytes\n", header.baseMsgpackSize);
+Printf("Extra data size: %d bytes\n", extraSize);
+Printf("\nviewX: %d\n", request.viewX.value);
+Printf("viewY: %d\n", request.viewY.value);
+Printf("staticId: %llu\n", request.session.staticIdArray.staticId.value);
+Printf("Token: ");
+for (int i = 0; i < request.session.token.length; i++) {
+    Printf("%02x", request.session.token.data[i]);
+}
+Printf("\n");
+
+if (extraSize > 0) {
+    Printf("\nTile cache entries: %d\n", extra.entries.count);
+    for (int i = 0; i < extra.entries.count; i++) {
+        Printf("  [%d] tileId=%llu, version=%u\n", 
+               i, 
+               extra.entries[i].tileId.value, 
+               extra.entries[i].version);
+    }
+}

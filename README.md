@@ -51,3 +51,20 @@ To regenerate auth files, delete the corresponding `auth/user_N.json` and restar
 | POST | `/api/queue/clear` | Drain queue |
 | POST | `/api/mercenaries/clear` | Clear results list |
 # merct
+
+
+
+
+
+Usage:
+
+First load the msgpack library in browser console:
+
+var script = document.createElement('script');
+script.src = 'https://cdn.jsdelivr.net/npm/msgpack-lite/dist/msgpack.min.js';
+document.head.appendChild(script);
+
+
+
+Then paste packet-capture-v5.js
+The library handles all msgpack decoding properly - no custom decoder needed.
