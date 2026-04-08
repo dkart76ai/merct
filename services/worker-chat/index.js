@@ -37,12 +37,12 @@ async function fileExists(filePath) {
 
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK || ''
 
-async function notifyDiscord( texto='',coord=null) {
+async function notifyDiscord(texto = '', coord = null) {
   if (!DISCORD_WEBHOOK) return
   try {
     let message = texto
-    if(coord){
-      message=`K:${coord.k} X:${coord.x} Y:${coord.y} (${texto})`
+    if (coord) {
+      message = `K:${coord.k} X:${coord.x} Y:${coord.y} (${texto})`
     }
     await fetch(DISCORD_WEBHOOK, {
       method: 'POST',
@@ -204,7 +204,7 @@ async function initPage() {
   await page.waitForFunction(() => !!window.SendBirdHelper?.sb, { timeout: 120000 })
   console.log(`[${config.workerId}] SendBirdHelper ready`)
   await sendMessage('hello')
-  await notifyDiscord(  'olleh')
+  await notifyDiscord('olleh')
   return { appId }
 }
 
@@ -248,15 +248,15 @@ async function sendMessage(msg = '', coord = null) {
 
   let data = ''
   let message = msg
-  if (coord) {
+  if (!!coord) {
     data = JSON.stringify({
       subs: {
         '/%0%/': {
           type: 'coord',
           entryType: 'poi',
-          coord.x,
-          coord.y,
-          realmId: coord.k,
+          x: coord?.x ?? 0,
+          y: coord?.y ?? 0,
+          realmId: coord?.k ?? 0,
           staticId: 400,
           name: 'Mercenary Exchange',
           v: 1
@@ -267,7 +267,7 @@ async function sendMessage(msg = '', coord = null) {
   }
 
   const result = await page.evaluate(
-    async ({ channelUrl, data,message }) => {
+    async ({ channelUrl, data, message }) => {
       try {
         // use game's own SendBirdHelper — no new connection needed
         if (!window.SendBirdHelper?.sb) {
@@ -291,7 +291,7 @@ async function sendMessage(msg = '', coord = null) {
     { channelUrl, data, message }
   )
 
-  console.log(`[${config.workerId}] 💬 Message sent K:${k} X:${x} Y:${y}`, result)
+  console.log(`[${config.workerId}] 💬 Message sent `, result)
 }
 
 async function run() {
@@ -305,8 +305,8 @@ async function run() {
     console.log(`[${config.workerId}] 📤 Sending chat for K:${k} X:${x} Y:${y} - ${text}`)
 
     try {
-      await sendMessage('',{k, x, y})
-      await notifyDiscord(text,{k, x, y})
+      await sendMessage('', { k, x, y })
+      await notifyDiscord(text, { k, x, y })
     } catch (error) {
       console.error(`[${config.workerId}] ❌ Failed to send:`, error.message)
     }
