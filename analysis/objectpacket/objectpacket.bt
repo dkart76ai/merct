@@ -1,0 +1,162 @@
+// Total Battle Object Packet Template for 010 Editor
+// Version: 1.0
+// Author: Reverse Engineered
+// 
+// PACKET FORMAT:
+// - 8 byte header
+// - Msgpack data containing view coords + map objects
+// 
+// OBJECT PATTERN: 0x9c 0x91 0xcf (fixarray(12) containing object)
+// OBJECT SIZE: 33 bytes
+// 
+// staticId VALUES:
+//   400 = Mercenary
+//   133 = Resource node
+//   512 = Unknown
+//   1450+ = Buildings/Structures
+//   50000 = Special object
+//
+// COORDINATES: offset +23 (kingdom), +24 (x), +25 (y) from 0x9c marker
+
+// Force little-endian byte order
+LittleEndian();
+
+// ============================================
+// STRUCTURES
+// ============================================
+
+typedef struct {
+    uint32 packetSize;
+    uint32 flags;
+} PACKET_HEADER <comment="8-byte protocol header">;
+
+typedef struct {
+    uint64 objectId;
+} OBJECT_ID <comment="Unique object identifier">;
+
+typedef struct (int staticId) {
+    uint16 staticId;
+    byte unknown1;
+    byte unknown2;
+    byte unknown3;
+    byte level;
+    byte unknown5;
+    byte unknown6;
+    byte unknown7;
+    byte unknown8;
+} OBJECT_DATA <comment="Object type and level data">;
+
+typedef struct {
+    byte marker <hidden=true>;
+    byte kingdom;
+    byte x;
+    byte y;
+} COORDS <comment="Object coordinates [kingdom, x, y]">;
+
+typedef struct {
+    byte marker <hidden=true>;
+    byte value;
+} INNER_ARRAY <comment="Single byte array element">;
+
+// Complete map object (33 bytes)
+typedef struct {
+    // 0x9c = fixarray(12) - already at current position
+    byte array12_marker <hidden=true>;
+    
+    // Element 0: fixarray(1) containing objectId
+    byte array1_marker;
+    OBJECT_ID id;
+    
+    // Element 1: staticId (uint16 LE)
+    byte uint16_marker;
+    uint16 staticId;
+    
+    // Element 2-5: various bytes
+    byte f2;
+    byte f3;
+    byte f4;
+    byte level;
+    
+    // Element 6-9: more bytes
+    byte f6;
+    byte f7;
+    byte f8;
+    byte f9;
+    
+    // Element 10: coords [k, x, y]
+    byte coords_marker;
+    COORDS coords;
+    
+    // Element 11: single byte array
+    byte elem11_marker;
+    byte elem11_val;
+    
+    // Element 12: uint32 LE
+    byte uint32_marker;
+    uint32 extra;
+    
+    // Element 13: boolean
+    byte lastField;
+} MAP_OBJECT <comment="Complete map object (33 bytes)">;
+
+// ============================================
+// MAIN PARSE
+// ============================================
+
+Printf("===========================================\n");
+Printf("  Total Battle Object Packet Analyzer\n");
+Printf("===========================================\n\n");
+
+// Parse header
+PACKET_HEADER header;
+Printf("Packet Header: Size=%d, Flags=0x%08X\n\n", header.packetSize, header.flags);
+
+// View coordinates
+uint16 viewX;
+uint16 viewY;
+Printf("View Coords: X=%d, Y=%d\n\n", viewX, viewY);
+
+// Skip remaining header bytes until objects
+byte skip1, skip2, skip3;
+byte objectsArrayMarker;
+
+Printf("--- Scanning for Objects ---\n\n");
+
+// Find and parse all objects
+local int objectCount = 0;
+local int mercCount = 0;
+local quad objPos;
+local uint16 sid;
+
+while (FTell() < FileSize() - 33) {
+    // Look for object marker pattern: 0x9c 0x91 0xcf
+    if (ReadByte(FTell()) == 0x9c && 
+        ReadByte(FTell()+1) == 0x91 && 
+        ReadByte(FTell()+2) == 0xcf) {
+        
+        objPos = FTell();
+        sid = ReadUInt16(FTell()+12);
+        
+        MAP_OBJECT obj;
+        objectCount++;
+        
+        // Highlight mercenaries
+        if (obj.staticId == 400) {
+            mercCount++;
+            Printf("*** MERCENARY at offset 0x%08X ***\n", objPos);
+            Printf("    ObjectId:  %Lu\n", obj.id.objectId);
+            Printf("    Location:  k%d, x:%d, y:%d\n", obj.coords.kingdom, obj.coords.x, obj.coords.y);
+            Printf("    Level:     %d\n\n", obj.level);
+        }
+    } else {
+        byte unknownByte;
+    }
+}
+
+// Summary
+Printf("===========================================\n");
+Printf("  SUMMARY\n");
+Printf("===========================================\n");
+Printf("Total Objects: %d\n", objectCount);
+Printf("Mercenaries:   %d\n", mercCount);
+Printf("===========================================\n");
