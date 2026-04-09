@@ -1,162 +1,110 @@
 // Total Battle Object Packet Template for 010 Editor
-// Version: 1.0
-// Author: Reverse Engineered
-// 
-// PACKET FORMAT:
-// - 8 byte header
-// - Msgpack data containing view coords + map objects
-// 
-// OBJECT PATTERN: 0x9c 0x91 0xcf (fixarray(12) containing object)
-// OBJECT SIZE: 33 bytes
-// 
-// staticId VALUES:
-//   400 = Mercenary
-//   133 = Resource node
-//   512 = Unknown
-//   1450+ = Buildings/Structures
-//   50000 = Special object
-//
-// COORDINATES: offset +23 (kingdom), +24 (x), +25 (y) from 0x9c marker
-
-// Force little-endian byte order
-LittleEndian();
-
-// ============================================
-// STRUCTURES
-// ============================================
+// Version: 2.6 - Full object parsing
 
 typedef struct {
     uint32 packetSize;
     uint32 flags;
-} PACKET_HEADER <comment="8-byte protocol header">;
+} HEADER;
+
+HEADER h;
+Printf("=== Total Battle Packet v2.6 ===\n\n");
+Printf("Packet Size: %d bytes\n\n", h.packetSize);
+
+// Outer fixarray[2]
+Printf("Header: 0x%02X (fixarray[2])\n", ReadUByte(FTell()));
+FSkip(1);
+
+// View coords
+Printf("View Coords:\n");
+Printf("  X Type: 0x%02X\n", ReadUByte(FTell()));
+LittleEndian(); uint16 viewX; LittleEndian();
+Printf("  X: %d\n", viewX);
+Printf("  Y Type: 0x%02X\n", ReadUByte(FTell()));
+LittleEndian(); uint16 viewY; LittleEndian();
+Printf("  Y: %d\n\n", viewY);
+
+// Skip unknown bytes until objects
+Printf("Skipping terrain data...\n");
+local int pos = 15;
+while (pos < FileSize() && !(ReadUByte(pos) == 0x9c && ReadUByte(pos+1) == 0x91 && ReadUByte(pos+2) == 0xcf)) {
+    pos++;
+}
+FSkip(pos - FTell());
+Printf("Objects start at offset %d\n\n", FTell());
+
+// Parse objects
+Printf("=== Objects ===\n\n");
+Printf("%-5s %-6s %-4s %-12s %-15s\n", "Num", "Type", "Lv", "ObjectId", "Coords");
+Printf("%-5s %-6s %-4s %-12s %-15s\n", "----", "------", "----", "------------", "---------------");
 
 typedef struct {
-    uint64 objectId;
-} OBJECT_ID <comment="Unique object identifier">;
-
-typedef struct (int staticId) {
-    uint16 staticId;
-    byte unknown1;
-    byte unknown2;
-    byte unknown3;
-    byte level;
-    byte unknown5;
-    byte unknown6;
-    byte unknown7;
-    byte unknown8;
-} OBJECT_DATA <comment="Object type and level data">;
-
-typedef struct {
-    byte marker <hidden=true>;
-    byte kingdom;
-    byte x;
-    byte y;
-} COORDS <comment="Object coordinates [kingdom, x, y]">;
-
-typedef struct {
-    byte marker <hidden=true>;
-    byte value;
-} INNER_ARRAY <comment="Single byte array element">;
-
-// Complete map object (33 bytes)
-typedef struct {
-    // 0x9c = fixarray(12) - already at current position
-    byte array12_marker <hidden=true>;
+    uchar marker1 <comment="0x9c">;
+    uchar arr1 <comment="0x91">;
+    uchar oid_type <comment="0xcf">;
+    LittleEndian(); uint64 objectId; LittleEndian();
     
-    // Element 0: fixarray(1) containing objectId
-    byte array1_marker;
-    OBJECT_ID id;
+    uchar sid_type <comment="0xcd">;
+    LittleEndian(); ushort staticId; LittleEndian();
     
-    // Element 1: staticId (uint16 LE)
-    byte uint16_marker;
-    uint16 staticId;
+    uchar unk1;
+    uchar unk2;
+    uchar unk3;
+    uchar level;
+    uchar unk5;
+    uchar unk6;
+    uchar unk7;
+    uchar unk8;
     
-    // Element 2-5: various bytes
-    byte f2;
-    byte f3;
-    byte f4;
-    byte level;
+    uchar coord_type <comment="0x93">;
+    uchar kingdom;
+    uchar x;
+    uchar y;
     
-    // Element 6-9: more bytes
-    byte f6;
-    byte f7;
-    byte f8;
-    byte f9;
+    uchar inner_type <comment="0x91">;
+    uchar inner_val;
     
-    // Element 10: coords [k, x, y]
-    byte coords_marker;
-    COORDS coords;
+    uchar extra_type <comment="0xce">;
+    LittleEndian(); uint extra; LittleEndian();
     
-    // Element 11: single byte array
-    byte elem11_marker;
-    byte elem11_val;
-    
-    // Element 12: uint32 LE
-    byte uint32_marker;
-    uint32 extra;
-    
-    // Element 13: boolean
-    byte lastField;
-} MAP_OBJECT <comment="Complete map object (33 bytes)">;
+    uchar flag <comment="0xc2/false 0xc3/true">;
+} MAP_OBJECT;
 
-// ============================================
-// MAIN PARSE
-// ============================================
-
-Printf("===========================================\n");
-Printf("  Total Battle Object Packet Analyzer\n");
-Printf("===========================================\n\n");
-
-// Parse header
-PACKET_HEADER header;
-Printf("Packet Header: Size=%d, Flags=0x%08X\n\n", header.packetSize, header.flags);
-
-// View coordinates
-uint16 viewX;
-uint16 viewY;
-Printf("View Coords: X=%d, Y=%d\n\n", viewX, viewY);
-
-// Skip remaining header bytes until objects
-byte skip1, skip2, skip3;
-byte objectsArrayMarker;
-
-Printf("--- Scanning for Objects ---\n\n");
-
-// Find and parse all objects
-local int objectCount = 0;
-local int mercCount = 0;
-local quad objPos;
-local uint16 sid;
+local int count = 0;
+local int mercs = 0;
+local string typeName;
 
 while (FTell() < FileSize() - 33) {
-    // Look for object marker pattern: 0x9c 0x91 0xcf
-    if (ReadByte(FTell()) == 0x9c && 
-        ReadByte(FTell()+1) == 0x91 && 
-        ReadByte(FTell()+2) == 0xcf) {
-        
-        objPos = FTell();
-        sid = ReadUInt16(FTell()+12);
-        
+    if (ReadUByte(FTell()) == 0x9c && ReadUByte(FTell()+1) == 0x91 && ReadUByte(FTell()+2) == 0xcf) {
         MAP_OBJECT obj;
-        objectCount++;
+        count++;
         
-        // Highlight mercenaries
         if (obj.staticId == 400) {
-            mercCount++;
-            Printf("*** MERCENARY at offset 0x%08X ***\n", objPos);
-            Printf("    ObjectId:  %Lu\n", obj.id.objectId);
-            Printf("    Location:  k%d, x:%d, y:%d\n", obj.coords.kingdom, obj.coords.x, obj.coords.y);
-            Printf("    Level:     %d\n\n", obj.level);
+            typeName = "MERC";
+            mercs++;
+            Printf("%-5d %-6s %-4d %-15Lu k%d,%d,%d\n", 
+                count, typeName, obj.level, obj.objectId, obj.kingdom, obj.x, obj.y);
+        } else if (obj.staticId >= 1450) {
+            typeName = "BUILD";
+            Printf("%-5d %-6s %-4d %-15Lu k%d,%d,%d\n", 
+                count, typeName, obj.level, obj.objectId, obj.kingdom, obj.x, obj.y);
+        } else if (obj.staticId == 512) {
+            typeName = "CASTLE";
+            Printf("%-5d %-6s %-4d %-15Lu k%d,%d,%d\n", 
+                count, typeName, obj.level, obj.objectId, obj.kingdom, obj.x, obj.y);
+        } else if (obj.staticId == 133) {
+            typeName = "RESRC";
+            Printf("%-5d %-6s %-4d %-15Lu k%d,%d,%d\n", 
+                count, typeName, obj.level, obj.objectId, obj.kingdom, obj.x, obj.y);
+        } else {
+            Printf("%-5d ID:%-5d %-4d %-15Lu k%d,%d,%d\n", 
+                count, obj.staticId, obj.level, obj.objectId, obj.kingdom, obj.x, obj.y);
         }
     } else {
-        byte unknownByte;
+        uchar skip;
     }
 }
 
-// Summary
-Printf("===========================================\n");
-Printf("  SUMMARY\n");
-Printf("===========================================\n");
-Printf("Total Objects: %d\n", objectCount);
-Printf("Mercenaries:   %d\n", mercCount);
-Printf("===========================================\n");
+Printf("\n=== Summary ===\n");
+Printf("Total Objects: %d\n", count);
+Printf("Mercenaries:  %d\n", mercs);
+Printf("================\n");
