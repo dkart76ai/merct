@@ -1,0 +1,2601 @@
+{
+  "totalObjects": 96,
+  "uniqueStaticIds": [
+    133,
+    400,
+    512,
+    1450,
+    1452,
+    1453,
+    1454,
+    1462,
+    1465,
+    1466,
+    1467,
+    1468,
+    1469,
+    1470,
+    1472,
+    1473,
+    1474,
+    1476,
+    1477,
+    1479,
+    1481,
+    1483,
+    1486,
+    1490,
+    1502,
+    1509,
+    1512,
+    1521,
+    1523,
+    1537,
+    1540,
+    1591,
+    1592,
+    1593,
+    1594,
+    1607,
+    1608,
+    1610,
+    1614,
+    1616,
+    1621,
+    1623,
+    1628,
+    1631,
+    1634,
+    1636,
+    1648,
+    1655,
+    1657,
+    1695,
+    2105,
+    2107,
+    2111,
+    2137,
+    2330,
+    2424,
+    2430,
+    2433,
+    2509,
+    2740,
+    2749,
+    2801,
+    2805,
+    2814,
+    2816,
+    2838,
+    2839,
+    2916,
+    3502,
+    50000
+  ],
+  "mercenaries": [
+    {
+      "objectId": 60933761166,
+      "staticId": 400,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 10,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 175,
+        "x": 204,
+        "y": 173
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3449209344,
+      "lastField": 202
+    }
+  ],
+  "allObjects": [
+    {
+      "objectId": 60933730201,
+      "staticId": 1512,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 26,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 175,
+        "x": 204,
+        "y": 147
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607095246,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933732790,
+      "staticId": 1657,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 27,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 169,
+        "x": 204,
+        "y": 159
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607011534,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933734604,
+      "staticId": 2111,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 172,
+        "x": 204,
+        "y": 144
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933736246,
+      "staticId": 1466,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 14,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 171,
+        "x": 204,
+        "y": 153
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607054542,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933736248,
+      "staticId": 1473,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 17,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 173,
+        "x": 204,
+        "y": 157
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607382478,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933736249,
+      "staticId": 1509,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 25,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 177,
+        "x": 204,
+        "y": 153
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607244750,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933740673,
+      "staticId": 1594,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 177,
+        "x": 204,
+        "y": 143
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607720910,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933743382,
+      "staticId": 1621,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 19,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 161,
+        "x": 204,
+        "y": 159
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608199886,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933744250,
+      "staticId": 2107,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 163,
+        "x": 204,
+        "y": 147
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933750348,
+      "staticId": 1591,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 2,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 167,
+        "x": 204,
+        "y": 149
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608097230,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933752900,
+      "staticId": 1452,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 3,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 173,
+        "x": 204,
+        "y": 147
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608431822,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933753117,
+      "staticId": 50000,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 162,
+        "x": 204,
+        "y": 152
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933759397,
+      "staticId": 1636,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 23,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 178,
+        "x": 204,
+        "y": 158
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3609174734,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933760047,
+      "staticId": 1648,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 25,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 164,
+        "x": 204,
+        "y": 142
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3609084110,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933760723,
+      "staticId": 1450,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 1,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 165,
+        "x": 204,
+        "y": 143
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3609395918,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933760927,
+      "staticId": 1634,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 22,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 169,
+        "x": 204,
+        "y": 153
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3609130702,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933725319,
+      "staticId": 1467,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 14,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 160,
+        "x": 204,
+        "y": 164
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607030990,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933732791,
+      "staticId": 1610,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 16,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 160,
+        "x": 204,
+        "y": 172
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607063246,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933736874,
+      "staticId": 1454,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 170,
+        "x": 204,
+        "y": 172
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607487950,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933739044,
+      "staticId": 2424,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 20,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 174,
+        "x": 204,
+        "y": 168
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933740506,
+      "staticId": 1476,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 18,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 179,
+        "x": 204,
+        "y": 177
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607721166,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933741187,
+      "staticId": 2509,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 25,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 176,
+        "x": 204,
+        "y": 164
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933741579,
+      "staticId": 1452,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 3,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 165,
+        "x": 204,
+        "y": 167
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608186574,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933741582,
+      "staticId": 1628,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 21,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 165,
+        "x": 204,
+        "y": 173
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607590350,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933751490,
+      "staticId": 1695,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 35,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 161,
+        "x": 204,
+        "y": 177
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608315854,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933751875,
+      "staticId": 2839,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 45,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 170,
+        "x": 204,
+        "y": 162
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608368078,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933752487,
+      "staticId": 1490,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 22,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 169,
+        "x": 204,
+        "y": 163
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608510926,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933753110,
+      "staticId": 1450,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 1,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 179,
+        "x": 204,
+        "y": 169
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608573646,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933758036,
+      "staticId": 1592,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 3,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 160,
+        "x": 204,
+        "y": 168
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608822734,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933758528,
+      "staticId": 1474,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 17,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 168,
+        "x": 204,
+        "y": 178
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608970190,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933759816,
+      "staticId": 1453,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 4,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 173,
+        "x": 204,
+        "y": 177
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608757966,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933761166,
+      "staticId": 400,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 10,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 175,
+        "x": 204,
+        "y": 173
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3449209344,
+      "lastField": 202
+    },
+    {
+      "objectId": 60933726899,
+      "staticId": 1473,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 17,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 161,
+        "x": 204,
+        "y": 183
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607087566,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933729490,
+      "staticId": 1452,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 3,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 174,
+        "x": 204,
+        "y": 182
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607243214,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933729957,
+      "staticId": 1468,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 15,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 167,
+        "x": 204,
+        "y": 193
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607177678,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933733731,
+      "staticId": 1502,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 24,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 169,
+        "x": 204,
+        "y": 197
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607455950,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933734149,
+      "staticId": 2838,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 45,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 160,
+        "x": 204,
+        "y": 188
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607333326,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933734832,
+      "staticId": 133,
+      "level": 2,
+      "unknown": {
+        "unknown1": 204,
+        "unknown3": 0,
+        "unknown4": 24,
+        "unknown5": 0,
+        "unknown6": 0,
+        "unknown7": 147,
+        "unknown8": 14,
+        "unknown9": 204
+      },
+      "coords": {
+        "k": 204,
+        "x": 197,
+        "y": 145
+      },
+      "innerArr": {
+        "len": 0,
+        "val": 0
+      },
+      "extra": 3482426562,
+      "lastField": 177
+    },
+    {
+      "objectId": 60933736881,
+      "staticId": 2816,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 40,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 172,
+        "x": 204,
+        "y": 188
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607082958,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933737534,
+      "staticId": 1454,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 177,
+        "x": 204,
+        "y": 193
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607260878,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933744792,
+      "staticId": 512,
+      "level": 0,
+      "unknown": {
+        "unknown1": 125,
+        "unknown3": 16,
+        "unknown4": 0,
+        "unknown5": 0,
+        "unknown6": 147,
+        "unknown7": 14,
+        "unknown8": 204,
+        "unknown9": 167
+      },
+      "coords": {
+        "k": 187,
+        "x": 145,
+        "y": 0
+      },
+      "innerArr": {
+        "len": 0,
+        "val": 194
+      },
+      "extra": 3687813532,
+      "lastField": 50
+    },
+    {
+      "objectId": 60933747419,
+      "staticId": 2916,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 40,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 165,
+        "x": 204,
+        "y": 183
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607977678,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933748425,
+      "staticId": 1467,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 14,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 171,
+        "x": 204,
+        "y": 193
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607921870,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933749775,
+      "staticId": 1655,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 27,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 177,
+        "x": 204,
+        "y": 189
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608026318,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933752274,
+      "staticId": 1537,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 31,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 161,
+        "x": 204,
+        "y": 197
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608594126,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933753941,
+      "staticId": 1469,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 15,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 162,
+        "x": 204,
+        "y": 192
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608603598,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933755389,
+      "staticId": 1486,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 21,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 178,
+        "x": 204,
+        "y": 182
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3609210830,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933756654,
+      "staticId": 2749,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 35,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 178,
+        "x": 204,
+        "y": 198
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3449209344,
+      "lastField": 103
+    },
+    {
+      "objectId": 60933736875,
+      "staticId": 1594,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 187,
+        "x": 204,
+        "y": 153
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607484622,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933736877,
+      "staticId": 2740,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 15,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 181,
+        "x": 204,
+        "y": 157
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933740499,
+      "staticId": 2801,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 36,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 181,
+        "x": 204,
+        "y": 153
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607303886,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933741189,
+      "staticId": 2330,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 15,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 182,
+        "x": 204,
+        "y": 142
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933741384,
+      "staticId": 1453,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 4,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 188,
+        "x": 204,
+        "y": 142
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607305934,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933742139,
+      "staticId": 1470,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 16,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 194,
+        "x": 204,
+        "y": 152
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607886030,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933743028,
+      "staticId": 2430,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 20,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 190,
+        "x": 204,
+        "y": 148
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933743216,
+      "staticId": 1607,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 14,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 198,
+        "x": 204,
+        "y": 152
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607837902,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933749240,
+      "staticId": 1454,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 185,
+        "x": 204,
+        "y": 147
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608133838,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933751485,
+      "staticId": 1540,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 32,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 182,
+        "x": 204,
+        "y": 148
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608154318,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933754163,
+      "staticId": 1466,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 14,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 192,
+        "x": 204,
+        "y": 142
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608715726,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933756255,
+      "staticId": 1470,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 16,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 199,
+        "x": 204,
+        "y": 157
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608546254,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933756461,
+      "staticId": 1623,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 20,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 195,
+        "x": 204,
+        "y": 147
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608887246,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933758278,
+      "staticId": 1479,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 19,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 195,
+        "x": 204,
+        "y": 143
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3609494734,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933759179,
+      "staticId": 1631,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 22,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 186,
+        "x": 204,
+        "y": 158
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3609135310,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933760926,
+      "staticId": 512,
+      "level": 0,
+      "unknown": {
+        "unknown1": 32,
+        "unknown3": 23,
+        "unknown4": 0,
+        "unknown5": 0,
+        "unknown6": 147,
+        "unknown7": 14,
+        "unknown8": 204,
+        "unknown9": 192
+      },
+      "coords": {
+        "k": 158,
+        "x": 145,
+        "y": 0
+      },
+      "innerArr": {
+        "len": 0,
+        "val": 194
+      },
+      "extra": 26856854,
+      "lastField": 205
+    },
+    {
+      "objectId": 60933730204,
+      "staticId": 1523,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 28,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 183,
+        "x": 204,
+        "y": 179
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607061454,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933731884,
+      "staticId": 1483,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 20,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 193,
+        "x": 204,
+        "y": 167
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607031502,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933734835,
+      "staticId": 1465,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 13,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 190,
+        "x": 204,
+        "y": 174
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607111118,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933737318,
+      "staticId": 2433,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 20,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 180,
+        "x": 204,
+        "y": 172
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933737322,
+      "staticId": 1521,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 28,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 197,
+        "x": 204,
+        "y": 169
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607205582,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933739048,
+      "staticId": 1465,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 13,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 183,
+        "x": 204,
+        "y": 163
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607763662,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933739247,
+      "staticId": 2814,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 39,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 198,
+        "x": 204,
+        "y": 178
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607329742,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933739458,
+      "staticId": 1593,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 4,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 186,
+        "x": 204,
+        "y": 178
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607400142,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933742865,
+      "staticId": 2107,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 199,
+        "x": 204,
+        "y": 163
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933745113,
+      "staticId": 1592,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 3,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 193,
+        "x": 204,
+        "y": 163
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608357838,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933746024,
+      "staticId": 512,
+      "level": 0,
+      "unknown": {
+        "unknown1": 112,
+        "unknown3": 3,
+        "unknown4": 0,
+        "unknown5": 0,
+        "unknown6": 147,
+        "unknown7": 14,
+        "unknown8": 204,
+        "unknown9": 185
+      },
+      "coords": {
+        "k": 173,
+        "x": 145,
+        "y": 0
+      },
+      "innerArr": {
+        "len": 0,
+        "val": 194
+      },
+      "extra": 1708102044,
+      "lastField": 59
+    },
+    {
+      "objectId": 60933749605,
+      "staticId": 3502,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 25,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 191,
+        "x": 204,
+        "y": 177
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969856,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933753750,
+      "staticId": 512,
+      "level": 0,
+      "unknown": {
+        "unknown1": 33,
+        "unknown3": 24,
+        "unknown4": 0,
+        "unknown5": 0,
+        "unknown6": 147,
+        "unknown7": 14,
+        "unknown8": 204,
+        "unknown9": 185
+      },
+      "coords": {
+        "k": 167,
+        "x": 145,
+        "y": 0
+      },
+      "innerArr": {
+        "len": 0,
+        "val": 194
+      },
+      "extra": 1808765340,
+      "lastField": 80
+    },
+    {
+      "objectId": 60933754987,
+      "staticId": 2137,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 181,
+        "x": 204,
+        "y": 169
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933757673,
+      "staticId": 512,
+      "level": 0,
+      "unknown": {
+        "unknown1": 105,
+        "unknown3": 21,
+        "unknown4": 0,
+        "unknown5": 0,
+        "unknown6": 147,
+        "unknown7": 14,
+        "unknown8": 204,
+        "unknown9": 196
+      },
+      "coords": {
+        "k": 174,
+        "x": 145,
+        "y": 0
+      },
+      "innerArr": {
+        "len": 0,
+        "val": 194
+      },
+      "extra": 2144309660,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933761407,
+      "staticId": 1481,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 19,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 185,
+        "x": 204,
+        "y": 163
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3609605582,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933731375,
+      "staticId": 1608,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 15,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 182,
+        "x": 204,
+        "y": 194
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607139790,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933731890,
+      "staticId": 1462,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 12,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 196,
+        "x": 204,
+        "y": 194
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607299022,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933733734,
+      "staticId": 2105,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 191,
+        "x": 204,
+        "y": 197
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 2442969600,
+      "lastField": 207
+    },
+    {
+      "objectId": 60933735766,
+      "staticId": 512,
+      "level": 0,
+      "unknown": {
+        "unknown1": 83,
+        "unknown3": 24,
+        "unknown4": 0,
+        "unknown5": 0,
+        "unknown6": 147,
+        "unknown7": 14,
+        "unknown8": 204,
+        "unknown9": 182
+      },
+      "coords": {
+        "k": 198,
+        "x": 145,
+        "y": 0
+      },
+      "innerArr": {
+        "len": 0,
+        "val": 194
+      },
+      "extra": 852464028,
+      "lastField": 6
+    },
+    {
+      "objectId": 60933735986,
+      "staticId": 1592,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 3,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 199,
+        "x": 204,
+        "y": 189
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607232462,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933742676,
+      "staticId": 2805,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 37,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 196,
+        "x": 204,
+        "y": 198
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607732942,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933745849,
+      "staticId": 1450,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 1,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 187,
+        "x": 204,
+        "y": 199
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607967950,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933746018,
+      "staticId": 1454,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 180,
+        "x": 204,
+        "y": 182
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608241358,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933746977,
+      "staticId": 1467,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 14,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 189,
+        "x": 204,
+        "y": 187
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3607983310,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933748027,
+      "staticId": 512,
+      "level": 0,
+      "unknown": {
+        "unknown1": 18,
+        "unknown3": 9,
+        "unknown4": 0,
+        "unknown5": 0,
+        "unknown6": 147,
+        "unknown7": 14,
+        "unknown8": 204,
+        "unknown9": 199
+      },
+      "coords": {
+        "k": 183,
+        "x": 145,
+        "y": 0
+      },
+      "innerArr": {
+        "len": 0,
+        "val": 194
+      },
+      "extra": 1674547612,
+      "lastField": 56
+    },
+    {
+      "objectId": 60933748835,
+      "staticId": 1465,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 13,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 190,
+        "x": 204,
+        "y": 182
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608059854,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933750343,
+      "staticId": 1454,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 5,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 183,
+        "x": 204,
+        "y": 187
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608513742,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933750345,
+      "staticId": 1616,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 18,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 190,
+        "x": 204,
+        "y": 188
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608592334,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933752085,
+      "staticId": 1472,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 16,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 187,
+        "x": 204,
+        "y": 193
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608950222,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933757267,
+      "staticId": 1477,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 18,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 188,
+        "x": 204,
+        "y": 182
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608802766,
+      "lastField": 105
+    },
+    {
+      "objectId": 60933761168,
+      "staticId": 1614,
+      "level": 0,
+      "unknown": {
+        "unknown1": 205,
+        "unknown3": 2,
+        "unknown4": 0,
+        "unknown5": 17,
+        "unknown6": 0,
+        "unknown7": 0,
+        "unknown8": 147,
+        "unknown9": 14
+      },
+      "coords": {
+        "k": 193,
+        "x": 204,
+        "y": 193
+      },
+      "innerArr": {
+        "len": 145,
+        "val": 0
+      },
+      "extra": 3608845774,
+      "lastField": 105
+    }
+  ]
+}
