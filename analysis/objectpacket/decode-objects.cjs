@@ -1,16 +1,18 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs')
+const path = require('path')
 
-const captureContent = fs.readFileSync(path.join(__dirname, 'packets.objects.cap'), 'utf8');
+const captureContent = fs.readFileSync(path.join(__dirname, 'packets.objects.cap'), 'utf8')
 
 // Extract all base64 data sections
-const base64Matches = captureContent.match(/data:application\/octet-stream;base64,([A-Za-z0-9+\/=]+)/g);
+const base64Matches = captureContent.match(
+  /data:application\/octet-stream;base64,([A-Za-z0-9+\/=]+)/g
+)
 
-console.log(`Found ${base64Matches ? base64Matches.length : 0} base64 data sections`);
+console.log(`Found ${base64Matches ? base64Matches.length : 0} base64 data sections`)
 
 if (!base64Matches) {
-  console.log('No base64 data found in capture file');
-  process.exit(1);
+  console.log('No base64 data found in capture file')
+  process.exit(1)
 }
 
 // Copy of readValue from decode.response.js (msgpack decoder)
@@ -19,10 +21,10 @@ function readValue(buf, off) {
   const byte = buf[off++]
 
   // Positive fixint (0xxxxxxx)
-  if (byte < 0x80) return { val: byte, end: off }
+  if ((byte & 0x80) === 0) return { val: byte, end: off }
 
   // Negative fixint (111xxxxx)
-  if (byte >= 0xe0) return { val: byte - 256, end: off }
+  if ((byte & 0xe0) === 0xe0) return { val: byte - 256, end: off }
 
   // Fixmap (1000xxxx)
   if ((byte & 0xf0) === 0x80) {
@@ -247,55 +249,55 @@ function readValue(buf, off) {
 
 // Decode a full buffer starting from offset 8 (skip 8-byte header)
 function decodeFull(buf) {
-  const results = [];
-  let off = 8; // Skip 8-byte header
-  
+  const results = []
+  let off = 8 // Skip 8-byte header
+
   while (off < buf.length) {
     try {
-      const result = readValue(buf, off);
+      const result = readValue(buf, off)
       if (result.val !== null) {
-        results.push(result.val);
-        off = result.end;
+        results.push(result.val)
+        off = result.end
       } else {
-        off++;
+        off++
       }
     } catch (e) {
-      off++;
+      off++
     }
   }
-  
-  return results;
+
+  return results
 }
 
 // Process each base64 response
-const decodedObjects = [];
+const decodedObjects = []
 
 for (let i = 0; i < base64Matches.length; i++) {
-  const base64Data = base64Matches[i].replace('data:application/octet-stream;base64,', '');
-  
+  const base64Data = base64Matches[i].replace('data:application/octet-stream;base64,', '')
+
   try {
-    const binaryData = Buffer.from(base64Data, 'base64');
-    console.log(`\nPacket ${i + 1}: ${binaryData.length} bytes`);
-    
+    const binaryData = Buffer.from(base64Data, 'base64')
+    console.log(`\nPacket ${i + 1}: ${binaryData.length} bytes`)
+
     if (binaryData.length > 8) {
       // Skip 8-byte header and decode
-      const decoded = decodeFull(binaryData);
-      console.log(`  Decoded ${decoded.length} msgpack values`);
-      
+      const decoded = decodeFull(binaryData)
+      console.log(`  Decoded ${decoded.length} msgpack values`)
+
       if (decoded.length > 0) {
         decodedObjects.push({
           packetIndex: i + 1,
           dataLength: binaryData.length,
           decoded: decoded
-        });
+        })
       }
     }
   } catch (e) {
-    console.log(`  Error decoding packet ${i + 1}: ${e.message}`);
+    console.log(`  Error decoding packet ${i + 1}: ${e.message}`)
   }
 }
 
 // Write results to JSON file
-const outputPath = path.join(__dirname, 'msgobjects.json');
-fs.writeFileSync(outputPath, JSON.stringify(decodedObjects, null, 2));
-console.log(`\nWrote ${decodedObjects.length} decoded packets to ${outputPath}`);
+const outputPath = path.join(__dirname, 'msgobjects.json')
+fs.writeFileSync(outputPath, JSON.stringify(decodedObjects, null, 2))
+console.log(`\nWrote ${decodedObjects.length} decoded packets to ${outputPath}`)
