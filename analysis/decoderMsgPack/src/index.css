@@ -1,0 +1,214 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #569cd6;
+  font-size: 24px;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.container .panel {
+  flex: 1 1 calc(30% - 10px);
+  min-width: 400px;
+}
+
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #252526;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 12px 16px;
+  background-color: #2d2d2d;
+  border-bottom: 1px solid #3c3c3c;
+  font-weight: 600;
+  font-size: 14px;
+  color: #cccccc;
+}
+
+.panel-content {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+}
+
+textarea {
+  width: 100%;
+  height: 100%;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border: none;
+  padding: 12px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  resize: none;
+  outline: none;
+}
+
+textarea:focus {
+  outline: none;
+}
+
+/* JSON Viewer Styles */
+.json-viewer {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.json-item {
+  position: relative;
+}
+
+.json-toggle {
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.1s;
+}
+
+.json-toggle:hover {
+  background-color: #3c3c3c;
+}
+
+.json-toggle.collapsed::before {
+  content: '▶';
+  margin-right: 4px;
+  font-size: 10px;
+}
+
+.json-toggle.expanded::before {
+  content: '▼';
+  margin-right: 4px;
+  font-size: 10px;
+}
+
+.json-key {
+  color: #9cdcfe;
+}
+
+.json-string {
+  color: #ce9178;
+}
+
+.json-number {
+  color: #b5cea8;
+}
+
+.json-boolean {
+  color: #569cd6;
+}
+
+.json-null {
+  color: #569cd6;
+}
+
+.json-bracket {
+  color: #d4d4d4;
+}
+
+.json-hex {
+  color: #ce9178;
+  background-color: #3c3020;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.json-array {
+  margin-left: 20px;
+  border-left: 1px solid #3c3c3c;
+  padding-left: 10px;
+}
+
+.json-object {
+  margin-left: 20px;
+  border-left: 1px solid #3c3c3c;
+  padding-left: 10px;
+}
+
+/* Error message */
+.error {
+  color: #f14c4c;
+  padding: 12px;
+  background-color: #3c2020;
+  border-radius: 4px;
+  margin: 12px;
+}
+
+.sample-btn {
+  margin: 12px;
+  padding: 8px 16px;
+  background-color: #0e639c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.sample-btn:hover {
+  background-color: #1177bb;
+}
+
+/* Copy button */
+.copy-btn {
+  padding: 4px 8px;
+  background-color: #3c3c3c;
+  color: #d4d4d4;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.copy-btn:hover {
+  background-color: #4c4c4c;
+}
+
+/* Stats */
+.stats {
+  padding: 8px 12px;
+  background-color: #2d2d2d;
+  font-size: 12px;
+  color: #888;
+  border-top: 1px solid #3c3c3c;
+}
