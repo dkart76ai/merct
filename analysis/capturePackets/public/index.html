@@ -1,325 +1,376 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Packet Capture</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segolas', 'Consolas', monospace;
-      margin: 0;
-      padding: 20px;
-      background: #1e1e1e;
-      color: #d4d4d4;
-    }
-    .header { text-align: center; margin-bottom: 20px; }
-    .header h1 { color: #569cd6; margin: 0; font-size: 24px; }
-    
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    button {
-      padding: 10px 20px;
-      background: #0e639c;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    button:hover { background: #1177bb; }
-    button:disabled { background: #444; cursor: not-allowed; }
-    button.danger { background: #c00; }
-    button.danger:hover { background: #e00; }
-    
-    input {
-      padding: 10px;
-      background: #2d2d2d;
-      border: 1px solid #444;
-      border-radius: 4px;
-      color: #d4d4d4;
-      font-family: inherit;
-    }
-    
-    .status {
-      padding: 10px 20px;
-      background: #2d2d2d;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    .status.connected { background: #1e3a1e; color: #4caf50; }
-    .status.disconnected { background: #3a1e1e; color: #f44336; }
-    
-    .info {
-      padding: 10px 15px;
-      background: #2d2d2d;
-      border-radius: 4px;
-      font-size: 13px;
-    }
-    
-    .panel {
-      background: #252526;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      overflow: hidden;
-    }
-    .panel-header {
-      font-weight: bold;
-      padding: 10px 15px;
-      background: #2d2d2d;
-      border-bottom: 1px solid #3c3c3c;
-      font-size: 14px;
-    }
-    #log {
-      background: #1e1e1e;
-      padding: 10px;
-      max-height: 200px;
-      overflow-y: auto;
-      font-size: 12px;
-      white-space: pre-wrap;
-    }
-    .count { color: #569cd6; font-weight: bold; margin-left: 15px; }
-    
-    .captures {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    .capture-item {
-      padding: 10px 15px;
-      border-bottom: 1px solid #3c3c3c;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    .capture-item:hover { background: #2d2d2d; }
-    .capture-item .url { color: #9cdcfe; }
-    .capture-item .meta { color: #888; font-size: 11px; margin-top: 4px; }
-    
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
-      z-index: 1000;
-    }
-    .modal.active { display: flex; align-items: center; justify-content: center; }
-    .modal-content {
-      background: #252526;
-      border-radius: 8px;
-      padding: 20px;
-      max-width: 90%;
-      max-height: 90%;
-      overflow: auto;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
-    }
-    .modal-header h3 { margin: 0; color: #569cd6; }
-    .modal-close {
-      background: none;
-      border: none;
-      color: #888;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .modal-close:hover { color: #fff; }
-    pre {
-      background: #1e1e1e;
-      padding: 15px;
-      border-radius: 4px;
-      overflow: auto;
-      max-height: 60vh;
-      font-size: 12px;
-      margin: 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>Packet Capture Tool</h1>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Packet Capture</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Segolas', 'Consolas', monospace;
+        margin: 0;
+        padding: 20px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .header h1 {
+        color: #569cd6;
+        margin: 0;
+        font-size: 24px;
+      }
 
-  <div class="controls">
-    <input type="text" id="realm" value="us47" placeholder="Realm">
-    <input type="text" id="kingdom" value="305" placeholder="Kingdom">
-    <button id="btnStart">Start Browser</button>
-    <button id="btnStop" disabled class="danger">Stop</button>
-    <div class="status disconnected" id="status">Disconnected</div>
-  </div>
+      .controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      button {
+        padding: 10px 20px;
+        background: #0e639c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      button:hover {
+        background: #1177bb;
+      }
+      button:disabled {
+        background: #444;
+        cursor: not-allowed;
+      }
+      button.danger {
+        background: #c00;
+      }
+      button.danger:hover {
+        background: #e00;
+      }
 
-  <div class="controls">
-    <button id="btnRefresh" disabled>Refresh</button>
-    <button id="btnExport" disabled>Export JSON</button>
-    <button id="btnClear" disabled class="danger">Clear</button>
-    <span class="count" id="captureCount">Captures: 0</span>
-  </div>
+      input {
+        padding: 10px;
+        background: #2d2d2d;
+        border: 1px solid #444;
+        border-radius: 4px;
+        color: #d4d4d4;
+        font-family: inherit;
+      }
 
-  <div class="info">
-    Captures responses from rubens-realm URLs automatically.
-  </div>
+      .status {
+        padding: 10px 20px;
+        background: #2d2d2d;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      .status.connected {
+        background: #1e3a1e;
+        color: #4caf50;
+      }
+      .status.disconnected {
+        background: #3a1e1e;
+        color: #f44336;
+      }
 
-  <div class="panel">
-    <div class="panel-header">Log</div>
-    <div id="log"></div>
-  </div>
+      .info {
+        padding: 10px 15px;
+        background: #2d2d2d;
+        border-radius: 4px;
+        font-size: 13px;
+      }
 
-  <div class="panel">
-    <div class="panel-header">
-      Captured Responses
-      <span class="count" id="listCount">(0)</span>
+      .panel {
+        background: #252526;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        overflow: hidden;
+      }
+      .panel-header {
+        font-weight: bold;
+        padding: 10px 15px;
+        background: #2d2d2d;
+        border-bottom: 1px solid #3c3c3c;
+        font-size: 14px;
+      }
+      #log {
+        background: #1e1e1e;
+        padding: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      .count {
+        color: #569cd6;
+        font-weight: bold;
+        margin-left: 15px;
+      }
+
+      .captures {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .capture-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid #3c3c3c;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .capture-item:hover {
+        background: #2d2d2d;
+      }
+      .capture-item .url {
+        color: #9cdcfe;
+      }
+      .capture-item .meta {
+        color: #888;
+        font-size: 11px;
+        margin-top: 4px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+      }
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background: #252526;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 90%;
+        max-height: 90%;
+        overflow: auto;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+      .modal-header h3 {
+        margin: 0;
+        color: #569cd6;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 20px;
+        cursor: pointer;
+      }
+      .modal-close:hover {
+        color: #fff;
+      }
+      pre {
+        background: #1e1e1e;
+        padding: 15px;
+        border-radius: 4px;
+        overflow: auto;
+        max-height: 60vh;
+        font-size: 12px;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Packet Capture Tool</h1>
     </div>
-    <div class="captures" id="capturesList">
-      <div style="padding: 20px; color: #666; text-align: center;">
-        No captures yet. Start the browser and interact with the game.
+
+    <div class="controls">
+      <button id="btnStart">Start Browser</button>
+      <button id="btnStop" disabled class="danger">Stop</button>
+      <div class="status disconnected" id="status">Disconnected</div>
+    </div>
+
+    <div class="controls">
+      <button id="btnRefresh" disabled>Refresh</button>
+      <button id="btnExport" disabled>Export JSON</button>
+      <button id="btnClear" disabled class="danger">Clear</button>
+      <span class="count" id="captureCount">Captures: 0</span>
+    </div>
+
+    <div class="info">Captures responses from rubens-realm URLs automatically.</div>
+
+    <div class="panel">
+      <div class="panel-header">Log</div>
+      <div id="log"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        Captured Responses
+        <span class="count" id="listCount">(0)</span>
+      </div>
+      <div class="captures" id="capturesList">
+        <div style="padding: 20px; color: #666; text-align: center">
+          No captures yet. Start the browser and interact with the game.
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Response Details</h3>
-        <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal" id="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Response Details</h3>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <pre id="modalContent"></pre>
       </div>
-      <pre id="modalContent"></pre>
     </div>
-  </div>
 
-  <script>
-    const API = '/api'
-    
-    function log(msg) {
-      const el = document.getElementById('log')
-      el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`
-      el.scrollTop = el.scrollHeight
-    }
+    <script>
+      const API = '/api'
 
-    function updateStatus(connected) {
-      const el = document.getElementById('status')
-      el.textContent = connected ? 'Connected' : 'Disconnected'
-      el.className = 'status ' + (connected ? 'connected' : 'disconnected')
-      
-      document.getElementById('btnStart').disabled = connected
-      document.getElementById('btnStop').disabled = !connected
-      document.getElementById('btnRefresh').disabled = !connected
-      document.getElementById('btnExport').disabled = !connected
-      document.getElementById('btnClear').disabled = !connected
-    }
+      function log(msg) {
+        const el = document.getElementById('log')
+        el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`
+        el.scrollTop = el.scrollHeight
+      }
 
-    async function refreshCaptures() {
-      try {
-        const res = await fetch(API + '/captures')
-        const data = await res.json()
-        if (data.success) {
-          const count = data.count || 0
-          document.getElementById('captureCount').textContent = 'Captures: ' + count
-          document.getElementById('listCount').textContent = '(' + count + ')'
-          renderCaptures(data.captures || [])
+      function updateStatus(connected) {
+        const el = document.getElementById('status')
+        el.textContent = connected ? 'Connected' : 'Disconnected'
+        el.className = 'status ' + (connected ? 'connected' : 'disconnected')
+
+        document.getElementById('btnStart').disabled = connected
+        document.getElementById('btnStop').disabled = !connected
+        document.getElementById('btnRefresh').disabled = !connected
+        document.getElementById('btnExport').disabled = !connected
+        document.getElementById('btnClear').disabled = !connected
+      }
+
+      async function refreshCaptures() {
+        try {
+          const res = await fetch(API + '/captures')
+          const data = await res.json()
+          if (data.success) {
+            const count = data.count || 0
+            document.getElementById('captureCount').textContent = 'Captures: ' + count
+            document.getElementById('listCount').textContent = '(' + count + ')'
+            renderCaptures(data.captures || [])
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
         }
-      } catch (e) {
-        log('Error: ' + e.message)
       }
-    }
 
-    function renderCaptures(captures) {
-      const el = document.getElementById('capturesList')
-      if (captures.length === 0) {
-        el.innerHTML = '<div style="padding: 20px; color: #666; text-align: center;">No captures yet.</div>'
-        return
-      }
-      
-      el.innerHTML = captures.map(c => {
-        const url = new URL(c.url)
-        const path = url.pathname + url.search
-        const size = c.bodySize ? `(${formatSize(c.bodySize)})` : ''
-        return `
+      function renderCaptures(captures) {
+        const el = document.getElementById('capturesList')
+        if (captures.length === 0) {
+          el.innerHTML =
+            '<div style="padding: 20px; color: #666; text-align: center;">No captures yet.</div>'
+          return
+        }
+
+        el.innerHTML = captures
+          .map(c => {
+            const url = new URL(c.url)
+            const path = url.pathname + url.search
+            const size = c.bodySize ? `(${formatSize(c.bodySize)})` : ''
+            return `
           <div class="capture-item" onclick="showCapture(${c.id})">
             <div class="url">${path}</div>
             <div class="meta">ID: ${c.id} | ${c.status} | ${size} | ${new Date(c.timestamp).toLocaleTimeString()}</div>
           </div>
         `
-      }).join('')
-    }
-
-    async function showCapture(id) {
-      const res = await fetch(API + '/captures/' + id)
-      const data = await res.json()
-      if (data.success) {
-        const c = data.capture
-        const content = JSON.stringify({
-          url: c.url,
-          status: c.status,
-          headers: c.headers,
-          bodySize: c.bodySize,
-          bodyB64: c.bodyB64 ? '(base64 encoded)' : null,
-          timestamp: c.timestamp
-        }, null, 2)
-        document.getElementById('modalContent').textContent = content
-        document.getElementById('modal').classList.add('active')
+          })
+          .join('')
       }
-    }
 
-    function closeModal() {
-      document.getElementById('modal').classList.remove('active')
-    }
+      async function showCapture(id) {
+        const res = await fetch(API + '/captures/' + id)
+        const data = await res.json()
+        if (data.success) {
+          const c = data.capture
+          const content = JSON.stringify(
+            {
+              url: c.url,
+              status: c.status,
+              headers: c.headers,
+              bodySize: c.bodySize,
+              bodyB64: c.bodyB64 ? '(base64 encoded)' : null,
+              timestamp: c.timestamp
+            },
+            null,
+            2
+          )
+          document.getElementById('modalContent').textContent = content
+          document.getElementById('modal').classList.add('active')
+        }
+      }
 
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B'
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-      return (bytes / 1024 / 1024).toFixed(1) + ' MB'
-    }
+      function closeModal() {
+        document.getElementById('modal').classList.remove('active')
+      }
 
-    document.getElementById('btnStart').addEventListener('click', async () => {
-      const realm = document.getElementById('realm').value
-      const kingdom = document.getElementById('kingdom').value
-      
-      log('Starting browser...')
-      const res = await fetch(API + '/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ realm, kingdom })
+      function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B'
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+        return (bytes / 1024 / 1024).toFixed(1) + ' MB'
+      }
+
+      document.getElementById('btnStart').addEventListener('click', async () => {
+        // const realm = document.getElementById('realm').value
+        // const kingdom = document.getElementById('kingdom').value
+
+        log('Starting browser...')
+        const res = await fetch(API + '/start', {
+          method: 'POST'
+          //    headers: { 'Content-Type': 'application/json' },
+          //    body: JSON.stringify({ realm, kingdom })
+        })
+        const data = await res.json()
+
+        if (data.success) {
+          log('Browser started!')
+          log('Navigate and interact with the game...')
+          updateStatus(true)
+          setInterval(refreshCaptures, 2000)
+        } else {
+          log('Error: ' + data.error)
+        }
       })
-      const data = await res.json()
-      
-      if (data.success) {
-        log('Browser started!')
-        log('Navigate and interact with the game...')
-        updateStatus(true)
-        setInterval(refreshCaptures, 2000)
-      } else {
-        log('Error: ' + data.error)
-      }
-    })
 
-    document.getElementById('btnStop').addEventListener('click', async () => {
-      await fetch(API + '/stop', { method: 'POST' })
-      log('Browser stopped')
-      updateStatus(false)
-    })
+      document.getElementById('btnStop').addEventListener('click', async () => {
+        await fetch(API + '/stop', { method: 'POST' })
+        log('Browser stopped')
+        updateStatus(false)
+      })
 
-    document.getElementById('btnRefresh').addEventListener('click', refreshCaptures)
+      document.getElementById('btnRefresh').addEventListener('click', refreshCaptures)
 
-    document.getElementById('btnExport').addEventListener('click', () => {
-      window.location = API + '/export'
-    })
+      document.getElementById('btnExport').addEventListener('click', () => {
+        window.location = API + '/export'
+      })
 
-    document.getElementById('btnClear').addEventListener('click', async () => {
-      await fetch(API + '/clear', { method: 'POST' })
-      log('Cleared')
-      document.getElementById('captureCount').textContent = 'Captures: 0'
-      document.getElementById('listCount').textContent = '(0)'
-      renderCaptures([])
-    })
+      document.getElementById('btnClear').addEventListener('click', async () => {
+        await fetch(API + '/clear', { method: 'POST' })
+        log('Cleared')
+        document.getElementById('captureCount').textContent = 'Captures: 0'
+        document.getElementById('listCount').textContent = '(0)'
+        renderCaptures([])
+      })
 
-    document.getElementById('modal').addEventListener('click', (e) => {
-      if (e.target.id === 'modal') closeModal()
-    })
-  </script>
-</body>
+      document.getElementById('modal').addEventListener('click', e => {
+        if (e.target.id === 'modal') closeModal()
+      })
+    </script>
+  </body>
 </html>

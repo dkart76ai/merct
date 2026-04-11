@@ -339,6 +339,7 @@ app.use(express.json({ limit: '50mb' }))
 app.use(express.static(path.join(__dirname, 'public')))
 
 let browser = null
+let context = null
 let page = null
 let captures = []
 let captureIndex = 0
@@ -367,12 +368,18 @@ app.post('/api/start', async (req, res) => {
       headless: false,
       args: ['--start-maximized']
     })
-
-    page = await browser.newPage()
+    context = await browser.newContext({
+      screen: { width: 1600, height: 1200 },
+      viewport: { width: 1600, height: 1200 },
+      deviceScaleFactor: 1,
+      userAgent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36'
+    })
+    page = await context.newPage()
     captures = []
     captureIndex = 0
 
-    // Capture responses using Playwright's native interception
+    // Capture responses - Playwright pairs request/response internally
     page.on('response', async response => {
       const url = response.url()
       if (!url.includes('rubens-realm')) return
@@ -385,6 +392,18 @@ app.post('/api/start', async (req, res) => {
         // Skip empty responses or non-data responses
         if (!body || body.length === 0) return
         if (headers['content-type']?.includes('text/html')) return
+
+        // Get the parent request - Playwright already matched them
+        const request = response.request()
+        const postData = request.postData()
+
+        const requestData = {
+          method: request.method(),
+          headers: request.headers(),
+          bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
+          bodySize: postData ? postData.length : 0,
+          decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
+        }
 
         // Decode response msgpack
         let decodedResponse = decodeFull(Buffer.from(body))
@@ -400,15 +419,19 @@ app.post('/api/start', async (req, res) => {
           opCode,
           url,
           status,
-          headers,
+          request: requestData,
+          responseHeaders: headers,
           bodyB64: Buffer.from(body).toString('base64'),
           decodedResponse,
           bodySize: body.length,
+          objectCount: objects.length,
+          hasObjects: objects.length > 0,
+          objects,
           timestamp: new Date().toISOString()
         })
 
         console.log(`[${new Date().toLocaleTimeString()}] Captured: ${url} (${body.length} bytes)`)
-        
+
         // Auto-save to file
         if (autoSave) saveToFile()
       } catch (e) {
