@@ -17,7 +17,9 @@ function loadStaticDb() {
     if (fs.existsSync(STATIC_DB_FILE)) {
       const data = JSON.parse(fs.readFileSync(STATIC_DB_FILE, 'utf8'))
       staticIdDb = new Map(Object.entries(data))
-      console.log(`[${new Date().toLocaleTimeString()}] Loaded ${staticIdDb.size} static IDs from database`)
+      console.log(
+        `[${new Date().toLocaleTimeString()}] Loaded ${staticIdDb.size} static IDs from database`
+      )
     } else {
       console.log(`[${new Date().toLocaleTimeString()}] No staticId-db.json found, starting fresh`)
     }
@@ -41,7 +43,9 @@ function addOrUpdateStaticId(staticId, data) {
 
   if (!staticIdDb.has(id)) {
     staticIdDb.set(id, { staticId: parseInt(id), ...data })
-    console.log(`[${new Date().toLocaleTimeString()}] New staticId: ${staticId} (${data.name || data.entryType || 'unknown'})`)
+    console.log(
+      `[${new Date().toLocaleTimeString()}] New staticId: ${staticId} (${data.name || data.entryType || 'unknown'})`
+    )
     updated = true
   } else {
     const existing = staticIdDb.get(id)
@@ -163,7 +167,10 @@ function readValue(buf, off) {
   if (byte >= 0xd4 && byte <= 0xd8) {
     const sizes = [1, 2, 4, 8, 16]
     const size = sizes[byte - 0xd4]
-    return { val: { type: buf[off], data: buf.slice(off + 1, off + 1 + size) }, end: off + 1 + size }
+    return {
+      val: { type: buf[off], data: buf.slice(off + 1, off + 1 + size) },
+      end: off + 1 + size
+    }
   }
 
   if (byte === 0xd9) {
@@ -374,7 +381,9 @@ function extractChatStaticIds(message) {
                   entryType: sub.entryType,
                   name: sub.name || 'Unknown'
                 })
-                console.log(`[${new Date().toLocaleTimeString()}] Chat staticId: ${sub.staticId} (${sub.entryType}) - ${sub.name || 'Unknown'}`)
+                console.log(
+                  `[${new Date().toLocaleTimeString()}] Chat staticId: ${sub.staticId} (${sub.entryType}) - ${sub.name || 'Unknown'}`
+                )
               }
               addOrUpdateStaticId(sub.staticId, {
                 entryType: sub.entryType,
@@ -440,7 +449,9 @@ function saveMyPlayerPackets() {
       packets: myPlayerPackets
     }
     fs.writeFileSync(MYPLAYER_FILE, JSON.stringify(data, null, 2))
-    console.log(`[${new Date().toLocaleTimeString()}] Saved ${myPlayerPackets.length} my player packets`)
+    console.log(
+      `[${new Date().toLocaleTimeString()}] Saved ${myPlayerPackets.length} my player packets`
+    )
   } catch (e) {
     console.error('Save my player packets error:', e.message)
   }
@@ -494,7 +505,8 @@ app.post('/api/start', async (req, res) => {
       screen: { width: 1360, height: 1024 },
       viewport: { width: 1360, height: 1024 },
       deviceScaleFactor: 1,
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36'
+      userAgent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36'
     })
     page = await context.newPage()
     captures = []
@@ -559,11 +571,17 @@ app.post('/api/start', async (req, res) => {
           const extractedId = extractInternalIdFrom402(decodedResponse)
           if (extractedId) {
             internalPlayerId = extractedId
-            console.log(`[${new Date().toLocaleTimeString()}] Found internal player ID: ${internalPlayerId}`)
+            console.log(
+              `[${new Date().toLocaleTimeString()}] Found internal player ID: ${internalPlayerId}`
+            )
           }
         }
 
-        const isMyPacket = containsPlayerId(decodedResponse, myPlayerInfo.playerId, internalPlayerId)
+        const isMyPacket = containsPlayerId(
+          decodedResponse,
+          myPlayerInfo.playerId,
+          internalPlayerId
+        )
         const objects = extractObjects(decodedResponse)
 
         objects.forEach(obj => trackUnknownStaticId(obj))
@@ -633,7 +651,7 @@ app.post('/api/stop', async (req, res) => {
 })
 
 app.get('/api/captures', (req, res) => {
-  res.json({ success: true, captures.slice(-50), count: captures.length })
+  res.json({ success: true, captures: captures.slice(-50), count: captures.length })
 })
 
 app.get('/api/captures/:id', (req, res) => {
