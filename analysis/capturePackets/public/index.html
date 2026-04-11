@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Packet Capture</title>
     <style>
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         font-family: 'Segolas', 'Consolas', monospace;
         margin: 0;
@@ -13,8 +15,15 @@
         background: #1e1e1e;
         color: #d4d4d4;
       }
-      .header { text-align: center; margin-bottom: 20px; }
-      .header h1 { color: #569cd6; margin: 0; font-size: 24px; }
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .header h1 {
+        color: #569cd6;
+        margin: 0;
+        font-size: 24px;
+      }
 
       .controls {
         display: flex;
@@ -32,12 +41,25 @@
         cursor: pointer;
         font-size: 14px;
       }
-      button:hover { background: #1177bb; }
-      button:disabled { background: #444; cursor: not-allowed; }
-      button.danger { background: #c00; }
-      button.danger:hover { background: #e00; }
+      button:hover {
+        background: #1177bb;
+      }
+      button:disabled {
+        background: #444;
+        cursor: not-allowed;
+      }
+      button.danger {
+        background: #c00;
+      }
+      button.danger:hover {
+        background: #e00;
+      }
 
-      input[type='checkbox'] { width: 18px; height: 18px; cursor: pointer; }
+      input[type='checkbox'] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
       label {
         display: flex;
         align-items: center;
@@ -48,8 +70,13 @@
         cursor: pointer;
         font-size: 14px;
       }
-      label:hover { background: #3a3a3a; }
-      label.active { background: #1e3a1e; color: #4caf50; }
+      label:hover {
+        background: #3a3a3a;
+      }
+      label.active {
+        background: #1e3a1e;
+        color: #4caf50;
+      }
 
       .panel {
         background: #252526;
@@ -64,28 +91,53 @@
         border-bottom: 1px solid #3c3c3c;
         font-size: 14px;
       }
-      .count { color: #569cd6; font-weight: bold; margin-left: 15px; }
+      .count {
+        color: #569cd6;
+        font-weight: bold;
+        margin-left: 15px;
+      }
 
       .main-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 15px;
       }
-      @media (max-width: 1200px) { .main-grid { grid-template-columns: 1fr; } }
+      @media (max-width: 1200px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+      }
 
-      .captures-list { max-height: 300px; overflow-y: auto; }
+      .captures-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
       .capture-item {
         padding: 10px 15px;
         border-bottom: 1px solid #3c3c3c;
         cursor: pointer;
         font-size: 13px;
       }
-      .capture-item:hover { background: #2d2d2d; }
-      .capture-item.selected { background: #2d4a2d; }
-      .capture-item.my-packet { background: #1e3a1e; }
-      .capture-item.my-packet:hover { background: #2a4a2a; }
-      .capture-item .url { color: #9cdcfe; }
-      .capture-item .meta { color: #888; font-size: 11px; margin-top: 4px; }
+      .capture-item:hover {
+        background: #2d2d2d;
+      }
+      .capture-item.selected {
+        background: #2d4a2d;
+      }
+      .capture-item.my-packet {
+        background: #1e3a1e;
+      }
+      .capture-item.my-packet:hover {
+        background: #2a4a2a;
+      }
+      .capture-item .url {
+        color: #9cdcfe;
+      }
+      .capture-item .meta {
+        color: #888;
+        font-size: 11px;
+        margin-top: 4px;
+      }
 
       #detail {
         width: 100%;
@@ -125,8 +177,18 @@
         white-space: pre-wrap;
       }
 
-      .empty-state { padding: 20px; color: #666; text-align: center; }
-      .my-packet-tag { background: #2e5e2e; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-right: 5px; }
+      .empty-state {
+        padding: 20px;
+        color: #666;
+        text-align: center;
+      }
+      .my-packet-tag {
+        background: #2e5e2e;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        margin-right: 5px;
+      }
     </style>
   </head>
   <body>
@@ -184,7 +246,7 @@
       <div class="panel-header">
         My Player Packets
         <span class="count" id="myPlayerCount">(0)</span>
-        <span id="internalIdDisplay" style="margin-left: 20px; color: #4caf50;"></span>
+        <span id="internalIdDisplay" style="margin-left: 20px; color: #4caf50"></span>
       </div>
       <div class="captures-list" id="myPlayerList">
         <div class="empty-state">No player packets yet</div>
@@ -196,7 +258,7 @@
         Unknown StaticIDs
         <span class="count" id="unknownCount">(0)</span>
       </div>
-      <div class="captures-list" id="unknownList" style="max-height: 200px;">
+      <div class="captures-list" id="unknownList" style="max-height: 200px">
         <div class="empty-state">No unknown static IDs</div>
       </div>
     </div>
@@ -206,7 +268,7 @@
         Chat StaticIDs
         <span class="count" id="chatCount">(0)</span>
       </div>
-      <div class="captures-list" id="chatList" style="max-height: 150px;">
+      <div class="captures-list" id="chatList" style="max-height: 150px">
         <div class="empty-state">No chat static IDs from MESG messages</div>
       </div>
     </div>
@@ -216,7 +278,7 @@
         Static ID Database
         <span class="count" id="dbCount">(0)</span>
       </div>
-      <div class="captures-list" id="dbList" style="max-height: 250px;">
+      <div class="captures-list" id="dbList" style="max-height: 250px">
         <div class="empty-state">Loading...</div>
       </div>
     </div>
@@ -261,7 +323,9 @@
             document.getElementById('listCount').textContent = '(' + data.count + ')'
             renderCaptures(data.captures || [])
           }
-        } catch (e) { log('Error: ' + e.message) }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
       }
 
       async function refreshOpcodes() {
@@ -272,7 +336,9 @@
             document.getElementById('opcodeCount').textContent = '(' + data.count + ')'
             renderOpcodes(data.opcodes || [])
           }
-        } catch (e) { log('Error: ' + e.message) }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
       }
 
       async function refreshMyPlayer() {
@@ -281,11 +347,14 @@
           const data = await res.json()
           if (data.success) {
             document.getElementById('myPlayerCount').textContent = '(' + data.count + ')'
-            document.getElementById('internalIdDisplay').textContent = 
-              data.internalPlayerId ? `Internal ID: ${data.internalPlayerId}` : ''
+            document.getElementById('internalIdDisplay').textContent = data.internalPlayerId
+              ? `Internal ID: ${data.internalPlayerId}`
+              : ''
             renderMyPlayerPackets(data.packets || [])
           }
-        } catch (e) { log('Error: ' + e.message) }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
       }
 
       async function refreshUnknownStaticIds() {
@@ -296,7 +365,9 @@
             document.getElementById('unknownCount').textContent = '(' + data.count + ')'
             renderUnknownStaticIds(data.items || [])
           }
-        } catch (e) { log('Error: ' + e.message) }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
       }
 
       async function refreshChatStaticIds() {
@@ -307,7 +378,9 @@
             document.getElementById('chatCount').textContent = '(' + data.count + ')'
             renderChatStaticIds(data.items || [])
           }
-        } catch (e) { log('Error: ' + e.message) }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
       }
 
       async function refreshStaticDb() {
@@ -318,7 +391,9 @@
             document.getElementById('dbCount').textContent = '(' + data.count + ')'
             renderStaticDb(data.items || [])
           }
-        } catch (e) { log('Error: ' + e.message) }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
       }
 
       function renderStaticDb(items) {
@@ -327,15 +402,17 @@
           el.innerHTML = '<div class="empty-state">No entries in database</div>'
           return
         }
-        el.innerHTML = items.map(item => {
-          const name = item.name || 'Unknown'
-          const entryType = item.entryType || 'N/A'
-          const level = item.level !== undefined ? `Lv${item.level}` : ''
-          return `<div class="capture-item">
+        el.innerHTML = items
+          .map(item => {
+            const name = item.name || 'Unknown'
+            const entryType = item.entryType || 'N/A'
+            const level = item.level !== undefined ? `Lv${item.level}` : ''
+            return `<div class="capture-item">
             <div class="url">${item.staticId} - <span style="color:#4caf50">${name}</span></div>
             <div class="meta">Type: ${entryType} ${level ? '| ' + level : ''}</div>
           </div>`
-        }).join('')
+          })
+          .join('')
       }
 
       function renderCaptures(captures) {
@@ -344,17 +421,19 @@
           el.innerHTML = '<div class="empty-state">No captures yet</div>'
           return
         }
-        el.innerHTML = captures.map(c => {
-          const url = new URL(c.url)
-          const path = url.pathname + url.search
-          const size = c.bodySize ? `(${c.bodySize}B)` : ''
-          const selected = c.id === selectedId ? 'selected' : ''
-          const myTag = c.isMyPacket ? '<span class="my-packet-tag">ME</span>' : ''
-          return `<div class="capture-item ${selected}" onclick="showCapture(${c.id}, 'captures')">
+        el.innerHTML = captures
+          .map(c => {
+            const url = new URL(c.url)
+            const path = url.pathname + url.search
+            const size = c.bodySize ? `(${c.bodySize}B)` : ''
+            const selected = c.id === selectedId ? 'selected' : ''
+            const myTag = c.isMyPacket ? '<span class="my-packet-tag">ME</span>' : ''
+            return `<div class="capture-item ${selected}" onclick="showCapture(${c.id}, 'captures')">
             ${myTag}<div class="url">${path}</div>
             <div class="meta">ID:${c.id} | Op:${c.opCode} | ${size}</div>
           </div>`
-        }).join('')
+          })
+          .join('')
       }
 
       function renderMyPlayerPackets(packets) {
@@ -363,15 +442,17 @@
           el.innerHTML = '<div class="empty-state">No player packets yet</div>'
           return
         }
-        el.innerHTML = packets.map(p => {
-          const url = new URL(p.url)
-          const path = url.pathname + url.search
-          const size = p.bodySize ? `(${p.bodySize}B)` : ''
-          return `<div class="capture-item my-packet" onclick="showCapture(${p.id}, 'myplayer')">
+        el.innerHTML = packets
+          .map(p => {
+            const url = new URL(p.url)
+            const path = url.pathname + url.search
+            const size = p.bodySize ? `(${p.bodySize}B)` : ''
+            return `<div class="capture-item my-packet" onclick="showCapture(${p.id}, 'myplayer')">
             <div class="url">${path}</div>
             <div class="meta">ID:${p.id} | Op:${p.opCode} | ${size}</div>
           </div>`
-        }).join('')
+          })
+          .join('')
       }
 
       function renderUnknownStaticIds(items) {
@@ -380,11 +461,13 @@
           el.innerHTML = '<div class="empty-state">No unknown static IDs</div>'
           return
         }
-        el.innerHTML = items.map(item => {
-          return `<div class="capture-item">
+        el.innerHTML = items
+          .map(item => {
+            return `<div class="capture-item">
             <div class="url">StaticID: ${item.staticId}</div>
           </div>`
-        }).join('')
+          })
+          .join('')
       }
 
       function renderChatStaticIds(items) {
@@ -393,12 +476,14 @@
           el.innerHTML = '<div class="empty-state">No chat static IDs from MESG messages</div>'
           return
         }
-        el.innerHTML = items.map(item => {
-          return `<div class="capture-item">
-            <div class="url">StaticID: ${item.staticId} <span style="color:#4caf50">x${item.count}</span></div>
+        el.innerHTML = items
+          .map(item => {
+            return `<div class="capture-item">
+            <div class="url">StaticID: ${item.staticId}</div>
             <div class="meta">EntryType: ${item.entryType} | Name: ${item.name}</div>
           </div>`
-        }).join('')
+          })
+          .join('')
       }
 
       function renderOpcodes(opcodes) {
@@ -456,7 +541,9 @@
             log(enabled ? 'Capturing started' : 'Capturing stopped')
             updateCaptureToggle(data.capturing)
           }
-        } catch (e) { log('Error: ' + e.message) }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
       }
 
       document.getElementById('btnStart').addEventListener('click', async () => {
@@ -474,18 +561,25 @@
             refreshChatStaticIds()
             refreshStaticDb()
           }, 1000)
-        } else { log('Error: ' + data.error) }
+        } else {
+          log('Error: ' + data.error)
+        }
       })
 
       document.getElementById('btnStop').addEventListener('click', async () => {
-        if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
+        if (refreshInterval) {
+          clearInterval(refreshInterval)
+          refreshInterval = null
+        }
         await fetch(API + '/stop', { method: 'POST' })
         log('Browser stopped')
         updateUI(false)
         updateCaptureToggle(false)
       })
 
-      document.getElementById('cbCapture').addEventListener('change', e => toggleCapture(e.target.checked))
+      document
+        .getElementById('cbCapture')
+        .addEventListener('change', e => toggleCapture(e.target.checked))
 
       document.getElementById('btnRefresh').addEventListener('click', () => {
         refreshCaptures()

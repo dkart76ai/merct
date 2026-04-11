@@ -38,7 +38,7 @@ function saveStaticDb() {
 function addOrUpdateStaticId(staticId, data) {
   const id = String(staticId)
   let updated = false
-  
+
   if (!staticIdDb.has(id)) {
     staticIdDb.set(id, { staticId: parseInt(id), ...data })
     console.log(`[${new Date().toLocaleTimeString()}] New staticId: ${staticId} (${data.name || data.entryType || 'unknown'})`)
@@ -52,7 +52,7 @@ function addOrUpdateStaticId(staticId, data) {
       }
     }
   }
-  
+
   if (updated) {
     saveStaticDb()
   }
@@ -458,12 +458,12 @@ function saveToFile() {
 function trackUnknownStaticId(obj) {
   const staticId = obj.staticId
   const level = obj.level
-  
+
   if (!unknownStaticIds.has(staticId)) {
     unknownStaticIds.add(staticId)
     console.log(`[${new Date().toLocaleTimeString()}] New unknown staticId: ${staticId}`)
   }
-  
+
   addOrUpdateStaticId(staticId, { level })
 }
 
@@ -502,9 +502,9 @@ app.post('/api/start', async (req, res) => {
 
     page.on('websocket', async ws => {
       console.log(`[${new Date().toLocaleTimeString()}] WebSocket opened: ${ws.url()}`)
-      
+
       ws.on('framesent', data => {})
-      
+
       ws.on('framereceived', data => {
         if (capturingEnabled) {
           try {
@@ -517,7 +517,7 @@ app.post('/api/start', async (req, res) => {
           } catch (e) {}
         }
       })
-      
+
       ws.on('close', () => {
         console.log(`[${new Date().toLocaleTimeString()}] WebSocket closed`)
       })
@@ -565,7 +565,7 @@ app.post('/api/start', async (req, res) => {
 
         const isMyPacket = containsPlayerId(decodedResponse, myPlayerInfo.playerId, internalPlayerId)
         const objects = extractObjects(decodedResponse)
-        
+
         objects.forEach(obj => trackUnknownStaticId(obj))
 
         captures.push({
@@ -633,7 +633,7 @@ app.post('/api/stop', async (req, res) => {
 })
 
 app.get('/api/captures', (req, res) => {
-  res.json({ success: true, captures, count: captures.length })
+  res.json({ success: true, captures.slice(-50), count: captures.length })
 })
 
 app.get('/api/captures/:id', (req, res) => {

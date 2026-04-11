@@ -4,10 +4,20 @@
     "name": "Player city",
     "entryType": "user"
   },
+  "4": {
+    "staticId": 4,
+    "entryType": "user",
+    "name": "Tagore"
+  },
   "5": {
     "staticId": 5,
     "entryType": "tile",
     "name": "Océano"
+  },
+  "9": {
+    "staticId": 9,
+    "entryType": "tile",
+    "name": "Desierto de arenas movedizas"
   },
   "25": {
     "staticId": 25,
@@ -29,8 +39,23 @@
     "entryType": "poi",
     "name": "Aserradero"
   },
+  "70": {
+    "staticId": 70,
+    "entryType": "poi",
+    "name": "Aserradero"
+  },
   "81": {
     "staticId": 81,
+    "entryType": "poi",
+    "name": "Aserradero"
+  },
+  "82": {
+    "staticId": 82,
+    "entryType": "poi",
+    "name": "Aserradero"
+  },
+  "84": {
+    "staticId": 84,
     "entryType": "poi",
     "name": "Aserradero"
   },
@@ -44,6 +69,11 @@
     "entryType": "poi",
     "name": "Mina"
   },
+  "102": {
+    "staticId": 102,
+    "entryType": "tile",
+    "name": "Llanura montañosa"
+  },
   "103": {
     "staticId": 103,
     "entryType": "tile",
@@ -53,6 +83,21 @@
     "staticId": 104,
     "entryType": "tile",
     "name": "Bosque tupido"
+  },
+  "105": {
+    "staticId": 105,
+    "entryType": "tile",
+    "name": "Tierras altas desiertas"
+  },
+  "107": {
+    "staticId": 107,
+    "entryType": "tile",
+    "name": "Dunas de arena"
+  },
+  "108": {
+    "staticId": 108,
+    "entryType": "tile",
+    "name": "Jungla"
   },
   "110": {
     "staticId": 110,
@@ -124,6 +169,21 @@
     "entryType": "poi",
     "name": "Escuadrón común infernal"
   },
+  "1463": {
+    "staticId": 1463,
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
+  },
+  "1464": {
+    "staticId": 1464,
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
+  },
+  "1466": {
+    "staticId": 1466,
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
+  },
   "1483": {
     "staticId": 1483,
     "entryType": "poi",
@@ -138,6 +198,11 @@
     "staticId": 1491,
     "entryType": "poi",
     "name": "Escuadrón común de elfos"
+  },
+  "1492": {
+    "staticId": 1492,
+    "entryType": "poi",
+    "name": "Escuadrón común de los malditos"
   },
   "1496": {
     "staticId": 1496,
@@ -184,6 +249,11 @@
     "entryType": "poi",
     "name": "Escuadrón común de los malditos"
   },
+  "1526": {
+    "staticId": 1526,
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
+  },
   "1527": {
     "staticId": 1527,
     "entryType": "poi",
@@ -191,6 +261,11 @@
   },
   "1533": {
     "staticId": 1533,
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
+  },
+  "1548": {
+    "staticId": 1548,
     "entryType": "poi",
     "name": "Escuadrón común de bárbaros"
   },
@@ -249,6 +324,11 @@
     "entryType": "poi",
     "name": "Escuadrón raro infernal"
   },
+  "1659": {
+    "staticId": 1659,
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
+  },
   "1663": {
     "staticId": 1663,
     "entryType": "poi",
@@ -259,8 +339,18 @@
     "entryType": "poi",
     "name": "Escuadrón raro de elfos"
   },
+  "1811": {
+    "staticId": 1811,
+    "entryType": "poi",
+    "name": "Ciudadela élfica"
+  },
   "1812": {
     "staticId": 1812,
+    "entryType": "poi",
+    "name": "Ciudadela élfica"
+  },
+  "1813": {
+    "staticId": 1813,
     "entryType": "poi",
     "name": "Ciudadela élfica"
   },
@@ -299,8 +389,18 @@
     "entryType": "poi",
     "name": "Cripta"
   },
+  "2206": {
+    "staticId": 2206,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
   "2210": {
     "staticId": 2210,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2237": {
+    "staticId": 2237,
     "entryType": "poi",
     "name": "Cripta"
   },
@@ -309,13 +409,38 @@
     "entryType": "poi",
     "name": "Cripta"
   },
+  "2304": {
+    "staticId": 2304,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
   "2310": {
     "staticId": 2310,
     "entryType": "poi",
     "name": "Cripta"
   },
+  "2311": {
+    "staticId": 2311,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
   "2331": {
     "staticId": 2331,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2403": {
+    "staticId": 2403,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2404": {
+    "staticId": 2404,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2425": {
+    "staticId": 2425,
     "entryType": "poi",
     "name": "Cripta épica"
   },
@@ -334,18 +459,48 @@
     "entryType": "poi",
     "name": "Cripta"
   },
+  "2510": {
+    "staticId": 2510,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
   "2528": {
     "staticId": 2528,
     "entryType": "poi",
     "name": "Cripta épica"
+  },
+  "2529": {
+    "staticId": 2529,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2537": {
+    "staticId": 2537,
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2723": {
     "staticId": 2723,
     "entryType": "poi",
     "name": "Cripta épica"
   },
+  "2725": {
+    "staticId": 2725,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
   "2741": {
     "staticId": 2741,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2745": {
+    "staticId": 2745,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2747": {
+    "staticId": 2747,
     "entryType": "poi",
     "name": "Cripta épica"
   },
@@ -364,8 +519,23 @@
     "entryType": "poi",
     "name": "Escuadrón común infernal"
   },
+  "3301": {
+    "staticId": 3301,
+    "entryType": "poi",
+    "name": "Cripta rara"
+  },
   "3302": {
     "staticId": 3302,
+    "entryType": "poi",
+    "name": "Cripta rara"
+  },
+  "3401": {
+    "staticId": 3401,
+    "entryType": "poi",
+    "name": "Cripta rara"
+  },
+  "3402": {
+    "staticId": 3402,
     "entryType": "poi",
     "name": "Cripta rara"
   },
@@ -374,8 +544,18 @@
     "entryType": "poi",
     "name": "Cripta rara"
   },
+  "3502": {
+    "staticId": 3502,
+    "entryType": "poi",
+    "name": "Cripta rara"
+  },
   "3511": {
     "staticId": 3511,
+    "entryType": "poi",
+    "name": "Cripta rara"
+  },
+  "3512": {
+    "staticId": 3512,
     "entryType": "poi",
     "name": "Cripta rara"
   },
@@ -383,6 +563,11 @@
     "staticId": 4000,
     "entryType": "spawn",
     "name": "Unknown"
+  },
+  "10001": {
+    "staticId": 10001,
+    "entryType": "clan",
+    "name": "Celtic Clan"
   },
   "10002": {
     "staticId": 10002,
@@ -403,6 +588,36 @@
     "staticId": 50000,
     "entryType": "poi",
     "name": "Arena"
+  },
+  "133334": {
+    "staticId": 133334,
+    "entryType": "poi",
+    "name": "Monstruo de zanahoria"
+  },
+  "152001": {
+    "staticId": 152001,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152004": {
+    "staticId": 152004,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152107": {
+    "staticId": 152107,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152109": {
+    "staticId": 152109,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152115": {
+    "staticId": 152115,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
   },
   "889000": {
     "staticId": 889000,
