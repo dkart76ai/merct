@@ -7,10 +7,10 @@ function readValue(buf, off) {
   const byte = buf[off++]
 
   // Positive fixint (0xxxxxxx)
-  if (byte < 0x80) return { val: byte, end: off }
+  if ((byte & 0x80) === 0) return { val: byte, end: off }
 
   // Negative fixint (111xxxxx)
-  if (byte >= 0xe0) return { val: byte - 256, end: off }
+  if ((byte & 0xe0) === 0xe0) return { val: byte - 256, end: off }
 
   // Fixmap (1000xxxx)
   if ((byte & 0xf0) === 0x80) {
