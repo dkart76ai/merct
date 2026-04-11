@@ -5,6 +5,18 @@ const { chromium } = require('playwright')
 
 const SAVE_FILE = path.join(__dirname, 'captures.json')
 
+const myPlayerInfo={
+  name: 'Maedve',
+  coords:{
+    k: 277,x:91:y:53
+  },
+  cityLevel:9,
+  heroLevel:6,
+  playerId:'tb:68568818',
+  might:7045,
+  clan:'LOW'
+}
+
 function readValue(buf, off) {
   if (off >= buf.length) return { val: null, end: buf.length }
   const byte = buf[off++]
