@@ -1,4 +1,3 @@
-// Packet Capture Script v5 - Using msgpack-lite library
 // Paste in browser console
 
 // var script = document.createElement('script');
@@ -77,182 +76,331 @@ const TILE_NAMES = {
   4000: 'Spawn'
 }
 
-// Extract viewX/viewY from raw bytes (uint16 LE at bytes 10-11 for viewX)
-function extractViewCoordsRaw(reqBytes) {
-  let viewX = 0,
-    viewY = 0
-  if (reqBytes.length >= 16) {
-    viewX = reqBytes[10] | (reqBytes[11] << 8)
-    viewY = reqBytes[14]
-  }
-  const buffer = new ArrayBuffer(4)
-  const view = new DataView(buffer)
-  view.setUint16(0, viewX, false)
-  const viewXBE = view.getUint32(0, true)
-  view.setUint16(0, viewY, false)
-  const viewYBE = view.getUint32(0, true)
-  return { viewX, viewY, viewXBE, viewYBE }
-}
+function readValue(buf, off) {
+  if (off >= buf.length) return { val: null, end: buf.length }
+  const byte = buf[off++]
 
-// Extract viewX/viewY using msgpack library
-function extractViewCoordsMsgpack(reqBytes) {
-  let viewX = 0,
-    viewY = 0
-  const msgpackData = reqBytes.slice(8)
-  try {
-    if (typeof msgpack !== 'undefined' && msgpack.decode) {
-      const decoded = msgpack.decode(msgpackData)
-      if (Array.isArray(decoded) && decoded.length >= 2) {
-        viewX = decoded[0] || 0
-        viewY = decoded[1] || 0
-      }
+  // Positive fixint (0xxxxxxx)
+  if ((byte & 0x80) === 0) return { val: byte, end: off }
+
+  // Negative fixint (111xxxxx)
+  if ((byte & 0xe0) === 0xe0) return { val: byte - 256, end: off }
+
+  // Fixmap (1000xxxx)
+  if ((byte & 0xf0) === 0x80) {
+    const size = byte & 0x0f
+    const obj = {}
+    let o = off
+    for (let i = 0; i < size; i++) {
+      if (o >= buf.length) break
+      const k = readValue(buf, o)
+      o = k.end
+      if (o >= buf.length) break
+      const v = readValue(buf, o)
+      o = v.end
+      obj[k.val] = v.val
     }
-  } catch (e) {
-    console.log('YO: Msgpack decode error:', e.message)
+    return { val: obj, end: o }
   }
-  const buffer = new ArrayBuffer(4)
-  const view = new DataView(buffer)
-  view.setUint16(0, viewX, false)
-  const viewXBE = view.getUint32(0, true)
-  view.setUint16(0, viewY, false)
-  const viewYBE = view.getUint32(0, true)
-  return { viewX, viewY, viewXBE, viewYBE }
+
+  // Fixarray (1001xxxx)
+  if ((byte & 0xf0) === 0x90) {
+    const size = byte & 0x0f
+    const arr = []
+    let o = off
+    for (let i = 0; i < size; i++) {
+      if (o >= buf.length) break
+      const v = readValue(buf, o)
+      arr.push(v.val)
+      o = v.end
+    }
+    return { val: arr, end: o }
+  }
+
+  // Fixstr (101xxxxx)
+  if ((byte & 0xe0) === 0xa0) {
+    const len = byte & 0x1f
+    return { val: buf.slice(off, off + len).toString('utf8'), end: off + len }
+  }
+
+  // 0xc0 - nil
+  if (byte === 0xc0) return { val: null, end: off }
+
+  // 0xc1 - never used
+
+  // 0xc2 - false
+  if (byte === 0xc2) return { val: false, end: off }
+
+  // 0xc3 - true
+  if (byte === 0xc3) return { val: true, end: off }
+
+  // 0xc4 - bin8
+  if (byte === 0xc4) {
+    const len = buf[off]
+    return { val: buf.slice(off + 1, off + 1 + len), end: off + 1 + len }
+  }
+
+  // 0xc5 - bin16
+  if (byte === 0xc5) {
+    const len = buf.readUInt16BE(off)
+    return { val: buf.slice(off + 2, off + 2 + len), end: off + 2 + len }
+  }
+
+  // 0xc6 - bin32
+  if (byte === 0xc6) {
+    const len = buf.readUInt32BE(off)
+    return { val: buf.slice(off + 4, off + 4 + len), end: off + 4 + len }
+  }
+
+  // 0xc7 - ext8, 0xc8 - ext16, 0xc9 - ext32
+  if (byte >= 0xc7 && byte <= 0xc9) {
+    let len, dataOff
+    if (byte === 0xc7) {
+      len = buf[off]
+      dataOff = off + 2
+    } else if (byte === 0xc8) {
+      len = buf.readUInt16BE(off)
+      dataOff = off + 3
+    } else {
+      len = buf.readUInt32BE(off)
+      dataOff = off + 5
+    }
+    const type = buf[dataOff]
+    const data = buf.slice(dataOff + 1, dataOff + 1 + len - 1)
+    return { val: { type, data }, end: dataOff + len }
+  }
+
+  // 0xca - float32
+  if (byte === 0xca) {
+    const view = new DataView(buf.buffer, buf.byteOffset + off)
+    return { val: view.getFloat32(0), end: off + 4 }
+  }
+
+  // 0xcb - float64
+  if (byte === 0xcb) {
+    const view = new DataView(buf.buffer, buf.byteOffset + off)
+    return { val: view.getFloat64(0), end: off + 8 }
+  }
+
+  // 0xcc - uint8
+  if (byte === 0xcc) return { val: buf[off], end: off + 1 }
+
+  // 0xcd - uint16 (LE)
+  if (byte === 0xcd) return { val: buf.readUInt16LE(off), end: off + 2 }
+
+  // 0xce - uint32 (LE)
+  if (byte === 0xce) return { val: buf.readUInt32LE(off), end: off + 4 }
+
+  // 0xcf - uint64
+  if (byte === 0xcf) {
+    let val = 0n
+    for (let i = 0; i < 8; i++) val += BigInt(buf[off + i]) << BigInt(i * 8)
+    return { val: Number(val), end: off + 8 }
+  }
+
+  // 0xd0 - int8
+  if (byte === 0xd0) return { val: buf.readInt8(off), end: off + 1 }
+
+  // 0xd1 - int16 (LE)
+  if (byte === 0xd1) return { val: buf.readInt16LE(off), end: off + 2 }
+
+  // 0xd2 - int32 (LE)
+  if (byte === 0xd2) return { val: buf.readInt32LE(off), end: off + 4 }
+
+  // 0xd3 - int64 (LE)
+  if (byte === 0xd3) {
+    let val = 0n
+    for (let i = 0; i < 8; i++) val += BigInt(buf[off + i]) << BigInt(i * 8)
+    return { val: Number(val), end: off + 8 }
+  }
+
+  // 0xd4 - fixext1, 0xd5 - fixext2, 0xd6 - fixext4, 0xd7 - fixext8, 0xd8 - fixext16
+  if (byte >= 0xd4 && byte <= 0xd8) {
+    const sizes = [1, 2, 4, 8, 16]
+    const size = sizes[byte - 0xd4]
+    return {
+      val: { type: buf[off], data: buf.slice(off + 1, off + 1 + size) },
+      end: off + 1 + size
+    }
+  }
+
+  // 0xd9 - str8
+  if (byte === 0xd9) {
+    const len = buf[off]
+    return { val: buf.slice(off + 1, off + 1 + len).toString('utf8'), end: off + 1 + len }
+  }
+
+  // 0xda - str16
+  if (byte === 0xda) {
+    const len = buf.readUInt16BE(off)
+    return { val: buf.slice(off + 2, off + 2 + len).toString('utf8'), end: off + 2 + len }
+  }
+
+  // 0xdb - str32
+  if (byte === 0xdb) {
+    const len = buf.readUInt32BE(off)
+    return { val: buf.slice(off + 4, off + 4 + len).toString('utf8'), end: off + 4 + len }
+  }
+
+  // 0xdc - array16
+  if (byte === 0xdc) {
+    const size = buf.readUInt16BE(off)
+    const arr = []
+    let o = off + 2
+    for (let i = 0; i < size; i++) {
+      if (o >= buf.length) break
+      const v = readValue(buf, o)
+      arr.push(v.val)
+      o = v.end
+    }
+    return { val: arr, end: o }
+  }
+
+  // 0xdd - array32
+  if (byte === 0xdd) {
+    const size = buf.readUInt32BE(off)
+    const arr = []
+    let o = off + 4
+    for (let i = 0; i < size; i++) {
+      if (o >= buf.length) break
+      const v = readValue(buf, o)
+      arr.push(v.val)
+      o = v.end
+    }
+    return { val: arr, end: o }
+  }
+
+  // 0xde - map16
+  if (byte === 0xde) {
+    const size = buf.readUInt16BE(off)
+    const obj = {}
+    let o = off + 2
+    for (let i = 0; i < size; i++) {
+      if (o >= buf.length) break
+      const k = readValue(buf, o)
+      o = k.end
+      if (o >= buf.length) break
+      const v = readValue(buf, o)
+      o = v.end
+      obj[k.val] = v.val
+    }
+    return { val: obj, end: o }
+  }
+
+  // 0xdf - map32
+  if (byte === 0xdf) {
+    const size = buf.readUInt32BE(off)
+    const obj = {}
+    let o = off + 4
+    for (let i = 0; i < size; i++) {
+      if (o >= buf.length) break
+      const k = readValue(buf, o)
+      o = k.end
+      if (o >= buf.length) break
+      const v = readValue(buf, o)
+      o = v.end
+      obj[k.val] = v.val
+    }
+    return { val: obj, end: o }
+  }
+
+  return { val: null, end: off + 1 }
 }
 
-// Decode objects using msgpack library
-function decodeObjects(buf) {
+// Decode a full buffer starting from offset 8 (skip 8-byte header)
+function decodeFull(buf) {
+  const results = []
+  let off = 8 // Skip 8-byte header
+
+  while (off < buf.length) {
+    try {
+      const result = readValue(buf, off)
+      if (result.val !== null) {
+        results.push(result.val)
+        off = result.end
+      } else {
+        off++
+      }
+    } catch (e) {
+      off++
+    }
+  }
+
+  return results
+}
+
+function extractObjects(data) {
   const objects = []
 
-  try {
-    // Skip 8-byte header
-    const msgpackData = buf.slice(8)
+  function isValidObject(arr) {
+    if (!Array.isArray(arr) || arr.length !== 12) return false
 
-    if (typeof msgpack !== 'undefined' && msgpack.decode) {
-      const decoded = msgpack.decode(msgpackData)
+    // First element: array with 1 element
+    if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
 
-      // Search for objects in the decoded structure
-      findObjects(decoded, objects)
-    }
-  } catch (e) {
-    console.log('YO: Object decode error:', e.message)
+    // 9th element (index 8): array with 3 elements
+    if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
+
+    // 10th element (index 9): array with 1 element
+    if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
+
+    // Last element (index 11): boolean
+    if (typeof arr[11] !== 'boolean') return false
+
+    return true
   }
 
+  function findObjects(arr, depth = 0) {
+    if (depth > 20) return // Prevent infinite recursion
+
+    for (const item of arr) {
+      if (Array.isArray(item)) {
+        if (isValidObject(item)) {
+          objects.push({
+            objectId: item[0][0],
+            staticId: item[1],
+            name: TILE_NAMES[staticId],
+            unk1: item[2],
+            unk2: item[3],
+            unk3: item[4],
+            level: item[5],
+            unk4: item[6],
+            unk5: item[7],
+            kingdom: item[8][0],
+            x: item[8][1],
+            y: item[8][2],
+            unk6: item[9][0],
+            extra: item[10],
+            isActive: item[11]
+          })
+        } else {
+          // Recurse into nested arrays
+          findObjects(item, depth + 1)
+        }
+      }
+    }
+  }
+
+  findObjects(data)
   return objects
 }
 
-// Recursively find objects in decoded structure
-function findObjects(data, objects, depth = 0) {
-  if (depth > 10) return // Prevent infinite recursion
+function getFirstValue(data) {
+  if (!data || data.length < 1) return null
 
-  if (Array.isArray(data)) {
-    // Check if this is a 12-element array with coords
-    if (data.length === 12) {
-      const coords = data[8]
-      if (Array.isArray(coords) && coords.length === 3) {
-        const [k, x, y] = coords
-        if (typeof k === 'number' && k >= 2 && k <= 2000) {
-          objects.push({
-            k,
-            x,
-            y,
-            staticId: data[1],
-            level: data[5],
-            name: TILE_NAMES[data[1]] || 'Unknown'
-          })
-        }
-      }
-    }
+  if (!Array.isArray(data)) return null
 
-    // Search in array elements
-    for (const item of data) {
-      if (Array.isArray(item)) {
-        findObjects(item, objects, depth + 1)
-      }
-    }
-  } else if (typeof data === 'object' && data !== null) {
-    // Search in object values
-    for (const key in data) {
-      const val = data[key]
-      if (Array.isArray(val)) {
-        findObjects(val, objects, depth + 1)
-      }
-    }
-  }
-}
-
-// Check response for TB: player tag and extract strings
-function extractPlayerData(resBytes) {
-  const result = {
-    hasPlayerTag: false,
-    playerTag: null,
-    strings: [],
-    hasObjects: false
-  }
-  
-  // Search for TB: pattern in raw bytes (player tags like "TB:12345")
-  const ascii = String.fromCharCode(...resBytes)
-  const tbMatch = ascii.match(/TB:(\d+)/g)
-  if (tbMatch) {
-    result.hasPlayerTag = true
-    result.playerTag = tbMatch
-  }
-  
-  // Extract printable strings (min 3 chars)
-  let str = ''
-  for (let i = 0; i < resBytes.length; i++) {
-    const c = resBytes[i]
-    if (c >= 32 && c <= 126) {
-      str += String.fromCharCode(c)
+  // recursivelly find the first non array value from data array
+  for (const item of data) {
+    if (Array.isArray(item)) {
+      const found = getFirstValue(item)
+      if (found !== null) return found
     } else {
-      if (str.length >= 3 && str.match(/[a-zA-Z]/)) {
-        result.strings.push(str)
-      }
-      str = ''
-    }
-  }
-  if (str.length >= 3 && str.match(/[a-zA-Z]/)) {
-    result.strings.push(str)
-  }
-  
-  return result
-}
-
-// Extract staticId and token from request using msgpack
-function extractStaticIdAndToken(reqBytes) {
-  let staticId = 0
-  let tokenHex = ''
-
-  if (reqBytes.length >= 40 && typeof msgpack !== 'undefined') {
-    try {
-      const data = msgpack.decode(reqBytes.slice(8))
-      if (Array.isArray(data) && data.length >= 3 && Array.isArray(data[2])) {
-        // data[2] is the session array [[staticId], token]
-        if (Array.isArray(data[2][0]) && data[2][0].length > 0) {
-          staticId = data[2][0][0]
-        }
-        if (data[2][1] instanceof Uint8Array || (data[2][1] && data[2][1].type === 'Buffer')) {
-          const tokenBytes = data[2][1].data || data[2][1]
-          tokenHex = Array.from(tokenBytes)
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('')
-            .toUpperCase()
-        }
-      }
-    } catch (e) {
-      console.log('YO: Error decoding staticId/token:', e.message)
+      return item
     }
   }
 
-  // Fallback: extract token directly from bytes 28-39
-  if (!tokenHex && reqBytes.length >= 40) {
-    const tokenBytes = reqBytes.slice(28, 40)
-    tokenHex = Array.from(tokenBytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('')
-      .toUpperCase()
-  }
-
-  return { staticId, tokenHex }
+  return null
 }
 
 const origFetch = window.fetch
@@ -293,51 +441,32 @@ function interceptFetch() {
       const resBytes = new Uint8Array(await resClone.arrayBuffer())
       const resB64 = btoa(String.fromCharCode(...resBytes))
 
-      // Decode using msgpack library
-      const { viewX, viewY, viewXBE, viewYBE } = extractViewCoordsMsgpack(reqBytes)
-      const raw = extractViewCoordsRaw(reqBytes)
-      const { staticId, tokenHex } = extractStaticIdAndToken(reqBytes)
-
       const kingdomMatch = reqUrl.match(/rubens-realm(\d+)/)
       const kingdom = kingdomMatch ? parseInt(kingdomMatch[1]) : 0
 
-      const objects = decodeObjects(resBytes)
-      const playerData = extractPlayerData(resBytes)
+      // Decode response msgpack
+      let decodedResponse = decodeFull(resBytes)
+
+      //scan the array and extract first value from array
+      const opCode = getFirstValue(decodedResponse)
+
+      // Find objects and player data in decoded structure
+      const objects = extractObjects(decodedResponse)
 
       const capture = {
         url: reqUrl,
         kingdom,
-        viewX,
-        viewY,
-        viewXBE,
-        viewYBE,
-        viewX_raw: raw.viewX,
-        viewY_raw: raw.viewY,
-        staticId,
-        token: tokenHex,
+        opCode,
         requestB64: reqB64,
         responseB64: resB64,
         responseSize: resBytes.length,
         objectCount: objects.length,
         hasObjects: objects.length > 0,
-        hasPlayerTag: playerData.hasPlayerTag,
-        playerTags: playerData.playerTag,
-        strings: playerData.strings.slice(0, 10),
-        objects: objects.slice(0, 5),
+        objects,
         timestamp: new Date().toISOString()
       }
-      
-      const hasFlag = capture.hasObjects ? '📦' : (capture.hasPlayerTag ? '👤' : '')
-      console.log(
-        `YO: ${hasFlag} k${kingdom} viewX=${raw.viewX} viewY=${raw.viewY} | objs=${objects.length} playerTags=${playerData.hasPlayerTag ? playerData.playerTag.length : 0}`
-      )
-      
-      if (capture.hasObjects || capture.hasPlayerTag) {
-        captured.push(capture)
-        if (playerData.strings.length > 0) {
-          console.log('   Strings:', playerData.strings.slice(0, 5).join(', '))
-        }
-      }
+
+      captured.push(capture)
     } catch (e) {
       console.error('YO: Capture error:', e)
     }
@@ -348,21 +477,14 @@ function interceptFetch() {
 
 interceptFetch()
 
-console.log('YO: ✅ Packet capture v5 active! (using msgpack-lite library)')
-console.log('YO: ')
-console.log('YO: IMPORTANT: Load msgpack-lite library first:')
-console.log(
-  'YO:   <script src="https://cdn.jsdelivr.net/npm/msgpack-lite/dist/msgpack.min.js"></script>'
-)
+console.log('YO: ✅ Packet capture v5 active!  ')
 console.log('YO: ')
 console.log('YO: Navigate in game - captures show:')
-console.log('YO:   [✓/⚠] viewX={msgpack} viewY={msgpack} (raw: {raw})')
 console.log('YO: ')
 console.log('YO: Commands:')
 console.log('YO:   captured                    - All captures with objects/players')
 console.log('YO:   capturedUrls               - Unique URLs')
 console.log('YO:   exportWithObjects()        - Download captures with objects')
-console.log('YO:   exportWithPlayers()         - Download captures with player data')
 console.log('YO:   exportAll()                - Download all captures')
 console.log('YO:   exportURL()                - Download sorted URLs')
 console.log('YO:   clearCaptures()            - Clear all')
@@ -378,19 +500,6 @@ window.exportWithObjects = function () {
   a.click()
   URL.revokeObjectURL(url)
   console.log('📥 Downloaded', withObjects.length, 'captures with objects')
-}
-
-window.exportWithPlayers = function () {
-  const withPlayers = captured.filter(c => c.hasPlayerTag)
-  const json = JSON.stringify(withPlayers, null, 2)
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'captures-with-players.json'
-  a.click()
-  URL.revokeObjectURL(url)
-  console.log('📥 Downloaded', withPlayers.length, 'captures with player data')
 }
 
 window.exportAll = function () {
