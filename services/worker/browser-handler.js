@@ -2,6 +2,8 @@ import path from 'node:path'
 import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { ImageProcessor } from './image-processor.js'
+import { getRedisClient } from '../shared/redis-client.js'
+import { REDIS_KEYS } from '../shared/constants.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DEBUG = process.env.DEBUG || false
@@ -16,6 +18,8 @@ export class BrowserHandler {
     this.code = null
     this.imageProcessor = new ImageProcessor()
     this.isInitialized = false
+
+    this.redis = null
   }
 
   async fileExists(filePath) {
@@ -427,8 +431,415 @@ export class BrowserHandler {
     await this.zoomingIn(DEBUG)
     await this.page.waitForTimeout(2000)
 
+    await this.setupResponseInterceptor()
+
     this.isInitialized = true
     console.log(`[${this.config.workerId}] ✅ Browser initialized and ready`)
+  }
+
+  async setupResponseInterceptor() {
+    this.redis = getRedisClient()
+
+    this.page.on('response', async response => {
+      const url = response.url()
+
+      if (!url.includes('rubens-realm')) return
+
+      try {
+        const buffer = await response.body()
+        if (!buffer || buffer.length < 10) return
+
+        const result = this.decodeAndCheckResponse(url, buffer)
+        const mercs = result.filter(o => o.staticId === 400)
+        if (mercs && mercs.length > 0) {
+          await this.pushMercenaryToRedis(mercs)
+        }
+      } catch (e) {
+        // Ignore errors
+      }
+    })
+
+    console.log(`[${this.config.workerId}] Response interceptor active (with Redis)`)
+  }
+
+  decodeAndCheckResponse(url, buffer) {
+    try {
+      if (buffer.length <= 8) return null
+
+      const decoded = this.decodeFull(buffer)
+
+      if (!decoded || !Array.isArray(decoded)) return null
+
+      const objects = this.findMapObjects(decoded)
+
+      if (objects.length > 0) {
+        if (DEBUG) {
+          console.log(
+            `[${this.config.workerId}] 📦 Response: k${kingdom} objects=${objects.length}}]...`
+          )
+        }
+      }
+
+      return objects
+    } catch (e) {
+      return null
+    }
+  }
+
+  async pushMercenaryToRedis(result) {
+    if (result.length < 1 || !this.redis) return
+
+    for (obj of result) {
+      const { kingdom, x, y } = obj
+
+      const mercData = {
+        k: kingdom,
+        x,
+        y,
+        confidence: 100,
+        text: `k:${kingdom}, x:${x}, y:${y}`,
+        timestamp: new Date().toISOString()
+      }
+
+      try {
+        await this.redis.lpush(REDIS_KEYS.MERCENARIES_LIST, JSON.stringify(mercData))
+        await this.redis.rpush(REDIS_KEYS.CHAT_PENDING_LIST, JSON.stringify(mercData))
+        console.log(`[${this.config.workerId}] ✅ Pushed mercenary to Redis: k${k}, x:${x}, y:${y}`)
+      } catch (e) {
+        console.error(`[${this.config.workerId}] ❌ Redis error:`, e.message)
+      }
+    }
+  }
+
+  decodeFull(buf) {
+    const results = []
+    let off = 8 // Skip 8-byte header
+
+    while (off < buf.length) {
+      try {
+        const result = this.readValue(buf, off)
+        if (result.val !== null) {
+          results.push(result.val)
+          off = result.end
+        } else {
+          off++
+        }
+      } catch (e) {
+        off++
+      }
+    }
+
+    return results
+  }
+
+  readValue(buf, off) {
+    if (off >= buf.length) return { val: null, end: buf.length }
+    const byte = buf[off++]
+
+    // Positive fixint (0xxxxxxx)
+    if ((byte & 0x80) === 0) return { val: byte, end: off }
+
+    // Negative fixint (111xxxxx)
+    if ((byte & 0xe0) === 0xe0) return { val: byte - 256, end: off }
+
+    // Fixmap (1000xxxx)
+    if ((byte & 0xf0) === 0x80) {
+      const size = byte & 0x0f
+      const obj = {}
+      let o = off
+      for (let i = 0; i < size; i++) {
+        if (o >= buf.length) break
+        const k = readValue(buf, o)
+        o = k.end
+        if (o >= buf.length) break
+        const v = readValue(buf, o)
+        o = v.end
+        obj[k.val] = v.val
+      }
+      return { val: obj, end: o }
+    }
+
+    // Fixarray (1001xxxx)
+    if ((byte & 0xf0) === 0x90) {
+      const size = byte & 0x0f
+      const arr = []
+      let o = off
+      for (let i = 0; i < size; i++) {
+        if (o >= buf.length) break
+        const v = readValue(buf, o)
+        arr.push(v.val)
+        o = v.end
+      }
+      return { val: arr, end: o }
+    }
+
+    // Fixstr (101xxxxx)
+    if ((byte & 0xe0) === 0xa0) {
+      const len = byte & 0x1f
+      return { val: buf.slice(off, off + len).toString('utf8'), end: off + len }
+    }
+
+    // 0xc0 - nil
+    if (byte === 0xc0) return { val: null, end: off }
+
+    // 0xc1 - never used
+
+    // 0xc2 - false
+    if (byte === 0xc2) return { val: false, end: off }
+
+    // 0xc3 - true
+    if (byte === 0xc3) return { val: true, end: off }
+
+    // 0xc4 - bin8
+    if (byte === 0xc4) {
+      const len = buf[off]
+      return { val: buf.slice(off + 1, off + 1 + len), end: off + 1 + len }
+    }
+
+    // 0xc5 - bin16
+    if (byte === 0xc5) {
+      const len = buf.readUInt16BE(off)
+      return { val: buf.slice(off + 2, off + 2 + len), end: off + 2 + len }
+    }
+
+    // 0xc6 - bin32
+    if (byte === 0xc6) {
+      const len = buf.readUInt32BE(off)
+      return { val: buf.slice(off + 4, off + 4 + len), end: off + 4 + len }
+    }
+
+    // 0xc7 - ext8, 0xc8 - ext16, 0xc9 - ext32
+    if (byte >= 0xc7 && byte <= 0xc9) {
+      let len, dataOff
+      if (byte === 0xc7) {
+        len = buf[off]
+        dataOff = off + 2
+      } else if (byte === 0xc8) {
+        len = buf.readUInt16BE(off)
+        dataOff = off + 3
+      } else {
+        len = buf.readUInt32BE(off)
+        dataOff = off + 5
+      }
+      const type = buf[dataOff]
+      const data = buf.slice(dataOff + 1, dataOff + 1 + len - 1)
+      return { val: { type, data }, end: dataOff + len }
+    }
+
+    // 0xca - float32
+    if (byte === 0xca) {
+      const view = new DataView(buf.buffer, buf.byteOffset + off)
+      return { val: view.getFloat32(0), end: off + 4 }
+    }
+
+    // 0xcb - float64
+    if (byte === 0xcb) {
+      const view = new DataView(buf.buffer, buf.byteOffset + off)
+      return { val: view.getFloat64(0), end: off + 8 }
+    }
+
+    // 0xcc - uint8
+    if (byte === 0xcc) return { val: buf[off], end: off + 1 }
+
+    // 0xcd - uint16 (LE for coordinates)
+    if (byte === 0xcd) return { val: buf.readUInt16LE(off), end: off + 2 }
+
+    // 0xce - uint32 (LE for coordinates)
+    if (byte === 0xce) return { val: buf.readUInt32LE(off), end: off + 4 }
+
+    // 0xcf - uint64
+    if (byte === 0xcf) {
+      let val = 0n
+      for (let i = 0; i < 8; i++) val += BigInt(buf[off + i]) << BigInt(i * 8)
+      return { val: Number(val), end: off + 8 }
+    }
+
+    // 0xd0 - int8
+    if (byte === 0xd0) return { val: buf.readInt8(off), end: off + 1 }
+
+    // 0xd1 - int16 (LE)
+    if (byte === 0xd1) return { val: buf.readInt16LE(off), end: off + 2 }
+
+    // 0xd2 - int32 (LE)
+    if (byte === 0xd2) return { val: buf.readInt32LE(off), end: off + 4 }
+
+    // 0xd3 - int64 (LE)
+    if (byte === 0xd3) {
+      let val = 0n
+      for (let i = 0; i < 8; i++) val += BigInt(buf[off + i]) << BigInt(i * 8)
+      return { val: Number(val), end: off + 8 }
+    }
+
+    // 0xd4 - fixext1, 0xd5 - fixext2, 0xd6 - fixext4, 0xd7 - fixext8, 0xd8 - fixext16
+    if (byte >= 0xd4 && byte <= 0xd8) {
+      const sizes = [1, 2, 4, 8, 16]
+      const size = sizes[byte - 0xd4]
+      return {
+        val: { type: buf[off], data: buf.slice(off + 1, off + 1 + size) },
+        end: off + 1 + size
+      }
+    }
+
+    // 0xd9 - str8
+    if (byte === 0xd9) {
+      const len = buf[off]
+      return { val: buf.slice(off + 1, off + 1 + len).toString('utf8'), end: off + 1 + len }
+    }
+
+    // 0xda - str16
+    if (byte === 0xda) {
+      const len = buf.readUInt16BE(off)
+      return { val: buf.slice(off + 2, off + 2 + len).toString('utf8'), end: off + 2 + len }
+    }
+
+    // 0xdb - str32
+    if (byte === 0xdb) {
+      const len = buf.readUInt32BE(off)
+      return { val: buf.slice(off + 4, off + 4 + len).toString('utf8'), end: off + 4 + len }
+    }
+
+    // 0xdc - array16
+    if (byte === 0xdc) {
+      const size = buf.readUInt16BE(off)
+      const arr = []
+      let o = off + 2
+      for (let i = 0; i < size; i++) {
+        if (o >= buf.length) break
+        const v = readValue(buf, o)
+        arr.push(v.val)
+        o = v.end
+      }
+      return { val: arr, end: o }
+    }
+
+    // 0xdd - array32
+    if (byte === 0xdd) {
+      const size = buf.readUInt32BE(off)
+      const arr = []
+      let o = off + 4
+      for (let i = 0; i < size; i++) {
+        if (o >= buf.length) break
+        const v = readValue(buf, o)
+        arr.push(v.val)
+        o = v.end
+      }
+      return { val: arr, end: o }
+    }
+
+    // 0xde - map16
+    if (byte === 0xde) {
+      const size = buf.readUInt16BE(off)
+      const obj = {}
+      let o = off + 2
+      for (let i = 0; i < size; i++) {
+        if (o >= buf.length) break
+        const k = readValue(buf, o)
+        o = k.end
+        if (o >= buf.length) break
+        const v = readValue(buf, o)
+        o = v.end
+        obj[k.val] = v.val
+      }
+      return { val: obj, end: o }
+    }
+
+    // 0xdf - map32
+    if (byte === 0xdf) {
+      const size = buf.readUInt32BE(off)
+      const obj = {}
+      let o = off + 4
+      for (let i = 0; i < size; i++) {
+        if (o >= buf.length) break
+        const k = readValue(buf, o)
+        o = k.end
+        if (o >= buf.length) break
+        const v = readValue(buf, o)
+        o = v.end
+        obj[k.val] = v.val
+      }
+      return { val: obj, end: o }
+    }
+
+    return { val: null, end: off + 1 }
+  }
+
+  extractObjects(data) {
+    const objects = []
+
+    function isValidObject(arr) {
+      if (!Array.isArray(arr) || arr.length !== 12) return false
+
+      // First element: array with 1 element
+      if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
+
+      // 9th element (index 8): array with 3 elements
+      if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
+
+      // 10th element (index 9): array with 1 element
+      if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
+
+      // Last element (index 11): boolean
+      if (typeof arr[11] !== 'boolean') return false
+
+      return true
+    }
+
+    function findObjects(arr, depth = 0) {
+      if (depth > 20) return // Prevent infinite recursion
+
+      for (const item of arr) {
+        if (Array.isArray(item)) {
+          if (isValidObject(item)) {
+            objects.push({
+              objectId: item[0][0],
+              staticId: item[1],
+              unk1: item[2],
+              unk2: item[3],
+              unk3: item[4],
+              level: item[5],
+              unk4: item[6],
+              unk5: item[7],
+              kingdom: item[8][0],
+              x: item[8][1],
+              y: item[8][2],
+              unk6: item[9][0],
+              extra: item[10],
+              isActive: item[11]
+            })
+          } else {
+            // Recurse into nested arrays
+            findObjects(item, depth + 1)
+          }
+        }
+      }
+    }
+
+    findObjects(data)
+    return objects
+  }
+
+  findMapObjects(data) {
+    if (!data || data.length < 1) return
+    // [ [312,12345], [[Buffer,369,[], [[obj1][obj2]...]]]]
+    // [ 400, 399, Buffer, 369,[],[[obj1][obj2]...]]
+    let opcode = 0
+    if (Array.isArray(data)) {
+      const header = data[0]
+      if (Array.isArray(header)) {
+        opcode = header[0] //312
+      } else {
+        opcode = header // 400
+      }
+    }
+
+    const validOpCodes = [312, 400]
+    if (!validOpCodes.includes(opcode)) return []
+
+    const objects = this.extractObjects(data)
+
+    console.log('Found ' + objects.length + ' objects\n')
+
+    return objects
   }
 
   setWorkerCode(code) {
