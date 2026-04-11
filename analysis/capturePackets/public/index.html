@@ -425,7 +425,7 @@
           .map(c => {
             const url = new URL(c.url)
             const path = url.pathname + url.search
-            const size = c.bodySize ? `(${c.bodySize}B)` : ''
+            const size = c.response?.bodySize ? `(${c.response.bodySize}B)` : ''
             const selected = c.id === selectedId ? 'selected' : ''
             const myTag = c.isMyPacket ? '<span class="my-packet-tag">ME</span>' : ''
             return `<div class="capture-item ${selected}" onclick="showCapture(${c.id}, 'captures')">
@@ -446,7 +446,7 @@
           .map(p => {
             const url = new URL(p.url)
             const path = url.pathname + url.search
-            const size = p.bodySize ? `(${p.bodySize}B)` : ''
+            const size = p.response?.bodySize ? `(${p.response.bodySize}B)` : ''
             return `<div class="capture-item my-packet" onclick="showCapture(${p.id}, 'myplayer')">
             <div class="url">${path}</div>
             <div class="meta">ID:${p.id} | Op:${p.opCode} | ${size}</div>
@@ -512,7 +512,7 @@
         s += `URL: ${c.url}\n`
         s += `Opcode: ${c.opCode}\n`
         s += `Status: ${c.status}\n`
-        s += `Size: ${c.bodySize} bytes\n`
+        s += `Size: ${c.response?.bodySize || 0} bytes\n`
         if (c.request) {
           s += `\n=== REQUEST ===\n`
           s += `Method: ${c.request.method}\n`
@@ -521,7 +521,7 @@
           }
         }
         s += `\n=== RESPONSE ===\n`
-        s += `Decoded:\n${JSON.stringify(c.decodedResponse, null, 2)}\n`
+        s += `Decoded:\n${JSON.stringify(c.response?.decodedResponse || [], null, 2)}\n`
         if (c.objects && c.objects.length > 0) {
           s += `\n=== OBJECTS (${c.objects.length}) ===\n`
           s += JSON.stringify(c.objects, null, 2)
