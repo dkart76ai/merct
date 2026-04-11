@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Packet Capture</title>
     <style>
-      * {
-        box-sizing: border-box;
-      }
+      * { box-sizing: border-box; }
       body {
         font-family: 'Segolas', 'Consolas', monospace;
         margin: 0;
@@ -15,15 +13,8 @@
         background: #1e1e1e;
         color: #d4d4d4;
       }
-      .header {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .header h1 {
-        color: #569cd6;
-        margin: 0;
-        font-size: 24px;
-      }
+      .header { text-align: center; margin-bottom: 20px; }
+      .header h1 { color: #569cd6; margin: 0; font-size: 24px; }
 
       .controls {
         display: flex;
@@ -41,50 +32,24 @@
         cursor: pointer;
         font-size: 14px;
       }
-      button:hover {
-        background: #1177bb;
-      }
-      button:disabled {
-        background: #444;
-        cursor: not-allowed;
-      }
-      button.danger {
-        background: #c00;
-      }
-      button.danger:hover {
-        background: #e00;
-      }
+      button:hover { background: #1177bb; }
+      button:disabled { background: #444; cursor: not-allowed; }
+      button.danger { background: #c00; }
+      button.danger:hover { background: #e00; }
 
-      input {
-        padding: 10px;
-        background: #2d2d2d;
-        border: 1px solid #444;
-        border-radius: 4px;
-        color: #d4d4d4;
-        font-family: inherit;
-      }
-
-      .status {
-        padding: 10px 20px;
-        background: #2d2d2d;
-        border-radius: 4px;
-        font-size: 14px;
-      }
-      .status.connected {
-        background: #1e3a1e;
-        color: #4caf50;
-      }
-      .status.disconnected {
-        background: #3a1e1e;
-        color: #f44336;
-      }
-
-      .info {
+      input[type='checkbox'] { width: 18px; height: 18px; cursor: pointer; }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         padding: 10px 15px;
         background: #2d2d2d;
         border-radius: 4px;
-        font-size: 13px;
+        cursor: pointer;
+        font-size: 14px;
       }
+      label:hover { background: #3a3a3a; }
+      label.active { background: #1e3a1e; color: #4caf50; }
 
       .panel {
         background: #252526;
@@ -99,144 +64,172 @@
         border-bottom: 1px solid #3c3c3c;
         font-size: 14px;
       }
-      #log {
-        background: #1e1e1e;
-        padding: 10px;
-        max-height: 200px;
-        overflow-y: auto;
-        font-size: 12px;
-        white-space: pre-wrap;
-      }
-      .count {
-        color: #569cd6;
-        font-weight: bold;
-        margin-left: 15px;
-      }
+      .count { color: #569cd6; font-weight: bold; margin-left: 15px; }
 
-      .captures {
-        max-height: 400px;
-        overflow-y: auto;
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
       }
+      @media (max-width: 1200px) { .main-grid { grid-template-columns: 1fr; } }
+
+      .captures-list { max-height: 300px; overflow-y: auto; }
       .capture-item {
         padding: 10px 15px;
         border-bottom: 1px solid #3c3c3c;
         cursor: pointer;
         font-size: 13px;
       }
-      .capture-item:hover {
-        background: #2d2d2d;
-      }
-      .capture-item .url {
-        color: #9cdcfe;
-      }
-      .capture-item .meta {
-        color: #888;
-        font-size: 11px;
-        margin-top: 4px;
+      .capture-item:hover { background: #2d2d2d; }
+      .capture-item.selected { background: #2d4a2d; }
+      .capture-item.my-packet { background: #1e3a1e; }
+      .capture-item.my-packet:hover { background: #2a4a2a; }
+      .capture-item .url { color: #9cdcfe; }
+      .capture-item .meta { color: #888; font-size: 11px; margin-top: 4px; }
+
+      #detail {
+        width: 100%;
+        height: 300px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border: none;
+        padding: 10px;
+        font-family: 'Consolas', monospace;
+        font-size: 12px;
+        resize: vertical;
+        border-radius: 0 0 8px 8px;
       }
 
-      .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-      }
-      .modal.active {
+      .opcodes-list {
         display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .modal-content {
-        background: #252526;
-        border-radius: 8px;
-        padding: 20px;
-        max-width: 90%;
-        max-height: 90%;
-        overflow: auto;
-      }
-      .modal-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 15px;
-      }
-      .modal-header h3 {
-        margin: 0;
-        color: #569cd6;
-      }
-      .modal-close {
-        background: none;
-        border: none;
-        color: #888;
-        font-size: 20px;
-        cursor: pointer;
-      }
-      .modal-close:hover {
-        color: #fff;
-      }
-      pre {
-        background: #1e1e1e;
+        flex-wrap: wrap;
+        gap: 8px;
         padding: 15px;
-        border-radius: 4px;
-        overflow: auto;
-        max-height: 60vh;
-        font-size: 12px;
-        margin: 0;
+        max-height: 150px;
+        overflow-y: auto;
       }
+      .opcode-tag {
+        padding: 4px 10px;
+        background: #0e639c;
+        border-radius: 4px;
+        font-size: 12px;
+        color: white;
+      }
+
+      #log {
+        background: #1e1e1e;
+        padding: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+
+      .empty-state { padding: 20px; color: #666; text-align: center; }
+      .my-packet-tag { background: #2e5e2e; padding: 2px 6px; border-radius: 3px; font-size: 10px; margin-right: 5px; }
     </style>
   </head>
   <body>
-    <div class="header">
-      <h1>Packet Capture Tool</h1>
-    </div>
+    <div class="header"><h1>Packet Capture Tool</h1></div>
 
     <div class="controls">
       <button id="btnStart">Start Browser</button>
       <button id="btnStop" disabled class="danger">Stop</button>
-      <div class="status disconnected" id="status">Disconnected</div>
+      <label id="captureToggle">
+        <input type="checkbox" id="cbCapture" />
+        <span>Capture Packets</span>
+      </label>
     </div>
 
     <div class="controls">
-      <button id="btnRefresh" disabled>Refresh</button>
-      <button id="btnExport" disabled>Export JSON</button>
-      <button id="btnClear" disabled class="danger">Clear</button>
+      <button id="btnRefresh">Refresh</button>
+      <button id="btnExport">Export JSON</button>
+      <button id="btnClear" class="danger">Clear</button>
+      <button id="btnSaveOpcodes">Save Opcodes</button>
+      <button id="btnExportMyPlayer">Export My Player</button>
+      <button id="btnExportUnknown">Export Unknown</button>
+      <button id="btnExportChat">Export Chat</button>
+      <button id="btnExportDb">Export DB</button>
       <span class="count" id="captureCount">Captures: 0</span>
     </div>
 
-    <div class="info">Captures responses from rubens-realm URLs automatically.</div>
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          Captured Packets
+          <span class="count" id="listCount">(0)</span>
+        </div>
+        <div class="captures-list" id="capturesList">
+          <div class="empty-state">Click "Capture Packets" to start</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Packet Details</div>
+        <textarea id="detail" readonly placeholder="Click on a packet to see details..."></textarea>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        Unique Opcodes
+        <span class="count" id="opcodeCount">(0)</span>
+      </div>
+      <div class="opcodes-list" id="opcodesList">
+        <div class="empty-state">No opcodes captured yet</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        My Player Packets
+        <span class="count" id="myPlayerCount">(0)</span>
+        <span id="internalIdDisplay" style="margin-left: 20px; color: #4caf50;"></span>
+      </div>
+      <div class="captures-list" id="myPlayerList">
+        <div class="empty-state">No player packets yet</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        Unknown StaticIDs
+        <span class="count" id="unknownCount">(0)</span>
+      </div>
+      <div class="captures-list" id="unknownList" style="max-height: 200px;">
+        <div class="empty-state">No unknown static IDs</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        Chat StaticIDs
+        <span class="count" id="chatCount">(0)</span>
+      </div>
+      <div class="captures-list" id="chatList" style="max-height: 150px;">
+        <div class="empty-state">No chat static IDs from MESG messages</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        Static ID Database
+        <span class="count" id="dbCount">(0)</span>
+      </div>
+      <div class="captures-list" id="dbList" style="max-height: 250px;">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
 
     <div class="panel">
       <div class="panel-header">Log</div>
       <div id="log"></div>
     </div>
 
-    <div class="panel">
-      <div class="panel-header">
-        Captured Responses
-        <span class="count" id="listCount">(0)</span>
-      </div>
-      <div class="captures" id="capturesList">
-        <div style="padding: 20px; color: #666; text-align: center">
-          No captures yet. Start the browser and interact with the game.
-        </div>
-      </div>
-    </div>
-
-    <div class="modal" id="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Response Details</h3>
-          <button class="modal-close" onclick="closeModal()">&times;</button>
-        </div>
-        <pre id="modalContent"></pre>
-      </div>
-    </div>
-
     <script>
       const API = '/api'
+      let selectedId = null
+      let refreshInterval = null
 
       function log(msg) {
         const el = document.getElementById('log')
@@ -244,16 +237,19 @@
         el.scrollTop = el.scrollHeight
       }
 
-      function updateStatus(connected) {
-        const el = document.getElementById('status')
-        el.textContent = connected ? 'Connected' : 'Disconnected'
-        el.className = 'status ' + (connected ? 'connected' : 'disconnected')
-
+      function updateUI(connected) {
         document.getElementById('btnStart').disabled = connected
         document.getElementById('btnStop').disabled = !connected
         document.getElementById('btnRefresh').disabled = !connected
         document.getElementById('btnExport').disabled = !connected
-        document.getElementById('btnClear').disabled = !connected
+        document.getElementById('cbCapture').disabled = !connected
+      }
+
+      function updateCaptureToggle(enabled) {
+        const label = document.getElementById('captureToggle')
+        const cb = document.getElementById('cbCapture')
+        cb.checked = enabled
+        label.className = enabled ? 'active' : ''
       }
 
       async function refreshCaptures() {
@@ -261,115 +257,281 @@
           const res = await fetch(API + '/captures')
           const data = await res.json()
           if (data.success) {
-            const count = data.count || 0
-            document.getElementById('captureCount').textContent = 'Captures: ' + count
-            document.getElementById('listCount').textContent = '(' + count + ')'
+            document.getElementById('captureCount').textContent = 'Captures: ' + data.count
+            document.getElementById('listCount').textContent = '(' + data.count + ')'
             renderCaptures(data.captures || [])
           }
-        } catch (e) {
-          log('Error: ' + e.message)
+        } catch (e) { log('Error: ' + e.message) }
+      }
+
+      async function refreshOpcodes() {
+        try {
+          const res = await fetch(API + '/opcodes')
+          const data = await res.json()
+          if (data.success) {
+            document.getElementById('opcodeCount').textContent = '(' + data.count + ')'
+            renderOpcodes(data.opcodes || [])
+          }
+        } catch (e) { log('Error: ' + e.message) }
+      }
+
+      async function refreshMyPlayer() {
+        try {
+          const res = await fetch(API + '/myplayer')
+          const data = await res.json()
+          if (data.success) {
+            document.getElementById('myPlayerCount').textContent = '(' + data.count + ')'
+            document.getElementById('internalIdDisplay').textContent = 
+              data.internalPlayerId ? `Internal ID: ${data.internalPlayerId}` : ''
+            renderMyPlayerPackets(data.packets || [])
+          }
+        } catch (e) { log('Error: ' + e.message) }
+      }
+
+      async function refreshUnknownStaticIds() {
+        try {
+          const res = await fetch(API + '/unknown-staticids')
+          const data = await res.json()
+          if (data.success) {
+            document.getElementById('unknownCount').textContent = '(' + data.count + ')'
+            renderUnknownStaticIds(data.items || [])
+          }
+        } catch (e) { log('Error: ' + e.message) }
+      }
+
+      async function refreshChatStaticIds() {
+        try {
+          const res = await fetch(API + '/chat-staticids')
+          const data = await res.json()
+          if (data.success) {
+            document.getElementById('chatCount').textContent = '(' + data.count + ')'
+            renderChatStaticIds(data.items || [])
+          }
+        } catch (e) { log('Error: ' + e.message) }
+      }
+
+      async function refreshStaticDb() {
+        try {
+          const res = await fetch(API + '/static-db')
+          const data = await res.json()
+          if (data.success) {
+            document.getElementById('dbCount').textContent = '(' + data.count + ')'
+            renderStaticDb(data.items || [])
+          }
+        } catch (e) { log('Error: ' + e.message) }
+      }
+
+      function renderStaticDb(items) {
+        const el = document.getElementById('dbList')
+        if (items.length === 0) {
+          el.innerHTML = '<div class="empty-state">No entries in database</div>'
+          return
         }
+        el.innerHTML = items.map(item => {
+          const name = item.name || 'Unknown'
+          const entryType = item.entryType || 'N/A'
+          const level = item.level !== undefined ? `Lv${item.level}` : ''
+          return `<div class="capture-item">
+            <div class="url">${item.staticId} - <span style="color:#4caf50">${name}</span></div>
+            <div class="meta">Type: ${entryType} ${level ? '| ' + level : ''}</div>
+          </div>`
+        }).join('')
       }
 
       function renderCaptures(captures) {
         const el = document.getElementById('capturesList')
         if (captures.length === 0) {
-          el.innerHTML =
-            '<div style="padding: 20px; color: #666; text-align: center;">No captures yet.</div>'
+          el.innerHTML = '<div class="empty-state">No captures yet</div>'
           return
         }
-
-        el.innerHTML = captures
-          .map(c => {
-            const url = new URL(c.url)
-            const path = url.pathname + url.search
-            const size = c.bodySize ? `(${formatSize(c.bodySize)})` : ''
-            return `
-          <div class="capture-item" onclick="showCapture(${c.id})">
-            <div class="url">${path}</div>
-            <div class="meta">ID: ${c.id} | ${c.status} | ${size} | ${new Date(c.timestamp).toLocaleTimeString()}</div>
-          </div>
-        `
-          })
-          .join('')
+        el.innerHTML = captures.map(c => {
+          const url = new URL(c.url)
+          const path = url.pathname + url.search
+          const size = c.bodySize ? `(${c.bodySize}B)` : ''
+          const selected = c.id === selectedId ? 'selected' : ''
+          const myTag = c.isMyPacket ? '<span class="my-packet-tag">ME</span>' : ''
+          return `<div class="capture-item ${selected}" onclick="showCapture(${c.id}, 'captures')">
+            ${myTag}<div class="url">${path}</div>
+            <div class="meta">ID:${c.id} | Op:${c.opCode} | ${size}</div>
+          </div>`
+        }).join('')
       }
 
-      async function showCapture(id) {
-        const res = await fetch(API + '/captures/' + id)
+      function renderMyPlayerPackets(packets) {
+        const el = document.getElementById('myPlayerList')
+        if (packets.length === 0) {
+          el.innerHTML = '<div class="empty-state">No player packets yet</div>'
+          return
+        }
+        el.innerHTML = packets.map(p => {
+          const url = new URL(p.url)
+          const path = url.pathname + url.search
+          const size = p.bodySize ? `(${p.bodySize}B)` : ''
+          return `<div class="capture-item my-packet" onclick="showCapture(${p.id}, 'myplayer')">
+            <div class="url">${path}</div>
+            <div class="meta">ID:${p.id} | Op:${p.opCode} | ${size}</div>
+          </div>`
+        }).join('')
+      }
+
+      function renderUnknownStaticIds(items) {
+        const el = document.getElementById('unknownList')
+        if (items.length === 0) {
+          el.innerHTML = '<div class="empty-state">No unknown static IDs</div>'
+          return
+        }
+        el.innerHTML = items.map(item => {
+          return `<div class="capture-item">
+            <div class="url">StaticID: ${item.staticId}</div>
+          </div>`
+        }).join('')
+      }
+
+      function renderChatStaticIds(items) {
+        const el = document.getElementById('chatList')
+        if (items.length === 0) {
+          el.innerHTML = '<div class="empty-state">No chat static IDs from MESG messages</div>'
+          return
+        }
+        el.innerHTML = items.map(item => {
+          return `<div class="capture-item">
+            <div class="url">StaticID: ${item.staticId} <span style="color:#4caf50">x${item.count}</span></div>
+            <div class="meta">EntryType: ${item.entryType} | Name: ${item.name}</div>
+          </div>`
+        }).join('')
+      }
+
+      function renderOpcodes(opcodes) {
+        const el = document.getElementById('opcodesList')
+        if (opcodes.length === 0) {
+          el.innerHTML = '<div class="empty-state">No opcodes captured yet</div>'
+          return
+        }
+        el.innerHTML = opcodes.map(op => `<span class="opcode-tag">${op}</span>`).join('')
+      }
+
+      async function showCapture(id, source) {
+        selectedId = id
+        const endpoint = source === 'myplayer' ? '/myplayer/' + id : '/captures/' + id
+        const res = await fetch(API + endpoint)
         const data = await res.json()
         if (data.success) {
-          const c = data.capture
-          const content = JSON.stringify(
-            {
-              url: c.url,
-              status: c.status,
-              headers: c.headers,
-              bodySize: c.bodySize,
-              bodyB64: c.bodyB64 ? '(base64 encoded)' : null,
-              timestamp: c.timestamp
-            },
-            null,
-            2
-          )
-          document.getElementById('modalContent').textContent = content
-          document.getElementById('modal').classList.add('active')
+          const c = data.packet || data.capture
+          document.getElementById('detail').value = formatDetail(c)
         }
       }
 
-      function closeModal() {
-        document.getElementById('modal').classList.remove('active')
+      function formatDetail(c) {
+        let s = ''
+        s += `=== PACKET #${c.id} ===\n`
+        s += `URL: ${c.url}\n`
+        s += `Opcode: ${c.opCode}\n`
+        s += `Status: ${c.status}\n`
+        s += `Size: ${c.bodySize} bytes\n`
+        if (c.request) {
+          s += `\n=== REQUEST ===\n`
+          s += `Method: ${c.request.method}\n`
+          if (c.request.decodedRequest) {
+            s += `Decoded:\n${JSON.stringify(c.request.decodedRequest, null, 2)}\n`
+          }
+        }
+        s += `\n=== RESPONSE ===\n`
+        s += `Decoded:\n${JSON.stringify(c.decodedResponse, null, 2)}\n`
+        if (c.objects && c.objects.length > 0) {
+          s += `\n=== OBJECTS (${c.objects.length}) ===\n`
+          s += JSON.stringify(c.objects, null, 2)
+        }
+        return s
       }
 
-      function formatSize(bytes) {
-        if (bytes < 1024) return bytes + ' B'
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-        return (bytes / 1024 / 1024).toFixed(1) + ' MB'
+      async function toggleCapture(enabled) {
+        try {
+          const res = await fetch(API + '/capturing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled })
+          })
+          const data = await res.json()
+          if (data.success) {
+            log(enabled ? 'Capturing started' : 'Capturing stopped')
+            updateCaptureToggle(data.capturing)
+          }
+        } catch (e) { log('Error: ' + e.message) }
       }
 
       document.getElementById('btnStart').addEventListener('click', async () => {
-        // const realm = document.getElementById('realm').value
-        // const kingdom = document.getElementById('kingdom').value
-
         log('Starting browser...')
-        const res = await fetch(API + '/start', {
-          method: 'POST'
-          //    headers: { 'Content-Type': 'application/json' },
-          //    body: JSON.stringify({ realm, kingdom })
-        })
+        const res = await fetch(API + '/start', { method: 'POST' })
         const data = await res.json()
-
         if (data.success) {
           log('Browser started!')
-          log('Navigate and interact with the game...')
-          updateStatus(true)
-          setInterval(refreshCaptures, 2000)
-        } else {
-          log('Error: ' + data.error)
-        }
+          updateUI(true)
+          refreshInterval = setInterval(() => {
+            refreshCaptures()
+            refreshOpcodes()
+            refreshMyPlayer()
+            refreshUnknownStaticIds()
+            refreshChatStaticIds()
+            refreshStaticDb()
+          }, 1000)
+        } else { log('Error: ' + data.error) }
       })
 
       document.getElementById('btnStop').addEventListener('click', async () => {
+        if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null }
         await fetch(API + '/stop', { method: 'POST' })
         log('Browser stopped')
-        updateStatus(false)
+        updateUI(false)
+        updateCaptureToggle(false)
       })
 
-      document.getElementById('btnRefresh').addEventListener('click', refreshCaptures)
+      document.getElementById('cbCapture').addEventListener('change', e => toggleCapture(e.target.checked))
+
+      document.getElementById('btnRefresh').addEventListener('click', () => {
+        refreshCaptures()
+        refreshOpcodes()
+        refreshMyPlayer()
+        refreshUnknownStaticIds()
+        refreshChatStaticIds()
+        refreshStaticDb()
+      })
 
       document.getElementById('btnExport').addEventListener('click', () => {
         window.location = API + '/export'
       })
 
-      document.getElementById('btnClear').addEventListener('click', async () => {
-        await fetch(API + '/clear', { method: 'POST' })
-        log('Cleared')
-        document.getElementById('captureCount').textContent = 'Captures: 0'
-        document.getElementById('listCount').textContent = '(0)'
-        renderCaptures([])
+      document.getElementById('btnExportMyPlayer').addEventListener('click', () => {
+        window.location = API + '/export-myplayer'
       })
 
-      document.getElementById('modal').addEventListener('click', e => {
-        if (e.target.id === 'modal') closeModal()
+      document.getElementById('btnExportUnknown').addEventListener('click', () => {
+        window.location = API + '/export-unknown-staticids'
+      })
+
+      document.getElementById('btnExportChat').addEventListener('click', () => {
+        window.location = API + '/export-chat-staticids'
+      })
+
+      document.getElementById('btnExportDb').addEventListener('click', () => {
+        window.location = API + '/export-static-db'
+      })
+
+      document.getElementById('btnClear').addEventListener('click', async () => {
+        await fetch(API + '/clear-all', { method: 'POST' })
+        log('Cleared all')
+        selectedId = null
+        document.getElementById('detail').value = ''
+        refreshCaptures()
+        refreshOpcodes()
+        refreshMyPlayer()
+        refreshUnknownStaticIds()
+        refreshChatStaticIds()
+      })
+
+      document.getElementById('btnSaveOpcodes').addEventListener('click', async () => {
+        const res = await fetch(API + '/save-opcodes', { method: 'POST' })
+        const data = await res.json()
+        if (data.success) log(`Saved ${data.count} opcodes to file`)
       })
     </script>
   </body>

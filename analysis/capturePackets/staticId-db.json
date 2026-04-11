@@ -1,0 +1,412 @@
+{
+  "2": {
+    "staticId": 2,
+    "name": "Player city",
+    "entryType": "user"
+  },
+  "5": {
+    "staticId": 5,
+    "entryType": "tile",
+    "name": "Océano"
+  },
+  "25": {
+    "staticId": 25,
+    "entryType": "poi",
+    "name": "Pueblo"
+  },
+  "34": {
+    "staticId": 34,
+    "entryType": "poi",
+    "name": "Pueblo"
+  },
+  "60": {
+    "staticId": 60,
+    "entryType": "poi",
+    "name": "Aserradero"
+  },
+  "66": {
+    "staticId": 66,
+    "entryType": "poi",
+    "name": "Aserradero"
+  },
+  "81": {
+    "staticId": 81,
+    "entryType": "poi",
+    "name": "Aserradero"
+  },
+  "98": {
+    "staticId": 98,
+    "entryType": "poi",
+    "name": "Mina"
+  },
+  "99": {
+    "staticId": 99,
+    "entryType": "poi",
+    "name": "Mina"
+  },
+  "103": {
+    "staticId": 103,
+    "entryType": "tile",
+    "name": "Prado montañoso"
+  },
+  "104": {
+    "staticId": 104,
+    "entryType": "tile",
+    "name": "Bosque tupido"
+  },
+  "110": {
+    "staticId": 110,
+    "entryType": "tile",
+    "name": "Bosque llano"
+  },
+  "111": {
+    "staticId": 111,
+    "entryType": "tile",
+    "name": "Bosque pantanoso"
+  },
+  "114": {
+    "staticId": 114,
+    "entryType": "tile",
+    "name": "Arboleda montañosa"
+  },
+  "116": {
+    "staticId": 116,
+    "entryType": "tile",
+    "name": "Tierras altas boscosas"
+  },
+  "126": {
+    "staticId": 126,
+    "entryType": "poi",
+    "name": "Cantera"
+  },
+  "400": {
+    "staticId": 400,
+    "name": "Mercenary exchange",
+    "entryType": "poi"
+  },
+  "1451": {
+    "staticId": 1451,
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
+  },
+  "1452": {
+    "staticId": 1452,
+    "entryType": "poi",
+    "name": "Escuadrón común de los malditos"
+  },
+  "1453": {
+    "staticId": 1453,
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
+  },
+  "1454": {
+    "staticId": 1454,
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
+  },
+  "1455": {
+    "staticId": 1455,
+    "entryType": "poi",
+    "name": "Escuadrón común de muertos vivientes"
+  },
+  "1456": {
+    "staticId": 1456,
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
+  },
+  "1457": {
+    "staticId": 1457,
+    "entryType": "poi",
+    "name": "Escuadrón común de los malditos"
+  },
+  "1459": {
+    "staticId": 1459,
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
+  },
+  "1483": {
+    "staticId": 1483,
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
+  },
+  "1489": {
+    "staticId": 1489,
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
+  },
+  "1491": {
+    "staticId": 1491,
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
+  },
+  "1496": {
+    "staticId": 1496,
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
+  },
+  "1497": {
+    "staticId": 1497,
+    "entryType": "poi",
+    "name": "Escuadrón común de los malditos"
+  },
+  "1500": {
+    "staticId": 1500,
+    "entryType": "poi",
+    "name": "Escuadrón común de muertos vivientes"
+  },
+  "1503": {
+    "staticId": 1503,
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
+  },
+  "1506": {
+    "staticId": 1506,
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
+  },
+  "1515": {
+    "staticId": 1515,
+    "entryType": "poi",
+    "name": "Escuadrón común de muertos vivientes"
+  },
+  "1518": {
+    "staticId": 1518,
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
+  },
+  "1520": {
+    "staticId": 1520,
+    "entryType": "poi",
+    "name": "Escuadrón común de muertos vivientes"
+  },
+  "1522": {
+    "staticId": 1522,
+    "entryType": "poi",
+    "name": "Escuadrón común de los malditos"
+  },
+  "1527": {
+    "staticId": 1527,
+    "entryType": "poi",
+    "name": "Escuadrón común de los malditos"
+  },
+  "1533": {
+    "staticId": 1533,
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
+  },
+  "1556": {
+    "staticId": 1556,
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
+  },
+  "1590": {
+    "staticId": 1590,
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes"
+  },
+  "1591": {
+    "staticId": 1591,
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
+  },
+  "1592": {
+    "staticId": 1592,
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
+  },
+  "1594": {
+    "staticId": 1594,
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
+  },
+  "1604": {
+    "staticId": 1604,
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
+  },
+  "1607": {
+    "staticId": 1607,
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
+  },
+  "1609": {
+    "staticId": 1609,
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
+  },
+  "1619": {
+    "staticId": 1619,
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
+  },
+  "1638": {
+    "staticId": 1638,
+    "entryType": "poi",
+    "name": "Escuadrón raro de bárbaros"
+  },
+  "1654": {
+    "staticId": 1654,
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
+  },
+  "1663": {
+    "staticId": 1663,
+    "entryType": "poi",
+    "name": "Escuadrón raro de bárbaros"
+  },
+  "1666": {
+    "staticId": 1666,
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
+  },
+  "1812": {
+    "staticId": 1812,
+    "entryType": "poi",
+    "name": "Ciudadela élfica"
+  },
+  "1816": {
+    "staticId": 1816,
+    "entryType": "poi",
+    "name": "Ciudadela maldita"
+  },
+  "1952": {
+    "staticId": 1952,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de los malditos"
+  },
+  "2101": {
+    "staticId": 2101,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2105": {
+    "staticId": 2105,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2106": {
+    "staticId": 2106,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2111": {
+    "staticId": 2111,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2203": {
+    "staticId": 2203,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2210": {
+    "staticId": 2210,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2302": {
+    "staticId": 2302,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2310": {
+    "staticId": 2310,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2331": {
+    "staticId": 2331,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2437": {
+    "staticId": 2437,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2503": {
+    "staticId": 2503,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2505": {
+    "staticId": 2505,
+    "entryType": "poi",
+    "name": "Cripta"
+  },
+  "2528": {
+    "staticId": 2528,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2723": {
+    "staticId": 2723,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2741": {
+    "staticId": 2741,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2748": {
+    "staticId": 2748,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2750": {
+    "staticId": 2750,
+    "entryType": "poi",
+    "name": "Cripta épica"
+  },
+  "2809": {
+    "staticId": 2809,
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
+  },
+  "3302": {
+    "staticId": 3302,
+    "entryType": "poi",
+    "name": "Cripta rara"
+  },
+  "3501": {
+    "staticId": 3501,
+    "entryType": "poi",
+    "name": "Cripta rara"
+  },
+  "3511": {
+    "staticId": 3511,
+    "entryType": "poi",
+    "name": "Cripta rara"
+  },
+  "4000": {
+    "staticId": 4000,
+    "entryType": "spawn",
+    "name": "Unknown"
+  },
+  "10002": {
+    "staticId": 10002,
+    "entryType": "clan",
+    "name": "Osmanlı"
+  },
+  "10004": {
+    "staticId": 10004,
+    "entryType": "clan",
+    "name": "Osmanlı"
+  },
+  "10007": {
+    "staticId": 10007,
+    "entryType": "clan",
+    "name": "Osmanlı"
+  },
+  "50000": {
+    "staticId": 50000,
+    "entryType": "poi",
+    "name": "Arena"
+  },
+  "889000": {
+    "staticId": 889000,
+    "entryType": "spawn",
+    "name": "Unknown"
+  }
+}
