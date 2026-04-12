@@ -478,8 +478,10 @@
         }
         el.innerHTML = items
           .map(item => {
+            const coords = item.kingdom ? `[${item.kingdom},${item.x},${item.y}]` : ''
             return `<div class="capture-item">
             <div class="url">StaticID: ${item.staticId}</div>
+            <div class="meta" style="color:#569cd6">${coords}</div>
           </div>`
           })
           .join('')

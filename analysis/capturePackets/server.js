@@ -346,7 +346,7 @@ let myPlayerPackets = []
 let myPlayerPacketIndex = 0
 let objectPackets = []
 
-let unknownStaticIds = new Set()
+let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
 let chatStaticIds = new Map()
 
 const myPlayerInfo = {
@@ -499,7 +499,7 @@ function trackUnknownStaticId(obj) {
   const { staticId, level, kingdom, x, y } = obj
 
   if (!unknownStaticIds.has(staticId)) {
-    unknownStaticIds.add(staticId)
+    unknownStaticIds.set(staticId, { kingdom, x, y })
     console.log(`[${new Date().toLocaleTimeString()}] New unknown staticId: ${staticId}`)
   }
 
@@ -833,12 +833,19 @@ app.post('/api/clear-all', (req, res) => {
 })
 
 app.get('/api/unknown-staticids', (req, res) => {
-  const entries = [...unknownStaticIds].map(id => ({ staticId: id }))
+  const entries = [...unknownStaticIds.entries()].map(([id, data]) => ({
+    staticId: parseInt(id),
+    kingdom: data.kingdom,
+    x: data.x,
+    y: data.y
+  }))
   res.json({ success: true, items: entries, count: unknownStaticIds.size })
 })
 
 app.get('/api/export-unknown-staticids', (req, res) => {
-  const entries = [...unknownStaticIds].map(id => ({ staticId: id }))
+  const entries = [...unknownStaticIds.entries()].map(([id, data]) => ({
+    staticId: parseInt(id)
+  }))
   res.setHeader('Content-Type', 'application/json')
   res.setHeader('Content-Disposition', 'attachment; filename=process-staticid.json')
   res.json(entries)
