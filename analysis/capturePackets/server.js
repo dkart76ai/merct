@@ -6,6 +6,7 @@ const { chromium } = require('playwright')
 const SAVE_FILE = path.join(__dirname, 'captures.json')
 const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
 const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
+const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json')
 const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
 const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
 const STATIC_DB_FILE = path.join(__dirname, 'staticId-db.json')
@@ -345,6 +346,7 @@ let capturingEnabled = false
 let uniqueOpcodes = new Set()
 let myPlayerPackets = []
 let myPlayerPacketIndex = 0
+let objectPackets = []
 let internalPlayerId = null
 let unknownStaticIds = new Set()
 let chatStaticIds = new Map()
@@ -455,6 +457,15 @@ function saveMyPlayerPackets() {
     )
   } catch (e) {
     console.error('Save my player packets error:', e.message)
+  }
+}
+
+function saveObjectPackets() {
+  try {
+    fs.writeFileSync(OBJECT_PACKETS_FILE, JSON.stringify(objectPackets, null, 2))
+    console.log(`[${new Date().toLocaleTimeString()}] Saved ${objectPackets.length} object packets`)
+  } catch (e) {
+    console.error('Save OBJECT packets error:', e.message)
   }
 }
 
@@ -618,6 +629,30 @@ app.post('/api/start', async (req, res) => {
           })
           console.log(`[${new Date().toLocaleTimeString()}] MY PACKET: ${url} (opcode: ${opCode})`)
           if (autoSave) saveMyPlayerPackets()
+        }
+
+        if (opCode === 312 || opCode === 408) {
+          objectPackets.push({
+            opCode,
+            url,
+            request: {
+              method: request.method(),
+              headers: request.headers(),
+              bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
+              bodySize: postData ? postData.length : 0,
+              decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
+            },
+            response: {
+              headers,
+              bodyB64: Buffer.from(body).toString('base64'),
+              bodySize: body.length,
+              decodedResponse
+            },
+            objectCount: objects.length,
+            objects
+          })
+
+          if (autoSave) saveObjectPackets()
         }
 
         console.log(`[${new Date().toLocaleTimeString()}] Captured: ${url} (${body.length} bytes)`)
