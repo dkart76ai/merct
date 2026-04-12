@@ -224,6 +224,184 @@ function decodeFull(buf) {
   return results
 }
 
+// ============================================
+// MSGPACK ENCODER
+// ============================================
+
+function encodeValue(value) {
+  const chunks = []
+
+  function writeUint8(val) {
+    chunks.push(val)
+  }
+
+  function writeUint16BE(val) {
+    chunks.push((val >> 8) & 0xff)
+    chunks.push(val & 0xff)
+  }
+
+  function writeUint32BE(val) {
+    chunks.push((val >> 24) & 0xff)
+    chunks.push((val >> 16) & 0xff)
+    chunks.push((val >> 8) & 0xff)
+    chunks.push(val & 0xff)
+  }
+
+  function writeBytes(arr) {
+    for (const b of arr) {
+      chunks.push(b)
+    }
+  }
+
+  function writeFloat32(val) {
+    const buf = new ArrayBuffer(4)
+    new DataView(buf).setFloat32(0, val, false)
+    for (let i = 0; i < 4; i++) {
+      chunks.push(new DataView(buf).getUint8(i))
+    }
+  }
+
+  function writeFloat64(val) {
+    const buf = new ArrayBuffer(8)
+    new DataView(buf).setFloat64(0, val, false)
+    for (let i = 0; i < 8; i++) {
+      chunks.push(new DataView(buf).getUint8(i))
+    }
+  }
+
+  function encode(val) {
+    if (val === null) {
+      writeUint8(0xc0)
+    } else if (val === false) {
+      writeUint8(0xc2)
+    } else if (val === true) {
+      writeUint8(0xc3)
+    } else if (typeof val === 'number') {
+      if (Number.isInteger(val)) {
+        if (val >= 0) {
+          if (val < 0x80) {
+            writeUint8(val)
+          } else if (val < 0x100) {
+            writeUint8(0xcc)
+            writeUint8(val)
+          } else if (val < 0x10000) {
+            writeUint8(0xcd)
+            writeUint16BE(val)
+          } else if (val < 0x100000000) {
+            writeUint8(0xce)
+            writeUint32BE(val)
+          } else if (val < 0x10000000000000000) {
+            writeUint8(0xcf)
+            for (let i = 0; i < 8; i++) {
+              chunks.push((BigInt(val) >> BigInt(i * 8)) & 0xffn)
+            }
+          } else {
+            writeFloat64(val)
+          }
+        } else {
+          if (val >= -0x20) {
+            writeUint8(val)
+          } else if (val >= -0x80) {
+            writeUint8(0xd0)
+            writeUint8(val + 256)
+          } else if (val >= -0x8000) {
+            writeUint8(0xd1)
+            writeUint16BE(val + 65536)
+          } else if (val >= -0x80000000) {
+            writeUint8(0xd2)
+            writeUint32BE(val + 4294967296)
+          } else if (val >= -0x8000000000000000) {
+            writeUint8(0xd3)
+            const v = BigInt(val)
+            for (let i = 0; i < 8; i++) {
+              chunks.push((v >> BigInt(i * 8)) & 0xffn)
+            }
+          } else {
+            writeFloat64(val)
+          }
+        }
+      } else {
+        writeUint8(0xcb)
+        writeFloat64(val)
+      }
+    } else if (typeof val === 'string') {
+      const bytes = new TextEncoder().encode(val)
+      const len = bytes.length
+      if (len < 0x20) {
+        writeUint8(0xa0 | len)
+        writeBytes(bytes)
+      } else if (len < 0x100) {
+        writeUint8(0xd9)
+        writeUint8(len)
+        writeBytes(bytes)
+      } else if (len < 0x10000) {
+        writeUint8(0xda)
+        writeUint16BE(len)
+        writeBytes(bytes)
+      } else {
+        writeUint8(0xdb)
+        writeUint32BE(len)
+        writeBytes(bytes)
+      }
+    } else if (Array.isArray(val)) {
+      const len = val.length
+      if (len < 0x10) {
+        writeUint8(0x90 | len)
+      } else if (len < 0x10000) {
+        writeUint8(0xdc)
+        writeUint16BE(len)
+      } else {
+        writeUint8(0xdd)
+        writeUint32BE(len)
+      }
+      for (const item of val) {
+        encode(item)
+      }
+    } else if (typeof val === 'object') {
+      const keys = Object.keys(val)
+      const len = keys.length
+      if (len < 0x10) {
+        writeUint8(0x80 | len)
+      } else if (len < 0x10000) {
+        writeUint8(0xde)
+        writeUint16BE(len)
+      } else {
+        writeUint8(0xdf)
+        writeUint32BE(len)
+      }
+      for (const key of keys) {
+        encode(key)
+        encode(val[key])
+      }
+    } else if (val instanceof Uint8Array) {
+      const len = val.length
+      if (len < 0x100) {
+        writeUint8(0xc4)
+        writeUint8(len)
+      } else if (len < 0x10000) {
+        writeUint8(0xc5)
+        writeUint16BE(len)
+      } else {
+        writeUint8(0xc6)
+        writeUint32BE(len)
+      }
+      writeBytes(val)
+    }
+  }
+
+  encode(value)
+  return new Uint8Array(chunks)
+}
+
+function encodeToBase64(data) {
+  const bytes = encodeValue(data)
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  return btoa(binary)
+}
+
 function decodeBase64(base64String) {
   try {
     let cleanBase64 = base64String.replace(/\s/g, '')
@@ -334,11 +512,44 @@ function App() {
   const [hexData, setHexData] = useState(null)
   const [error, setError] = useState(null)
   const [stats, setStats] = useState(null)
+  const [encodeInput, setEncodeInput] = useState('')
+  const [encodedOutput, setEncodedOutput] = useState('')
+  const [encodeError, setEncodeError] = useState(null)
 
   const handleClear = () => {
     setDecoded(null)
     setHexData(null)
     setInput('')
+  }
+
+  const handleEncode = useCallback(() => {
+    if (!encodeInput.trim()) {
+      setEncodeError('Please enter JSON data')
+      setEncodedOutput('')
+      return
+    }
+
+    try {
+      const data = JSON.parse(encodeInput)
+      const encoded = encodeToBase64(data)
+      setEncodedOutput(encoded)
+      setEncodeError(null)
+    } catch (e) {
+      setEncodeError('Invalid JSON: ' + e.message)
+      setEncodedOutput('')
+    }
+  }, [encodeInput])
+
+  const handleLoadEncodedSample = () => {
+    if (decoded) {
+      setEncodeInput(JSON.stringify(decoded, null, 2))
+    }
+  }
+
+  const handleCopyEncoded = () => {
+    if (encodedOutput) {
+      navigator.clipboard.writeText(encodedOutput)
+    }
   }
 
   const handleDecode = useCallback(() => {
@@ -472,6 +683,37 @@ function App() {
             </div>
             {stats && <div className='stats'>Numeric values as hex</div>}
           </div>
+        </div>
+
+        <div className='panel'>
+          <div className='panel-header'>
+            Encoder (JSON to MsgPack)
+          </div>
+          <div className='panel-content'>
+            <textarea
+              value={encodeInput}
+              onChange={e => setEncodeInput(e.target.value)}
+              placeholder='Enter JSON data to encode...'
+              spellCheck={false}
+              style={{ width: '100%', height: '100px', background: '#1e1e1e', color: '#d4d4d4', border: 'none', padding: '10px', fontFamily: 'monospace' }}
+            />
+          </div>
+          <div style={{ padding: '10px', display: 'flex', gap: '8px' }}>
+            <button className='sample-btn' onClick={handleEncode}>Encode</button>
+            <button className='sample-btn' onClick={handleLoadEncodedSample} disabled={!decoded}>Use Decoded</button>
+          </div>
+          {encodeError && <div className='error' style={{ padding: '10px' }}>{encodeError}</div>}
+          {encodedOutput && (
+            <div style={{ padding: '10px' }}>
+              <div style={{ marginBottom: '8px', color: '#569cd6' }}>Encoded Base64:</div>
+              <textarea
+                value={encodedOutput}
+                readOnly
+                style={{ width: '100%', height: '60px', background: '#1e1e1e', color: '#4ec9b0', border: 'none', padding: '10px', fontFamily: 'monospace', fontSize: '12px' }}
+              />
+              <button className='copy-btn' onClick={handleCopyEncoded} style={{ marginTop: '8px' }}>Copy</button>
+            </div>
+          )}
         </div>
       </div>
     </div>
