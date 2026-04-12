@@ -553,14 +553,6 @@ app.post('/api/start', async (req, res) => {
         const request = response.request()
         const postData = request.postData()
 
-        const requestData = {
-          method: request.method(),
-          headers: request.headers(),
-          bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
-          bodySize: postData ? postData.length : 0,
-          decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
-        }
-
         let decodedResponse = decodeFull(Buffer.from(body))
         const opCode = getFirstValue(decodedResponse)
 
@@ -592,7 +584,13 @@ app.post('/api/start', async (req, res) => {
           opCode,
           url,
           status,
-          request: requestData,
+          request: {
+            method: request.method(),
+            headers: request.headers(),
+            bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
+            bodySize: postData ? postData.length : 0,
+            decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
+          },
           response: {
             headers,
             bodyB64: Buffer.from(body).toString('base64'),
