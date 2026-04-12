@@ -317,16 +317,14 @@ function extractObjects(data) {
 }
 
 function getFirstValue(data) {
-  if (!data || data.length < 1) return null
-  if (!Array.isArray(data)) return null
-  for (const item of data) {
+  for (let item of data) {
+    if (typeof item === 'number') return item
     if (Array.isArray(item)) {
-      const found = getFirstValue(item)
-      if (found !== null) return found
-    } else {
-      return item
+      const resultado = getFirstValue(item)
+      if (resultado !== undefined) return resultado
     }
   }
+
   return null
 }
 
@@ -347,7 +345,7 @@ let uniqueOpcodes = new Set()
 let myPlayerPackets = []
 let myPlayerPacketIndex = 0
 let objectPackets = []
-let internalPlayerId = null
+
 let unknownStaticIds = new Set()
 let chatStaticIds = new Map()
 
@@ -358,7 +356,9 @@ const myPlayerInfo = {
   heroLevel: 6,
   playerId: 'tb:68568818',
   might: 7045,
-  clan: 'LOW'
+  clan: 'LOW',
+  sessionToken: null,
+  internalPlayerId: null
 }
 
 function extractChatStaticIds(message) {
@@ -436,6 +436,23 @@ function extractInternalIdFrom402(data) {
   return null
 }
 
+function extractSessionToken(data) {
+  for (let item of arr) {
+    // Si es un objeto literal (y no null ni otro array)
+    if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
+      if (item.type === 'Buffer') {
+        return Buffer.from(item.data)
+      }
+    }
+    // Si es un array, buscamos dentro de él
+    if (Array.isArray(item)) {
+      const resultado = extractSessionToken(item)
+      if (resultado !== undefined) return resultado
+    }
+  }
+  return null
+}
+
 function containsPlayerId(data, playerId, internalId) {
   if (!data) return false
   const str = JSON.stringify(data)
@@ -448,7 +465,7 @@ function saveMyPlayerPackets() {
   try {
     const data = {
       playerId: myPlayerInfo.playerId,
-      internalPlayerId: internalPlayerId,
+      internalPlayerId: myPlayerInfo.internalPlayerId,
       packets: myPlayerPackets
     }
     fs.writeFileSync(MYPLAYER_FILE, JSON.stringify(data, null, 2))
@@ -479,8 +496,7 @@ function saveToFile() {
 }
 
 function trackUnknownStaticId(obj) {
-  const staticId = obj.staticId
-  const level = obj.level
+  const { staticId, level, kingdom, x, y } = obj
 
   if (!unknownStaticIds.has(staticId)) {
     unknownStaticIds.add(staticId)
@@ -571,20 +587,36 @@ app.post('/api/start', async (req, res) => {
           uniqueOpcodes.add(opCode)
         }
 
-        if (opCode === 402 && !internalPlayerId) {
+        if (opCode === 402 && !myPlayerInfo.internalPlayerId) {
           const extractedId = extractInternalIdFrom402(decodedResponse)
           if (extractedId) {
-            internalPlayerId = extractedId
+            myPlayerInfo.internalPlayerId = extractedId
             console.log(
-              `[${new Date().toLocaleTimeString()}] Found internal player ID: ${internalPlayerId}`
+              `[${new Date().toLocaleTimeString()}] Found internal player ID: ${myPlayerInfo.internalPlayerId}`
             )
+          }
+        }
+
+        if (opCode === 203) {
+          if (!myPlayerInfo.internalPlayerId) {
+            const id = decoded[1]?.[0]?.[0]
+            if (typeof id === 'number' && id > 1000000000000) {
+              myPlayerInfo.internalPlayerId = id
+              console.log(`Found internal player ID: ${myPlayerInfo.internalPlayerId}`)
+            }
+          }
+
+          if (!myPlayerInfo.sessionToken) {
+            myPlayerInfo.sessionToken = extractSessionToken(decodedResponse)
+
+            console.log(`Found session token: ${myPlayerInfo.sessionToken}`)
           }
         }
 
         const isMyPacket = containsPlayerId(
           decodedResponse,
           myPlayerInfo.playerId,
-          internalPlayerId
+          myPlayerInfo.internalPlayerId
         )
         const objects = extractObjects(decodedResponse)
 
@@ -631,7 +663,7 @@ app.post('/api/start', async (req, res) => {
           if (autoSave) saveMyPlayerPackets()
         }
 
-        if (opCode === 312 || opCode === 408) {
+        if (opCode === 312 || opCode === 408 || objects.length > 0) {
           objectPackets.push({
             opCode,
             url,
@@ -757,7 +789,7 @@ app.get('/api/myplayer', (req, res) => {
   res.json({
     success: true,
     playerId: myPlayerInfo.playerId,
-    internalPlayerId: internalPlayerId,
+    internalPlayerId: myPlayerInfo.internalPlayerId,
     packets: myPlayerPackets,
     count: myPlayerPackets.length
   })
@@ -778,7 +810,7 @@ app.get('/api/export-myplayer', (req, res) => {
   res.setHeader('Content-Disposition', 'attachment; filename=myplayer.json')
   res.json({
     playerId: myPlayerInfo.playerId,
-    internalPlayerId: internalPlayerId,
+    internalPlayerId: myPlayerInfo.internalPlayerId,
     packets: myPlayerPackets
   })
 })
@@ -794,7 +826,7 @@ app.post('/api/clear-all', (req, res) => {
   captureIndex = 0
   myPlayerPackets = []
   myPlayerPacketIndex = 0
-  internalPlayerId = null
+  myPlayerInfo.internalPlayerId = null
   uniqueOpcodes.clear()
   chatStaticIds.clear()
   res.json({ success: true })
