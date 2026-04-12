@@ -350,8 +350,8 @@ function App() {
     }
 
     try {
-      const result = decodeBase64(input)
-
+      let result = decodeBase64(input)
+      result = processBytesToString(result)
       console.log(processBytesToString(result))
       setDecoded(result)
       setHexData(convertToHex(result))
