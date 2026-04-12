@@ -10,43 +10,6 @@ const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
 const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
 const STATIC_DB_FILE = path.join(__dirname, 'staticId-db.json')
 
-const playerPacket = [
-  [402, 1199],
-  [
-    [
-      [
-        [1189706200851],
-        'tb:68568818', // player id
-        'Maedve', // name
-        'PE', //country
-        12,
-        9,
-        1,
-        6, //hero lvl
-        9, //city level
-        1,
-        7121, //might
-        [1189705941092],
-        591363,
-        'LoW',
-        0,
-        [
-          277, //k
-          91, //x
-          53 //y
-        ],
-        [1189750630623],
-        376, // gold
-        1683,
-        [],
-        [],
-        '',
-        [0]
-      ]
-    ]
-  ]
-]
-
 let staticIdDb = new Map()
 
 function loadStaticDb() {
@@ -316,7 +279,8 @@ function extractObjects(data) {
   }
 
   function findObjects(arr, depth = 0) {
-    if (depth > 20) return
+    console.log('findobjects depth', depth)
+    if (depth > 200) return
     for (const item of arr) {
       if (Array.isArray(item)) {
         if (isValidObject(item)) {
@@ -382,7 +346,7 @@ let uniqueOpcodes = new Set()
 let myPlayerPackets = []
 let myPlayerPacketIndex = 0
 let internalPlayerId = null
-let unknownStaticIds = new Map()
+let unknownStaticIds = new Set()
 let chatStaticIds = new Map()
 
 const myPlayerInfo = {

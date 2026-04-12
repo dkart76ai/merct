@@ -319,6 +319,12 @@
     "entryType": "poi",
     "name": "Escuadrón raro de bárbaros"
   },
+  "1650": {
+    "staticId": 1650,
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes",
+    "level": 26
+  },
   "1654": {
     "staticId": 1654,
     "entryType": "poi",
@@ -618,6 +624,12 @@
     "staticId": 152115,
     "entryType": "poi",
     "name": "Escuadrón rúnico de asalto"
+  },
+  "152125": {
+    "staticId": 152125,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto",
+    "level": 45
   },
   "889000": {
     "staticId": 889000,

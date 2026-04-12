@@ -215,6 +215,11 @@
       <span class="count" id="captureCount">Captures: 0</span>
     </div>
 
+    <div class="controls">
+      <label>Filter Opcodes (comma separated):</label>
+      <input type="text" id="opcodeFilter" placeholder="e.g. 312,315,316" style="padding: 8px; width: 250px; border-radius: 4px; border: 1px solid #444; background: #2d2d2d; color: #d4d4d4;" />
+    </div>
+
     <div class="main-grid">
       <div class="panel">
         <div class="panel-header">
@@ -292,6 +297,7 @@
       const API = '/api'
       let selectedId = null
       let refreshInterval = null
+      let allCaptures = []
 
       function log(msg) {
         const el = document.getElementById('log')
@@ -319,9 +325,10 @@
           const res = await fetch(API + '/captures')
           const data = await res.json()
           if (data.success) {
-            document.getElementById('captureCount').textContent = 'Captures: ' + data.count
-            document.getElementById('listCount').textContent = '(' + data.count + ')'
-            renderCaptures(data.captures || [])
+            allCaptures = data.captures || []
+            document.getElementById('captureCount').textContent = 'Captures: ' + allCaptures.length
+            document.getElementById('listCount').textContent = '(' + allCaptures.length + ')'
+            renderCaptures(allCaptures)
           }
         } catch (e) {
           log('Error: ' + e.message)
@@ -415,13 +422,21 @@
           .join('')
       }
 
+      function getFilteredOpcodes() {
+        const filter = document.getElementById('opcodeFilter').value
+        if (!filter) return new Set()
+        return new Set(filter.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)))
+      }
+
       function renderCaptures(captures) {
         const el = document.getElementById('capturesList')
-        if (captures.length === 0) {
-          el.innerHTML = '<div class="empty-state">No captures yet</div>'
+        const filteredOpcodes = getFilteredOpcodes()
+        const filtered = captures.filter(c => !filteredOpcodes.has(c.opCode))
+        if (filtered.length === 0) {
+          el.innerHTML = '<div class="empty-state">No captures' + (filteredOpcodes.size > 0 ? ' (filter active)' : '') + '</div>'
           return
         }
-        el.innerHTML = captures
+        el.innerHTML = filtered
           .map(c => {
             const url = new URL(c.url)
             const path = url.pathname + url.search
@@ -608,6 +623,12 @@
 
       document.getElementById('btnExportDb').addEventListener('click', () => {
         window.location = API + '/export-static-db'
+      })
+
+      document.getElementById('opcodeFilter').addEventListener('input', () => {
+        if (allCaptures.length > 0) {
+          renderCaptures(allCaptures)
+        }
       })
 
       document.getElementById('btnClear').addEventListener('click', async () => {
