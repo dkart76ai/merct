@@ -247,7 +247,16 @@ function processBytesToString(data) {
   if (data === null) return null
   if (typeof data === 'number') return data
   if (typeof data === 'boolean') return data
-  if (typeof data === 'string') return data
+  if (typeof data === 'string') {
+    if (data.includes(',')) {
+      const parts = data.split(',')
+
+      if (parts.every(c => !isNaN(c))) {
+        return parts.map(c => String.fromCharCode(c)).join('')
+      }
+    }
+    return data
+  }
   if (Array.isArray(data)) {
     return data.map(item => processBytesToString(item))
   }
