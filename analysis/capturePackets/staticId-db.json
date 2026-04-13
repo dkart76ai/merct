@@ -27,7 +27,8 @@
   "10": {
     "staticId": 10,
     "level": 1,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Pueblo"
   },
   "11": {
     "staticId": 11,
@@ -38,12 +39,14 @@
   "12": {
     "staticId": 12,
     "level": 3,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Pueblo"
   },
   "13": {
     "staticId": 13,
     "level": 4,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Pueblo"
   },
   "14": {
     "staticId": 14,
@@ -54,12 +57,14 @@
   "15": {
     "staticId": 15,
     "level": 6,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Pueblo"
   },
   "16": {
     "staticId": 16,
     "level": 7,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Pueblo"
   },
   "17": {
     "staticId": 17,
@@ -70,7 +75,8 @@
   "18": {
     "staticId": 18,
     "level": 9,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Pueblo"
   },
   "19": {
     "staticId": 19,
@@ -81,7 +87,8 @@
   "20": {
     "staticId": 20,
     "level": 11,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Pueblo"
   },
   "21": {
     "staticId": 21,
@@ -338,7 +345,8 @@
   "88": {
     "staticId": 88,
     "level": 4,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Mina"
   },
   "89": {
     "staticId": 89,
@@ -367,7 +375,8 @@
   "93": {
     "staticId": 93,
     "level": 9,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Mina"
   },
   "94": {
     "staticId": 94,
@@ -408,7 +417,8 @@
   "100": {
     "staticId": 100,
     "level": 16,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Mina"
   },
   "101": {
     "staticId": 101,
@@ -485,7 +495,8 @@
   "113": {
     "staticId": 113,
     "level": 4,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cantera"
   },
   "114": {
     "staticId": 114,
@@ -496,7 +507,8 @@
   "115": {
     "staticId": 115,
     "level": 6,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cantera"
   },
   "116": {
     "staticId": 116,
@@ -543,7 +555,8 @@
   "123": {
     "staticId": 123,
     "level": 14,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cantera"
   },
   "124": {
     "staticId": 124,
@@ -566,7 +579,8 @@
   "127": {
     "staticId": 127,
     "level": 18,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cantera"
   },
   "128": {
     "staticId": 128,
@@ -577,12 +591,14 @@
   "129": {
     "staticId": 129,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cantera"
   },
   "130": {
     "staticId": 130,
     "level": 21,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cantera"
   },
   "131": {
     "staticId": 131,
@@ -599,7 +615,8 @@
   "133": {
     "staticId": 133,
     "level": 24,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cantera"
   },
   "134": {
     "staticId": 134,
@@ -616,7 +633,8 @@
   "200": {
     "staticId": 200,
     "level": 10,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Montículo de dragón"
   },
   "210": {
     "staticId": 210,
@@ -627,7 +645,8 @@
   "211": {
     "staticId": 211,
     "level": 10,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Ruinas de manantial"
   },
   "400": {
     "staticId": 400,
@@ -952,7 +971,8 @@
   "1495": {
     "staticId": 1495,
     "level": 23,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común de muertos vivientes"
   },
   "1496": {
     "staticId": 1496,
@@ -1011,7 +1031,8 @@
   "1505": {
     "staticId": 1505,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común de muertos vivientes"
   },
   "1506": {
     "staticId": 1506,
@@ -1034,7 +1055,8 @@
   "1509": {
     "staticId": 1509,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
   },
   "1510": {
     "staticId": 1510,
@@ -1063,7 +1085,8 @@
   "1514": {
     "staticId": 1514,
     "level": 26,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
   },
   "1515": {
     "staticId": 1515,
@@ -1157,7 +1180,9 @@
   },
   "1530": {
     "staticId": 1530,
-    "level": 30
+    "level": 30,
+    "entryType": "poi",
+    "name": "Escuadrón común de muertos vivientes"
   },
   "1531": {
     "staticId": 1531,
@@ -1179,12 +1204,15 @@
   },
   "1534": {
     "staticId": 1534,
-    "level": 30
+    "level": 30,
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
   },
   "1535": {
     "staticId": 1535,
     "level": 31,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común de muertos vivientes"
   },
   "1536": {
     "staticId": 1536,
@@ -1195,16 +1223,19 @@
   "1537": {
     "staticId": 1537,
     "level": 31,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común de los malditos"
   },
   "1538": {
     "staticId": 1538,
-    "level": 31
+    "level": 31,
+    "entryType": "poi"
   },
   "1539": {
     "staticId": 1539,
     "level": 31,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
   },
   "1540": {
     "staticId": 1540,
@@ -1286,7 +1317,9 @@
   },
   "1553": {
     "staticId": 1553,
-    "level": 34
+    "level": 34,
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
   },
   "1554": {
     "staticId": 1554,
@@ -1321,7 +1354,8 @@
   "1559": {
     "staticId": 1559,
     "level": 35,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
   },
   "1590": {
     "staticId": 1590,
@@ -1482,7 +1516,8 @@
   "1616": {
     "staticId": 1616,
     "level": 18,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
   },
   "1617": {
     "staticId": 1617,
@@ -1517,7 +1552,8 @@
   "1622": {
     "staticId": 1622,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "1623": {
     "staticId": 1623,
@@ -1558,7 +1594,8 @@
   "1629": {
     "staticId": 1629,
     "level": 21,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "1630": {
     "staticId": 1630,
@@ -1587,12 +1624,14 @@
   "1634": {
     "staticId": 1634,
     "level": 22,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "1635": {
     "staticId": 1635,
     "level": 23,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes"
   },
   "1636": {
     "staticId": 1636,
@@ -1615,7 +1654,8 @@
   "1639": {
     "staticId": 1639,
     "level": 23,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "1640": {
     "staticId": 1640,
@@ -1650,7 +1690,8 @@
   "1645": {
     "staticId": 1645,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes"
   },
   "1646": {
     "staticId": 1646,
@@ -1667,12 +1708,14 @@
   "1648": {
     "staticId": 1648,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de bárbaros"
   },
   "1649": {
     "staticId": 1649,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "1650": {
     "staticId": 1650,
@@ -1683,7 +1726,8 @@
   "1651": {
     "staticId": 1651,
     "level": 26,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
   },
   "1652": {
     "staticId": 1652,
@@ -1694,7 +1738,8 @@
   "1653": {
     "staticId": 1653,
     "level": 26,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de bárbaros"
   },
   "1654": {
     "staticId": 1654,
@@ -1723,7 +1768,8 @@
   "1658": {
     "staticId": 1658,
     "level": 27,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de bárbaros"
   },
   "1659": {
     "staticId": 1659,
@@ -1740,7 +1786,8 @@
   "1661": {
     "staticId": 1661,
     "level": 28,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
   },
   "1662": {
     "staticId": 1662,
@@ -1757,7 +1804,8 @@
   "1664": {
     "staticId": 1664,
     "level": 28,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "1665": {
     "staticId": 1665,
@@ -1774,7 +1822,8 @@
   "1667": {
     "staticId": 1667,
     "level": 29,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "1668": {
     "staticId": 1668,
@@ -1785,12 +1834,14 @@
   "1669": {
     "staticId": 1669,
     "level": 29,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "1670": {
     "staticId": 1670,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes"
   },
   "1671": {
     "staticId": 1671,
@@ -1801,16 +1852,20 @@
   "1672": {
     "staticId": 1672,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "1673": {
     "staticId": 1673,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de bárbaros"
   },
   "1674": {
     "staticId": 1674,
-    "level": 30
+    "level": 30,
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "1675": {
     "staticId": 1675,
@@ -1820,11 +1875,15 @@
   },
   "1676": {
     "staticId": 1676,
-    "level": 31
+    "level": 31,
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
   },
   "1677": {
     "staticId": 1677,
-    "level": 31
+    "level": 31,
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "1678": {
     "staticId": 1678,
@@ -1852,17 +1911,21 @@
   },
   "1682": {
     "staticId": 1682,
-    "level": 32
+    "level": 32,
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "1683": {
     "staticId": 1683,
     "level": 32,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de bárbaros"
   },
   "1684": {
     "staticId": 1684,
     "level": 32,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "1685": {
     "staticId": 1685,
@@ -1896,7 +1959,9 @@
   },
   "1690": {
     "staticId": 1690,
-    "level": 34
+    "level": 34,
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes"
   },
   "1691": {
     "staticId": 1691,
@@ -1941,7 +2006,9 @@
   },
   "1698": {
     "staticId": 1698,
-    "level": 35
+    "level": 35,
+    "entryType": "poi",
+    "name": "Escuadrón raro de bárbaros"
   },
   "1699": {
     "staticId": 1699,
@@ -1951,12 +2018,15 @@
   },
   "1750": {
     "staticId": 1750,
-    "level": 16
+    "level": 16,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de muertos vivientes"
   },
   "1751": {
     "staticId": 1751,
     "level": 17,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1752": {
     "staticId": 1752,
@@ -1967,15 +2037,26 @@
   "1753": {
     "staticId": 1753,
     "level": 19,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
+  },
+  "1754": {
+    "staticId": 1754,
+    "level": 20,
+    "entryType": "poi",
+    "name": "Escuadrón heroico infernal"
   },
   "1756": {
     "staticId": 1756,
-    "level": 22
+    "level": 22,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1757": {
     "staticId": 1757,
-    "level": 23
+    "level": 23,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de los malditos"
   },
   "1758": {
     "staticId": 1758,
@@ -2021,7 +2102,9 @@
   },
   "1769": {
     "staticId": 1769,
-    "level": 35
+    "level": 35,
+    "entryType": "poi",
+    "name": "Escuadrón heroico infernal"
   },
   "1771": {
     "staticId": 1771,
@@ -2098,7 +2181,8 @@
   "1851": {
     "staticId": 1851,
     "level": 17,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1852": {
     "staticId": 1852,
@@ -2109,11 +2193,14 @@
   "1853": {
     "staticId": 1853,
     "level": 19,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
   },
   "1854": {
     "staticId": 1854,
-    "level": 20
+    "level": 20,
+    "entryType": "poi",
+    "name": "Escuadrón heroico infernal"
   },
   "1856": {
     "staticId": 1856,
@@ -2121,11 +2208,15 @@
   },
   "1857": {
     "staticId": 1857,
-    "level": 23
+    "level": 23,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de los malditos"
   },
   "1858": {
     "staticId": 1858,
-    "level": 24
+    "level": 24,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
   },
   "1859": {
     "staticId": 1859,
@@ -2184,7 +2275,8 @@
   "1951": {
     "staticId": 1951,
     "level": 17,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1952": {
     "staticId": 1952,
@@ -2195,6 +2287,12 @@
   "1953": {
     "staticId": 1953,
     "level": 19,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
+  },
+  "1954": {
+    "staticId": 1954,
+    "level": 20,
     "entryType": "poi"
   },
   "1955": {
@@ -2205,16 +2303,19 @@
   "1956": {
     "staticId": 1956,
     "level": 22,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1957": {
     "staticId": 1957,
-    "level": 23
+    "level": 23,
+    "entryType": "poi"
   },
   "1958": {
     "staticId": 1958,
     "level": 24,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
   },
   "1960": {
     "staticId": 1960,
@@ -2222,11 +2323,15 @@
   },
   "1961": {
     "staticId": 1961,
-    "level": 27
+    "level": 27,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1962": {
     "staticId": 1962,
-    "level": 28
+    "level": 28,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de los malditos"
   },
   "1965": {
     "staticId": 1965,
@@ -2273,12 +2378,14 @@
   "2050": {
     "staticId": 2050,
     "level": 16,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de muertos vivientes"
   },
   "2051": {
     "staticId": 2051,
     "level": 17,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "2052": {
     "staticId": 2052,
@@ -2289,16 +2396,19 @@
   "2053": {
     "staticId": 2053,
     "level": 19,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
   },
   "2054": {
     "staticId": 2054,
-    "level": 20
+    "level": 20,
+    "entryType": "poi"
   },
   "2055": {
     "staticId": 2055,
     "level": 21,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de muertos vivientes"
   },
   "2056": {
     "staticId": 2056,
@@ -2308,15 +2418,20 @@
   },
   "2057": {
     "staticId": 2057,
-    "level": 23
+    "level": 23,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de los malditos"
   },
   "2058": {
     "staticId": 2058,
-    "level": 24
+    "level": 24,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
   },
   "2059": {
     "staticId": 2059,
-    "level": 25
+    "level": 25,
+    "entryType": "poi"
   },
   "2061": {
     "staticId": 2061,
@@ -2329,7 +2444,8 @@
   "2063": {
     "staticId": 2063,
     "level": 29,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
   },
   "2064": {
     "staticId": 2064,
@@ -2466,7 +2582,8 @@
   "2202": {
     "staticId": 2202,
     "level": 10,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2203": {
     "staticId": 2203,
@@ -2555,7 +2672,8 @@
   "2305": {
     "staticId": 2305,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2306": {
     "staticId": 2306,
@@ -2566,7 +2684,8 @@
   "2307": {
     "staticId": 2307,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2308": {
     "staticId": 2308,
@@ -2595,17 +2714,20 @@
   "2323": {
     "staticId": 2323,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2324": {
     "staticId": 2324,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2325": {
     "staticId": 2325,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2326": {
     "staticId": 2326,
@@ -2616,12 +2738,14 @@
   "2327": {
     "staticId": 2327,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2328": {
     "staticId": 2328,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2329": {
     "staticId": 2329,
@@ -2632,7 +2756,8 @@
   "2330": {
     "staticId": 2330,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2331": {
     "staticId": 2331,
@@ -2655,7 +2780,8 @@
   "2334": {
     "staticId": 2334,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2335": {
     "staticId": 2335,
@@ -2666,7 +2792,8 @@
   "2336": {
     "staticId": 2336,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2337": {
     "staticId": 2337,
@@ -2707,7 +2834,8 @@
   "2406": {
     "staticId": 2406,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2407": {
     "staticId": 2407,
@@ -2718,12 +2846,14 @@
   "2408": {
     "staticId": 2408,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2409": {
     "staticId": 2409,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2410": {
     "staticId": 2410,
@@ -2740,7 +2870,8 @@
   "2423": {
     "staticId": 2423,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2424": {
     "staticId": 2424,
@@ -2757,7 +2888,8 @@
   "2426": {
     "staticId": 2426,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2427": {
     "staticId": 2427,
@@ -2768,17 +2900,20 @@
   "2428": {
     "staticId": 2428,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2429": {
     "staticId": 2429,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2430": {
     "staticId": 2430,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2431": {
     "staticId": 2431,
@@ -2795,12 +2930,14 @@
   "2433": {
     "staticId": 2433,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2434": {
     "staticId": 2434,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2435": {
     "staticId": 2435,
@@ -2811,7 +2948,8 @@
   "2436": {
     "staticId": 2436,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2437": {
     "staticId": 2437,
@@ -2822,12 +2960,14 @@
   "2501": {
     "staticId": 2501,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2502": {
     "staticId": 2502,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2503": {
     "staticId": 2503,
@@ -2838,7 +2978,8 @@
   "2504": {
     "staticId": 2504,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2505": {
     "staticId": 2505,
@@ -2855,12 +2996,14 @@
   "2507": {
     "staticId": 2507,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2508": {
     "staticId": 2508,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2509": {
     "staticId": 2509,
@@ -2877,31 +3020,38 @@
   "2511": {
     "staticId": 2511,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta"
   },
   "2523": {
     "staticId": 2523,
-    "level": 25
+    "level": 25,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2524": {
     "staticId": 2524,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2525": {
     "staticId": 2525,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2526": {
     "staticId": 2526,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2527": {
     "staticId": 2527,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2528": {
     "staticId": 2528,
@@ -2917,34 +3067,45 @@
   },
   "2530": {
     "staticId": 2530,
-    "level": 25
+    "level": 25,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2531": {
     "staticId": 2531,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2532": {
     "staticId": 2532,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2533": {
     "staticId": 2533,
-    "level": 25
+    "level": 25,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2534": {
     "staticId": 2534,
-    "level": 25
+    "level": 25,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2535": {
     "staticId": 2535,
-    "level": 25
+    "level": 25,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2536": {
     "staticId": 2536,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2537": {
     "staticId": 2537,
@@ -2963,11 +3124,13 @@
   },
   "2625": {
     "staticId": 2625,
-    "level": 30
+    "level": 30,
+    "entryType": "poi"
   },
   "2626": {
     "staticId": 2626,
-    "level": 30
+    "level": 30,
+    "entryType": "poi"
   },
   "2627": {
     "staticId": 2627,
@@ -2977,7 +3140,9 @@
   },
   "2628": {
     "staticId": 2628,
-    "level": 30
+    "level": 30,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2629": {
     "staticId": 2629,
@@ -2988,11 +3153,13 @@
   "2630": {
     "staticId": 2630,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2631": {
     "staticId": 2631,
-    "level": 30
+    "level": 30,
+    "entryType": "poi"
   },
   "2632": {
     "staticId": 2632,
@@ -3000,16 +3167,20 @@
   },
   "2633": {
     "staticId": 2633,
-    "level": 30
+    "level": 30,
+    "entryType": "poi"
   },
   "2634": {
     "staticId": 2634,
-    "level": 30
+    "level": 30,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2635": {
     "staticId": 2635,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2636": {
     "staticId": 2636,
@@ -3099,7 +3270,8 @@
   "2740": {
     "staticId": 2740,
     "level": 15,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2741": {
     "staticId": 2741,
@@ -3130,7 +3302,8 @@
   "2746": {
     "staticId": 2746,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2747": {
     "staticId": 2747,
@@ -3158,16 +3331,20 @@
   "2751": {
     "staticId": 2751,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2752": {
     "staticId": 2752,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2753": {
     "staticId": 2753,
-    "level": 30
+    "level": 30,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2754": {
     "staticId": 2754,
@@ -3188,7 +3365,8 @@
   "2802": {
     "staticId": 2802,
     "level": 36,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común de los malditos"
   },
   "2803": {
     "staticId": 2803,
@@ -3258,7 +3436,9 @@
   },
   "2814": {
     "staticId": 2814,
-    "level": 39
+    "level": 39,
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
   },
   "2815": {
     "staticId": 2815,
@@ -3406,7 +3586,8 @@
   "2839": {
     "staticId": 2839,
     "level": 45,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común infernal"
   },
   "2900": {
     "staticId": 2900,
@@ -3451,7 +3632,8 @@
   },
   "2907": {
     "staticId": 2907,
-    "level": 37
+    "level": 37,
+    "entryType": "poi"
   },
   "2908": {
     "staticId": 2908,
@@ -3478,7 +3660,9 @@
   },
   "2912": {
     "staticId": 2912,
-    "level": 39
+    "level": 39,
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "2913": {
     "staticId": 2913,
@@ -3489,11 +3673,14 @@
   "2914": {
     "staticId": 2914,
     "level": 39,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "2915": {
     "staticId": 2915,
-    "level": 39
+    "level": 39,
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes"
   },
   "2916": {
     "staticId": 2916,
@@ -3522,7 +3709,8 @@
   "2920": {
     "staticId": 2920,
     "level": 41,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes"
   },
   "2921": {
     "staticId": 2921,
@@ -3540,7 +3728,9 @@
   },
   "2924": {
     "staticId": 2924,
-    "level": 42
+    "level": 42,
+    "entryType": "poi",
+    "name": "Escuadrón raro infernal"
   },
   "2925": {
     "staticId": 2925,
@@ -3554,7 +3744,9 @@
   },
   "2927": {
     "staticId": 2927,
-    "level": 42
+    "level": 42,
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "2928": {
     "staticId": 2928,
@@ -3570,7 +3762,9 @@
   },
   "2930": {
     "staticId": 2930,
-    "level": 43
+    "level": 43,
+    "entryType": "poi",
+    "name": "Escuadrón raro de muertos vivientes"
   },
   "2931": {
     "staticId": 2931,
