@@ -2060,7 +2060,9 @@
   },
   "1758": {
     "staticId": 1758,
-    "level": 24
+    "level": 24,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
   },
   "1759": {
     "staticId": 1759,
@@ -2204,7 +2206,9 @@
   },
   "1856": {
     "staticId": 1856,
-    "level": 22
+    "level": 22,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1857": {
     "staticId": 1857,
@@ -2293,12 +2297,14 @@
   "1954": {
     "staticId": 1954,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico infernal"
   },
   "1955": {
     "staticId": 1955,
     "level": 21,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de muertos vivientes"
   },
   "1956": {
     "staticId": 1956,
@@ -2309,7 +2315,8 @@
   "1957": {
     "staticId": 1957,
     "level": 23,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de los malditos"
   },
   "1958": {
     "staticId": 1958,
@@ -2402,7 +2409,8 @@
   "2054": {
     "staticId": 2054,
     "level": 20,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico infernal"
   },
   "2055": {
     "staticId": 2055,
@@ -3116,11 +3124,14 @@
   "2623": {
     "staticId": 2623,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2624": {
     "staticId": 2624,
-    "level": 30
+    "level": 30,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2625": {
     "staticId": 2625,
@@ -3207,7 +3218,9 @@
   },
   "2726": {
     "staticId": 2726,
-    "level": 35
+    "level": 35,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2727": {
     "staticId": 2727,
@@ -3291,7 +3304,9 @@
   },
   "2744": {
     "staticId": 2744,
-    "level": 35
+    "level": 35,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2745": {
     "staticId": 2745,
@@ -3924,6 +3939,30 @@
     "entryType": "poi",
     "name": "Monstruo de zanahoria",
     "level": 0
+  },
+  "150209": {
+    "staticId": 150209,
+    "level": 9,
+    "entryType": "poi",
+    "name": "Bóveda de los antiguos"
+  },
+  "150219": {
+    "staticId": 150219,
+    "level": 19,
+    "entryType": "poi",
+    "name": "Bóveda de los antiguos"
+  },
+  "150222": {
+    "staticId": 150222,
+    "level": 22,
+    "entryType": "poi",
+    "name": "Bóveda de los antiguos"
+  },
+  "150229": {
+    "staticId": 150229,
+    "level": 29,
+    "entryType": "poi",
+    "name": "Bóveda de los antiguos"
   },
   "152001": {
     "staticId": 152001,
