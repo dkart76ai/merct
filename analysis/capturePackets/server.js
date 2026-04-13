@@ -3,8 +3,14 @@ const path = require('path')
 const fs = require('fs')
 // const { chromium } = require('playwright')
 const { firefox } = require('playwright')
+const { loadEnvFile } = require('node:process')
 
-const SAVE_FILE = path.join(__dirname, 'captures.json')
+loadEnvFile() // Defaults to loading './.env'
+
+const channelUrl = process.env.CHAT_CHANNEL_URL || ''
+console.log('channel url', channelUrl)
+
+const SAVE_DIR = path.join(__dirname, 'captures')
 const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
 const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
 const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json')
@@ -12,7 +18,19 @@ const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
 const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
 const STATIC_DB_FILE = path.join(__dirname, 'staticId-db.json')
 
+let saveFileIndex = 0
+const MAX_CAPTURES_PER_FILE = 500
+
 let staticIdDb = new Map()
+
+async function fileExists(filePath) {
+  try {
+    await fs.access(filePath, fs.constants.F_OK)
+    return true
+  } catch {
+    return false
+  }
+}
 
 function loadStaticDb() {
   try {
@@ -349,6 +367,9 @@ let objectPackets = []
 let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
 let chatStaticIds = new Map()
 
+let sessionSaved = false
+const authPath = path.join(__dirname, 'auth', 'user.json')
+
 const myPlayerInfo = {
   name: 'Maedve',
   coords: { k: 277, x: 91, y: 53 },
@@ -488,25 +509,103 @@ function saveObjectPackets() {
 
 function saveToFile() {
   try {
-    fs.writeFileSync(SAVE_FILE, JSON.stringify(captures, null, 2))
-    console.log(`[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to file`)
+    if (!fs.existsSync(SAVE_DIR)) {
+      fs.mkdirSync(SAVE_DIR, { recursive: true })
+    }
+
+    const saveFile = path.join(SAVE_DIR, `captures-${String(saveFileIndex).padStart(3, '0')}.json`)
+    fs.writeFileSync(saveFile, JSON.stringify(captures, null, 2))
+    console.log(
+      `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
+    )
+
+    if (captures.length >= MAX_CAPTURES_PER_FILE) {
+      captures = []
+      captureIndex = 0
+      saveFileIndex++
+      console.log(
+        `[${new Date().toLocaleTimeString()}] Rotation: switched to captures-${String(saveFileIndex).padStart(3, '0')}.json`
+      )
+    }
   } catch (e) {
     console.error('Save error:', e.message)
   }
 }
 
-function trackUnknownStaticId(obj) {
+async function trackUnknownStaticId(obj) {
   const { staticId, level, kingdom, x, y } = obj
   const dbEntry = staticIdDb.get(String(staticId))
 
   const isComplete = dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level
 
-  if (!isComplete && !unknownStaticIds.has(staticId)) {
-    unknownStaticIds.set(staticId, { kingdom, x, y })
-    console.log(`[${new Date().toLocaleTimeString()}] New incomplete staticId: ${staticId}`)
+  if (!isComplete) {
+    unknownStaticIds.set(staticId, { kingdom, x, y, timestamp: Date.now() })
+    if (!unknownStaticIds.has(staticId)) {
+      console.log(`[${new Date().toLocaleTimeString()}] New incomplete staticId: ${staticId}`)
+    }
+
+    await sendMessage('', { k: kingdom, x, y }, staticId, dbEntry?.entryType || 'poi')
   }
 
   addOrUpdateStaticId(staticId, { level })
+}
+
+async function sendMessage(msg = '', coord = null, staticId = 400, entryType = 'poi') {
+  if (!channelUrl) {
+    console.log(`⚠️ No channel URL configured`)
+    return
+  }
+
+  let data = ''
+  let message = msg
+  if (!!coord) {
+    data = JSON.stringify({
+      subs: {
+        '/%0%/': {
+          type: 'coord',
+          entryType,
+          x: coord?.x ?? 0,
+          y: coord?.y ?? 0,
+          realmId: coord?.k ?? 0,
+          staticId,
+          name: '',
+          v: 1
+        }
+      }
+    })
+    message = '/%0%/'
+  }
+
+  const result = await page.evaluate(
+    async ({ channelUrl, data, message }) => {
+      try {
+        // use game's own SendBirdHelper — no new connection needed
+        if (!window.SendBirdHelper?.sb) {
+          return { success: false, error: 'SendBirdHelper not ready' }
+        }
+        const state = window.SendBirdHelper?.sb.connectionState
+        if (state !== 'OPEN') {
+          console.log('chat not connected')
+          return { success: false, error: 'SendBirdHelper not ready', state }
+        }
+
+        // find channel in existing list or fetch it
+        let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
+        if (!channel) {
+          channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
+        }
+        const msg = await channel.sendUserMessage({
+          message,
+          customType: 'user',
+          data
+        })
+        return { success: true, messageId: msg.messageId }
+      } catch (e) {
+        return { success: false, error: e.message }
+      }
+    },
+    { channelUrl, data, message }
+  )
 }
 
 function saveUnknownStaticIds() {
@@ -533,13 +632,25 @@ app.post('/api/start', async (req, res) => {
       headless: false,
       args: ['--start-maximized']
     })
-    context = await browser.newContext({
+
+    const options = {
       screen: { width: 1360, height: 1024 },
       viewport: { width: 1360, height: 1024 },
       deviceScaleFactor: 1,
       userAgent:
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36'
-    })
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36',
+      extraHTTPHeaders: {
+        'Accept-Language': 'en-US,en;q=0.9',
+        'sec-ch-ua': '"Chromium";v="125", "Not(A:Brand";v="99", "Google Chrome";v="125"' // Remove "HeadlessChrome"
+      }
+    }
+
+    if (await fileExists(authPath)) {
+      options.storageState = authPath
+    }
+
+    context = await browser.newContext(options)
+
     page = await context.newPage()
     captures = []
     captureIndex = 0
@@ -567,6 +678,23 @@ app.post('/api/start', async (req, res) => {
       })
     })
 
+    // Patch Triumph.framework.js to expose SendBirdHelper globally
+    await page.route('**/Triumph.framework.js', async route => {
+      try {
+        const response = await route.fetch()
+        let body = await response.text()
+        body = body.replace(
+          'var SendBirdHelper = {',
+          'var SendBirdHelper = window.SendBirdHelper = {'
+        )
+        await route.fulfill({ response, body })
+        console.log(`  🔧 Triumph.framework.js patched`)
+      } catch (e) {
+        console.error(`  Failed to patch framework:`, e.message)
+        await route.continue()
+      }
+    })
+
     // await page.route('**/rubens-realm**', async route => {
     //   const request = route.request()
     //   const buffer = request.postDataBuffer() // Aquí es mucho más probable que sí tenga datos
@@ -584,6 +712,12 @@ app.post('/api/start', async (req, res) => {
 
       const url = response.url()
       if (!url.includes('rubens-realm')) return
+
+      if (captureIndex == 100 && !sessionSaved) {
+        //save session
+        sessionSaved = true
+        await context.storageState({ path: authPath })
+      }
 
       try {
         const status = response.status()
@@ -660,8 +794,8 @@ app.post('/api/start', async (req, res) => {
           response: {
             headers,
             bodyB64: Buffer.from(body).toString('base64'),
-            bodySize: body.length,
-            decodedResponse
+            bodySize: body.length
+            // decodedResponse
           },
           objectCount: objects.length,
           objects,
@@ -678,7 +812,7 @@ app.post('/api/start', async (req, res) => {
             bodyB64: Buffer.from(body).toString('base64'),
             bodySize: body.length,
             bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
-            bodyBufferSize: postDataBuff ? postDataBuff.length : 0
+            bodyBufferSize: postDataBuff ? postDataBuff.length : 0,
             decodedResponse,
             objectCount: objects.length,
             objects,
@@ -728,6 +862,11 @@ app.post('/api/start', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message })
   }
+
+  // await page.waitForTimeout(20000)
+
+  // if (await page.locator('canvas').waitFor({ state: 'visible', timeout: 90000 }).catch(() => false)) {
+  // }
 })
 
 app.post('/api/stop', async (req, res) => {
@@ -864,7 +1003,8 @@ app.get('/api/unknown-staticids', (req, res) => {
     staticId: parseInt(id),
     kingdom: data.kingdom,
     x: data.x,
-    y: data.y
+    y: data.y,
+    timestamp: parseInt(data.timestamp)
   }))
   res.json({ success: true, items: entries, count: unknownStaticIds.size })
 })
