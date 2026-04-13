@@ -677,6 +677,8 @@ app.post('/api/start', async (req, res) => {
             request: requestData,
             bodyB64: Buffer.from(body).toString('base64'),
             bodySize: body.length,
+            bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
+            bodyBufferSize: postDataBuff ? postDataBuff.length : 0
             decodedResponse,
             objectCount: objects.length,
             objects,
@@ -695,7 +697,9 @@ app.post('/api/start', async (req, res) => {
               headers: request.headers(),
               bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
               bodySize: postData ? postData.length : 0,
-              decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
+              bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
+              bodyBufferSize: postDataBuff ? postDataBuff.length : 0
+              // decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
             },
             response: {
               headers,
