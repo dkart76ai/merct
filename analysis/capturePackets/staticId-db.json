@@ -1229,7 +1229,8 @@
   "1538": {
     "staticId": 1538,
     "level": 31,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común de bárbaros"
   },
   "1539": {
     "staticId": 1539,
@@ -2204,6 +2205,12 @@
     "entryType": "poi",
     "name": "Escuadrón heroico infernal"
   },
+  "1855": {
+    "staticId": 1855,
+    "level": 21,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de muertos vivientes"
+  },
   "1856": {
     "staticId": 1856,
     "level": 22,
@@ -2439,7 +2446,8 @@
   "2059": {
     "staticId": 2059,
     "level": 25,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico infernal"
   },
   "2061": {
     "staticId": 2061,
@@ -3141,7 +3149,8 @@
   "2626": {
     "staticId": 2626,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2627": {
     "staticId": 2627,
@@ -3300,7 +3309,9 @@
   },
   "2743": {
     "staticId": 2743,
-    "level": 30
+    "level": 30,
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2744": {
     "staticId": 2744,
@@ -3643,7 +3654,8 @@
   "2906": {
     "staticId": 2906,
     "level": 37,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
   },
   "2907": {
     "staticId": 2907,
@@ -3811,7 +3823,9 @@
   },
   "2936": {
     "staticId": 2936,
-    "level": 45
+    "level": 45,
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
   },
   "2937": {
     "staticId": 2937,
@@ -3946,6 +3960,12 @@
     "entryType": "poi",
     "name": "Bóveda de los antiguos"
   },
+  "150214": {
+    "staticId": 150214,
+    "level": 14,
+    "entryType": "poi",
+    "name": "Bóveda de los antiguos"
+  },
   "150219": {
     "staticId": 150219,
     "level": 19,
@@ -3955,6 +3975,12 @@
   "150222": {
     "staticId": 150222,
     "level": 22,
+    "entryType": "poi",
+    "name": "Bóveda de los antiguos"
+  },
+  "150224": {
+    "staticId": 150224,
+    "level": 24,
     "entryType": "poi",
     "name": "Bóveda de los antiguos"
   },
