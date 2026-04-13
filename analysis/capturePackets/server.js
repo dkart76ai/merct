@@ -413,7 +413,19 @@ function extractChatStaticIds(message) {
                 entryType: sub.entryType,
                 name: sub.name || null
               })
-              unknownStaticIds.delete(sub.staticId)
+
+              const unknown = unknownStaticIds.get(String(sub.staticId))
+
+              const isComplete =
+                unknown &&
+                unknown.name &&
+                unknown.entryType &&
+                unknown.level != null &&
+                unknown.level >= 0
+
+              if (isComplete) {
+                unknownStaticIds.delete(sub.staticId)
+              }
             }
           }
         }
@@ -536,7 +548,8 @@ async function trackUnknownStaticId(obj) {
   const { staticId, level, kingdom, x, y } = obj
   const dbEntry = staticIdDb.get(String(staticId))
 
-  const isComplete = dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level
+  const isComplete =
+    dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level != null && dbEntry.level >= 0
 
   if (!isComplete) {
     unknownStaticIds.set(staticId, { kingdom, x, y, timestamp: Date.now() })
@@ -813,7 +826,7 @@ app.post('/api/start', async (req, res) => {
             bodySize: body.length,
             bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
             bodyBufferSize: postDataBuff ? postDataBuff.length : 0,
-            decodedResponse,
+            // decodedResponse,
             objectCount: objects.length,
             objects,
             timestamp: new Date().toISOString()
@@ -838,8 +851,8 @@ app.post('/api/start', async (req, res) => {
             response: {
               headers,
               bodyB64: Buffer.from(body).toString('base64'),
-              bodySize: body.length,
-              decodedResponse
+              bodySize: body.length
+              // decodedResponse
             },
             objectCount: objects.length,
             objects
