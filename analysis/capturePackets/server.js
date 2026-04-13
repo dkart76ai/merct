@@ -497,10 +497,13 @@ function saveToFile() {
 
 function trackUnknownStaticId(obj) {
   const { staticId, level, kingdom, x, y } = obj
+  const dbEntry = staticIdDb.get(String(staticId))
 
-  if (!unknownStaticIds.has(staticId)) {
+  const isComplete = dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level
+
+  if (!isComplete && !unknownStaticIds.has(staticId)) {
     unknownStaticIds.set(staticId, { kingdom, x, y })
-    console.log(`[${new Date().toLocaleTimeString()}] New unknown staticId: ${staticId}`)
+    console.log(`[${new Date().toLocaleTimeString()}] New incomplete staticId: ${staticId}`)
   }
 
   addOrUpdateStaticId(staticId, { level })
