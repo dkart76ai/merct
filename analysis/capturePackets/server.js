@@ -1,7 +1,8 @@
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
-const { chromium } = require('playwright')
+// const { chromium } = require('playwright')
+const { firefox } = require('playwright')
 
 const SAVE_FILE = path.join(__dirname, 'captures.json')
 const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
@@ -280,7 +281,6 @@ function extractObjects(data) {
   }
 
   function findObjects(arr, depth = 0) {
-    console.log('findobjects depth', depth)
     if (depth > 200) return
     for (const item of arr) {
       if (Array.isArray(item)) {
@@ -525,7 +525,8 @@ app.post('/api/start', async (req, res) => {
       return res.json({ success: true, message: 'Browser already running' })
     }
 
-    browser = await chromium.launch({
+    browser = await firefox.launch({
+      // browser = await chromium.launch({
       headless: false,
       args: ['--start-maximized']
     })
@@ -563,6 +564,18 @@ app.post('/api/start', async (req, res) => {
       })
     })
 
+    // await page.route('**/rubens-realm**', async route => {
+    //   const request = route.request()
+    //   const buffer = request.postDataBuffer() // Aquí es mucho más probable que sí tenga datos
+
+    //   if (buffer) {
+    //     console.log('¡Payload capturado!', buffer.length)
+    //     // fs.writeFileSync('captura.bin', buffer);
+    //   }
+
+    //   await route.continue() // No olvides continuar la petición
+    // })
+
     page.on('response', async response => {
       if (!capturingEnabled) return
 
@@ -579,6 +592,11 @@ app.post('/api/start', async (req, res) => {
 
         const request = response.request()
         const postData = request.postData()
+        const postDataBuff = request.postDataBuffer()
+        // if (postDataBuff) {
+        //   console.log(`Recibidos ${postDataBuff.length} bytes de datos binarios.`)
+        //   // Aquí puedes procesar el Buffer, por ejemplo, guardarlo como archivo
+        // }
 
         let decodedResponse = decodeFull(Buffer.from(body))
         const opCode = getFirstValue(decodedResponse)
@@ -632,7 +650,9 @@ app.post('/api/start', async (req, res) => {
             headers: request.headers(),
             bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
             bodySize: postData ? postData.length : 0,
-            decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
+            bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
+            bodyBufferSize: postDataBuff ? postDataBuff.length : 0
+            // decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
           },
           response: {
             headers,
