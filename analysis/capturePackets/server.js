@@ -4,7 +4,6 @@ const fs = require('fs')
 // const { chromium } = require('playwright')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
-
 loadEnvFile() // Defaults to loading './.env'
 
 const channelUrl = process.env.CHAT_CHANNEL_URL || ''
@@ -14,9 +13,15 @@ const SAVE_DIR = path.join(__dirname, 'captures')
 const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
 const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
 const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json')
+const OBJECT_PACKETS312_FILE = path.join(__dirname, 'samples', 'objectpackets312.json')
 const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
 const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
 const STATIC_DB_FILE = path.join(__dirname, 'staticId-db.json')
+const PACKET312 = {
+  kingdom: 100,
+  sessionToken: null,
+  buff: null
+}
 
 let saveFileIndex = 0
 const MAX_CAPTURES_PER_FILE = 500
@@ -363,6 +368,7 @@ let uniqueOpcodes = new Set()
 let myPlayerPackets = []
 let myPlayerPacketIndex = 0
 let objectPackets = []
+let packets312analyze = []
 
 let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
 let chatStaticIds = new Map()
@@ -514,6 +520,16 @@ function saveObjectPackets() {
   try {
     fs.writeFileSync(OBJECT_PACKETS_FILE, JSON.stringify(objectPackets, null, 2))
     console.log(`[${new Date().toLocaleTimeString()}] Saved ${objectPackets.length} object packets`)
+  } catch (e) {
+    console.error('Save OBJECT packets error:', e.message)
+  }
+}
+function saveObjectPackets312() {
+  try {
+    fs.writeFileSync(OBJECT_PACKETS312_FILE, JSON.stringify(packets312analyze, null, 2))
+    console.log(
+      `[${new Date().toLocaleTimeString()}] Saved ${packets312analyze.length} object packets`
+    )
   } catch (e) {
     console.error('Save OBJECT packets error:', e.message)
   }
@@ -861,6 +877,32 @@ app.post('/api/start', async (req, res) => {
           if (autoSave) saveObjectPackets()
         }
 
+        if (opCode === 312 && objects.length > 0) {
+          const decodedReq = decodeFull(Buffer.from(postDataBuff))
+          const tileIds = decodedReq[1]
+
+          const allCoordX = objects.map(o => o.x)
+          const allCoordY = objects.map(o => o.y)
+          const minX = Math.min(...allCoordX)
+          const maxX = Math.max(...allCoordX)
+          const minY = Math.min(...allCoordY)
+          const maxY = Math.max(...allCoordY)
+          const kingdom = objects[0].kingdom
+
+          packets312analyze.push({
+            opCode,
+            url,
+            requestBodyB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
+            responseBodyB64: Buffer.from(body).toString('base64'),
+            kingdom,
+            tileIds: JSON.stringify(tileIds),
+            range: `xy1=${minX}-${minY}, xy2=${maxX}-${maxY}`,
+            objectCount: objects.length
+          })
+
+          if (autoSave) saveObjectPackets312()
+        }
+
         console.log(`[${new Date().toLocaleTimeString()}] Captured: ${url} (${body.length} bytes)`)
 
         if (autoSave) saveToFile()
@@ -897,6 +939,14 @@ app.post('/api/stop', async (req, res) => {
 
 app.get('/api/captures', (req, res) => {
   res.json({ success: true, captures: captures.slice(-50), count: captures.length })
+})
+
+app.get('/api/captures312', (req, res) => {
+  res.json({
+    success: true,
+    captures: captures.filter(c => c.opCode === 312).slice(-50),
+    count: captures.length
+  })
 })
 
 app.get('/api/captures/:id', (req, res) => {
@@ -1001,6 +1051,8 @@ app.post('/api/clear-myplayer', (req, res) => {
 })
 
 app.post('/api/clear-all', (req, res) => {
+  objectPackets = []
+  packets312analyze = []
   captures = []
   captureIndex = 0
   myPlayerPackets = []
