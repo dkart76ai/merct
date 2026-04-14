@@ -4,6 +4,7 @@ const fs = require('fs')
 // const { chromium } = require('playwright')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
+const {kingdomUrls} = require(.'./kingdomUrls.js')
 loadEnvFile() // Defaults to loading './.env'
 
 const channelUrl = process.env.CHAT_CHANNEL_URL || ''
@@ -646,6 +647,34 @@ function saveUnknownStaticIds() {
   }
 }
 
+const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
+  const allNumbers = []
+  const used = new Set()
+
+  for (let i = start; i <= end; i++) {
+    // Si el número ya se usó en un salto anterior, lo saltamos
+    if (used.has(i)) continue
+
+    // Generamos el bloque basado en tu patrón (n, n+50, n+100, n+150...)
+    // Usamos 4 saltos como en tu ejemplo: [9, 59, 109, 159]
+    for (let j = 0; j < 4; j++) {
+      let num = i + j * step
+      if (num <= end && !used.has(num)) {
+        allNumbers.push(num)
+        used.add(num)
+      }
+    }
+  }
+
+  // Dividimos el resultado en arreglos de 12 elementos
+  const result = []
+  for (let i = 0; i < allNumbers.length; i += groupSize) {
+    result.push(allNumbers.slice(i, i + groupSize))
+  }
+
+  return result
+}
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
@@ -889,6 +918,20 @@ app.post('/api/start', async (req, res) => {
           const maxY = Math.max(...allCoordY)
           const kingdom = objects[0].kingdom
 
+          /*
+[
+ [ 312, "sequence ie:2242", [["sessionToken?"], "212bytesAuth?"], ""],
+ [ ["tileId1", "tileId2"],["0's as many tilesId" ],[],[] ]
+
+]
+
+
+*/
+          if (!PACKET312.sessionToken) {
+            PACKET312.sessionToken = decodedReq[0][2][0][0] // playerid? or session token?
+            PACKET312.buff1 = decodedReq[0][2][1] // auth token?
+          }
+
           packets312analyze.push({
             opCode,
             url,
@@ -922,6 +965,56 @@ app.post('/api/start', async (req, res) => {
 
   // if (await page.locator('canvas').waitFor({ state: 'visible', timeout: 90000 }).catch(() => false)) {
   // }
+})
+
+app.post('/api/scanKingdom', async (req, res) => {
+  if (isNaN(req.body.kingdom)) {
+    return res.json({ success: false, msg: 'enter kingdom' })
+  }
+
+  if (!PACKET312.sessionToken || !PACKET312.buff) {
+    return res.json({ success: false, msg: 'data not ready' })
+  }
+      // const default='https://game-us17.totalbattle.com/rubens-realm146'
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    return res.json({ success: false, msg: 'invalid kingdom' })
+  }
+
+
+  PACKET312.kingdom = parseInt(req.body.kingdom)
+  const randomSeq = Math.floor(Math.random() * 32000) + 1
+
+  const tilesArray = generateArrays()
+
+  const promises = tilesArray.map(tiles => {
+    const buff312 = [
+      [312, randomSeq, [[PACKET312.sessionToken], PACKET312.buff], ''],
+      [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
+    ]
+
+    const payload = 1 // encodeMsgPack(buff312)
+
+
+    return fetch(url, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
+        'Content-Type': 'application/octet-stream'
+      },
+      body: payload,
+      referrer: 'https://totalbattle.com/',
+      method: 'POST'
+    })
+  })
+
+  // 2. Ejecutarlas en paralelo
+  const responses = await Promise.all(promises)
+
+  // 3. Convertir todas a JSON (otra tanda de promesas)
+  const data = await Promise.all(responses.map(res => res.json()))
+
+  res.json({ success: true, kingdom: PACKET312.kingdom })
 })
 
 app.post('/api/stop', async (req, res) => {
