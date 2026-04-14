@@ -2,227 +2,12 @@ import React, { useState, useCallback, useMemo } from 'react'
 import JsonView from '@uiw/react-json-view'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import { vscodeTheme } from '@uiw/react-json-view/vscode'
+import { decodeMsgPackBase64 } from './messagePack'
+
 // ============================================
 // MSGPACK DECODER (browser-compatible)
 // ============================================
 const Quote = JsonView.Quote
-
-function readValue(buf, off) {
-  if (off >= buf.length) return { val: null, end: buf.length }
-  const byte = buf[off++]
-
-  // Create DataView for multi-byte reads
-  const dataView = new DataView(buf.buffer, buf.byteOffset)
-
-  // Helper functions for DataView reads
-  const readUint16BE = offset => dataView.getUint16(offset, false)
-  const readUint32BE = offset => dataView.getUint32(offset, false)
-  const readUint16LE = offset => dataView.getUint16(offset, true)
-  const readUint32LE = offset => dataView.getUint32(offset, true)
-  const readInt8 = offset => dataView.getInt8(offset)
-  const readInt16LE = offset => dataView.getInt16(offset, true)
-  const readInt32LE = offset => dataView.getInt32(offset, true)
-  const readFloat32 = offset => dataView.getFloat32(offset, false)
-  const readFloat64 = offset => dataView.getFloat64(offset, false)
-
-  if ((byte & 0x80) === 0) return { val: byte, end: off }
-  if ((byte & 0xe0) === 0xe0) return { val: byte - 256, end: off }
-
-  if ((byte & 0xf0) === 0x80) {
-    const size = byte & 0x0f
-    const obj = {}
-    let o = off
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const k = readValue(buf, o)
-      o = k.end
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      o = v.end
-      obj[k.val] = v.val
-    }
-    return { val: obj, end: o }
-  }
-
-  if ((byte & 0xf0) === 0x90) {
-    const size = byte & 0x0f
-    const arr = []
-    let o = off
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      arr.push(v.val)
-      o = v.end
-    }
-    return { val: arr, end: o }
-  }
-
-  if ((byte & 0xe0) === 0xa0) {
-    const len = byte & 0x1f
-    return { val: buf.slice(off, off + len).toString('utf8'), end: off + len }
-  }
-
-  if (byte === 0xc0) return { val: null, end: off }
-  if (byte === 0xc2) return { val: false, end: off }
-  if (byte === 0xc3) return { val: true, end: off }
-
-  if (byte === 0xc4) {
-    const len = buf[off]
-    return { val: buf.slice(off + 1, off + 1 + len), end: off + 1 + len }
-  }
-  if (byte === 0xc5) {
-    const len = readUint16BE(off)
-    return { val: buf.slice(off + 2, off + 2 + len), end: off + 2 + len }
-  }
-  if (byte === 0xc6) {
-    const len = readUint32BE(off)
-    return { val: buf.slice(off + 4, off + 4 + len), end: off + 4 + len }
-  }
-
-  if (byte >= 0xc7 && byte <= 0xc9) {
-    let len, dataOff
-    if (byte === 0xc7) {
-      len = buf[off]
-      dataOff = off + 2
-    } else if (byte === 0xc8) {
-      len = readUint16BE(off)
-      dataOff = off + 3
-    } else {
-      len = readUint32BE(off)
-      dataOff = off + 5
-    }
-    const type = buf[dataOff]
-    const data = buf.slice(dataOff + 1, dataOff + 1 + len - 1)
-    return { val: { type, data }, end: dataOff + len }
-  }
-
-  if (byte === 0xca) {
-    return { val: readFloat32(off), end: off + 4 }
-  }
-  if (byte === 0xcb) {
-    return { val: readFloat64(off), end: off + 8 }
-  }
-
-  if (byte === 0xcc) return { val: buf[off], end: off + 1 }
-  if (byte === 0xcd) return { val: readUint16LE(off), end: off + 2 }
-  if (byte === 0xce) return { val: readUint32LE(off), end: off + 4 }
-  if (byte === 0xcf) {
-    let val = 0n
-    for (let i = 0; i < 8; i++) val += BigInt(buf[off + i]) << BigInt(i * 8)
-    return { val: Number(val), end: off + 8 }
-  }
-
-  if (byte === 0xd0) return { val: readInt8(off), end: off + 1 }
-  if (byte === 0xd1) return { val: readInt16LE(off), end: off + 2 }
-  if (byte === 0xd2) return { val: readInt32LE(off), end: off + 4 }
-  if (byte === 0xd3) {
-    let val = 0n
-    for (let i = 0; i < 8; i++) val += BigInt(buf[off + i]) << BigInt(i * 8)
-    return { val: Number(val), end: off + 8 }
-  }
-
-  if (byte >= 0xd4 && byte <= 0xd8) {
-    const sizes = [1, 2, 4, 8, 16]
-    const size = sizes[byte - 0xd4]
-    return {
-      val: { type: buf[off], data: buf.slice(off + 1, off + 1 + size) },
-      end: off + 1 + size
-    }
-  }
-
-  if (byte === 0xd9) {
-    const len = buf[off]
-    return { val: buf.slice(off + 1, off + 1 + len).toString('utf8'), end: off + 1 + len }
-  }
-  if (byte === 0xda) {
-    const len = readUint16BE(off)
-    return { val: buf.slice(off + 2, off + 2 + len).toString('utf8'), end: off + 2 + len }
-  }
-  if (byte === 0xdb) {
-    const len = readUint32BE(off)
-    return { val: buf.slice(off + 4, off + 4 + len).toString('utf8'), end: off + 4 + len }
-  }
-
-  if (byte === 0xdc) {
-    const size = readUint16BE(off)
-    const arr = []
-    let o = off + 2
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      arr.push(v.val)
-      o = v.end
-    }
-    return { val: arr, end: o }
-  }
-
-  if (byte === 0xdd) {
-    const size = readUint32BE(off)
-    const arr = []
-    let o = off + 4
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      arr.push(v.val)
-      o = v.end
-    }
-    return { val: arr, end: o }
-  }
-
-  if (byte === 0xde) {
-    const size = readUint16BE(off)
-    const obj = {}
-    let o = off + 2
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const k = readValue(buf, o)
-      o = k.end
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      o = v.end
-      obj[k.val] = v.val
-    }
-    return { val: obj, end: o }
-  }
-
-  if (byte === 0xdf) {
-    const size = readUint32BE(off)
-    const obj = {}
-    let o = off + 4
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const k = readValue(buf, o)
-      o = k.end
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      o = v.end
-      obj[k.val] = v.val
-    }
-    return { val: obj, end: o }
-  }
-
-  return { val: null, end: off + 1 }
-}
-
-// Decode a full buffer starting from offset 8 (skip 8-byte header)
-function decodeFull(buf) {
-  const results = []
-  let off = 8
-  while (off < buf.length) {
-    try {
-      const result = readValue(buf, off)
-      if (result.val !== null) {
-        results.push(result.val)
-        off = result.end
-      } else {
-        off++
-      }
-    } catch (e) {
-      off++
-    }
-  }
-  return results
-}
 
 // ============================================
 // MSGPACK ENCODER
@@ -402,25 +187,6 @@ function encodeToBase64(data) {
   return btoa(binary)
 }
 
-function decodeBase64(base64String) {
-  try {
-    let cleanBase64 = base64String.replace(/\s/g, '')
-    if (cleanBase64.includes(',')) {
-      cleanBase64 = cleanBase64.split(',')[1]
-    }
-
-    const binaryString = atob(cleanBase64)
-    const bytes = new Uint8Array(binaryString.length)
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i)
-    }
-
-    return decodeFull(bytes)
-  } catch (e) {
-    throw new Error('Failed to decode: ' + e.message)
-  }
-}
-
 function processBytesToString(data) {
   if (data === null) return null
   if (typeof data === 'number') return data
@@ -449,6 +215,89 @@ function processBytesToString(data) {
     return result
   }
   return data
+}
+
+// ============================================
+// OPCODE 312 REQUEST BUILDER
+// ============================================
+
+const HEADER_312 = new Uint8Array([0x71, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00])
+
+function writeUint16LE(val, chunks) {
+  chunks.push(val & 0xff)
+  chunks.push((val >> 8) & 0xff)
+}
+
+function writeUint64LE(val, chunks) {
+  const v = BigInt(val)
+  for (let i = 0; i < 8; i++) {
+    chunks.push(Number((v >> BigInt(i * 8)) & 0xffn))
+  }
+}
+
+function buildOpCode312Request(opCode, seqNum, playerObjId, playerExtData, tileIds, tileVals) {
+  const chunks = []
+
+  chunks.push(...HEADER_312)
+
+  chunks.push(0x94)
+
+  chunks.push(0xcd)
+  writeUint16LE(opCode, chunks)
+
+  if (seqNum < 0x80) {
+    chunks.push(seqNum)
+  } else {
+    chunks.push(0xcc)
+    chunks.push(seqNum & 0xff)
+  }
+
+  chunks.push(0x92)
+  chunks.push(0x91)
+  chunks.push(0xcf)
+  writeUint64LE(playerObjId, chunks)
+
+  chunks.push(0xc4)
+  chunks.push(0x0c)
+  chunks.push(0x69)
+  for (let i = 0; i < 12; i++) {
+    chunks.push(playerExtData[i] || 0)
+  }
+
+  chunks.push(0xa0)
+
+  chunks.push(0x94)
+  chunks.push(0x91)
+  chunks.push(0x90 | Math.min(tileIds.length, 15))
+  for (const tileId of tileIds) {
+    chunks.push(0xcd)
+    writeUint16LE(tileId, chunks)
+  }
+
+  chunks.push(0x91)
+  chunks.push(0x90 | Math.min(tileVals.length, 15))
+  for (const val of tileVals) {
+    if (val < 0x80) {
+      chunks.push(val)
+    } else {
+      chunks.push(0xcc)
+      chunks.push(val & 0xff)
+    }
+  }
+
+  chunks.push(0x90)
+  chunks.push(0x90)
+
+  return new Uint8Array(chunks)
+}
+
+function encodeOpCode312Request(opCode, seqNum, playerObjId, playerExtData, tileIds, tileVals) {
+  const bytes = buildOpCode312Request(opCode, seqNum, playerObjId, playerExtData, tileIds, tileVals)
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  return btoa(binary)
 }
 
 // ============================================
@@ -516,6 +365,14 @@ function App() {
   const [encodedOutput, setEncodedOutput] = useState('')
   const [encodeError, setEncodeError] = useState(null)
 
+  const [op312OpCode, setOp312OpCode] = useState(312)
+  const [op312SeqNum, setOp312SeqNum] = useState(100)
+  const [op312PlayerId, setOp312PlayerId] = useState('1309965043442')
+  const [op312TileIds, setOp312TileIds] = useState('2285')
+  const [op312ExtData, setOp312ExtData] = useState('69dd4b7dab5ab7c72318eb2fa0')
+  const [op312Output, setOp312Output] = useState('')
+  const [op312Error, setOp312Error] = useState(null)
+
   const handleClear = () => {
     setDecoded(null)
     setHexData(null)
@@ -561,7 +418,7 @@ function App() {
     }
 
     try {
-      let result = decodeBase64(input)
+      let result = decodeMsgPackBase64(input)
       result = processBytesToString(result)
       console.log(processBytesToString(result))
       setDecoded(result)
@@ -593,6 +450,60 @@ function App() {
 
   const handleLoadSample = () => {
     setInput(SAMPLE_DATA)
+  }
+
+  const handleBuildOp312Request = () => {
+    try {
+      const tileIds = op312TileIds
+        .split(',')
+        .map(s => parseInt(s.trim()))
+        .filter(n => !isNaN(n))
+      if (tileIds.length === 0) {
+        setOp312Error('Please enter valid tile IDs')
+        setOp312Output('')
+        return
+      }
+
+      let playerId = BigInt(op312PlayerId)
+      if (playerId < 0n) playerId = BigInt(Number(op312PlayerId))
+
+      const extHex = op312ExtData.replace(/\s/g, '')
+      const extBytes = new Uint8Array(12)
+      for (let i = 0; i < 12 && i * 2 < extHex.length; i++) {
+        extBytes[i] = parseInt(extHex.substr(i * 2, 2), 16)
+      }
+
+      const tileVals = tileIds.map(() => 0)
+
+      const output = encodeOpCode312Request(
+        op312OpCode,
+        op312SeqNum,
+        playerId,
+        extBytes,
+        tileIds,
+        tileVals
+      )
+
+      setOp312Output(output)
+      setOp312Error(null)
+    } catch (e) {
+      setOp312Error('Error: ' + e.message)
+      setOp312Output('')
+    }
+  }
+
+  const handleLoadSample312 = () => {
+    setOp312OpCode(312)
+    setOp312SeqNum(24)
+    setOp312PlayerId('1309965043442')
+    setOp312TileIds('2285')
+    setOp312ExtData('69dd4b7dab5ab7c72318eb2fa0')
+  }
+
+  const handleCopyOp312 = () => {
+    if (op312Output) {
+      navigator.clipboard.writeText(op312Output)
+    }
   }
 
   return (
@@ -686,34 +597,215 @@ function App() {
         </div>
 
         <div className='panel'>
-          <div className='panel-header'>
-            Encoder (JSON to MsgPack)
-          </div>
+          <div className='panel-header'>Encoder (JSON to MsgPack)</div>
           <div className='panel-content'>
             <textarea
               value={encodeInput}
               onChange={e => setEncodeInput(e.target.value)}
               placeholder='Enter JSON data to encode...'
               spellCheck={false}
-              style={{ width: '100%', height: '100px', background: '#1e1e1e', color: '#d4d4d4', border: 'none', padding: '10px', fontFamily: 'monospace' }}
+              style={{
+                width: '100%',
+                height: '100px',
+                background: '#1e1e1e',
+                color: '#d4d4d4',
+                border: 'none',
+                padding: '10px',
+                fontFamily: 'monospace'
+              }}
             />
           </div>
           <div style={{ padding: '10px', display: 'flex', gap: '8px' }}>
-            <button className='sample-btn' onClick={handleEncode}>Encode</button>
-            <button className='sample-btn' onClick={handleLoadEncodedSample} disabled={!decoded}>Use Decoded</button>
+            <button className='sample-btn' onClick={handleEncode}>
+              Encode
+            </button>
+            <button className='sample-btn' onClick={handleLoadEncodedSample} disabled={!decoded}>
+              Use Decoded
+            </button>
           </div>
-          {encodeError && <div className='error' style={{ padding: '10px' }}>{encodeError}</div>}
+          {encodeError && (
+            <div className='error' style={{ padding: '10px' }}>
+              {encodeError}
+            </div>
+          )}
           {encodedOutput && (
             <div style={{ padding: '10px' }}>
               <div style={{ marginBottom: '8px', color: '#569cd6' }}>Encoded Base64:</div>
               <textarea
                 value={encodedOutput}
                 readOnly
-                style={{ width: '100%', height: '60px', background: '#1e1e1e', color: '#4ec9b0', border: 'none', padding: '10px', fontFamily: 'monospace', fontSize: '12px' }}
+                style={{
+                  width: '100%',
+                  height: '60px',
+                  background: '#1e1e1e',
+                  color: '#4ec9b0',
+                  border: 'none',
+                  padding: '10px',
+                  fontFamily: 'monospace',
+                  fontSize: '12px'
+                }}
               />
-              <button className='copy-btn' onClick={handleCopyEncoded} style={{ marginTop: '8px' }}>Copy</button>
+              <button className='copy-btn' onClick={handleCopyEncoded} style={{ marginTop: '8px' }}>
+                Copy
+              </button>
             </div>
           )}
+        </div>
+
+        <div className='panel'>
+          <div className='panel-header'>OpCode 312 Request Builder (Total Battle Map Objects)</div>
+          <div className='panel-content'>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '10px',
+                padding: '10px'
+              }}
+            >
+              <div>
+                <label style={{ display: 'block', marginBottom: '5px', color: '#569cd6' }}>
+                  opCode
+                </label>
+                <input
+                  type='number'
+                  value={op312OpCode}
+                  onChange={e => setOp312OpCode(parseInt(e.target.value) || 0)}
+                  style={{
+                    width: '100%',
+                    background: '#1e1e1e',
+                    color: '#d4d4d4',
+                    border: '1px solid #3c3c3c',
+                    padding: '5px'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '5px', color: '#569cd6' }}>
+                  seqNum
+                </label>
+                <input
+                  type='number'
+                  value={op312SeqNum}
+                  onChange={e => setOp312SeqNum(parseInt(e.target.value) || 0)}
+                  style={{
+                    width: '100%',
+                    background: '#1e1e1e',
+                    color: '#d4d4d4',
+                    border: '1px solid #3c3c3c',
+                    padding: '5px'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '5px', color: '#569cd6' }}>
+                  playerObjId
+                </label>
+                <input
+                  type='text'
+                  value={op312PlayerId}
+                  onChange={e => setOp312PlayerId(e.target.value)}
+                  placeholder='1309965043442'
+                  style={{
+                    width: '100%',
+                    background: '#1e1e1e',
+                    color: '#d4d4d4',
+                    border: '1px solid #3c3c3c',
+                    padding: '5px'
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '5px', color: '#569cd6' }}>
+                  tileIds (comma-separated)
+                </label>
+                <input
+                  type='text'
+                  value={op312TileIds}
+                  onChange={e => setOp312TileIds(e.target.value)}
+                  placeholder='2285, 2334, 2335'
+                  style={{
+                    width: '100%',
+                    background: '#1e1e1e',
+                    color: '#d4d4d4',
+                    border: '1px solid #3c3c3c',
+                    padding: '5px'
+                  }}
+                />
+              </div>
+            </div>
+            <div style={{ padding: '10px' }}>
+              <label style={{ display: 'block', marginBottom: '5px', color: '#569cd6' }}>
+                playerExtData (24 hex bytes, no spaces)
+              </label>
+              <input
+                type='text'
+                value={op312ExtData}
+                onChange={e => setOp312ExtData(e.target.value)}
+                placeholder='69dd4b7dab5ab7c72318eb2fa0'
+                style={{
+                  width: '100%',
+                  background: '#1e1e1e',
+                  color: '#d4d4d4',
+                  border: '1px solid #3c3c3c',
+                  padding: '5px',
+                  fontFamily: 'monospace'
+                }}
+              />
+            </div>
+            <div style={{ padding: '10px', display: 'flex', gap: '8px' }}>
+              <button className='sample-btn' onClick={handleBuildOp312Request}>
+                Build Request
+              </button>
+              <button className='sample-btn' onClick={handleLoadSample312}>
+                Load Sample
+              </button>
+            </div>
+            {op312Error && (
+              <div className='error' style={{ padding: '10px' }}>
+                {op312Error}
+              </div>
+            )}
+            {op312Output && (
+              <div style={{ padding: '10px' }}>
+                <div style={{ marginBottom: '8px', color: '#569cd6' }}>Request Base64:</div>
+                <textarea
+                  value={op312Output}
+                  readOnly
+                  style={{
+                    width: '100%',
+                    height: '80px',
+                    background: '#1e1e1e',
+                    color: '#4ec9b0',
+                    border: 'none',
+                    padding: '10px',
+                    fontFamily: 'monospace',
+                    fontSize: '12px'
+                  }}
+                />
+                <div style={{ marginTop: '8px', color: '#569cd6' }}>Hex:</div>
+                <div
+                  style={{
+                    background: '#1e1e1e',
+                    color: '#4ec9b0',
+                    padding: '10px',
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  {op312Output &&
+                    btoa(op312Output)
+                      .match(/.{1,2}/g)
+                      ?.map((pair, i) => (i > 0 && i % 8 === 0 ? '\n' + pair : pair))
+                      .join(' ')}
+                </div>
+                <button className='copy-btn' onClick={handleCopyOp312} style={{ marginTop: '8px' }}>
+                  Copy
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
