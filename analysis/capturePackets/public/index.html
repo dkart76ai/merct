@@ -217,7 +217,19 @@
 
     <div class="controls">
       <label>Filter Opcodes (comma separated):</label>
-      <input type="text" id="opcodeFilter" placeholder="e.g. 312,315,316" style="padding: 8px; width: 250px; border-radius: 4px; border: 1px solid #444; background: #2d2d2d; color: #d4d4d4;" />
+      <input
+        type="text"
+        id="opcodeFilter"
+        placeholder="e.g. 312,315,316"
+        style="
+          padding: 8px;
+          width: 250px;
+          border-radius: 4px;
+          border: 1px solid #444;
+          background: #2d2d2d;
+          color: #d4d4d4;
+        "
+      />
     </div>
 
     <div class="main-grid">
@@ -425,7 +437,12 @@
       function getFilteredOpcodes() {
         const filter = document.getElementById('opcodeFilter').value
         if (!filter) return new Set()
-        return new Set(filter.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)))
+        return new Set(
+          filter
+            .split(',')
+            .map(s => parseInt(s.trim()))
+            .filter(n => !isNaN(n))
+        )
       }
 
       function renderCaptures(captures) {
@@ -433,7 +450,10 @@
         const filteredOpcodes = getFilteredOpcodes()
         const filtered = captures.filter(c => !filteredOpcodes.has(c.opCode))
         if (filtered.length === 0) {
-          el.innerHTML = '<div class="empty-state">No captures' + (filteredOpcodes.size > 0 ? ' (filter active)' : '') + '</div>'
+          el.innerHTML =
+            '<div class="empty-state">No captures' +
+            (filteredOpcodes.size > 0 ? ' (filter active)' : '') +
+            '</div>'
           return
         }
         el.innerHTML = filtered
@@ -477,6 +497,7 @@
           return
         }
         el.innerHTML = items
+          .sort((a, b) => b.timestamp - a.timestamp)
           .map(item => {
             const coords = item.kingdom ? `[${item.kingdom},${item.x},${item.y}]` : ''
             return `<div class="capture-item">
