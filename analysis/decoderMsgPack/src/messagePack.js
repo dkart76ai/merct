@@ -171,7 +171,8 @@ function readValue(buf, off) {
 
   if ((byte & 0xe0) === 0xa0) {
     const len = byte & 0x1f
-    return { val: buf.slice(off, off + len).toString('utf8'), end: off + len }
+    return { val: new TextDecoder().decode(buf.slice(off, off + len)), end: off + len }
+    // return { val: buf.slice(off, off + len).toString('utf8'), end: off + len }
   }
 
   if (byte === 0xc0) return { val: null, end: off }
@@ -244,15 +245,20 @@ function readValue(buf, off) {
 
   if (byte === 0xd9) {
     const len = buf[off]
-    return { val: buf.slice(off + 1, off + 1 + len).toString('utf8'), end: off + 1 + len }
+    // return { val: buf.slice(off + 1, off + 1 + len).toString('utf8'), end: off + 1 + len }
+    return { val: new TextDecoder().decode(buf.slice(off + 1, off + 1 + len)), end: off + 1 + len }
+    // new TextDecoder().decode(buf.subarray(start, end));
+    // new TextDecoder().decode(buf.slice(start, end))
   }
   if (byte === 0xda) {
     const len = readUint16BE(off)
-    return { val: buf.slice(off + 2, off + 2 + len).toString('utf8'), end: off + 2 + len }
+    // return { val: buf.slice(off + 2, off + 2 + len).toString('utf8'), end: off + 2 + len }
+    return { val: new TextDecoder().decode(buf.slice(off + 2, off + 2 + len)), end: off + 2 + len }
   }
   if (byte === 0xdb) {
     const len = readUint32BE(off)
-    return { val: buf.slice(off + 4, off + 4 + len).toString('utf8'), end: off + 4 + len }
+    // return { val: buf.slice(off + 4, off + 4 + len).toString('utf8'), end: off + 4 + len }
+    return { val: new TextDecoder().decode(buf.slice(off + 4, off + 4 + len)), end: off + 4 + len }
   }
 
   if (byte === 0xdc) {

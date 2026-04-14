@@ -187,36 +187,6 @@ function encodeToBase64(data) {
   return btoa(binary)
 }
 
-function processBytesToString(data) {
-  if (data === null) return null
-  if (typeof data === 'number') return data
-  if (typeof data === 'boolean') return data
-  if (typeof data === 'string') {
-    if (data.includes(',')) {
-      const parts = data.split(',')
-
-      if (parts.every(c => !isNaN(c))) {
-        return parts.map(c => String.fromCharCode(c)).join('')
-      }
-    }
-    return data
-  }
-  if (Array.isArray(data)) {
-    return data.map(item => processBytesToString(item))
-  }
-  if (typeof data === 'object') {
-    if (data.type === 'Buffer' && Array.isArray(data.data)) {
-      return new TextDecoder().decode(new Uint8Array(data.data))
-    }
-    const result = {}
-    for (const key of Object.keys(data)) {
-      result[key] = processBytesToString(data[key])
-    }
-    return result
-  }
-  return data
-}
-
 // ============================================
 // OPCODE 312 REQUEST BUILDER
 // ============================================
@@ -419,8 +389,7 @@ function App() {
 
     try {
       let result = decodeMsgPackBase64(input)
-      result = processBytesToString(result)
-      console.log(processBytesToString(result))
+
       setDecoded(result)
       setHexData(convertToHex(result))
       setError(null)
