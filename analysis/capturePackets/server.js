@@ -4,7 +4,20 @@ const fs = require('fs')
 // const { chromium } = require('playwright')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
-const {kingdomUrls} = require(.'./kingdomUrls.js')
+const { kingdomUrls } = require('./kingdomUrls.js')
+
+const {
+  decodeMsgPack,
+  decodeMsgPackBase64,
+  multiDecodeMsgPackBase64,
+  multiDecodeMsgPack2,
+  encodeMsgPack2,
+  encodeMsgPack2MultiFragments,
+  encodeBase64,
+  decodeBase64,
+  decodeMsgPack2
+} = require('../message-pack/messagePack.js')
+
 loadEnvFile() // Defaults to loading './.env'
 
 const channelUrl = process.env.CHAT_CHANNEL_URL || ''
@@ -86,210 +99,6 @@ function addOrUpdateStaticId(staticId, data) {
   if (updated) {
     saveStaticDb()
   }
-}
-
-function readValue(buf, off) {
-  if (off >= buf.length) return { val: null, end: buf.length }
-  const byte = buf[off++]
-
-  if ((byte & 0x80) === 0) return { val: byte, end: off }
-  if ((byte & 0xe0) === 0xe0) return { val: byte - 256, end: off }
-
-  if ((byte & 0xf0) === 0x80) {
-    const size = byte & 0x0f
-    const obj = {}
-    let o = off
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const k = readValue(buf, o)
-      o = k.end
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      o = v.end
-      obj[k.val] = v.val
-    }
-    return { val: obj, end: o }
-  }
-
-  if ((byte & 0xf0) === 0x90) {
-    const size = byte & 0x0f
-    const arr = []
-    let o = off
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      arr.push(v.val)
-      o = v.end
-    }
-    return { val: arr, end: o }
-  }
-
-  if ((byte & 0xe0) === 0xa0) {
-    const len = byte & 0x1f
-    return { val: buf.slice(off, off + len).toString('utf8'), end: off + len }
-  }
-
-  if (byte === 0xc0) return { val: null, end: off }
-  if (byte === 0xc2) return { val: false, end: off }
-  if (byte === 0xc3) return { val: true, end: off }
-
-  if (byte === 0xc4) {
-    const len = buf[off]
-    return { val: buf.slice(off + 1, off + 1 + len), end: off + 1 + len }
-  }
-  if (byte === 0xc5) {
-    const len = buf.readUInt16BE(off)
-    return { val: buf.slice(off + 2, off + 2 + len), end: off + 2 + len }
-  }
-  if (byte === 0xc6) {
-    const len = buf.readUInt32BE(off)
-    return { val: buf.slice(off + 4, off + 4 + len), end: off + 4 + len }
-  }
-
-  if (byte >= 0xc7 && byte <= 0xc9) {
-    let len, dataOff
-    if (byte === 0xc7) {
-      len = buf[off]
-      dataOff = off + 2
-    } else if (byte === 0xc8) {
-      len = buf.readUInt16BE(off)
-      dataOff = off + 3
-    } else {
-      len = buf.readUInt32BE(off)
-      dataOff = off + 5
-    }
-    const type = buf[dataOff]
-    const data = buf.slice(dataOff + 1, dataOff + 1 + len - 1)
-    return { val: { type, data }, end: dataOff + len }
-  }
-
-  if (byte === 0xca) {
-    const view = new DataView(buf.buffer, buf.byteOffset + off)
-    return { val: view.getFloat32(0), end: off + 4 }
-  }
-  if (byte === 0xcb) {
-    const view = new DataView(buf.buffer, buf.byteOffset + off)
-    return { val: view.getFloat64(0), end: off + 8 }
-  }
-
-  if (byte === 0xcc) return { val: buf[off], end: off + 1 }
-  if (byte === 0xcd) return { val: buf.readUInt16LE(off), end: off + 2 }
-  if (byte === 0xce) return { val: buf.readUInt32LE(off), end: off + 4 }
-  if (byte === 0xcf) {
-    let val = 0n
-    for (let i = 0; i < 8; i++) val += BigInt(buf[off + i]) << BigInt(i * 8)
-    return { val: Number(val), end: off + 8 }
-  }
-
-  if (byte === 0xd0) return { val: buf.readInt8(off), end: off + 1 }
-  if (byte === 0xd1) return { val: buf.readInt16LE(off), end: off + 2 }
-  if (byte === 0xd2) return { val: buf.readInt32LE(off), end: off + 4 }
-  if (byte === 0xd3) {
-    let val = 0n
-    for (let i = 0; i < 8; i++) val += BigInt(buf[off + i]) << BigInt(i * 8)
-    return { val: Number(val), end: off + 8 }
-  }
-
-  if (byte >= 0xd4 && byte <= 0xd8) {
-    const sizes = [1, 2, 4, 8, 16]
-    const size = sizes[byte - 0xd4]
-    return {
-      val: { type: buf[off], data: buf.slice(off + 1, off + 1 + size) },
-      end: off + 1 + size
-    }
-  }
-
-  if (byte === 0xd9) {
-    const len = buf[off]
-    return { val: buf.slice(off + 1, off + 1 + len).toString('utf8'), end: off + 1 + len }
-  }
-  if (byte === 0xda) {
-    const len = buf.readUInt16BE(off)
-    return { val: buf.slice(off + 2, off + 2 + len).toString('utf8'), end: off + 2 + len }
-  }
-  if (byte === 0xdb) {
-    const len = buf.readUInt32BE(off)
-    return { val: buf.slice(off + 4, off + 4 + len).toString('utf8'), end: off + 4 + len }
-  }
-
-  if (byte === 0xdc) {
-    const size = buf.readUInt16BE(off)
-    const arr = []
-    let o = off + 2
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      arr.push(v.val)
-      o = v.end
-    }
-    return { val: arr, end: o }
-  }
-
-  if (byte === 0xdd) {
-    const size = buf.readUInt32BE(off)
-    const arr = []
-    let o = off + 4
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      arr.push(v.val)
-      o = v.end
-    }
-    return { val: arr, end: o }
-  }
-
-  if (byte === 0xde) {
-    const size = buf.readUInt16BE(off)
-    const obj = {}
-    let o = off + 2
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const k = readValue(buf, o)
-      o = k.end
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      o = v.end
-      obj[k.val] = v.val
-    }
-    return { val: obj, end: o }
-  }
-
-  if (byte === 0xdf) {
-    const size = buf.readUInt32BE(off)
-    const obj = {}
-    let o = off + 4
-    for (let i = 0; i < size; i++) {
-      if (o >= buf.length) break
-      const k = readValue(buf, o)
-      o = k.end
-      if (o >= buf.length) break
-      const v = readValue(buf, o)
-      o = v.end
-      obj[k.val] = v.val
-    }
-    return { val: obj, end: o }
-  }
-
-  return { val: null, end: off + 1 }
-}
-
-function decodeFull(buf) {
-  const results = []
-  let off = 8
-  while (off < buf.length) {
-    try {
-      const result = readValue(buf, off)
-      if (result.val !== null) {
-        results.push(result.val)
-        off = result.end
-      } else {
-        off++
-      }
-    } catch (e) {
-      off++
-    }
-  }
-  return results
 }
 
 function extractObjects(data) {
@@ -445,7 +254,7 @@ function saveChatStaticIds() {
   try {
     const entries = [...chatStaticIds.values()]
     fs.writeFileSync(CHAT_STATICID_FILE, JSON.stringify(entries, null, 2))
-    console.log(`[${new Date().toLocaleTimeString()}] Saved ${entries.length} chat static IDs`)
+    // console.log(`[${new Date().toLocaleTimeString()}] Saved ${entries.length} chat static IDs`)
   } catch (e) {
     console.error('Save chat staticids error:', e.message)
   }
@@ -477,7 +286,7 @@ function extractInternalIdFrom402(data) {
 }
 
 function extractSessionToken(data) {
-  for (let item of arr) {
+  for (let item of data) {
     // Si es un objeto literal (y no null ni otro array)
     if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
       if (item.type === 'Buffer') {
@@ -520,7 +329,7 @@ function saveMyPlayerPackets() {
 function saveObjectPackets() {
   try {
     fs.writeFileSync(OBJECT_PACKETS_FILE, JSON.stringify(objectPackets, null, 2))
-    console.log(`[${new Date().toLocaleTimeString()}] Saved ${objectPackets.length} object packets`)
+    // console.log(`[${new Date().toLocaleTimeString()}] Saved ${objectPackets.length} object packets`)
   } catch (e) {
     console.error('Save OBJECT packets error:', e.message)
   }
@@ -528,9 +337,9 @@ function saveObjectPackets() {
 function saveObjectPackets312() {
   try {
     fs.writeFileSync(OBJECT_PACKETS312_FILE, JSON.stringify(packets312analyze, null, 2))
-    console.log(
-      `[${new Date().toLocaleTimeString()}] Saved ${packets312analyze.length} object packets`
-    )
+    // console.log(
+    //   `[${new Date().toLocaleTimeString()}] Saved ${packets312analyze.length} object packets`
+    // )
   } catch (e) {
     console.error('Save OBJECT packets error:', e.message)
   }
@@ -544,9 +353,9 @@ function saveToFile() {
 
     const saveFile = path.join(SAVE_DIR, `captures-${String(saveFileIndex).padStart(3, '0')}.json`)
     fs.writeFileSync(saveFile, JSON.stringify(captures, null, 2))
-    console.log(
-      `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
-    )
+    // console.log(
+    //   `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
+    // )
 
     if (captures.length >= MAX_CAPTURES_PER_FILE) {
       captures = []
@@ -723,7 +532,7 @@ app.post('/api/start', async (req, res) => {
           try {
             const text = data.payload.toString('utf8')
             if (text.startsWith('MESG')) {
-              console.log(`[WS] MESG received: ${text.substring(0, 200)}...`)
+              // console.log(`[WS] MESG received: ${text.substring(0, 200)}...`)
               extractChatStaticIds(text)
               if (autoSave) saveChatStaticIds()
             }
@@ -793,7 +602,9 @@ app.post('/api/start', async (req, res) => {
         //   // Aquí puedes procesar el Buffer, por ejemplo, guardarlo como archivo
         // }
 
-        let decodedResponse = decodeFull(Buffer.from(body))
+        const decodedReq = decodeMsgPack2(Buffer.from(postDataBuff))
+
+        let decodedResponse = decodeMsgPack2(Buffer.from(body))
         const opCode = getFirstValue(decodedResponse)
 
         if (opCode !== null) {
@@ -812,7 +623,7 @@ app.post('/api/start', async (req, res) => {
 
         if (opCode === 203) {
           if (!myPlayerInfo.internalPlayerId) {
-            const id = decoded[1]?.[0]?.[0]
+            const id = decodedResponse[1]?.[0]?.[0]
             if (typeof id === 'number' && id > 1000000000000) {
               myPlayerInfo.internalPlayerId = id
               console.log(`Found internal player ID: ${myPlayerInfo.internalPlayerId}`)
@@ -906,8 +717,29 @@ app.post('/api/start', async (req, res) => {
           if (autoSave) saveObjectPackets()
         }
 
+        if (opCode === 312) {
+          console.log(
+            '312 packet getting tokens',
+            JSON.stringify(decodedReq, (key, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            )
+          )
+          //request:          [312,284,[["1309965043442"],{"0":105,"1":223,"2":166,"3":213,"4":171,"5":90,"6":183,"7":199,"8":35,"9":86,"10":245,"11":99}],""]
+
+          if (!PACKET312.sessionToken) {
+            PACKET312.sessionToken = decodedReq[2]?.[0]?.[0] // playerid? or session token?
+            PACKET312.buff = decodedReq[2]?.[1] // auth token?
+
+            console.log(
+              '312 packet decodedReq[0][2]',
+              JSON.stringify(decodedReq[0][2], (key, value) =>
+                typeof value === 'bigint' ? value.toString() : value
+              )
+            )
+          }
+        }
+
         if (opCode === 312 && objects.length > 0) {
-          const decodedReq = decodeFull(Buffer.from(postDataBuff))
           const tileIds = decodedReq[1]
 
           const allCoordX = objects.map(o => o.x)
@@ -927,10 +759,6 @@ app.post('/api/start', async (req, res) => {
 
 
 */
-          if (!PACKET312.sessionToken) {
-            PACKET312.sessionToken = decodedReq[0][2][0][0] // playerid? or session token?
-            PACKET312.buff1 = decodedReq[0][2][1] // auth token?
-          }
 
           packets312analyze.push({
             opCode,
@@ -946,7 +774,7 @@ app.post('/api/start', async (req, res) => {
           if (autoSave) saveObjectPackets312()
         }
 
-        console.log(`[${new Date().toLocaleTimeString()}] Captured: ${url} (${body.length} bytes)`)
+        // console.log(`[${new Date().toLocaleTimeString()}] Captured: ${url} (${body.length} bytes)`)
 
         if (autoSave) saveToFile()
       } catch (e) {
@@ -968,34 +796,43 @@ app.post('/api/start', async (req, res) => {
 })
 
 app.post('/api/scanKingdom', async (req, res) => {
+  console.log('scanning kingdom')
+
   if (isNaN(req.body.kingdom)) {
-    return res.json({ success: false, msg: 'enter kingdom' })
+    console.log('no kingdom')
+    return res.json({ success: false, error: 'enter kingdom' })
   }
 
-  if (!PACKET312.sessionToken || !PACKET312.buff) {
-    return res.json({ success: false, msg: 'data not ready' })
+  if (!PACKET312.sessionToken) {
+    console.log('no session token  ')
+    return res.json({ success: false, error: 'no session token' })
   }
-      // const default='https://game-us17.totalbattle.com/rubens-realm146'
-  const url = kingdomUrls[kingdom]
-  if (!url) {
-    return res.json({ success: false, msg: 'invalid kingdom' })
+  if (!PACKET312.buff) {
+    console.log('no  auth buf')
+    return res.json({ success: false, error: 'no  auth buf' })
   }
-
-
+  // const default='https://game-us17.totalbattle.com/rubens-realm146'
   PACKET312.kingdom = parseInt(req.body.kingdom)
+  const url = kingdomUrls[PACKET312.kingdom]
+  if (!url) {
+    console.log('invalid kingdom')
+    return res.json({ success: false, error: 'invalid kingdom' })
+  }
+
   const randomSeq = Math.floor(Math.random() * 32000) + 1
 
-  const tilesArray = generateArrays()
-
+  const tilesArray = generateArrays().slice(0, 1)
+  console.log('tiles', tilesArray)
   const promises = tilesArray.map(tiles => {
     const buff312 = [
       [312, randomSeq, [[PACKET312.sessionToken], PACKET312.buff], ''],
       [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
     ]
 
-    const payload = 1 // encodeMsgPack(buff312)
-
-
+    // const payload =  encodeMsgPack2(buff312)
+    const payload = encodeMsgPack2MultiFragments(buff312)
+    console.log('sending packet 312 to ', url, payload)
+    console.log('payload b64', encodeBase64(payload))
     return fetch(url, {
       headers: {
         'User-Agent':
@@ -1009,12 +846,16 @@ app.post('/api/scanKingdom', async (req, res) => {
   })
 
   // 2. Ejecutarlas en paralelo
-  const responses = await Promise.all(promises)
-
-  // 3. Convertir todas a JSON (otra tanda de promesas)
-  const data = await Promise.all(responses.map(res => res.json()))
-
-  res.json({ success: true, kingdom: PACKET312.kingdom })
+  try {
+    const responses = await Promise.all(promises)
+    const data = await Promise.all(responses.map(res => res.json()))
+    console.log(data)
+    // 3. Convertir todas a JSON (otra tanda de promesas)
+    res.json({ success: true, kingdom: PACKET312.kingdom, data })
+  } catch (e) {
+    console.log('error sending packet', e)
+    res.status(500).json({ success: false, error: e.message })
+  }
 })
 
 app.post('/api/stop', async (req, res) => {
