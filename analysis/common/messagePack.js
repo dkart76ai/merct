@@ -53,7 +53,7 @@ class MsgPackDecoder {
 
       // 8. Enteros (8, 16, 32, 64 bits)
       case 0xcc:
-        return this.view.getUint8(this.off++, true)
+        return this.view.getUint8(this.off++)
       case 0xcd:
         return this.view.getUint16((this.off += 2) - 2, true, true)
       case 0xce:
@@ -61,7 +61,7 @@ class MsgPackDecoder {
       case 0xcf:
         return this.view.getBigUint64((this.off += 8) - 8, true, true)
       case 0xd0:
-        return this.view.getInt8(this.off++, true)
+        return this.view.getInt8(this.off++)
       case 0xd1:
         return this.view.getInt16((this.off += 2) - 2, true, true)
       case 0xd2:
@@ -330,7 +330,7 @@ function readValue(buf, off) {
 }
 
 // Decode a full buffer starting from offset 8 (skip 8-byte header)
-export function decodeMsgPack(buf) {
+function decodeMsgPack(buf) {
   const results = []
   let off = 8
   while (off < buf.length) {
@@ -349,7 +349,7 @@ export function decodeMsgPack(buf) {
   return results
 }
 
-export function decodeBase64(base64String) {
+function decodeBase64(base64String) {
   let cleanBase64 = base64String.replace(/\s/g, '')
   if (cleanBase64.includes(',')) {
     cleanBase64 = cleanBase64.split(',')[1]
@@ -364,7 +364,7 @@ export function decodeBase64(base64String) {
   return bytes
 }
 
-export function decodeMsgPackBase64(base64String) {
+function decodeMsgPackBase64(base64String) {
   try {
     const bytes = decodeBase64(base64String)
 
@@ -375,7 +375,7 @@ export function decodeMsgPackBase64(base64String) {
 }
 
 /// usando el msgpack decoder de gooogleAI
-export function decodeMsgPack2(buff) {
+function decodeMsgPack2(buff) {
   // 1. Instanciamos el decoder
   const decoder = new MsgPackDecoder(buff)
 
@@ -395,7 +395,7 @@ export function decodeMsgPack2(buff) {
   return data
 }
 
-export function multiDecodeMsgPack2(buff) {
+function multiDecodeMsgPack2(buff) {
   const decoder = new MsgPackDecoder(buff)
   // 2. Leemos los dos enteros del encabezado (4 buff cada uno)
   // Usamos getUint32. El primero está en offset 0, el segundo en offset 4.
@@ -422,10 +422,10 @@ export function multiDecodeMsgPack2(buff) {
   }
 
   // console.log(results) // Aquí tienes todo el contenido
-  return results
+  return { results, bufLen: longitud1, len: longitud2 }
 }
 
-export function multiDecodeMsgPackBase64(base64String) {
+function multiDecodeMsgPackBase64(base64String) {
   try {
     const bytes = decodeBase64(base64String)
 
@@ -451,7 +451,7 @@ class MsgPackEncoder {
       let newBuffer = new Uint8Array(newLength)
       newBuffer.set(this.buffer)
       this.buffer = newBuffer
-      this.view = new DataView(this.buffer.buffer) // DataView siempre se reinicia sobre el nuevo buffer
+      this.view = new DataView(this.buffer.buffer)
     }
   }
 
@@ -472,57 +472,37 @@ class MsgPackEncoder {
             return this.writeUint8(val)
           } else if (val < 65536) {
             this.writeUint8(0xcd)
-            return this.writeUint16(val) //val & 0xff, (val >>> 8) & 0xff)
+            return this.writeUint16LE(val)
           } else if (val < 4294967296) {
             this.writeUint8(0xce)
-            return this.writeUint32(val)
-            // val & 0xff,
-            //   (val >>> 8) & 0xff,
-            //   (val >>> 16) & 0xff,
-            //   (val >>> 24) & 0xff
+            return this.writeUint32LE(val)
           } else {
-            // uint64
             this.encodeBigInt(BigInt(val))
           }
         } else {
           if (val >= -32) {
-            // negative fixnum
             return this.writeUint8(val & 0xff)
           } else if (val >= -128) {
-            // Int8
             this.writeUint8(0xd0)
-            return this.writeInt8(val)
+            return this.writeUint8(val)
           } else if (val >= -32768) {
-            // int16
-            this.writeUInt8(0xd1)
-            return this.writeInt16(val) // val& 0xff, (val >>> 8) & 0xff)
-            // chunks.push(0xd1, val & 0xff, (val >>> 8) & 0xff)
+            this.writeUint8(0xd1)
+            return this.writeInt16LE(val)
           } else if (val >= -2147483648) {
-            // int32
             this.writeUint8(0xd2)
-            return this.writeInt32(val)
-            // chunks.push(
-            //   0xd2,
-            //   val & 0xff,
-            //   (val >>> 8) & 0xff,
-            //   (val >>> 16) & 0xff,
-            //   (val >>> 24) & 0xff
-            // )
+            return this.writeInt32LE(val)
           } else {
-            // uint64
             this.encodeBigInt(BigInt(val))
           }
         }
       } else {
-        // Float64 BE (standard)
         this.writeUint8(0xcb)
-        return this.writeFloat64(val)
+        return this.writeFloat64LE(val)
       }
     }
 
     if (type === 'bigint') {
       this.encodeBigInt(val)
-
       return
     }
 
@@ -536,10 +516,10 @@ class MsgPackEncoder {
         this.writeUint8(len)
       } else if (len <= 65535) {
         this.writeUint8(0xda)
-        this.writeUint16(len) // Longitud en Little Endian
+        this.writeUint16LE(len)
       } else {
         this.writeUint8(0xdb)
-        this.writeUint32(len) // Longitud en Little Endian
+        this.writeUint32LE(len)
       }
       this.ensureSpace(len)
       this.buffer.set(bytes, this.off)
@@ -550,20 +530,34 @@ class MsgPackEncoder {
     if (Array.isArray(val)) {
       const len = val.length
       if (len <= 15) {
-        // console.log('array', 0x90 | len)
         this.writeUint8(0x90 | len)
       } else if (len <= 65535) {
-        // console.log('array $DC', len)
-
         this.writeUint8(0xdc)
-        this.writeUint16(len) // Little Endian
+        this.writeUint16LE(len)
       } else {
-        // console.log('array $DD', len)
-
         this.writeUint8(0xdd)
-        this.writeUint32(len) // Little Endian
+        this.writeUint32LE(len)
       }
       for (const item of val) this.encode(item)
+      return
+    }
+
+    if (ArrayBuffer.isView(val) || val instanceof ArrayBuffer) {
+      const bytes = val instanceof ArrayBuffer ? new Uint8Array(val) : val
+      const len = bytes.length
+      if (len < 256) {
+        this.writeUint8(0xc4)
+        this.writeUint8(len)
+      } else if (len < 65536) {
+        this.writeUint8(0xc5)
+        this.writeUint16LE(len)
+      } else {
+        this.writeUint8(0xc6)
+        this.writeUint32LE(len)
+      }
+      this.ensureSpace(len)
+      this.buffer.set(bytes, this.off)
+      this.off += len
       return
     }
 
@@ -573,11 +567,11 @@ class MsgPackEncoder {
       if (len <= 15) {
         this.writeUint8(0x80 | len)
       } else if (len <= 65535) {
-        this.writeUint8(0xde) // Corregido: antes tenías writeUint16(0xde)
-        this.writeUint16(len) // Little Endian
+        this.writeUint8(0xde)
+        this.writeUint16LE(len)
       } else {
         this.writeUint8(0xdf)
-        this.writeUint32(len) // Little Endian
+        this.writeUint32LE(len)
       }
       for (const key of keys) {
         this.encode(key)
@@ -587,67 +581,86 @@ class MsgPackEncoder {
     }
   }
 
-  // MÉTODOS AUXILIARES (Todos con el parámetro 'true' para Little Endian)
   writeUint8(v) {
-    // console.log('writeUint8', v, '(', v.toString(16), ')', 'at', this.off)
     this.ensureSpace(1)
     this.view.setUint8(this.off++, v)
-    // console.log('buffer', this.getFinalBuffer())
   }
-  writeUint16(v) {
-    // console.log('writeUint16', v, '(', v.toString(16), ')', 'at', this.off)
+
+  writeInt8(v) {
+    this.ensureSpace(1)
+    this.view.setInt8(this.off++, v)
+  }
+
+  writeUint16LE(v) {
     this.ensureSpace(2)
     this.view.setUint16(this.off, v, true)
     this.off += 2
-    // console.log('buffer', this.getFinalBuffer())
   }
-  writeUint32(v) {
-    // console.log('writeUint32', v, '(', v.toString(16), ')', 'at', this.off)
+
+  writeUint32LE(v) {
     this.ensureSpace(4)
     this.view.setUint32(this.off, v, true)
     this.off += 4
-    // console.log('buffer', this.getFinalBuffer())
   }
-  writeInt32(v) {
-    // console.log('writeInt8', v, '(', v.toString(16), ')', 'at', this.off)
+
+  writeInt16LE(v) {
+    this.ensureSpace(2)
+    this.view.setInt16(this.off, v, true)
+    this.off += 2
+  }
+
+  writeInt32LE(v) {
     this.ensureSpace(4)
     this.view.setInt32(this.off, v, true)
     this.off += 4
-    // console.log('buffer', this.getFinalBuffer())
   }
-  writeBigUint64(v) {
-    // console.log('writeBigUint64', v, '(', v.toString(16), ')', 'at', this.off)
 
+  // writeUint16BE(v) {
+  //   this.ensureSpace(2)
+  //   this.view.setUint16(this.off, v, false)
+  //   this.off += 2
+  // }
+
+  // writeUint32BE(v) {
+  //   this.ensureSpace(4)
+  //   this.view.setUint32(this.off, v, false)
+  //   this.off += 4
+  // }
+
+  writeBigUint64LE(v) {
+    // console.log('writeBigUint64LE', v, '(', v.toString(16), ')', 'at', this.off)
     this.ensureSpace(8)
     this.view.setBigUint64(this.off, v, true)
     this.off += 8
-    // console.log('buffer', this.getFinalBuffer())
   }
-  writeBigInt64(v) {
-    // console.log('writeBigInt64', v, '(', v.toString(16), ')', 'at', this.off)
 
+  writeBigInt64LE(v) {
+    // console.log('writeBigInt64LE', v, '(', v.toString(16), ')', 'at', this.off)
     this.ensureSpace(8)
     this.view.setBigInt64(this.off, v, true)
     this.off += 8
     // console.log('buffer', this.getFinalBuffer())
   }
-  writeFloat64(v) {
-    console.log('writeFloat64', v, '(', v.toString(16), ')', 'at', this.off)
 
+  writeFloat64LE(v) {
     this.ensureSpace(8)
     this.view.setFloat64(this.off, v, true)
     this.off += 8
-    console.log('buffer', this.getFinalBuffer())
   }
 
   encodeBigInt(v) {
     if (v >= 0n) {
       this.writeUint8(0xcf)
-      this.writeBigUint64(v)
+      this.writeBigUint64LE(v)
     } else {
       this.writeUint8(0xd3)
-      this.writeBigInt64(v)
+      this.writeBigInt64LE(v)
     }
+    // console.log('buffer', this.getFinalBuffer())
+    // console.log(
+    //   'buffer',
+    //   [...this.getFinalBuffer()].map(n => n.toString(16))
+    // )
   }
 
   getFinalBuffer() {
@@ -655,64 +668,47 @@ class MsgPackEncoder {
   }
 }
 
-export function encodeMsgPack2MultiFragments(fragmentos) {
+function encodeMsgPack2MultiFragments(fragmentos, len) {
   const encoder = new MsgPackEncoder()
 
-  // 1. Reservar espacio para el encabezado (8 bytes)
-  // Simplemente saltamos el offset para dejar el hueco
   encoder.off = 8
-
-  // 2. Codificar todos tus fragmentos/objetos
-  // const fragmentos = [ {id: 1}, [1, 2, 3], "mensaje final" ];
 
   fragmentos.forEach(obj => {
     encoder.encode(obj)
   })
 
-  // 3. Obtener el buffer resultante
   const finalBuf = encoder.getFinalBuffer()
   const view = new DataView(finalBuf.buffer)
 
-  // 4. "Fix length": Calcular y escribir la longitud al final
-  // Restamos 8 para tener solo el tamaño del PAYLOAD, o usamos el total según tu protocolo
   const payloadLength = finalBuf.length
 
-  // Escribimos en Little Endian (true) como determinamos antes
   view.setUint32(0, payloadLength, true)
-  view.setUint32(4, payloadLength, true) // Si tu header repite la longitud
+  view.setUint32(4, len, true)
 
-  // console.log(
-  //   'Buffer listo para enviar:',
-  //   [...finalBuf].map(b => b.toString(16))
-  // )
   return finalBuf
 }
 
-export function encodeMsgPack2(value) {
+function encodeMsgPack2(value) {
   const encoder = new MsgPackEncoder()
 
-  // 1. Escribir manualmente tu encabezado de 8 bytes
-  // (Por ejemplo, si longitud1 y longitud2 eran los valores originales)
-  encoder.writeUint32(value.length + 8)
-  encoder.writeUint32(value.length + 8)
+  encoder.writeUint32LE(value.length + 8)
+  encoder.writeUint32LE(value.length + 8)
 
-  // 2. Codificar el objeto JS de vuelta a MessagePack
   encoder.encode(value)
 
-  // 3. Obtener el resultado final
   return encoder.getFinalBuffer()
 }
 
-export function encodeMsgPack2ToBase64(value) {
+function encodeMsgPack2ToBase64(value) {
   const b64 = btoa(String.fromCharCode(...encodeMsgPack2(value)))
   return b64
 }
-
+/*
 // ============================================================
 // MessagePack Encoder
 // ============================================================
 
-export function encodeMsgPack(value) {
+function encodeMsgPack(value) {
   const chunks = []
 
   function encode(val) {
@@ -922,7 +918,7 @@ export function encodeMsgPack(value) {
   return new Uint8Array(chunks)
 }
 
-export function encodeMsgPackToBase64(value) {
+function encodeMsgPackToBase64(value) {
   const bytes = encodeMsgPack(value)
   let binary = ''
   for (let i = 0; i < bytes.length; i++) {
@@ -931,7 +927,7 @@ export function encodeMsgPackToBase64(value) {
   return btoa(binary)
 }
 
-export function encodeMsgPackMultiple(values) {
+function encodeMsgPackMultiple(values) {
   const chunks = []
   for (const value of values) {
     const encoded = encodeMsgPack(value)
@@ -940,7 +936,7 @@ export function encodeMsgPackMultiple(values) {
   return new Uint8Array(chunks)
 }
 
-export function encodeMsgPackMultipleToBase64(values) {
+function encodeMsgPackMultipleToBase64(values) {
   const bytes = encodeMsgPackMultiple(values)
   let binary = ''
   for (let i = 0; i < bytes.length; i++) {
@@ -950,7 +946,7 @@ export function encodeMsgPackMultipleToBase64(values) {
 }
 
 // Encode multiple values with 8-byte header (like the game server expects)
-export function encodeMsgPackWithHeader(values) {
+function encodeMsgPackWithHeader(values) {
   const header = new Uint8Array([0x71, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00])
   const body = encodeMsgPackMultiple(values)
   const result = new Uint8Array(header.length + body.length)
@@ -959,7 +955,7 @@ export function encodeMsgPackWithHeader(values) {
   return result
 }
 
-export function encodeMsgPackWithHeaderToBase64(values) {
+function encodeMsgPackWithHeaderToBase64(values) {
   const bytes = encodeMsgPackWithHeader(values)
   let binary = ''
   for (let i = 0; i < bytes.length; i++) {
@@ -969,7 +965,7 @@ export function encodeMsgPackWithHeaderToBase64(values) {
 }
 
 // Round-trip test
-export function testEncodeDecode(value) {
+function testEncodeDecode(value) {
   const encoded = encodeMsgPack(value)
   const decoded = decodeMsgPack(new Uint8Array([...Array(8).fill(0), ...encoded]))
   return {
@@ -979,19 +975,27 @@ export function testEncodeDecode(value) {
     matches: JSON.stringify(value) === JSON.stringify(decoded[0])
   }
 }
-
+*/
 // CommonJS exports for Node.js
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    MsgPackDecoder,
+    MsgPackEncoder,
     readValue,
     decodeMsgPack,
     decodeMsgPackBase64,
-    encodeMsgPack,
-    encodeMsgPackToBase64,
-    encodeMsgPackMultiple,
-    encodeMsgPackMultipleToBase64,
-    encodeMsgPackWithHeader,
-    encodeMsgPackWithHeaderToBase64,
-    testEncodeDecode
+    // encodeMsgPack,
+    // encodeMsgPackToBase64,
+    // encodeMsgPackMultiple,
+    // encodeMsgPackMultipleToBase64,
+    // encodeMsgPackWithHeader,
+    // encodeMsgPackWithHeaderToBase64,
+    encodeMsgPack2,
+    encodeMsgPack2MultiFragments,
+    encodeMsgPack2ToBase64,
+    multiDecodeMsgPack2,
+    multiDecodeMsgPackBase64,
+    decodeBase64
+    // testEncodeDecode
   }
 }

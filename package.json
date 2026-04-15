@@ -8,7 +8,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Scans Total Battle kingdoms for mercenaries using Playwright + OpenCV template matching, distributed via BullMQ + Redis.",
   "type": "module",
   "devDependencies": {
     "@playwright/test": "^1.58.2",
@@ -23,5 +23,16 @@
     "opencv-wasm": "^4.3.0-10",
     "p-limit": "^7.3.0",
     "workerpool": "^10.0.1"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkart76ai/merct.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dkart76ai/merct/issues"
+  },
+  "homepage": "https://github.com/dkart76ai/merct#readme"
 }

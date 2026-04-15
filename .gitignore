@@ -16,3 +16,6 @@ services/accounts.json
 assets/debug_ocr_region.png
 services/worker/test-results/
 Triumph.framework.js
+/build/
+analysis/decoderMsgPack/build/*
+analysis/temp_mod/*

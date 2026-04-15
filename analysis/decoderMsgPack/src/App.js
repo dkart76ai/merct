@@ -2,7 +2,15 @@ import React, { useState, useCallback, useMemo } from 'react'
 import JsonView from '@uiw/react-json-view'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import { vscodeTheme } from '@uiw/react-json-view/vscode'
-import { decodeMsgPackBase64 } from './messagePack'
+import {
+  decodeMsgPackBase64,
+  multiDecodeMsgPackBase64,
+  multiDecodeMsgPack2,
+  encodeMsgPack2,
+  encodeMsgPack2MultiFragments,
+  decodeBase64,
+  decodeMsgPack2
+} from '../../common/messagePack'
 
 // ============================================
 // MSGPACK DECODER (browser-compatible)
@@ -388,7 +396,21 @@ function App() {
     }
 
     try {
-      let result = decodeMsgPackBase64(input)
+      //let result = decodeMsgPackBase64(input)
+      const bytes = decodeBase64(input)
+      let result = multiDecodeMsgPackBase64(input)
+      // let result = decodeMsgPack2(bytes)
+      console.log('decoded result', result)
+
+      // const test = encodeMsgPack2(result)
+      const test = encodeMsgPack2MultiFragments(result.results, result.len)
+      // console.log('test reencode', test)
+      console.log('original encoded len', bytes.length)
+      console.log('original encoded', [...bytes].map(n => n.toString()).join(' ,'))
+      console.log('test reencode   ', [...test].map(n => n.toString()).join(' ,'))
+      let result2 = multiDecodeMsgPack2(test)
+      console.log('otra vez decoded', result2)
+      console.log('match', JSON.stringify([...bytes]) === JSON.stringify([...test]))
 
       setDecoded(result)
       setHexData(convertToHex(result))
