@@ -1,13 +1,20 @@
 class MsgPackDecoder {
   constructor(buffer) {
     this.buf = new Uint8Array(buffer)
-    this.view = new DataView(this.buf.buffer, this.buf.byteOffset, this.buf.byteLength)
+    this.view = new DataView(this.buf.buffer, this.buf.byteOffset, this.buf.byteLength, true)
     this.off = 0
     this.decoder = new TextDecoder()
+    this.len = this.view.getUint32(0, true, true)
   }
 
   decode() {
+    if (this.off >= this.buf.length) {
+      // Si ya no hay más bytes, detenemos la ejecución
+      return undefined
+    }
+
     const byte = this.buf[this.off++]
+    if (byte === undefined) return undefined
 
     // 1. Enteros Positivos (0x00 - 0x7f)
     if (byte <= 0x7f) return byte
@@ -32,53 +39,53 @@ class MsgPackDecoder {
 
       // 6. Binarios (Raw bytes)
       case 0xc4:
-        return this.readBinary(this.view.getUint8(this.off++))
+        return this.readBinary(this.view.getUint8(this.off++), true)
       case 0xc5:
-        return this.readBinary(this.view.getUint16((this.off += 2) - 2))
+        return this.readBinary(this.view.getUint16((this.off += 2) - 2, true), true)
       case 0xc6:
-        return this.readBinary(this.view.getUint32((this.off += 4) - 4))
+        return this.readBinary(this.view.getUint32((this.off += 4) - 4, true), true)
 
       // 7. Floats (IEEE 754)
       case 0xca:
-        return this.view.getFloat32((this.off += 4) - 4)
+        return this.view.getFloat32((this.off += 4) - 4, true, true)
       case 0xcb:
-        return this.view.getFloat64((this.off += 8) - 8)
+        return this.view.getFloat64((this.off += 8) - 8, true, true)
 
       // 8. Enteros (8, 16, 32, 64 bits)
       case 0xcc:
-        return this.view.getUint8(this.off++)
+        return this.view.getUint8(this.off++, true)
       case 0xcd:
-        return this.view.getUint16((this.off += 2) - 2)
+        return this.view.getUint16((this.off += 2) - 2, true, true)
       case 0xce:
-        return this.view.getUint32((this.off += 4) - 4)
+        return this.view.getUint32((this.off += 4) - 4, true, true)
       case 0xcf:
-        return this.view.getBigUint64((this.off += 8) - 8)
+        return this.view.getBigUint64((this.off += 8) - 8, true, true)
       case 0xd0:
-        return this.view.getInt8(this.off++)
+        return this.view.getInt8(this.off++, true)
       case 0xd1:
-        return this.view.getInt16((this.off += 2) - 2)
+        return this.view.getInt16((this.off += 2) - 2, true, true)
       case 0xd2:
-        return this.view.getInt32((this.off += 4) - 4)
+        return this.view.getInt32((this.off += 4) - 4, true, true)
       case 0xd3:
-        return this.view.getBigInt64((this.off += 8) - 8)
+        return this.view.getBigInt64((this.off += 8) - 8, true, true)
 
       // 9. Strings largos
       case 0xd9:
-        return this.readString(this.view.getUint8(this.off++))
+        return this.readString(this.view.getUint8(this.off++), true)
       case 0xda:
-        return this.readString(this.view.getUint16((this.off += 2) - 2))
+        return this.readString(this.view.getUint16((this.off += 2) - 2, true), true)
       case 0xdb:
-        return this.readString(this.view.getUint32((this.off += 4) - 4))
+        return this.readString(this.view.getUint32((this.off += 4) - 4, true), true)
 
       // 10. Arrays y Mapas largos
       case 0xdc:
-        return this.readArray(this.view.getUint16((this.off += 2) - 2))
+        return this.readArray(this.view.getUint16((this.off += 2) - 2, true), true)
       case 0xdd:
-        return this.readArray(this.view.getUint32((this.off += 4) - 4))
+        return this.readArray(this.view.getUint32((this.off += 4) - 4, true), true)
       case 0xde:
-        return this.readMap(this.view.getUint16((this.off += 2) - 2))
+        return this.readMap(this.view.getUint16((this.off += 2) - 2, true), true)
       case 0xdf:
-        return this.readMap(this.view.getUint32((this.off += 4) - 4))
+        return this.readMap(this.view.getUint32((this.off += 4) - 4, true), true)
     }
 
     // 11. Enteros Negativos (0xe0 - 0xff)
@@ -342,18 +349,24 @@ export function decodeMsgPack(buf) {
   return results
 }
 
+export function decodeBase64(base64String) {
+  let cleanBase64 = base64String.replace(/\s/g, '')
+  if (cleanBase64.includes(',')) {
+    cleanBase64 = cleanBase64.split(',')[1]
+  }
+
+  const binaryString = atob(cleanBase64)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+
+  return bytes
+}
+
 export function decodeMsgPackBase64(base64String) {
   try {
-    let cleanBase64 = base64String.replace(/\s/g, '')
-    if (cleanBase64.includes(',')) {
-      cleanBase64 = cleanBase64.split(',')[1]
-    }
-
-    const binaryString = atob(cleanBase64)
-    const bytes = new Uint8Array(binaryString.length)
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i)
-    }
+    const bytes = decodeBase64(base64String)
 
     return decodeMsgPack(bytes)
   } catch (e) {
@@ -364,12 +377,12 @@ export function decodeMsgPackBase64(base64String) {
 /// usando el msgpack decoder de gooogleAI
 export function decodeMsgPack2(buff) {
   // 1. Instanciamos el decoder
-  const decoder = new MsgPackDecoder(bytes)
+  const decoder = new MsgPackDecoder(buff)
 
   // 2. Leemos los dos enteros del encabezado (4 bytes cada uno)
   // Usamos getUint32. El primero está en offset 0, el segundo en offset 4.
-  const longitud1 = decoder.view.getUint32(0) // Offset 0
-  const longitud2 = decoder.view.getUint32(4) // Offset 4
+  const longitud1 = decoder.view.getUint32(0, true) // Offset 0
+  const longitud2 = decoder.view.getUint32(4, true) // Offset 4
 
   console.log(`Longitudes del encabezado: ${longitud1}, ${longitud2}`)
 
@@ -383,37 +396,54 @@ export function decodeMsgPack2(buff) {
 }
 
 export function multiDecodeMsgPack2(buff) {
-  const decoder = new MsgPackDecoder(bytes)
-  // 2. Leemos los dos enteros del encabezado (4 bytes cada uno)
+  const decoder = new MsgPackDecoder(buff)
+  // 2. Leemos los dos enteros del encabezado (4 buff cada uno)
   // Usamos getUint32. El primero está en offset 0, el segundo en offset 4.
-  const longitud1 = decoder.view.getUint32(0) // Offset 0
-  const longitud2 = decoder.view.getUint32(4) // Offset 4
+  const longitud1 = decoder.view.getUint32(0, true) // Offset 0
+  const longitud2 = decoder.view.getUint32(4, true) // Offset 4
 
-  console.log(`Longitudes del encabezado: ${longitud1}, ${longitud2}`)
+  console.log(`Longitudes del encabezado: ${longitud1}, ${longitud2}, buff.len=`, buff.length)
 
   decoder.off = 8 // Saltamos tu encabezado
 
   const results = []
-
-  // Mientras no hayamos llegado al final del buffer
-  while (decoder.off < bytes.length) {
-    results.push(decoder.decode())
+  try {
+    while (decoder.off < buff.length) {
+      // console.log('Decodificando en offset:', decoder.off)
+      const data = decoder.decode()
+      if (data !== undefined) {
+        results.push(data)
+      }
+    }
+  } catch (err) {
+    console.error('Error en offset ' + decoder.off + ':', err.message)
+    // Inspecciona los bytes cercanos al error
+    console.log('Bytes problemáticos:', buff.slice(decoder.off, decoder.off + 10))
   }
 
-  console.log(results) // Aquí tienes todo el contenido
+  // console.log(results) // Aquí tienes todo el contenido
   return results
+}
+
+export function multiDecodeMsgPackBase64(base64String) {
+  try {
+    const bytes = decodeBase64(base64String)
+
+    return multiDecodeMsgPack2(bytes)
+  } catch (e) {
+    throw new Error('Failed to decode: ' + e.message)
+  }
 }
 
 //-------------
 class MsgPackEncoder {
   constructor() {
-    this.buffer = new Uint8Array(1024) // Buffer inicial
+    this.buffer = new Uint8Array(1024)
     this.view = new DataView(this.buffer.buffer)
     this.off = 0
     this.encoder = new TextEncoder()
   }
 
-  // Asegura que haya espacio suficiente en el buffer
   ensureSpace(bytes) {
     if (this.off + bytes > this.buffer.length) {
       let newLength = this.buffer.length * 2
@@ -421,52 +451,81 @@ class MsgPackEncoder {
       let newBuffer = new Uint8Array(newLength)
       newBuffer.set(this.buffer)
       this.buffer = newBuffer
-      this.view = new DataView(this.buffer.buffer)
+      this.view = new DataView(this.buffer.buffer) // DataView siempre se reinicia sobre el nuevo buffer
     }
   }
 
   encode(val) {
-    // 1. Nulos y Booleanos
     if (val === null) return this.writeUint8(0xc0)
     if (val === false) return this.writeUint8(0xc2)
     if (val === true) return this.writeUint8(0xc3)
 
     const type = typeof val
 
-    // 2. Números
     if (type === 'number') {
       if (Number.isInteger(val)) {
-        if (val >= 0 && val <= 127) return this.writeUint8(val) // positive fixint
-        if (val < 0 && val >= -32) return this.writeUint8(0xe0 | (val + 32)) // negative fixint
-
-        // Enteros más grandes (simplificado a 32 bits para este ejemplo)
-        if (val > 0) {
-          this.writeUint8(0xce)
-          return this.writeUint32(val)
+        if (val >= 0) {
+          if (val < 128) {
+            return this.writeUint8(val)
+          } else if (val < 256) {
+            this.writeUint8(0xcc)
+            return this.writeUint8(val)
+          } else if (val < 65536) {
+            this.writeUint8(0xcd)
+            return this.writeUint16(val) //val & 0xff, (val >>> 8) & 0xff)
+          } else if (val < 4294967296) {
+            this.writeUint8(0xce)
+            return this.writeUint32(val)
+            // val & 0xff,
+            //   (val >>> 8) & 0xff,
+            //   (val >>> 16) & 0xff,
+            //   (val >>> 24) & 0xff
+          } else {
+            // uint64
+            this.encodeBigInt(BigInt(val))
+          }
         } else {
-          this.writeUint8(0xd2)
-          return this.writeInt32(val)
+          if (val >= -32) {
+            // negative fixnum
+            return this.writeUint8(val & 0xff)
+          } else if (val >= -128) {
+            // Int8
+            this.writeUint8(0xd0)
+            return this.writeInt8(val)
+          } else if (val >= -32768) {
+            // int16
+            this.writeUInt8(0xd1)
+            return this.writeInt16(val) // val& 0xff, (val >>> 8) & 0xff)
+            // chunks.push(0xd1, val & 0xff, (val >>> 8) & 0xff)
+          } else if (val >= -2147483648) {
+            // int32
+            this.writeUint8(0xd2)
+            return this.writeInt32(val)
+            // chunks.push(
+            //   0xd2,
+            //   val & 0xff,
+            //   (val >>> 8) & 0xff,
+            //   (val >>> 16) & 0xff,
+            //   (val >>> 24) & 0xff
+            // )
+          } else {
+            // uint64
+            this.encodeBigInt(BigInt(val))
+          }
         }
       } else {
-        // Flotantes (double)
+        // Float64 BE (standard)
         this.writeUint8(0xcb)
         return this.writeFloat64(val)
       }
     }
 
-    // Dentro de encode(val)
     if (type === 'bigint') {
-      if (val >= 0n) {
-        this.writeUint8(0xcf) // uint 64
-        this.writeBigUint64(val)
-      } else {
-        this.writeUint8(0xd3) // int 64
-        this.writeBigInt64(val)
-      }
+      this.encodeBigInt(val)
+
       return
     }
 
-    // 3. Strings
     if (type === 'string') {
       const bytes = this.encoder.encode(val)
       const len = bytes.length
@@ -477,10 +536,10 @@ class MsgPackEncoder {
         this.writeUint8(len)
       } else if (len <= 65535) {
         this.writeUint8(0xda)
-        this.writeUint16(len)
+        this.writeUint16(len) // Longitud en Little Endian
       } else {
         this.writeUint8(0xdb)
-        this.writeUint32(len)
+        this.writeUint32(len) // Longitud en Little Endian
       }
       this.ensureSpace(len)
       this.buffer.set(bytes, this.off)
@@ -488,35 +547,38 @@ class MsgPackEncoder {
       return
     }
 
-    // 4. Arrays
     if (Array.isArray(val)) {
       const len = val.length
-      if (len <= 15) this.writeUint8(0x90 | len)
-      else if (len <= 65535) {
-        this.writeUint8(0xdc)
-        this.writeUint16(len)
-      } else {
-        this.writeUint8(0xdd)
-        this.writeUint32(len)
-      }
+      if (len <= 15) {
+        // console.log('array', 0x90 | len)
+        this.writeUint8(0x90 | len)
+      } else if (len <= 65535) {
+        // console.log('array $DC', len)
 
+        this.writeUint8(0xdc)
+        this.writeUint16(len) // Little Endian
+      } else {
+        // console.log('array $DD', len)
+
+        this.writeUint8(0xdd)
+        this.writeUint32(len) // Little Endian
+      }
       for (const item of val) this.encode(item)
       return
     }
 
-    // 5. Mapas (Objetos)
     if (type === 'object') {
       const keys = Object.keys(val)
       const len = keys.length
-      if (len <= 15) this.writeUint8(0x80 | len)
-      else if (len <= 65535) {
-        this.writeUint16(0xde)
-        this.writeUint16(len)
+      if (len <= 15) {
+        this.writeUint8(0x80 | len)
+      } else if (len <= 65535) {
+        this.writeUint8(0xde) // Corregido: antes tenías writeUint16(0xde)
+        this.writeUint16(len) // Little Endian
       } else {
         this.writeUint8(0xdf)
-        this.writeUint32(len)
+        this.writeUint32(len) // Little Endian
       }
-
       for (const key of keys) {
         this.encode(key)
         this.encode(val[key])
@@ -525,42 +587,67 @@ class MsgPackEncoder {
     }
   }
 
-  // Métodos auxiliares de escritura
+  // MÉTODOS AUXILIARES (Todos con el parámetro 'true' para Little Endian)
   writeUint8(v) {
+    // console.log('writeUint8', v, '(', v.toString(16), ')', 'at', this.off)
     this.ensureSpace(1)
     this.view.setUint8(this.off++, v)
+    // console.log('buffer', this.getFinalBuffer())
   }
   writeUint16(v) {
+    // console.log('writeUint16', v, '(', v.toString(16), ')', 'at', this.off)
     this.ensureSpace(2)
-    this.view.setUint16(this.off, v)
+    this.view.setUint16(this.off, v, true)
     this.off += 2
+    // console.log('buffer', this.getFinalBuffer())
   }
   writeUint32(v) {
+    // console.log('writeUint32', v, '(', v.toString(16), ')', 'at', this.off)
     this.ensureSpace(4)
-    this.view.setUint32(this.off, v)
+    this.view.setUint32(this.off, v, true)
     this.off += 4
+    // console.log('buffer', this.getFinalBuffer())
+  }
+  writeInt32(v) {
+    // console.log('writeInt8', v, '(', v.toString(16), ')', 'at', this.off)
+    this.ensureSpace(4)
+    this.view.setInt32(this.off, v, true)
+    this.off += 4
+    // console.log('buffer', this.getFinalBuffer())
   }
   writeBigUint64(v) {
-    this.ensureSpace(8)
-    this.view.setBigUint64(this.off, v)
-    this.off += 8
-  }
+    // console.log('writeBigUint64', v, '(', v.toString(16), ')', 'at', this.off)
 
+    this.ensureSpace(8)
+    this.view.setBigUint64(this.off, v, true)
+    this.off += 8
+    // console.log('buffer', this.getFinalBuffer())
+  }
   writeBigInt64(v) {
-    this.ensureSpace(8)
-    this.view.setBigInt64(this.off, v)
-    this.off += 8
-  }
+    // console.log('writeBigInt64', v, '(', v.toString(16), ')', 'at', this.off)
 
-  writeInt32(v) {
-    this.ensureSpace(4)
-    this.view.setInt32(this.off, v)
-    this.off += 4
+    this.ensureSpace(8)
+    this.view.setBigInt64(this.off, v, true)
+    this.off += 8
+    // console.log('buffer', this.getFinalBuffer())
   }
   writeFloat64(v) {
+    console.log('writeFloat64', v, '(', v.toString(16), ')', 'at', this.off)
+
     this.ensureSpace(8)
-    this.view.setFloat64(this.off, v)
+    this.view.setFloat64(this.off, v, true)
     this.off += 8
+    console.log('buffer', this.getFinalBuffer())
+  }
+
+  encodeBigInt(v) {
+    if (v >= 0n) {
+      this.writeUint8(0xcf)
+      this.writeBigUint64(v)
+    } else {
+      this.writeUint8(0xd3)
+      this.writeBigInt64(v)
+    }
   }
 
   getFinalBuffer() {
@@ -568,13 +655,46 @@ class MsgPackEncoder {
   }
 }
 
+export function encodeMsgPack2MultiFragments(fragmentos) {
+  const encoder = new MsgPackEncoder()
+
+  // 1. Reservar espacio para el encabezado (8 bytes)
+  // Simplemente saltamos el offset para dejar el hueco
+  encoder.off = 8
+
+  // 2. Codificar todos tus fragmentos/objetos
+  // const fragmentos = [ {id: 1}, [1, 2, 3], "mensaje final" ];
+
+  fragmentos.forEach(obj => {
+    encoder.encode(obj)
+  })
+
+  // 3. Obtener el buffer resultante
+  const finalBuf = encoder.getFinalBuffer()
+  const view = new DataView(finalBuf.buffer)
+
+  // 4. "Fix length": Calcular y escribir la longitud al final
+  // Restamos 8 para tener solo el tamaño del PAYLOAD, o usamos el total según tu protocolo
+  const payloadLength = finalBuf.length
+
+  // Escribimos en Little Endian (true) como determinamos antes
+  view.setUint32(0, payloadLength, true)
+  view.setUint32(4, payloadLength, true) // Si tu header repite la longitud
+
+  // console.log(
+  //   'Buffer listo para enviar:',
+  //   [...finalBuf].map(b => b.toString(16))
+  // )
+  return finalBuf
+}
+
 export function encodeMsgPack2(value) {
   const encoder = new MsgPackEncoder()
 
   // 1. Escribir manualmente tu encabezado de 8 bytes
   // (Por ejemplo, si longitud1 y longitud2 eran los valores originales)
-  encoder.writeUint32(longitud1)
-  encoder.writeUint32(longitud2)
+  encoder.writeUint32(value.length + 8)
+  encoder.writeUint32(value.length + 8)
 
   // 2. Codificar el objeto JS de vuelta a MessagePack
   encoder.encode(value)
