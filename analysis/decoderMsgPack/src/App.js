@@ -10,7 +10,7 @@ import {
   encodeMsgPack2MultiFragments,
   decodeBase64,
   decodeMsgPack2
-} from '../../common/messagePack'
+} from 'message-pack'
 
 // ============================================
 // MSGPACK DECODER (browser-compatible)
