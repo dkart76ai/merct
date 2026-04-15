@@ -364,6 +364,11 @@ function decodeBase64(base64String) {
   return bytes
 }
 
+function encodeBase64(buffer) {
+  const b64 = btoa(String.fromCharCode(...buffer))
+  return b64
+}
+
 function decodeMsgPackBase64(base64String) {
   try {
     const bytes = decodeBase64(base64String)
@@ -700,7 +705,7 @@ function encodeMsgPack2(value) {
 }
 
 function encodeMsgPack2ToBase64(value) {
-  const b64 = btoa(String.fromCharCode(...encodeMsgPack2(value)))
+  const b64 = encodeBase64(encodeMsgPack2(value))
   return b64
 }
 /*
@@ -979,9 +984,10 @@ function testEncodeDecode(value) {
 // CommonJS exports for Node.js
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    MsgPackDecoder,
-    MsgPackEncoder,
-    readValue,
+    // MsgPackDecoder,
+    // MsgPackEncoder,
+    // readValue,
+
     decodeMsgPack,
     decodeMsgPackBase64,
     // encodeMsgPack,
@@ -990,11 +996,13 @@ if (typeof module !== 'undefined' && module.exports) {
     // encodeMsgPackMultipleToBase64,
     // encodeMsgPackWithHeader,
     // encodeMsgPackWithHeaderToBase64,
+    decodeMsgPack2,
     encodeMsgPack2,
     encodeMsgPack2MultiFragments,
     encodeMsgPack2ToBase64,
     multiDecodeMsgPack2,
     multiDecodeMsgPackBase64,
+    encodeBase64,
     decodeBase64
     // testEncodeDecode
   }
