@@ -24,7 +24,7 @@
 | 8     | position   | [14,175,147]  | [kingdom, x, y]               |
 | 9     | -          | [0]           | Unknown                        |
 | 10    | extra      | 1775697895    | Computed value?               |
-| 11    | flag       | false         | Boolean flag                  |
+| 11    | flag       | false         | Boolean flag  rare cryps unlocked/key   |
 
 ## Known Opcodes
 
