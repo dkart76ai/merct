@@ -20,8 +20,11 @@ const {
 
 loadEnvFile() // Defaults to loading './.env'
 
-const channelUrl = process.env.CHAT_CHANNEL_URL || ''
-console.log('channel url', channelUrl)
+const config = {
+  accountUser: process.env.CHAT_ACCOUNT_USER,
+  accountPwd: process.env.CHAT_ACCOUNT_PWD,
+  channelUrl: process.env.CHAT_CHANNEL_URL || ''
+}
 
 const SAVE_DIR = path.join(__dirname, 'captures')
 const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
@@ -35,6 +38,20 @@ const PACKET312 = {
   kingdom: 100,
   sessionToken: null,
   buff: null
+}
+
+function mapToUint8Array(map) {
+  if (!map) return null
+  if (map instanceof Uint8Array) return map
+  const keys = Object.keys(map)
+    .map(Number)
+    .sort((a, b) => a - b)
+  if (keys.length === 0) return null
+  const arr = new Uint8Array(keys.length)
+  for (const k of keys) {
+    arr[k] = map[k]
+  }
+  return arr
 }
 
 let saveFileIndex = 0
@@ -114,13 +131,14 @@ function extractObjects(data) {
   }
 
   function findObjects(arr, depth = 0) {
+    console.log('findobjects: depth', depth)
     if (depth > 200) return
     for (const item of arr) {
       if (Array.isArray(item)) {
         if (isValidObject(item)) {
           const staticId = item[1]
           const known = staticIdDb.get(String(staticId))
-          objects.push({
+          const obj = {
             objectId: item[0][0],
             staticId: staticId,
             name: known?.name || null,
@@ -137,7 +155,9 @@ function extractObjects(data) {
             unk6: item[9][0],
             extra: item[10],
             isActive: item[11]
-          })
+          }
+          objects.push(obj)
+          console.log('objeto encontrado:', obj.staticId, obj.name)
         } else {
           findObjects(item, depth + 1)
         }
@@ -390,7 +410,7 @@ async function trackUnknownStaticId(obj) {
 }
 
 async function sendMessage(msg = '', coord = null, staticId = 400, entryType = 'poi') {
-  if (!channelUrl) {
+  if (!config.channelUrl) {
     console.log(`⚠️ No channel URL configured`)
     return
   }
@@ -443,7 +463,7 @@ async function sendMessage(msg = '', coord = null, staticId = 400, entryType = '
         return { success: false, error: e.message }
       }
     },
-    { channelUrl, data, message }
+    { channelUrl: config.channelUrl, data, message }
   )
 }
 
@@ -727,14 +747,26 @@ app.post('/api/start', async (req, res) => {
           //request:          [312,284,[["1309965043442"],{"0":105,"1":223,"2":166,"3":213,"4":171,"5":90,"6":183,"7":199,"8":35,"9":86,"10":245,"11":99}],""]
 
           if (!PACKET312.sessionToken) {
-            PACKET312.sessionToken = decodedReq[2]?.[0]?.[0] // playerid? or session token?
+            const rawToken = decodedReq[2]?.[0]?.[0]
+            PACKET312.sessionToken =
+              typeof rawToken === 'bigint'
+                ? rawToken
+                : typeof rawToken === 'number'
+                  ? BigInt(rawToken)
+                  : rawToken
             PACKET312.buff = decodedReq[2]?.[1] // auth token?
 
             console.log(
               '312 packet decodedReq[0][2]',
-              JSON.stringify(decodedReq[0][2], (key, value) =>
+              JSON.stringify(decodedReq[2], (key, value) =>
                 typeof value === 'bigint' ? value.toString() : value
               )
+            )
+            console.log(
+              'PACKET312.sessionToken type:',
+              typeof PACKET312.sessionToken,
+              'value:',
+              PACKET312.sessionToken
             )
           }
         }
@@ -782,7 +814,22 @@ app.post('/api/start', async (req, res) => {
       }
     })
 
-    await page.goto(`https://totalbattle.com/es`)
+    await page.goto('https://totalbattle.com/es', { timeout: 70000 })
+    await page.waitForTimeout(10000)
+
+    // Login if needed
+    const loginInput = page.getByRole('textbox', { name: 'E-mail' })
+    if (await loginInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+      console.log(`  Logging in...`)
+      const loginButton = page.locator('#registration').getByText('Iniciar sesión')
+      if (await loginButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await loginButton.click()
+        await page.waitForTimeout(500)
+      }
+      await loginInput.fill(config.accountUser)
+      await page.getByRole('textbox', { name: 'Contraseña' }).fill(config.accountPwd)
+      await page.getByRole('button', { name: 'Iniciar sesión' }).click()
+    }
 
     res.json({ success: true, message: 'Browser started, capturing responses...' })
   } catch (error) {
@@ -798,7 +845,8 @@ app.post('/api/start', async (req, res) => {
 app.post('/api/scanKingdom', async (req, res) => {
   console.log('scanning kingdom')
 
-  if (isNaN(req.body.kingdom)) {
+  const kingdoms = req.body.kingdoms || ''
+  if (kingdoms.trim() === '') {
     console.log('no kingdom')
     return res.json({ success: false, error: 'enter kingdom' })
   }
@@ -812,8 +860,9 @@ app.post('/api/scanKingdom', async (req, res) => {
     return res.json({ success: false, error: 'no  auth buf' })
   }
   // const default='https://game-us17.totalbattle.com/rubens-realm146'
-  PACKET312.kingdom = parseInt(req.body.kingdom)
-  const url = kingdomUrls[PACKET312.kingdom]
+  PACKET312.kingdoms = kingdoms.split(',').map(parseInt)
+  const currentKingdom = PACKET312.kingdoms[0]
+  const url = kingdomUrls[currentKingdom]
   if (!url) {
     console.log('invalid kingdom')
     return res.json({ success: false, error: 'invalid kingdom' })
@@ -821,37 +870,85 @@ app.post('/api/scanKingdom', async (req, res) => {
 
   const randomSeq = Math.floor(Math.random() * 32000) + 1
 
-  const tilesArray = generateArrays().slice(0, 1)
+  const tilesArray = generateArrays()
   console.log('tiles', tilesArray)
-  const promises = tilesArray.map(tiles => {
+  console.log(
+    'PACKET312.sessionToken type:',
+    typeof PACKET312.sessionToken,
+    'value:',
+    PACKET312.sessionToken
+  )
+
+  // Ensure token is BigInt (in case it was stored as string)
+  const tokenValue = PACKET312.sessionToken
+  const tokenBigInt =
+    typeof tokenValue === 'bigint'
+      ? tokenValue
+      : typeof tokenValue === 'number'
+        ? BigInt(tokenValue)
+        : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
+          ? BigInt(tokenValue)
+          : tokenValue
+
+  // Create all payloads in node
+  const payloads = tilesArray.map(tiles => {
     const buff312 = [
-      [312, randomSeq, [[PACKET312.sessionToken], PACKET312.buff], ''],
+      [312, randomSeq, [[tokenBigInt], mapToUint8Array(PACKET312.buff)], ''],
       [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
     ]
-
-    // const payload =  encodeMsgPack2(buff312)
     const payload = encodeMsgPack2MultiFragments(buff312)
     console.log('sending packet 312 to ', url, payload)
     console.log('payload b64', encodeBase64(payload))
-    return fetch(url, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
-        'Content-Type': 'application/octet-stream'
-      },
-      body: payload,
-      referrer: 'https://totalbattle.com/',
-      method: 'POST'
-    })
+    return Array.from(payload)
   })
 
   // 2. Ejecutarlas en paralelo
   try {
-    const responses = await Promise.all(promises)
-    const data = await Promise.all(responses.map(res => res.json()))
-    console.log(data)
-    // 3. Convertir todas a JSON (otra tanda de promesas)
-    res.json({ success: true, kingdom: PACKET312.kingdom, data })
+    const data = await page.evaluate(
+      async ({ url, payloads, headers }) => {
+        const results = await Promise.all(
+          payloads.map(async payloadBytes => {
+            try {
+              const res = await fetch(url, {
+                headers: headers,
+                body: new Uint8Array(payloadBytes),
+                referrer: 'https://totalbattle.com/',
+                method: 'POST'
+              })
+
+              const buffer = await res.arrayBuffer()
+              const bytes = new Uint8Array(buffer)
+              const decoded = multiDecodeMsgPack2(bytes)
+              console.log('Decoded msgpack:', decoded.results.length, 'objects')
+              return { success: true, decoded: decoded.results }
+            } catch (err) {
+              return { success: false, error: err.message }
+            }
+          })
+        )
+        return JSON.stringify(results, (k, v) => (typeof v === 'bigint' ? v.toString() : v))
+      },
+      {
+        url,
+        payloads,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
+          Referer: 'https://totalbattle.com/'
+        }
+      }
+    ) // pass data from node scope to playwright scope
+
+    //llega a node
+    const finalData = JSON.parse(data)
+
+    //enviamos a react
+    res.json({
+      success: true,
+      kingdom: PACKET312.kingdom,
+      data: finalData
+    })
   } catch (e) {
     console.log('error sending packet', e)
     res.status(500).json({ success: false, error: e.message })
