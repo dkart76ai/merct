@@ -11,6 +11,7 @@ const {
   decodeMsgPackBase64,
   multiDecodeMsgPackBase64,
   multiDecodeMsgPack2,
+
   encodeMsgPack2,
   encodeMsgPack2MultiFragments,
   encodeBase64,
@@ -662,9 +663,13 @@ app.post('/api/start', async (req, res) => {
           myPlayerInfo.playerId,
           myPlayerInfo.internalPlayerId
         )
-        const objects = extractObjects(decodedResponse)
 
-        objects.forEach(obj => trackUnknownStaticId(obj))
+        let objects = []
+        if (opCode === 312 || opCode === 408) {
+          extractObjects(decodedResponse)
+
+          objects.forEach(obj => trackUnknownStaticId(obj))
+        }
 
         captures.push({
           id: ++captureIndex,
@@ -711,7 +716,7 @@ app.post('/api/start', async (req, res) => {
           if (autoSave) saveMyPlayerPackets()
         }
 
-        if (opCode === 312 || opCode === 408 || objects.length > 0) {
+        if (opCode === 312 || opCode === 408) {
           objectPackets.push({
             opCode,
             url,
@@ -918,9 +923,9 @@ app.post('/api/scanKingdom', async (req, res) => {
 
               const buffer = await res.arrayBuffer()
               const bytes = new Uint8Array(buffer)
-              const decoded = multiDecodeMsgPack2(bytes)
-              console.log('Decoded msgpack:', decoded.results.length, 'objects')
-              return { success: true, decoded: decoded.results }
+
+              // Convert Uint8Array to regular array for JSON serialization
+              return { success: true, buffer: Array.from(bytes) }
             } catch (err) {
               return { success: false, error: err.message }
             }
@@ -942,13 +947,23 @@ app.post('/api/scanKingdom', async (req, res) => {
 
     //llega a node
     const finalData = JSON.parse(data)
-
-    //enviamos a react
-    res.json({
-      success: true,
-      kingdom: PACKET312.kingdom,
-      data: finalData
-    })
+    console.log('finalData', finalData[0])
+    if (finalData.length > 0 && finalData[0].success && finalData[0].buffer) {
+      // Convert regular array back to Uint8Array
+      const bytes = new Uint8Array(finalData[0].buffer)
+      console.log('Response buffer length:', bytes.length)
+      const decoded = multiDecodeMsgPack2(bytes)
+      const o = extractObjects(decoded.results)
+      console.log('found ', o.length, 'objects')
+      //enviamos a react
+      res.json({
+        success: true,
+        kingdom: PACKET312.kingdom
+      })
+    } else {
+      console.log('error sending packet', finalData)
+      res.status(200).json({ success: false, error: 'failed to get data' })
+    }
   } catch (e) {
     console.log('error sending packet', e)
     res.status(500).json({ success: false, error: e.message })

@@ -12,7 +12,7 @@
   "4": {
     "staticId": 4,
     "entryType": "user",
-    "name": "Tagore"
+    "name": "Portal"
   },
   "5": {
     "staticId": 5,
@@ -652,6 +652,11 @@
     "staticId": 400,
     "name": "Mercenary exchange",
     "entryType": "poi"
+  },
+  "565": {
+    "staticId": 565,
+    "entryType": "poi",
+    "name": null
   },
   "628": {
     "staticId": 628,
@@ -4327,5 +4332,10 @@
     "entryType": "spawn",
     "name": "Unknown",
     "level": 50
+  },
+  "889001": {
+    "staticId": 889001,
+    "entryType": "poi",
+    "name": null
   }
 }

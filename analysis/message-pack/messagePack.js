@@ -1,6 +1,9 @@
 class MsgPackDecoder {
   constructor(buffer) {
     this.buf = new Uint8Array(buffer)
+    if (this.buf.length < 4) {
+      throw new Error(`Buffer too small: ${this.buf.length} bytes (need at least 4)`)
+    }
     this.view = new DataView(this.buf.buffer, this.buf.byteOffset, this.buf.byteLength, true)
     this.off = 0
     this.decoder = new TextDecoder()
@@ -401,6 +404,16 @@ function decodeMsgPack2(buff) {
 }
 
 function multiDecodeMsgPack2(buff) {
+  if (!buff || buff.length === 0) {
+    console.warn('multiDecodeMsgPack2: Empty buffer received')
+    return { results: [], bufLen: 0, len: 0 }
+  }
+  
+  if (buff.length < 8) {
+    console.warn('multiDecodeMsgPack2: Buffer too small for header:', buff.length, 'bytes')
+    return { results: [], bufLen: 0, len: 0 }
+  }
+  
   const decoder = new MsgPackDecoder(buff)
   // 2. Leemos los dos enteros del encabezado (4 buff cada uno)
   // Usamos getUint32. El primero está en offset 0, el segundo en offset 4.
