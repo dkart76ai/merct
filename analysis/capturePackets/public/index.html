@@ -201,6 +201,8 @@
         <input type="checkbox" id="cbCapture" />
         <span>Capture Packets</span>
       </label>
+      <button id="btnScan312">scan kingdom 312</button>
+      <input type="text" id="kingdoms" value="147" placeholder="enter kingdoms ie: 147,142,143" />
     </div>
 
     <div class="controls">
@@ -613,6 +615,38 @@
         log('Browser stopped')
         updateUI(false)
         updateCaptureToggle(false)
+      })
+
+      document.getElementById('btnScan312').addEventListener('click', async () => {
+        log('Scanning - sending 312 packets...')
+        const kingdoms = document.getElementById('kingdoms').value || ''
+        if (kingdoms.trim() === '') return
+
+        //check if kingdoms have commas, split and check if each is a valid number
+        const kds = kingdoms.split(',')
+        if (
+          !kds.every(item => {
+            const trimmed = item.trim()
+            // Validamos que no esté vacío y que sea un número real
+            return trimmed !== '' && !isNaN(trimmed)
+          })
+        ) {
+          alert('enter valid kingdoms')
+          return
+        }
+
+        const res = await fetch(API + '/scanKingdom', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kingdoms })
+        })
+        const data = await res.json()
+        if (data.success) {
+          console.log('data', data.data)
+          log('Packet 312 sent')
+        } else {
+          log('Error: ' + data.error)
+        }
       })
 
       document

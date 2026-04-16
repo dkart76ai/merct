@@ -389,14 +389,14 @@ function decodeMsgPack2(buff) {
   const longitud1 = decoder.view.getUint32(0, true) // Offset 0
   const longitud2 = decoder.view.getUint32(4, true) // Offset 4
 
-  console.log(`Longitudes del encabezado: ${longitud1}, ${longitud2}`)
+  // console.log(`Longitudes del encabezado: ${longitud1}, ${longitud2}`)
 
   // 3. Posicionamos el offset en 8 para saltar el encabezado
   decoder.off = 8
 
   // 4. Decodificamos el payload MessagePack
   const data = decoder.decode()
-  console.log('Contenido:', data)
+  // console.log('Contenido:', data)
   return data
 }
 
@@ -407,7 +407,7 @@ function multiDecodeMsgPack2(buff) {
   const longitud1 = decoder.view.getUint32(0, true) // Offset 0
   const longitud2 = decoder.view.getUint32(4, true) // Offset 4
 
-  console.log(`Longitudes del encabezado: ${longitud1}, ${longitud2}, buff.len=`, buff.length)
+  // console.log(`Longitudes del encabezado: ${longitud1}, ${longitud2}, buff.len=`, buff.length)
 
   decoder.off = 8 // Saltamos tu encabezado
 
@@ -673,7 +673,7 @@ class MsgPackEncoder {
   }
 }
 
-function encodeMsgPack2MultiFragments(fragmentos, len) {
+function encodeMsgPack2MultiFragments(fragmentos, len = null) {
   const encoder = new MsgPackEncoder()
 
   encoder.off = 8
@@ -685,10 +685,11 @@ function encodeMsgPack2MultiFragments(fragmentos, len) {
   const finalBuf = encoder.getFinalBuffer()
   const view = new DataView(finalBuf.buffer)
 
-  const payloadLength = finalBuf.length
+  const totalLength = finalBuf.length
+  const msgpackPayloadLength = len ? len : (totalLength - 8)
 
-  view.setUint32(0, payloadLength, true)
-  view.setUint32(4, len, true)
+  view.setUint32(0, totalLength, true)
+  view.setUint32(4, msgpackPayloadLength, true)
 
   return finalBuf
 }
