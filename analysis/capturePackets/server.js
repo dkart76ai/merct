@@ -18,6 +18,7 @@ const {
   decodeBase64,
   decodeMsgPack2
 } = require('../message-pack/messagePack.js')
+const { staticIdDb, loadStaticDb, saveStaticDb, addOrUpdateStaticId } = require('./staticId.js')
 
 loadEnvFile() // Defaults to loading './.env'
 
@@ -34,7 +35,6 @@ const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json'
 const OBJECT_PACKETS312_FILE = path.join(__dirname, 'samples', 'objectpackets312.json')
 const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
 const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
-const STATIC_DB_FILE = path.join(__dirname, 'staticId-db.json')
 const PACKET312 = {
   kingdom: 100,
   sessionToken: null,
@@ -66,56 +66,6 @@ async function fileExists(filePath) {
     return true
   } catch {
     return false
-  }
-}
-
-function loadStaticDb() {
-  try {
-    if (fs.existsSync(STATIC_DB_FILE)) {
-      const data = JSON.parse(fs.readFileSync(STATIC_DB_FILE, 'utf8'))
-      staticIdDb = new Map(Object.entries(data))
-      console.log(
-        `[${new Date().toLocaleTimeString()}] Loaded ${staticIdDb.size} static IDs from database`
-      )
-    } else {
-      console.log(`[${new Date().toLocaleTimeString()}] No staticId-db.json found, starting fresh`)
-    }
-  } catch (e) {
-    console.error('Error loading staticId-db:', e.message)
-  }
-}
-
-function saveStaticDb() {
-  try {
-    const data = Object.fromEntries(staticIdDb)
-    fs.writeFileSync(STATIC_DB_FILE, JSON.stringify(data, null, 2))
-  } catch (e) {
-    console.error('Error saving staticId-db:', e.message)
-  }
-}
-
-function addOrUpdateStaticId(staticId, data) {
-  const id = String(staticId)
-  let updated = false
-
-  if (!staticIdDb.has(id)) {
-    staticIdDb.set(id, { staticId: parseInt(id), ...data })
-    console.log(
-      `[${new Date().toLocaleTimeString()}] New staticId: ${staticId} (${data.name || data.entryType || 'unknown'})`
-    )
-    updated = true
-  } else {
-    const existing = staticIdDb.get(id)
-    for (const [key, value] of Object.entries(data)) {
-      if (value !== undefined && value !== null && existing[key] === undefined) {
-        existing[key] = value
-        updated = true
-      }
-    }
-  }
-
-  if (updated) {
-    saveStaticDb()
   }
 }
 
@@ -987,14 +937,6 @@ app.get('/api/captures', (req, res) => {
   res.json({ success: true, captures: captures.slice(-50), count: captures.length })
 })
 
-app.get('/api/captures312', (req, res) => {
-  res.json({
-    success: true,
-    captures: captures.filter(c => c.opCode === 312).slice(-50),
-    count: captures.length
-  })
-})
-
 app.get('/api/captures/:id', (req, res) => {
   const id = parseInt(req.params.id)
   const capture = captures.find(c => c.id === id)
@@ -1003,12 +945,6 @@ app.get('/api/captures/:id', (req, res) => {
   } else {
     res.status(404).json({ success: false, error: 'Not found' })
   }
-})
-
-app.get('/api/export', (req, res) => {
-  res.setHeader('Content-Type', 'application/json')
-  res.setHeader('Content-Disposition', 'attachment; filename=captures.json')
-  res.json(captures)
 })
 
 app.post('/api/clear', (req, res) => {
@@ -1080,16 +1016,6 @@ app.get('/api/myplayer/:id', (req, res) => {
   }
 })
 
-app.get('/api/export-myplayer', (req, res) => {
-  res.setHeader('Content-Type', 'application/json')
-  res.setHeader('Content-Disposition', 'attachment; filename=myplayer.json')
-  res.json({
-    playerId: myPlayerInfo.playerId,
-    internalPlayerId: myPlayerInfo.internalPlayerId,
-    packets: myPlayerPackets
-  })
-})
-
 app.post('/api/clear-myplayer', (req, res) => {
   myPlayerPackets = []
   myPlayerPacketIndex = 0
@@ -1120,25 +1046,9 @@ app.get('/api/unknown-staticids', (req, res) => {
   res.json({ success: true, items: entries, count: unknownStaticIds.size })
 })
 
-app.get('/api/export-unknown-staticids', (req, res) => {
-  const entries = [...unknownStaticIds.entries()].map(([id, data]) => ({
-    staticId: parseInt(id)
-  }))
-  res.setHeader('Content-Type', 'application/json')
-  res.setHeader('Content-Disposition', 'attachment; filename=process-staticid.json')
-  res.json(entries)
-})
-
 app.get('/api/chat-staticids', (req, res) => {
   const entries = [...chatStaticIds.values()]
   res.json({ success: true, items: entries, count: chatStaticIds.size })
-})
-
-app.get('/api/export-chat-staticids', (req, res) => {
-  const entries = [...chatStaticIds.values()]
-  res.setHeader('Content-Type', 'application/json')
-  res.setHeader('Content-Disposition', 'attachment; filename=chat-staticid.json')
-  res.json(entries)
 })
 
 app.get('/api/static-db', (req, res) => {
@@ -1153,33 +1063,6 @@ app.get('/api/static-db/:id', (req, res) => {
   } else {
     res.status(404).json({ success: false, error: 'StaticId not found' })
   }
-})
-
-app.post('/api/static-db', (req, res) => {
-  const { staticId, name, entryType, level } = req.body
-  if (staticId === undefined) {
-    return res.status(400).json({ success: false, error: 'staticId required' })
-  }
-  addOrUpdateStaticId(staticId, { name, entryType, level })
-  res.json({ success: true, item: staticIdDb.get(String(staticId)) })
-})
-
-app.delete('/api/static-db/:id', (req, res) => {
-  const id = req.params.id
-  if (staticIdDb.has(id)) {
-    staticIdDb.delete(id)
-    saveStaticDb()
-    res.json({ success: true })
-  } else {
-    res.status(404).json({ success: false, error: 'StaticId not found' })
-  }
-})
-
-app.get('/api/export-static-db', (req, res) => {
-  res.setHeader('Content-Type', 'application/json')
-  res.setHeader('Content-Disposition', 'attachment; filename=staticId-db.json')
-  const data = Object.fromEntries(staticIdDb)
-  res.json(data)
 })
 
 loadStaticDb()
