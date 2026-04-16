@@ -18,7 +18,14 @@ const {
   decodeBase64,
   decodeMsgPack2
 } = require('../message-pack/messagePack.js')
-const { staticIdDb, loadStaticDb, saveStaticDb, addOrUpdateStaticId } = require('./staticId.js')
+const {
+  getStaticIdValues,
+  getStaticIdData,
+  getStaticIdSize,
+  loadStaticDb,
+  saveStaticDb,
+  addOrUpdateStaticId
+} = require('./staticId.js')
 
 loadEnvFile() // Defaults to loading './.env'
 
@@ -29,12 +36,11 @@ const config = {
 }
 
 const SAVE_DIR = path.join(__dirname, 'captures')
-const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
 const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
 const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json')
 const OBJECT_PACKETS312_FILE = path.join(__dirname, 'samples', 'objectpackets312.json')
-const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
-const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
+// const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
+// const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
 const PACKET312 = {
   kingdom: 100,
   sessionToken: null,
@@ -57,8 +63,6 @@ function mapToUint8Array(map) {
 
 let saveFileIndex = 0
 const MAX_CAPTURES_PER_FILE = 500
-
-let staticIdDb = new Map()
 
 async function fileExists(filePath) {
   try {
@@ -88,7 +92,7 @@ function extractObjects(data) {
       if (Array.isArray(item)) {
         if (isValidObject(item)) {
           const staticId = item[1]
-          const known = staticIdDb.get(String(staticId))
+          const known = getStaticIdData(staticId)
           const obj = {
             objectId: item[0][0],
             staticId: staticId,
@@ -221,25 +225,15 @@ function extractChatStaticIds(message) {
   } catch (e) {}
 }
 
-function saveChatStaticIds() {
-  try {
-    const entries = [...chatStaticIds.values()]
-    fs.writeFileSync(CHAT_STATICID_FILE, JSON.stringify(entries, null, 2))
-    // console.log(`[${new Date().toLocaleTimeString()}] Saved ${entries.length} chat static IDs`)
-  } catch (e) {
-    console.error('Save chat staticids error:', e.message)
-  }
-}
-
-function saveOpcodes() {
-  try {
-    const opcodes = [...uniqueOpcodes].sort((a, b) => a - b)
-    fs.writeFileSync(OPCODES_FILE, JSON.stringify(opcodes, null, 2))
-    console.log(`[${new Date().toLocaleTimeString()}] Saved ${opcodes.length} unique opcodes`)
-  } catch (e) {
-    console.error('Save opcodes error:', e.message)
-  }
-}
+// function saveChatStaticIds() {
+//   try {
+//     const entries = [...chatStaticIds.values()]
+//     fs.writeFileSync(CHAT_STATICID_FILE, JSON.stringify(entries, null, 2))
+//     // console.log(`[${new Date().toLocaleTimeString()}] Saved ${entries.length} chat static IDs`)
+//   } catch (e) {
+//     console.error('Save chat staticids error:', e.message)
+//   }
+// }
 
 function extractInternalIdFrom402(data) {
   if (!Array.isArray(data)) return null
@@ -343,7 +337,7 @@ function saveToFile() {
 
 async function trackUnknownStaticId(obj) {
   const { staticId, level, kingdom, x, y } = obj
-  const dbEntry = staticIdDb.get(String(staticId))
+  const dbEntry = getStaticIdData(staticId)
 
   const isComplete =
     dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level != null && dbEntry.level >= 0
@@ -418,14 +412,14 @@ async function sendMessage(msg = '', coord = null, staticId = 400, entryType = '
   )
 }
 
-function saveUnknownStaticIds() {
-  try {
-    const entries = [...unknownStaticIds].map(id => ({ staticId: id }))
-    fs.writeFileSync(PROCESS_STATICID_FILE, JSON.stringify(entries, null, 2))
-  } catch (e) {
-    console.error('Save unknown staticids error:', e.message)
-  }
-}
+// function saveUnknownStaticIds() {
+//   try {
+//     const entries = [...unknownStaticIds].map(id => ({ staticId: id }))
+//     fs.writeFileSync(PROCESS_STATICID_FILE, JSON.stringify(entries, null, 2))
+//   } catch (e) {
+//     console.error('Save unknown staticids error:', e.message)
+//   }
+// }
 
 const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
   const allNumbers = []
@@ -505,7 +499,7 @@ app.post('/api/start', async (req, res) => {
             if (text.startsWith('MESG')) {
               // console.log(`[WS] MESG received: ${text.substring(0, 200)}...`)
               extractChatStaticIds(text)
-              if (autoSave) saveChatStaticIds()
+              // if (autoSave) saveChatStaticIds()
             }
           } catch (e) {}
         }
@@ -983,44 +977,39 @@ app.post('/api/capturing', (req, res) => {
   res.json({ success: true, capturing: capturingEnabled })
 })
 
-app.get('/api/opcodes', (req, res) => {
-  res.json({
-    success: true,
-    opcodes: [...uniqueOpcodes].sort((a, b) => a - b),
-    count: uniqueOpcodes.size
-  })
-})
+// app.get('/api/opcodes', (req, res) => {
+//   res.json({
+//     success: true,
+//     opcodes: [...uniqueOpcodes].sort((a, b) => a - b),
+//     count: uniqueOpcodes.size
+//   })
+// })
 
-app.post('/api/save-opcodes', (req, res) => {
-  saveOpcodes()
-  res.json({ success: true, count: uniqueOpcodes.size })
-})
+// app.get('/api/myplayer', (req, res) => {
+//   res.json({
+//     success: true,
+//     playerId: myPlayerInfo.playerId,
+//     internalPlayerId: myPlayerInfo.internalPlayerId,
+//     packets: myPlayerPackets,
+//     count: myPlayerPackets.length
+//   })
+// })
 
-app.get('/api/myplayer', (req, res) => {
-  res.json({
-    success: true,
-    playerId: myPlayerInfo.playerId,
-    internalPlayerId: myPlayerInfo.internalPlayerId,
-    packets: myPlayerPackets,
-    count: myPlayerPackets.length
-  })
-})
+// app.get('/api/myplayer/:id', (req, res) => {
+//   const id = parseInt(req.params.id)
+//   const packet = myPlayerPackets.find(p => p.id === id)
+//   if (packet) {
+//     res.json({ success: true, packet })
+//   } else {
+//     res.status(404).json({ success: false, error: 'Not found' })
+//   }
+// })
 
-app.get('/api/myplayer/:id', (req, res) => {
-  const id = parseInt(req.params.id)
-  const packet = myPlayerPackets.find(p => p.id === id)
-  if (packet) {
-    res.json({ success: true, packet })
-  } else {
-    res.status(404).json({ success: false, error: 'Not found' })
-  }
-})
-
-app.post('/api/clear-myplayer', (req, res) => {
-  myPlayerPackets = []
-  myPlayerPacketIndex = 0
-  res.json({ success: true })
-})
+// app.post('/api/clear-myplayer', (req, res) => {
+//   myPlayerPackets = []
+//   myPlayerPacketIndex = 0
+//   res.json({ success: true })
+// })
 
 app.post('/api/clear-all', (req, res) => {
   objectPackets = []
@@ -1029,7 +1018,7 @@ app.post('/api/clear-all', (req, res) => {
   captureIndex = 0
   myPlayerPackets = []
   myPlayerPacketIndex = 0
-  myPlayerInfo.internalPlayerId = null
+  // myPlayerInfo.internalPlayerId = null
   uniqueOpcodes.clear()
   chatStaticIds.clear()
   res.json({ success: true })
@@ -1046,23 +1035,15 @@ app.get('/api/unknown-staticids', (req, res) => {
   res.json({ success: true, items: entries, count: unknownStaticIds.size })
 })
 
-app.get('/api/chat-staticids', (req, res) => {
-  const entries = [...chatStaticIds.values()]
-  res.json({ success: true, items: entries, count: chatStaticIds.size })
-})
+// app.get('/api/chat-staticids', (req, res) => {
+//   const entries = [...chatStaticIds.values()]
+//   res.json({ success: true, items: entries, count: chatStaticIds.size })
+// })
 
 app.get('/api/static-db', (req, res) => {
-  const entries = [...staticIdDb.values()]
-  res.json({ success: true, items: entries, count: staticIdDb.size })
-})
-
-app.get('/api/static-db/:id', (req, res) => {
-  const id = req.params.id
-  if (staticIdDb.has(id)) {
-    res.json({ success: true, item: staticIdDb.get(id) })
-  } else {
-    res.status(404).json({ success: false, error: 'StaticId not found' })
-  }
+  console.log('Sending staticId Db with', getStaticIdSize(), 'entries')
+  const entries = getStaticIdValues()
+  res.json({ success: true, items: entries, count: getStaticIdSize() })
 })
 
 loadStaticDb()

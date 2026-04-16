@@ -1,8 +1,11 @@
-export let staticIdDb = new Map()
+const fs = require('fs')
+const path = require('path')
+
+let staticIdDb = new Map()
 
 const STATIC_DB_FILE = path.join(__dirname, 'staticId-db.json')
 
-export function loadStaticDb() {
+function loadStaticDb() {
   try {
     if (fs.existsSync(STATIC_DB_FILE)) {
       const data = JSON.parse(fs.readFileSync(STATIC_DB_FILE, 'utf8'))
@@ -18,7 +21,7 @@ export function loadStaticDb() {
   }
 }
 
-export function saveStaticDb() {
+function saveStaticDb() {
   try {
     const data = Object.fromEntries(staticIdDb)
     fs.writeFileSync(STATIC_DB_FILE, JSON.stringify(data, null, 2))
@@ -26,8 +29,16 @@ export function saveStaticDb() {
     console.error('Error saving staticId-db:', e.message)
   }
 }
-
-export function addOrUpdateStaticId(staticId, data) {
+function getStaticIdData(staticId) {
+  return staticIdDb.get(String(staticId)) || null
+}
+function getStaticIdValues() {
+  return Array.from(staticIdDb.values())
+}
+function getStaticIdSize() {
+  return staticIdDb.size
+}
+function addOrUpdateStaticId(staticId, data) {
   const id = String(staticId)
   let updated = false
 
@@ -50,4 +61,14 @@ export function addOrUpdateStaticId(staticId, data) {
   if (updated) {
     saveStaticDb()
   }
+}
+
+module.exports = {
+  loadStaticDb,
+  saveStaticDb,
+  addOrUpdateStaticId,
+
+  getStaticIdSize,
+  getStaticIdValues,
+  getStaticIdData
 }
