@@ -453,7 +453,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
-app.post('/api/start', async (req, res) => {
+app.post('/api/browser/start', async (req, res) => {
   try {
     if (browser) {
       return res.json({ success: true, message: 'Browser already running' })
@@ -914,7 +914,7 @@ app.post('/api/scanKingdom', async (req, res) => {
   }
 })
 
-app.post('/api/stop', async (req, res) => {
+app.post('/api/browser/stop', async (req, res) => {
   try {
     if (browser) {
       await browser.close()
@@ -947,30 +947,30 @@ app.post('/api/clear', (req, res) => {
   res.json({ success: true })
 })
 
-app.post('/api/save', (req, res) => {
-  saveToFile()
-  res.json({ success: true, count: captures.length })
-})
+// app.post('/api/save', (req, res) => {
+//   saveToFile()
+//   res.json({ success: true, count: captures.length })
+// })
 
 app.post('/api/autosave', (req, res) => {
   autoSave = req.body.enabled !== false
   res.json({ success: true, autoSave })
 })
 
-app.post('/api/load', (req, res) => {
-  try {
-    if (fs.existsSync(SAVE_FILE)) {
-      const data = fs.readFileSync(SAVE_FILE, 'utf8')
-      captures = JSON.parse(data)
-      captureIndex = captures.length > 0 ? Math.max(...captures.map(c => c.id)) : 0
-      res.json({ success: true, count: captures.length })
-    } else {
-      res.json({ success: true, count: 0 })
-    }
-  } catch (e) {
-    res.status(500).json({ success: false, error: e.message })
-  }
-})
+// app.post('/api/load', (req, res) => {
+//   try {
+//     if (fs.existsSync(SAVE_FILE)) {
+//       const data = fs.readFileSync(SAVE_FILE, 'utf8')
+//       captures = JSON.parse(data)
+//       captureIndex = captures.length > 0 ? Math.max(...captures.map(c => c.id)) : 0
+//       res.json({ success: true, count: captures.length })
+//     } else {
+//       res.json({ success: true, count: 0 })
+//     }
+//   } catch (e) {
+//     res.status(500).json({ success: false, error: e.message })
+//   }
+// })
 
 app.post('/api/capturing', (req, res) => {
   capturingEnabled = req.body.enabled === true

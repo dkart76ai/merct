@@ -207,13 +207,9 @@
 
     <div class="controls">
       <button id="btnRefresh">Refresh</button>
-      <button id="btnExport">Export JSON</button>
+
       <button id="btnClear" class="danger">Clear</button>
-      <button id="btnSaveOpcodes">Save Opcodes</button>
-      <button id="btnExportMyPlayer">Export My Player</button>
-      <button id="btnExportUnknown">Export Unknown</button>
-      <button id="btnExportChat">Export Chat</button>
-      <button id="btnExportDb">Export DB</button>
+
       <span class="count" id="captureCount">Captures: 0</span>
     </div>
 
@@ -251,7 +247,7 @@
       </div>
     </div>
 
-    <div class="panel">
+    <!-- <div class="panel">
       <div class="panel-header">
         Unique Opcodes
         <span class="count" id="opcodeCount">(0)</span>
@@ -259,9 +255,9 @@
       <div class="opcodes-list" id="opcodesList">
         <div class="empty-state">No opcodes captured yet</div>
       </div>
-    </div>
+    </div> -->
 
-    <div class="panel">
+    <!-- <div class="panel">
       <div class="panel-header">
         My Player Packets
         <span class="count" id="myPlayerCount">(0)</span>
@@ -270,7 +266,7 @@
       <div class="captures-list" id="myPlayerList">
         <div class="empty-state">No player packets yet</div>
       </div>
-    </div>
+    </div> -->
 
     <div class="panel">
       <div class="panel-header">
@@ -282,7 +278,7 @@
       </div>
     </div>
 
-    <div class="panel">
+    <!-- <div class="panel">
       <div class="panel-header">
         Chat StaticIDs
         <span class="count" id="chatCount">(0)</span>
@@ -290,7 +286,7 @@
       <div class="captures-list" id="chatList" style="max-height: 150px">
         <div class="empty-state">No chat static IDs from MESG messages</div>
       </div>
-    </div>
+    </div> -->
 
     <div class="panel">
       <div class="panel-header">
@@ -323,7 +319,7 @@
         document.getElementById('btnStart').disabled = connected
         document.getElementById('btnStop').disabled = !connected
         document.getElementById('btnRefresh').disabled = !connected
-        document.getElementById('btnExport').disabled = !connected
+
         document.getElementById('cbCapture').disabled = !connected
       }
 
@@ -349,34 +345,34 @@
         }
       }
 
-      async function refreshOpcodes() {
-        try {
-          const res = await fetch(API + '/opcodes')
-          const data = await res.json()
-          if (data.success) {
-            document.getElementById('opcodeCount').textContent = '(' + data.count + ')'
-            renderOpcodes(data.opcodes || [])
-          }
-        } catch (e) {
-          log('Error: ' + e.message)
-        }
-      }
+      // async function refreshOpcodes() {
+      //   try {
+      //     const res = await fetch(API + '/opcodes')
+      //     const data = await res.json()
+      //     if (data.success) {
+      //       document.getElementById('opcodeCount').textContent = '(' + data.count + ')'
+      //       renderOpcodes(data.opcodes || [])
+      //     }
+      //   } catch (e) {
+      //     log('Error: ' + e.message)
+      //   }
+      // }
 
-      async function refreshMyPlayer() {
-        try {
-          const res = await fetch(API + '/myplayer')
-          const data = await res.json()
-          if (data.success) {
-            document.getElementById('myPlayerCount').textContent = '(' + data.count + ')'
-            document.getElementById('internalIdDisplay').textContent = data.internalPlayerId
-              ? `Internal ID: ${data.internalPlayerId}`
-              : ''
-            renderMyPlayerPackets(data.packets || [])
-          }
-        } catch (e) {
-          log('Error: ' + e.message)
-        }
-      }
+      // async function refreshMyPlayer() {
+      //   try {
+      //     const res = await fetch(API + '/myplayer')
+      //     const data = await res.json()
+      //     if (data.success) {
+      //       document.getElementById('myPlayerCount').textContent = '(' + data.count + ')'
+      //       document.getElementById('internalIdDisplay').textContent = data.internalPlayerId
+      //         ? `Internal ID: ${data.internalPlayerId}`
+      //         : ''
+      //       renderMyPlayerPackets(data.packets || [])
+      //     }
+      //   } catch (e) {
+      //     log('Error: ' + e.message)
+      //   }
+      // }
 
       async function refreshUnknownStaticIds() {
         try {
@@ -391,18 +387,18 @@
         }
       }
 
-      async function refreshChatStaticIds() {
-        try {
-          const res = await fetch(API + '/chat-staticids')
-          const data = await res.json()
-          if (data.success) {
-            document.getElementById('chatCount').textContent = '(' + data.count + ')'
-            renderChatStaticIds(data.items || [])
-          }
-        } catch (e) {
-          log('Error: ' + e.message)
-        }
-      }
+      // async function refreshChatStaticIds() {
+      //   try {
+      //     const res = await fetch(API + '/chat-staticids')
+      //     const data = await res.json()
+      //     if (data.success) {
+      //       document.getElementById('chatCount').textContent = '(' + data.count + ')'
+      //       renderChatStaticIds(data.items || [])
+      //     }
+      //   } catch (e) {
+      //     log('Error: ' + e.message)
+      //   }
+      // }
 
       async function refreshStaticDb() {
         try {
@@ -473,24 +469,24 @@
           .join('')
       }
 
-      function renderMyPlayerPackets(packets) {
-        const el = document.getElementById('myPlayerList')
-        if (packets.length === 0) {
-          el.innerHTML = '<div class="empty-state">No player packets yet</div>'
-          return
-        }
-        el.innerHTML = packets
-          .map(p => {
-            const url = new URL(p.url)
-            const path = url.pathname + url.search
-            const size = p.response?.bodySize ? `(${p.response.bodySize}B)` : ''
-            return `<div class="capture-item my-packet" onclick="showCapture(${p.id}, 'myplayer')">
-            <div class="url">${path}</div>
-            <div class="meta">ID:${p.id} | Op:${p.opCode} | ${size}</div>
-          </div>`
-          })
-          .join('')
-      }
+      // function renderMyPlayerPackets(packets) {
+      //   const el = document.getElementById('myPlayerList')
+      //   if (packets.length === 0) {
+      //     el.innerHTML = '<div class="empty-state">No player packets yet</div>'
+      //     return
+      //   }
+      //   el.innerHTML = packets
+      //     .map(p => {
+      //       const url = new URL(p.url)
+      //       const path = url.pathname + url.search
+      //       const size = p.response?.bodySize ? `(${p.response.bodySize}B)` : ''
+      //       return `<div class="capture-item my-packet" onclick="showCapture(${p.id}, 'myplayer')">
+      //       <div class="url">${path}</div>
+      //       <div class="meta">ID:${p.id} | Op:${p.opCode} | ${size}</div>
+      //     </div>`
+      //     })
+      //     .join('')
+      // }
 
       function renderUnknownStaticIds(items) {
         const el = document.getElementById('unknownList')
@@ -510,34 +506,34 @@
           .join('')
       }
 
-      function renderChatStaticIds(items) {
-        const el = document.getElementById('chatList')
-        if (items.length === 0) {
-          el.innerHTML = '<div class="empty-state">No chat static IDs from MESG messages</div>'
-          return
-        }
-        el.innerHTML = items
-          .map(item => {
-            return `<div class="capture-item">
-            <div class="url">StaticID: ${item.staticId}</div>
-            <div class="meta">EntryType: ${item.entryType} | Name: ${item.name}</div>
-          </div>`
-          })
-          .join('')
-      }
+      // function renderChatStaticIds(items) {
+      //   const el = document.getElementById('chatList')
+      //   if (items.length === 0) {
+      //     el.innerHTML = '<div class="empty-state">No chat static IDs from MESG messages</div>'
+      //     return
+      //   }
+      //   el.innerHTML = items
+      //     .map(item => {
+      //       return `<div class="capture-item">
+      //       <div class="url">StaticID: ${item.staticId}</div>
+      //       <div class="meta">EntryType: ${item.entryType} | Name: ${item.name}</div>
+      //     </div>`
+      //     })
+      //     .join('')
+      // }
 
-      function renderOpcodes(opcodes) {
-        const el = document.getElementById('opcodesList')
-        if (opcodes.length === 0) {
-          el.innerHTML = '<div class="empty-state">No opcodes captured yet</div>'
-          return
-        }
-        el.innerHTML = opcodes.map(op => `<span class="opcode-tag">${op}</span>`).join('')
-      }
+      // function renderOpcodes(opcodes) {
+      //   const el = document.getElementById('opcodesList')
+      //   if (opcodes.length === 0) {
+      //     el.innerHTML = '<div class="empty-state">No opcodes captured yet</div>'
+      //     return
+      //   }
+      //   el.innerHTML = opcodes.map(op => `<span class="opcode-tag">${op}</span>`).join('')
+      // }
 
       async function showCapture(id, source) {
         selectedId = id
-        const endpoint = source === 'myplayer' ? '/myplayer/' + id : '/captures/' + id
+        const endpoint = '/captures/' + id
         const res = await fetch(API + endpoint)
         const data = await res.json()
         if (data.success) {
@@ -588,17 +584,17 @@
 
       document.getElementById('btnStart').addEventListener('click', async () => {
         log('Starting browser...')
-        const res = await fetch(API + '/start', { method: 'POST' })
+        const res = await fetch(API + '/browser/start', { method: 'POST' })
         const data = await res.json()
         if (data.success) {
           log('Browser started!')
           updateUI(true)
           refreshInterval = setInterval(() => {
             refreshCaptures()
-            refreshOpcodes()
-            refreshMyPlayer()
+            // refreshOpcodes()
+            // refreshMyPlayer()
             refreshUnknownStaticIds()
-            refreshChatStaticIds()
+            // refreshChatStaticIds()
             refreshStaticDb()
           }, 1000)
         } else {
@@ -611,7 +607,7 @@
           clearInterval(refreshInterval)
           refreshInterval = null
         }
-        await fetch(API + '/stop', { method: 'POST' })
+        await fetch(API + '/browser/stop', { method: 'POST' })
         log('Browser stopped')
         updateUI(false)
         updateCaptureToggle(false)
@@ -655,31 +651,11 @@
 
       document.getElementById('btnRefresh').addEventListener('click', () => {
         refreshCaptures()
-        refreshOpcodes()
-        refreshMyPlayer()
+        // refreshOpcodes()
+        // refreshMyPlayer()
         refreshUnknownStaticIds()
-        refreshChatStaticIds()
+        // refreshChatStaticIds()
         refreshStaticDb()
-      })
-
-      document.getElementById('btnExport').addEventListener('click', () => {
-        window.location = API + '/export'
-      })
-
-      document.getElementById('btnExportMyPlayer').addEventListener('click', () => {
-        window.location = API + '/export-myplayer'
-      })
-
-      document.getElementById('btnExportUnknown').addEventListener('click', () => {
-        window.location = API + '/export-unknown-staticids'
-      })
-
-      document.getElementById('btnExportChat').addEventListener('click', () => {
-        window.location = API + '/export-chat-staticids'
-      })
-
-      document.getElementById('btnExportDb').addEventListener('click', () => {
-        window.location = API + '/export-static-db'
       })
 
       document.getElementById('opcodeFilter').addEventListener('input', () => {
@@ -694,16 +670,10 @@
         selectedId = null
         document.getElementById('detail').value = ''
         refreshCaptures()
-        refreshOpcodes()
-        refreshMyPlayer()
+        // refreshOpcodes()
+        // refreshMyPlayer()
         refreshUnknownStaticIds()
-        refreshChatStaticIds()
-      })
-
-      document.getElementById('btnSaveOpcodes').addEventListener('click', async () => {
-        const res = await fetch(API + '/save-opcodes', { method: 'POST' })
-        const data = await res.json()
-        if (data.success) log(`Saved ${data.count} opcodes to file`)
+        // refreshChatStaticIds()
       })
     </script>
   </body>
