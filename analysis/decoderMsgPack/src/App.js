@@ -12,7 +12,7 @@ import {
   decodeBase64,
   decodeMsgPack2
 } from 'message-pack'
-
+import staticIdDB from './staticId-db.json'
 // ============================================
 // CONVERT NUMBERS TO HEX
 // ============================================
@@ -72,6 +72,7 @@ function App() {
   const [input, setInput] = useState('')
   const [decoded, setDecoded] = useState(null)
   const [hexData, setHexData] = useState(null)
+  const [objects, setObjects] = useState(null)
   const [error, setError] = useState(null)
   const [stats, setStats] = useState(null)
   const [encodeInput, setEncodeInput] = useState('')
@@ -79,10 +80,70 @@ function App() {
   const [encodedOutputB64, setEncodedOutputB64] = useState('')
   const [encodeError, setEncodeError] = useState(null)
 
+  function extractObjects(data) {
+    const objects = []
+
+    function isValidObject(arr) {
+      if (!Array.isArray(arr) || arr.length !== 12) return false
+      if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
+      if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
+      if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
+      if (typeof arr[11] !== 'boolean') return false
+      return true
+    }
+
+    function findObjects(arr, depth = 0) {
+      console.log('findobjects: depth', depth)
+      if (depth > 200) return
+      for (const item of arr) {
+        if (Array.isArray(item)) {
+          if (isValidObject(item)) {
+            const staticId = item[1]
+            const known = staticIdDB[staticId]
+            const obj = {
+              objectId: item[0][0],
+              staticId: staticId,
+              name: known?.name || null,
+              level: known?.level || null,
+              entryType: known?.entryType || null,
+              unk1: item[2],
+              unk2: item[3],
+              unk3: item[4],
+              level: item[5],
+              unk4: item[6],
+              unk5: item[7],
+              kingdom: item[8][0],
+              x: item[8][1],
+              y: item[8][2],
+              unk6: item[9][0],
+              extra: item[10],
+              isActive: item[11]
+            }
+            objects.push(obj)
+            console.log('objeto encontrado:', obj.staticId, obj.name)
+          } else {
+            findObjects(item, depth + 1)
+          }
+        }
+      }
+    }
+
+    findObjects(data)
+    return objects
+  }
+
+  const handleGetObject = () => {
+    if (!decoded) return
+    console.log('extracting objects from', decoded)
+    const obj = extractObjects(decoded)
+    setObjects(obj)
+  }
+
   const handleClear = () => {
     setDecoded(null)
     setHexData(null)
     setInput('')
+    setObjects(null)
   }
 
   const handleEncodeClear = () => {
@@ -222,6 +283,9 @@ function App() {
             <button className='sample-btn' onClick={handleClear}>
               Clear
             </button>
+            <button className='sample-btn' onClick={handleGetObject} disabled={!decoded}>
+              Search for objects
+            </button>
           </div>
           <div className='panel-content'>
             <textarea
@@ -286,6 +350,17 @@ function App() {
               )}
             </div>
             {stats && <div className='stats'>Numeric values as hex</div>}
+          </div>
+
+          <div className='panel'>
+            <div className='panel-header'>Objects</div>
+            <div className='panel-content'>
+              {objects && (
+                <div className='json-viewer'>
+                  <JsonView value={objects} displayDataTypes={false} style={githubDarkTheme} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

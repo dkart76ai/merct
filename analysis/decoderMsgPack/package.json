@@ -6,7 +6,8 @@
     "@uiw/react-json-view": "^2.0.0-alpha.41",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "message-pack": "file:../message-pack"
   },
   "scripts": {
     "start": "react-scripts start",

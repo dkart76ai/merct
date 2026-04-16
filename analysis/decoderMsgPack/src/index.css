@@ -192,6 +192,12 @@ textarea:focus {
   font-size: 13px;
 }
 
+.sample-btn:disabled,
+.sample-btn:disabled:hover {
+  cursor: not-allowed;
+  background-color: #3c3c3c;
+}
+
 .sample-btn:hover {
   background-color: #1177bb;
 }
