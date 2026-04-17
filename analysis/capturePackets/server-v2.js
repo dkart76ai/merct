@@ -36,10 +36,7 @@ loadEnvFile()
 
 const config = {
   accountUser: process.env.CHAT_ACCOUNT_USER,
-  accountPwd: process.env.CHAT_ACCOUNT_PWD,
-  channelUrl: process.env.CHAT_CHANNEL_URL || '',
-  discordWebhook: process.env.DISCORD_WEBHOOK_URL || '',
-  chatChannel: process.env.CHAT_CHANNEL_ID || ''
+  accountPwd: process.env.CHAT_ACCOUNT_PWD
 }
 // const authPath = path.join(__dirname, 'auth', 'user.json')
 

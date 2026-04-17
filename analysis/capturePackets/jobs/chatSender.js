@@ -1,6 +1,7 @@
 let globalPage = null
 const channelUrl = process.env.CHAT_CHANNEL_URL || ''
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK || ''
+const staticIdDB = require('../staticId.js')
 
 function setChatPage(page) {
   globalPage = page
@@ -16,7 +17,8 @@ async function notifyDiscord(msg = '', coord = null) {
   try {
     let message = msg
     if (coord) {
-      message = `K:${coord.k} X:${coord.x} Y:${coord.y} (${msg})`
+      const dbEntry = staticIdDB.getStaticIdData(staticId)
+      message = `K:${coord.k} X:${coord.x} Y:${coord.y} ${dbEntry.name || ''} (${msg})`
     }
     await fetch(DISCORD_WEBHOOK, {
       method: 'POST',
@@ -30,7 +32,7 @@ async function notifyDiscord(msg = '', coord = null) {
   }
 }
 
-async function sendMessage(msg = '', coord = null, staticId = 400, entryType = 'poi') {
+async function sendMessage(msg = '', coord = null, staticId = 400) {
   if (!channelUrl) return
 
   const page = getChatPage()
@@ -39,16 +41,18 @@ async function sendMessage(msg = '', coord = null, staticId = 400, entryType = '
   let data = ''
   let message = msg
   if (!!coord) {
+    const dbEntry = staticIdDB.getStaticIdData(staticId)
+
     data = JSON.stringify({
       subs: {
         '/%0%/': {
           type: 'coord',
-          entryType,
+          entryType: dbEntry.entryType || 'poi',
           x: coord?.x ?? 0,
           y: coord?.y ?? 0,
           realmId: coord?.k ?? 0,
           staticId,
-          name: '',
+          name: dbEntry.name || '',
           v: 1
         }
       }

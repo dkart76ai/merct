@@ -6,9 +6,9 @@ let stats = {
 }
 
 function saveObject(obj) {
-  const key = `${obj.kingdom}-${obj.objectId}`
+  const key = `${obj.kingdom}-${obj.x}-${obj.x}`
   const existing = objectsDb.get(key)
-  
+
   if (existing) {
     // Update existing, keep earliest data
     const merged = {
@@ -40,7 +40,7 @@ function saveObjects(objects) {
     updated: 0,
     objects: []
   }
-  
+
   for (const obj of objects) {
     const result = saveObject(obj)
     if (result.action === 'created') {
@@ -50,35 +50,35 @@ function saveObjects(objects) {
     }
     results.objects.push(result.key)
   }
-  
+
   return results
 }
 
 function findObjects(query) {
   const { staticId, level, amount = 10 } = query
-  
+
   let results = []
-  
+
   for (const obj of objectsDb.values()) {
     // Match staticId (required)
     if (staticId !== undefined && obj.staticId !== staticId) {
       continue
     }
-    
+
     // Match level if specified
     if (level !== undefined && obj.level !== level) {
       continue
     }
-    
+
     results.push(obj)
   }
-  
+
   // Sort by lastSeenAt (most recent first)
   results.sort((a, b) => b.lastSeenAt - a.lastSeenAt)
-  
+
   // Limit amount
   const limited = results.slice(0, amount)
-  
+
   return {
     total: results.length,
     returned: limited.length,

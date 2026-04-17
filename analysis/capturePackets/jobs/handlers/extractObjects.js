@@ -13,13 +13,14 @@ function extractObjects(data) {
     return true
   }
 
-  function findObjects(arr, depth = 0) {
+  async function findObjects(arr, depth = 0) {
     if (depth > 200) return
+
     for (const item of arr) {
       if (Array.isArray(item)) {
         if (isValidObject(item)) {
           const staticId = item[1]
-          objects.push({
+          const obj = {
             objectId: item[0][0],
             staticId: staticId,
             unk1: item[2],
@@ -34,7 +35,8 @@ function extractObjects(data) {
             unk6: item[9][0],
             extra: item[10],
             isActive: item[11]
-          })
+          }
+          objects.push(obj)
 
           // track unknown static id
           const dbEntry = staticIdDB.getStaticIdData(staticId)
@@ -44,8 +46,11 @@ function extractObjects(data) {
             dbEntry.entryType &&
             dbEntry.level != null &&
             dbEntry.level >= 0
+
           if (!isComplete) {
-            // await sendMessage('', { k: kingdom, x, y }, staticId, dbEntry?.entryType || 'poi')
+            await addJob(JOB_TYPES.NOTIFICATION, {
+              objects: [obj]
+            })
           }
         } else {
           findObjects(item, depth + 1)
