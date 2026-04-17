@@ -1,4 +1,5 @@
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
+const staticId = require('../../staticId.js')
 
 function extractObjects(data) {
   const objects = []
@@ -34,6 +35,18 @@ function extractObjects(data) {
             extra: item[10],
             isActive: item[11]
           })
+
+          // track unknown static id
+          const dbEntry = staticId.getStaticIdData(staticId)
+          const isComplete =
+            dbEntry &&
+            dbEntry.name &&
+            dbEntry.entryType &&
+            dbEntry.level != null &&
+            dbEntry.level >= 0
+          if (!isComplete) {
+            // await sendMessage('', { k: kingdom, x, y }, staticId, dbEntry?.entryType || 'poi')
+          }
         } else {
           findObjects(item, depth + 1)
         }

@@ -49,6 +49,7 @@ const SAVE_DIR = path.join(__dirname, 'captures')
 // const OBJECT_PACKETS312_FILE = path.join(__dirname, 'samples', 'objectpackets312.json')
 // const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
 // const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
+let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
 
 // const PACKET312 = {
 //   kingdoms: [],
@@ -352,6 +353,47 @@ async function handleStopTimer(req, res) {
     timerManager.stopAll()
     res.json({ success: true, message: 'Stopped all timers' })
   }
+}
+
+function extractChatStaticIds(message) {
+  if (!message || typeof message !== 'string') return
+  if (!message.startsWith('MESG')) return
+
+  try {
+    const jsonMatch = message.match(/MESG(\{.*\})/)
+    if (!jsonMatch) return
+
+    const msgData = JSON.parse(jsonMatch[1])
+    if (msgData.data) {
+      try {
+        const data = JSON.parse(msgData.data)
+        if (data.subs) {
+          for (const key in data.subs) {
+            const sub = data.subs[key]
+            if (sub.staticId && sub.entryType) {
+              staticId.addOrUpdateStaticId(sub.staticId, {
+                entryType: sub.entryType,
+                name: sub.name || null
+              })
+
+              const unknown = unknownStaticIds.get(String(sub.staticId))
+
+              const isComplete =
+                unknown &&
+                unknown.name &&
+                unknown.entryType &&
+                unknown.level != null &&
+                unknown.level >= 0
+
+              if (isComplete) {
+                unknownStaticIds.delete(sub.staticId)
+              }
+            }
+          }
+        }
+      } catch (e) {}
+    }
+  } catch (e) {}
 }
 
 function setupWebsocketListener() {
