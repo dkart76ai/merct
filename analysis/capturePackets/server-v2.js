@@ -237,24 +237,6 @@ const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
   return result
 }
 
-// async function buildPacketPayload(kingdomId, tiles, tokenBigInt, token2) {
-//   const url = kingdomUrls[kingdomId]
-//   if (!url || !tokenBigInt || !token2) return null
-
-//   const randomSeq = Math.floor(Math.random() * 32000) + 1
-//   const packetData = [
-//     [312, randomSeq, [[tokenBigInt], token2], ''],
-//     [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
-//   ]
-
-//   return {
-//     url,
-//     packetData,
-//     kingdom: kingdomId,
-//     notificationConfig: config
-//   }
-// }
-
 async function handleScanKingdom(req, res) {
   const { kingdoms, priority = 'HIGH' } = req.body
 
@@ -263,18 +245,6 @@ async function handleScanKingdom(req, res) {
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
   }
-
-  // const _token1 = await redisClient.get('mysession:token1:BigInt')
-  // if (!_token1) {
-  //   return res.json({ success: false, error: 'no session token' })
-  // }
-
-  // const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
-  // if (!_token2) {
-  //   return res.json({ success: false, error: 'no auth buf' })
-  // }
-  // const token1 = BigInt(_token1)
-  // const token2 = new Uint8Array(_token2)
 
   const kingdomList = kingdoms
     .split(',')
@@ -339,18 +309,6 @@ async function handleStartTimer(req, res) {
     return res.json({ success: false, error: 'enter kingdom' })
   }
 
-  // const _token1 = await redisClient.get('mysession:token1:BigInt')
-  // if (!_token1) {
-  //   return res.json({ success: false, error: 'no session token1' })
-  // }
-
-  // const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
-  // if (!_token2) {
-  //   return res.json({ success: false, error: 'no session token2' })
-  // }
-  // const token1 = BigInt(_token1)
-  // const token2 = new Uint8Array(_token2)
-
   const kingdomList = kingdoms
     .split(',')
     .map(k => parseInt(k.trim()))
@@ -364,23 +322,9 @@ async function handleStartTimer(req, res) {
 
   for (const kingdomId of kingdomList) {
     for (const tiles of tilesArray) {
-      // Ensure token is BigInt
-      // const tokenValue = PACKET312.sessionToken
-      // const tokenBigInt =
-      //   typeof tokenValue === 'bigint'
-      //     ? tokenValue
-      //     : typeof tokenValue === 'number'
-      //       ? BigInt(tokenValue)
-      //       : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
-      //         ? BigInt(tokenValue)
-      //         : tokenValue
-
       timerManager.scheduleScanKingdom(kingdomId, {
         intervalMs: parseInt(interval),
         tiles
-        // payloadBuilder: async kId => {
-        //   return buildPacketPayload(kId, tiles, token1, token2)
-        // }
       })
     }
   }
@@ -555,7 +499,7 @@ app.post('/api/timer/start', handleStartTimer)
 
 app.post('/api/timer/stop', handleStopTimer)
 
-app.post('/api/stop', async (req, res) => {
+app.post('/api/browser/stop', async (req, res) => {
   try {
     if (browser) {
       await browser.close()
@@ -632,22 +576,22 @@ app.get('/api/static-db', (req, res) => {
 })
 
 // Objects database endpoints
-app.get('/api/objects', (req, res) => {
-  const objects = getAllObjects()
-  res.json({ success: true, count: objects.length, objects })
-})
+// app.get('/api/objects', (req, res) => {
+//   const objects = getAllObjects()
+//   res.json({ success: true, count: objects.length, objects })
+// })
 
-app.get('/api/objects/stats', (req, res) => {
-  const stats = getStats()
-  res.json({ success: true, ...stats })
-})
+// app.get('/api/objects/stats', (req, res) => {
+//   const stats = getStats()
+//   res.json({ success: true, ...stats })
+// })
 
-app.post('/api/objects/find', async (req, res) => {
-  const { staticId, level, amount = 10 } = req.body
+// app.post('/api/objects/find', async (req, res) => {
+//   const { staticId, level, amount = 10 } = req.body
 
-  const result = findObjects({ staticId, level, amount })
-  res.json({ success: true, ...result })
-})
+//   const result = findObjects({ staticId, level, amount })
+//   res.json({ success: true, ...result })
+// })
 
 app.post('/api/objects/find-and-notify', async (req, res) => {
   const { staticId, level, amount = 10, notificationConfig } = req.body
@@ -772,13 +716,13 @@ app.post('/api/capturing/start', async (req, res) => {
   }
 
   capturingEnabled = true
-  res.json({ success: true, message: 'Capturing started' })
+  res.json({ success: true, message: 'Capturing started', capturing: true })
 })
 
 app.post('/api/capturing/stop', async (req, res) => {
   capturingEnabled = false
 
-  res.json({ success: true, message: 'Capturing stopped' })
+  res.json({ success: true, message: 'Capturing stopped', capturing: false })
 })
 
 // app.get('/api/opcodes', (req, res) => {
@@ -815,6 +759,7 @@ async function main() {
     console.log('  GET  /api/jobs/status - Get job queue status')
     console.log('  GET  /api/timers - Get active timers')
     console.log('  POST /api/browser/start - Start browser')
+    console.log('  POST /api/browser/stop - Stop browser')
     console.log('  POST /api/capturing/start - Start packet capture')
   })
 

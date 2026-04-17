@@ -203,6 +203,11 @@
       </label>
       <button id="btnScan312">scan kingdom 312</button>
       <input type="text" id="kingdoms" value="147" placeholder="enter kingdoms ie: 147,142,143" />
+
+      <label id="scanKingdomsToggle">
+        <input type="checkbox" id="cbScanKingdoms" />
+        <span>Scan kingdoms</span>
+      </label>
     </div>
 
     <div class="controls">
@@ -321,11 +326,19 @@
         document.getElementById('btnRefresh').disabled = !connected
 
         document.getElementById('cbCapture').disabled = !connected
+        document.getElementById('cbScanKingdoms').disabled = !connected
       }
 
       function updateCaptureToggle(enabled) {
         const label = document.getElementById('captureToggle')
         const cb = document.getElementById('cbCapture')
+        cb.checked = enabled
+        label.className = enabled ? 'active' : ''
+      }
+
+      function updateScanKingdomToggle(enabled) {
+        const label = document.getElementById('scanKingdomsToggle')
+        const cb = document.getElementById('cbScanKingdoms')
         cb.checked = enabled
         label.className = enabled ? 'active' : ''
       }
@@ -582,6 +595,56 @@
         }
       }
 
+      async function toggleScanKingdom(enabled) {
+        if (enabled) {
+          const kingdoms = document.getElementById('kingdoms').value || ''
+          if (kingdoms.trim() === '') return
+
+          //check if kingdoms have commas, split and check if each is a valid number
+          const kds = kingdoms.split(',')
+          if (
+            !kds.every(item => {
+              const trimmed = item.trim()
+              // Validamos que no esté vacío y que sea un número real
+              return trimmed !== '' && !isNaN(trimmed)
+            })
+          ) {
+            alert('enter valid kingdoms')
+            return
+          }
+
+          try {
+            const res = await fetch(API + '/timer/start', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ kingdoms })
+            })
+            const data = await res.json()
+            if (data.success) {
+              log('Capturing started')
+              updateScanKingdomToggle(data.success)
+            }
+          } catch (e) {
+            log('Error: ' + e.message)
+          }
+        } else {
+          try {
+            const res = await fetch(API + '/timer/stop', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ kingdoms })
+            })
+            const data = await res.json()
+            if (data.success) {
+              log('Capturing stoped')
+              updateScanKingdomToggle(data.success)
+            }
+          } catch (e) {
+            log('Error: ' + e.message)
+          }
+        }
+      }
+
       document.getElementById('btnStart').addEventListener('click', async () => {
         log('Starting browser...')
         const res = await fetch(API + '/browser/start', { method: 'POST' })
@@ -611,6 +674,7 @@
         log('Browser stopped')
         updateUI(false)
         updateCaptureToggle(false)
+        updateScanKingdomToggle(false)
       })
 
       document.getElementById('btnScan312').addEventListener('click', async () => {
@@ -648,6 +712,9 @@
       document
         .getElementById('cbCapture')
         .addEventListener('change', e => toggleCapture(e.target.checked))
+      document
+        .getElementById('cbScanKingdoms')
+        .addEventListener('change', e => toggleScanKingdom(e.target.checked))
 
       document.getElementById('btnRefresh').addEventListener('click', () => {
         refreshCaptures()

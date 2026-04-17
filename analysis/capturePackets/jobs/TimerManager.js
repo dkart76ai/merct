@@ -11,9 +11,7 @@ class TimerManager {
   async scheduleScanKingdom(kingdomId, options = {}) {
     const {
       intervalMs = 60000,
-
       tiles
-
     } = options
 
     const timerKey = `kingdom:${kingdomId}`
@@ -24,15 +22,11 @@ class TimerManager {
       every: intervalMs
     }
 
-    // Build job data - call payloadBuilder if provided (await if async)
-
-
     const jobData = {
       kingdomId,
       triggeredBy: 'timer',
       intervalMs,
-      tiles,
-      // ...basePayload  // Includes: url, packetData, notificationConfig
+      tiles
     }
 
     const job = await this.queue.add(JOB_TYPES.SEND_PACKET, jobData, {
@@ -47,7 +41,7 @@ class TimerManager {
     })
 
     this.timerConfigs.set(timerKey, {
-      kingdomId,
+      kingdomId,tiles,
       intervalMs,
       startedAt: Date.now()
     })
