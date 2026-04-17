@@ -1,10 +1,9 @@
 const { getRedis } = require('../redis')
 
-const NOTIFICATION_QUEUE = 'notifications:pending'
 const NOTIFICATION_HISTORY = 'notifications:history'
 
 async function sendDiscordWebhook(webhookUrl, data) {
-  const { type, objects, message } = data
+  const { type, objects } = data
 
   try {
     const embed = {
@@ -40,16 +39,12 @@ async function sendDiscordWebhook(webhookUrl, data) {
   }
 }
 
-async function sendChatMessage(config, data) {
+async function sendChatMessage(data) {
   const { channel, message } = data
 
   try {
-    // In-game chat sending would be implemented here
-    // For now, log it
     console.log(`[Notification] Chat message to ${channel}: ${message}`)
-    
     return { success: true, platform: 'chat', channel }
-
   } catch (error) {
     console.error(`[Notification] Chat error:`, error.message)
     return { success: false, platform: 'chat', error: error.message }
@@ -65,8 +60,8 @@ function formatNotificationMessage(type, objects) {
   return `[Alert] ${type}: ${names} ${location}`
 }
 
-async function notificationHandler(payload) {
-  const { type, objects, triggeredBy, config = {} } = payload
+async function notificationHandler(data) {
+  const { type, objects, triggeredBy, config = {} } = data
 
   console.log(`[Notification] Processing ${type} for ${objects.length} objects`)
 
@@ -81,10 +76,7 @@ async function notificationHandler(payload) {
   // In-game chat
   if (config.chatChannel) {
     const message = formatNotificationMessage(type, objects)
-    const chatResult = await sendChatMessage(config, {
-      channel: config.chatChannel,
-      message
-    })
+    const chatResult = await sendChatMessage({ channel: config.chatChannel, message })
     results.push(chatResult)
   }
 
@@ -127,7 +119,5 @@ module.exports = {
   notificationHandler,
   sendDiscordWebhook,
   sendChatMessage,
-  formatNotificationMessage,
-  NOTIFICATION_QUEUE,
-  NOTIFICATION_HISTORY
+  formatNotificationMessage
 }

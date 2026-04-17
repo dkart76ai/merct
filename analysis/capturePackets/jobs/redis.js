@@ -1,22 +1,19 @@
 const Redis = require('ioredis')
 
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
-
 let redis = null
-let subscriber = null
 
 function getRedis() {
   if (!redis) {
-    redis = new Redis(REDIS_URL, {
-      maxRetriesPerRequest: 3,
-      retryDelayOnFailover: 100,
-      lazyConnect: true
+    redis = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      maxRetriesPerRequest: null
     })
-    
-    redis.on('error', (err) => {
+
+    redis.on('error', err => {
       console.error('Redis connection error:', err.message)
     })
-    
+
     redis.on('connect', () => {
       console.log('Redis connected')
     })
@@ -26,25 +23,12 @@ function getRedis() {
 
 async function connectRedis() {
   const client = getRedis()
-  await client.connect().catch(() => {
-    console.log('Redis already connected or connection failed')
-  })
+  await client.ping()
+  console.log('Redis connected and verified')
   return client
-}
-
-function getSubscriber() {
-  if (!subscriber) {
-    subscriber = getRedis().duplicate()
-    subscriber.on('error', (err) => {
-      console.error('Redis subscriber error:', err.message)
-    })
-  }
-  return subscriber
 }
 
 module.exports = {
   getRedis,
-  connectRedis,
-  getSubscriber,
-  REDIS_URL
+  connectRedis
 }

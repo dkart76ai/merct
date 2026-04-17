@@ -1,0 +1,61 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Development files
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage
+.nyc_output
+
+# Build outputs
+dist
+build
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.temp
+
+# Capture data (optional - comment out to persist in Docker)
+# captures/
+
+# Sample data (optional)
+samples/
+!samples/.gitkeep
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Debug files
+*.map

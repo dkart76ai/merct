@@ -1,5 +1,4 @@
-const fs = require('fs')
-const path = require('path')
+const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 
 function extractObjects(data) {
   const objects = []
@@ -46,23 +45,10 @@ function extractObjects(data) {
   return objects
 }
 
-async function loadStaticIdDb() {
-  const dbPath = path.join(__dirname, '../../staticId-db.json')
-  try {
-    if (fs.existsSync(dbPath)) {
-      const data = JSON.parse(fs.readFileSync(dbPath, 'utf8'))
-      return new Map(Object.entries(data))
-    }
-  } catch (e) {
-    console.error('[ExtractObjects] Error loading staticId-db:', e.message)
-  }
-  return new Map()
-}
+async function extractObjectsHandler(data) {
+  const { packetData, kingdom, triggeredBy } = data
 
-async function extractObjectsHandler(payload) {
-  const { packetData, kingdom, triggeredBy, saveToDb = true } = payload
-
-  console.log(`[ExtractObjects] Processing ${packetData.length} data items`)
+  console.log(`[ExtractObjects] Processing data`)
 
   try {
     const objects = extractObjects(packetData)
@@ -70,69 +56,34 @@ async function extractObjectsHandler(payload) {
     console.log(`[ExtractObjects] Found ${objects.length} objects`)
 
     if (objects.length === 0) {
-      return { success: true, count: 0, objects: [], nextJobs: [] }
+      return { success: true, count: 0, objects: [] }
     }
 
-    // Enrich with static ID data
-    const staticIdDb = await loadStaticIdDb()
-    const enrichedObjects = objects.map(obj => {
-      const known = staticIdDb.get(String(obj.staticId))
-      return {
-        ...obj,
-        name: known?.name || null,
-        entryType: known?.entryType || null
-      }
-    })
-
-    // Filter objects that might need notifications
-    const notifyObjects = enrichedObjects.filter(obj => 
-      obj.name && obj.isActive
-    )
-
-    const nextJobs = []
-
-    // Check for notification-worthy objects
-    if (notifyObjects.length > 0) {
-      console.log(`[ExtractObjects] ${notifyObjects.length} objects eligible for notification`)
-      nextJobs.push({
-        type: 'notification',
-        priority: 'HIGH',
-        payload: {
-          type: 'objects-spotted',
-          objects: notifyObjects,
-          triggeredBy
-        }
-      })
-    }
-
-    const result = {
+    // Chain: Save objects first, then find-objects will trigger notification
+    return {
       success: true,
       count: objects.length,
-      objects: enrichedObjects,
-      notificationCount: notifyObjects.length,
+      objects,
       triggeredBy,
-      timestamp: Date.now(),
-      nextJobs
+      nextJobs: [
+        {
+          type: JOB_TYPES.SAVE_OBJECTS,
+          priority: PRIORITY.NORMAL,
+          payload: {
+            objects,
+            triggeredBy
+          }
+        }
+      ]
     }
-
-    return result
 
   } catch (error) {
     console.error(`[ExtractObjects] Error:`, error.message)
-    
-    return {
-      success: false,
-      count: 0,
-      objects: [],
-      error: error.message,
-      timestamp: Date.now(),
-      nextJobs: []
-    }
+    throw error
   }
 }
 
 module.exports = {
   extractObjectsHandler,
-  extractObjects,
-  loadStaticIdDb
+  extractObjects
 }

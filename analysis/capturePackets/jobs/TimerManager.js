@@ -1,160 +1,161 @@
-const { PRIORITY } = require('./PriorityJobQueue')
+const { Queue } = require('bullmq')
+const { JOB_TYPES, PRIORITY } = require('./index')
 
 class TimerManager {
-  constructor(jobQueue) {
-    this.jobQueue = jobQueue
+  constructor(queue) {
+    this.queue = queue
     this.timers = new Map()
     this.timerConfigs = new Map()
   }
 
-  scheduleScanKingdom(kingdomId, options = {}) {
+  async scheduleScanKingdom(kingdomId, options = {}) {
     const {
       intervalMs = 60000,
-      payloadBuilder = null,
-      onTick = null
+      payloadBuilder,
+      jobType = JOB_TYPES.SEND_PACKET
     } = options
 
-    // Clear existing timer for this kingdom
-    this.stopScan(kingdomId)
+    const timerKey = `kingdom:${kingdomId}`
 
-    const timerId = setInterval(async () => {
-      try {
-        console.log(`[Timer] Kingdom ${kingdomId} scan triggered`)
-        
-        if (onTick) {
-          await onTick(kingdomId)
-        }
-        
-        if (payloadBuilder) {
-          const payload = await payloadBuilder(kingdomId)
-          if (payload) {
-            // LOW priority - background timer jobs don't block user actions
-            await this.jobQueue.addLow('send-packet', payload)
-          }
-        }
-        
-      } catch (error) {
-        console.error(`[Timer] Kingdom ${kingdomId} scan error:`, error.message)
-      }
-    }, intervalMs)
+    await this.stopScan(kingdomId)
 
-    this.timers.set(kingdomId, timerId)
-    this.timerConfigs.set(kingdomId, {
+    const repeatOptions = {
+      every: intervalMs
+    }
+
+    // Build job data - call payloadBuilder if provided (await if async)
+    const basePayload = payloadBuilder 
+      ? await Promise.resolve(payloadBuilder(kingdomId))
+      : {}
+
+    const jobData = {
+      kingdomId,
+      triggeredBy: 'timer',
+      intervalMs,
+      ...basePayload  // Includes: url, packetData, notificationConfig
+    }
+
+    const job = await this.queue.add(jobType, jobData, {
+      priority: PRIORITY.LOW,
+      repeat: repeatOptions,
+      jobId: `timer:${timerKey}`
+    })
+
+    this.timers.set(timerKey, {
+      repeatJobKey: job.repeatJobKey,
+      jobType
+    })
+
+    this.timerConfigs.set(timerKey, {
+      kingdomId,
       intervalMs,
       startedAt: Date.now()
     })
 
-    console.log(`[Timer] Scheduled scan for kingdom ${kingdomId} every ${intervalMs}ms`)
-    
-    return timerId
+    console.log(`[Timer] Scheduled ${jobType} for kingdom ${kingdomId} every ${intervalMs}ms`)
+
+    return job
   }
 
-  scheduleCustom(name, intervalMs, callback) {
-    // Clear existing timer with same name
-    this.stopNamedTimer(name)
+  async scheduleCustom(name, intervalMs, jobType, jobData, options = {}) {
+    const timerKey = `custom:${name}`
 
-    const timerId = setInterval(async () => {
-      try {
-        console.log(`[Timer] Custom timer "${name}" triggered`)
-        await callback()
-      } catch (error) {
-        console.error(`[Timer] Custom timer "${name}" error:`, error.message)
+    await this.stopNamedTimer(name)
+
+    const repeatOptions = {
+      every: intervalMs
+    }
+
+    const job = await this.queue.add(
+      jobType,
+      { ...jobData, customTimerName: name },
+      {
+        priority: options.priority || PRIORITY.NORMAL,
+        repeat: repeatOptions,
+        jobId: `timer:${timerKey}`
       }
-    }, intervalMs)
+    )
 
-    this.timers.set(`custom:${name}`, timerId)
-    this.timerConfigs.set(`custom:${name}`, {
+    this.timers.set(timerKey, {
+      repeatJobKey: job.repeatJobKey,
+      jobType
+    })
+
+    this.timerConfigs.set(timerKey, {
       name,
       intervalMs,
+      jobType,
       startedAt: Date.now()
     })
 
     console.log(`[Timer] Scheduled custom timer "${name}" every ${intervalMs}ms`)
-    
-    return timerId
+
+    return job
   }
 
-  stopScan(kingdomId) {
-    if (this.timers.has(kingdomId)) {
-      clearInterval(this.timers.get(kingdomId))
-      this.timers.delete(kingdomId)
-      this.timerConfigs.delete(kingdomId)
-      console.log(`[Timer] Stopped scan for kingdom ${kingdomId}`)
+  async stopScan(kingdomId) {
+    const timerKey = `kingdom:${kingdomId}`
+    return this.stopByKey(timerKey)
+  }
+
+  async stopNamedTimer(name) {
+    const timerKey = `custom:${name}`
+    return this.stopByKey(timerKey)
+  }
+
+  async stopByKey(timerKey) {
+    const timer = this.timers.get(timerKey)
+
+    if (timer) {
+      try {
+        if (timer.repeatJobKey) {
+          await this.queue.removeRepeatableByKey(timer.repeatJobKey)
+          console.log(`[Timer] Removed repeatable job with key: ${timer.repeatJobKey}`)
+        }
+      } catch (error) {
+        console.error(`[Timer] Error removing timer ${timerKey}:`, error.message)
+      }
+
+      this.timers.delete(timerKey)
+      this.timerConfigs.delete(timerKey)
       return true
     }
+
     return false
   }
 
-  stopNamedTimer(name) {
-    const key = `custom:${name}`
-    if (this.timers.has(key)) {
-      clearInterval(this.timers.get(key))
-      this.timers.delete(key)
-      this.timerConfigs.delete(key)
-      console.log(`[Timer] Stopped custom timer "${name}"`)
-      return true
+  async stopAll() {
+    const keys = Array.from(this.timers.keys())
+    for (const key of keys) {
+      await this.stopByKey(key)
     }
-    return false
-  }
-
-  stopAll() {
-    for (const [key, timerId] of this.timers) {
-      clearInterval(timerId)
-    }
-    this.timers.clear()
-    this.timerConfigs.clear()
-    console.log(`[Timer] Stopped all timers`)
+    console.log('[Timer] Stopped all timers')
   }
 
   isRunning(kingdomId) {
-    return this.timers.has(kingdomId)
+    const timerKey = `kingdom:${kingdomId}`
+    return this.timers.has(timerKey)
   }
 
   getConfig(kingdomId) {
-    return this.timerConfigs.get(kingdomId) || null
+    return this.timerConfigs.get(`kingdom:${kingdomId}`) || null
   }
 
   getActiveTimers() {
-    const active = []
-    for (const [key, config] of this.timerConfigs) {
-      const timerInfo = {
-        key,
-        ...config
-      }
-      active.push(timerInfo)
-    }
-    return active
+    return Array.from(this.timerConfigs.entries()).map(([key, config]) => ({
+      key,
+      ...config
+    }))
   }
 
-  // Get next run time for a kingdom
   getNextRunTime(kingdomId) {
-    const config = this.timerConfigs.get(kingdomId)
+    const config = this.timerConfigs.get(`kingdom:${kingdomId}`)
     if (!config) return null
 
     const elapsed = Date.now() - config.startedAt
-    const intervalMs = config.intervalMs
-    const nextRun = config.startedAt + Math.ceil(elapsed / intervalMs) * intervalMs
-    
+    const nextRun = config.startedAt + Math.ceil(elapsed / config.intervalMs) * config.intervalMs
+
     return nextRun
-  }
-
-  // Adjust interval for a running timer
-  adjustInterval(kingdomId, newIntervalMs) {
-    if (!this.timers.has(kingdomId)) {
-      console.warn(`[Timer] Cannot adjust - no timer running for kingdom ${kingdomId}`)
-      return false
-    }
-
-    const config = this.timerConfigs.get(kingdomId)
-    
-    // Restart with new interval
-    const builder = null // User should re-call scheduleScanKingdom with new interval
-    console.log(`[Timer] Restarting timer for kingdom ${kingdomId} with new interval ${newIntervalMs}ms`)
-    
-    // Simply update config and let it continue (next tick will use new timing)
-    config.intervalMs = newIntervalMs
-    
-    return true
   }
 }
 

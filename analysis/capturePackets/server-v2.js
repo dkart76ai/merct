@@ -4,25 +4,30 @@ const fs = require('fs')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
 const { kingdomUrls } = require('./kingdomUrls.js')
+const { multiDecodeMsgPack2, decodeMsgPack2 } = require('../message-pack/messagePack.js')
 const {
-  decodeMsgPack,
-  decodeMsgPackBase64,
-  multiDecodeMsgPackBase64,
-  multiDecodeMsgPack2,
-  encodeMsgPack2,
-  encodeMsgPack2MultiFragments,
-  encodeBase64,
-  decodeBase64,
-  decodeMsgPack2
-} = require('../message-pack/messagePack.js')
-const {
-  initializeJobs,
-  getJobQueue,
+  addJob,
+  addCritical,
+  addHigh,
+  addLow,
   getTimerManager,
-  shutdownJobs,
+  startWorker,
+  stopWorker,
+  getQueueStatus,
+  getJob,
+  closeQueue,
+  JOB_TYPES,
   PRIORITY
 } = require('./jobs/index.js')
-const { staticIdDb, loadStaticDb, saveStaticDb, addOrUpdateStaticId } = require('./staticId.js')
+const staticId = require('./staticId.js')
+const {
+  sendPacketHandler,
+  extractObjectsHandler,
+  saveObjectsHandler,
+  findObjectsHandler,
+  notificationHandler
+} = require('./jobs/handlers')
+const { findObjects, getStats, getAllObjects } = require('./jobs/database')
 
 loadEnvFile()
 
@@ -33,14 +38,15 @@ const config = {
   discordWebhook: process.env.DISCORD_WEBHOOK_URL || '',
   chatChannel: process.env.CHAT_CHANNEL_ID || ''
 }
+// const authPath = path.join(__dirname, 'auth', 'user.json')
 
 const SAVE_DIR = path.join(__dirname, 'captures')
-const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
+// const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
 const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
 const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json')
-const OBJECT_PACKETS312_FILE = path.join(__dirname, 'samples', 'objectpackets312.json')
-const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
-const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
+// const OBJECT_PACKETS312_FILE = path.join(__dirname, 'samples', 'objectpackets312.json')
+// const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
+// const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
 
 const PACKET312 = {
   kingdoms: [],
@@ -93,7 +99,7 @@ function extractObjects(data) {
       if (Array.isArray(item)) {
         if (isValidObject(item)) {
           const staticId = item[1]
-          const known = staticIdDb.get(String(staticId))
+          const known = staticId.getStaticIdData(staticId)
           const obj = {
             objectId: item[0][0],
             staticId: staticId,
@@ -150,6 +156,7 @@ let autoSave = true
 let capturingEnabled = false
 let uniqueOpcodes = new Set()
 let myPlayerPackets = []
+let objectPackets = []
 
 async function saveMyPlayerPackets() {
   if (!myPlayerPackets.length) return
@@ -179,8 +186,6 @@ async function saveObjectPackets() {
     console.error('Save object packets error:', e.message)
   }
 }
-
-let objectPackets = []
 
 async function saveCaptures() {
   if (!captures.length) return
@@ -236,19 +241,16 @@ function buildPacketPayload(kingdomId, tiles, tokenBigInt) {
 
   const randomSeq = Math.floor(Math.random() * 32000) + 1
 
-  const buff312 = [
+  const packetData = [
     [312, randomSeq, [[tokenBigInt], mapToUint8Array(PACKET312.buff)], ''],
     [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
   ]
 
-  const encoded = encodeMsgPack2MultiFragments(buff312)
-
   return {
     url,
-    data: buff312,
-    encoded: Array.from(encoded),
+    packetData,
     kingdom: kingdomId,
-    seq: randomSeq
+    notificationConfig: config
   }
 }
 
@@ -290,7 +292,6 @@ async function handleScanKingdom(req, res) {
           : tokenValue
 
   const tilesArray = generateArrays()
-  const jobQueue = getJobQueue()
   const jobIds = []
 
   console.log(`[API] Queuing ${tilesArray.length * kingdomList.length} scan jobs`)
@@ -299,24 +300,18 @@ async function handleScanKingdom(req, res) {
     for (const tiles of tilesArray) {
       const payload = buildPacketPayload(kingdomId, tiles, tokenBigInt)
 
-      const jobId =
+      const job =
         priority === 'CRITICAL'
-          ? await jobQueue.addCritical('send-packet', {
-              url: payload.url,
-              data: payload.data,
-              kingdom: kingdomId,
-              triggeredBy: 'manual',
-              notificationConfig: config
+          ? await addCritical(JOB_TYPES.SEND_PACKET, {
+              ...payload,
+              triggeredBy: 'manual'
             })
-          : await jobQueue.addHigh('send-packet', {
-              url: payload.url,
-              data: payload.data,
-              kingdom: kingdomId,
-              triggeredBy: 'manual',
-              notificationConfig: config
+          : await addHigh(JOB_TYPES.SEND_PACKET, {
+              ...payload,
+              triggeredBy: 'manual'
             })
 
-      jobIds.push({ kingdomId, jobId })
+      jobIds.push({ kingdomId, jobId: job.id })
     }
   }
 
@@ -348,28 +343,29 @@ async function handleStartTimer(req, res) {
   if (kingdomList.length === 0) {
     return res.json({ success: false, error: 'no valid kingdoms' })
   }
-
+  const tilesArray = generateArrays()
   const timerManager = getTimerManager()
 
   for (const kingdomId of kingdomList) {
-    // Ensure token is BigInt
-    const tokenValue = PACKET312.sessionToken
-    const tokenBigInt =
-      typeof tokenValue === 'bigint'
-        ? tokenValue
-        : typeof tokenValue === 'number'
-          ? BigInt(tokenValue)
-          : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
+    for (const tiles of tilesArray) {
+      // Ensure token is BigInt
+      const tokenValue = PACKET312.sessionToken
+      const tokenBigInt =
+        typeof tokenValue === 'bigint'
+          ? tokenValue
+          : typeof tokenValue === 'number'
             ? BigInt(tokenValue)
-            : tokenValue
+            : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
+              ? BigInt(tokenValue)
+              : tokenValue
 
-    timerManager.scheduleScanKingdom(kingdomId, {
-      intervalMs: parseInt(interval),
-      payloadBuilder: async kId => {
-        const tiles = [9, 59, 109, 159, 209, 259, 309, 359, 409, 459, 509, 559]
-        return buildPacketPayload(kId, tiles, tokenBigInt)
-      }
-    })
+      timerManager.scheduleScanKingdom(kingdomId, {
+        intervalMs: parseInt(interval),
+        payloadBuilder: async kId => {
+          return buildPacketPayload(kId, tiles, tokenBigInt)
+        }
+      })
+    }
   }
 
   res.json({
@@ -397,6 +393,324 @@ async function handleStopTimer(req, res) {
   }
 }
 
+function setupWebsocketListener() {
+  if (!page) return
+
+  page.on('websocket', async ws => {
+    console.log(`[${new Date().toLocaleTimeString()}] WebSocket opened: ${ws.url()}`)
+
+    ws.on('framesent', data => {})
+
+    ws.on('framereceived', data => {
+      if (capturingEnabled) {
+        try {
+          const text = data.payload.toString('utf8')
+          if (text.startsWith('MESG')) {
+            // console.log(`[WS] MESG received: ${text.substring(0, 200)}...`)
+            extractChatStaticIds(text)
+            // if (autoSave) saveChatStaticIds()
+          }
+        } catch (e) {}
+      }
+    })
+
+    ws.on('close', () => {
+      console.log(`[${new Date().toLocaleTimeString()}] WebSocket closed`)
+    })
+  })
+}
+
+async function patchSendbird() {
+  if (!page) return
+  // Patch Triumph.framework.js to expose SendBirdHelper globally
+  await page.route('**/Triumph.framework.js', async route => {
+    try {
+      const response = await route.fetch()
+      let body = await response.text()
+      body = body.replace(
+        'var SendBirdHelper = {',
+        'var SendBirdHelper = window.SendBirdHelper = {'
+      )
+      await route.fulfill({ response, body })
+      console.log(`  🔧 Triumph.framework.js patched`)
+    } catch (e) {
+      console.error(`  Failed to patch framework:`, e.message)
+      await route.continue()
+    }
+  })
+}
+
+function setupPacketCaptureListener() {
+  if (!page) return
+
+  page.on('response', async response => {
+    if (!capturingEnabled) return
+
+    const url = response.url()
+    if (!url.includes('rubens-realm')) return
+
+    // if (captureIndex == 100 && !sessionSaved) {
+    //   //save session
+    //   sessionSaved = true
+    //   await context.storageState({ path: authPath })
+    // }
+
+    try {
+      const status = response.status()
+      const headers = response.headers()
+      const body = await response.body()
+
+      if (!body || body.length === 0) return
+      if (headers['content-type']?.includes('text/html')) return
+
+      const request = response.request()
+      const postData = request.postData()
+      const postDataBuff = request.postDataBuffer()
+      // if (postDataBuff) {
+      //   console.log(`Recibidos ${postDataBuff.length} bytes de datos binarios.`)
+      //   // Aquí puedes procesar el Buffer, por ejemplo, guardarlo como archivo
+      // }
+
+      const decodedReq = decodeMsgPack2(Buffer.from(postDataBuff))
+
+      let decodedResponse = decodeMsgPack2(Buffer.from(body))
+      const opCode = getFirstValue(decodedResponse)
+
+      if (opCode !== null) {
+        uniqueOpcodes.add(opCode)
+      }
+
+      if (opCode === 402 && !myPlayerInfo.internalPlayerId) {
+        const extractedId = extractInternalIdFrom402(decodedResponse)
+        if (extractedId) {
+          myPlayerInfo.internalPlayerId = extractedId
+          console.log(
+            `[${new Date().toLocaleTimeString()}] Found internal player ID: ${myPlayerInfo.internalPlayerId}`
+          )
+        }
+      }
+
+      if (opCode === 203) {
+        if (!myPlayerInfo.internalPlayerId) {
+          const id = decodedResponse[1]?.[0]?.[0]
+          if (typeof id === 'number' && id > 1000000000000) {
+            myPlayerInfo.internalPlayerId = id
+            console.log(`Found internal player ID: ${myPlayerInfo.internalPlayerId}`)
+          }
+        }
+
+        if (!myPlayerInfo.sessionToken) {
+          myPlayerInfo.sessionToken = extractSessionToken(decodedResponse)
+
+          console.log(`Found session token: ${myPlayerInfo.sessionToken}`)
+        }
+      }
+
+      const isMyPacket = containsPlayerId(
+        decodedResponse,
+        myPlayerInfo.playerId,
+        myPlayerInfo.internalPlayerId
+      )
+
+      let objects = []
+      if (opCode === 312 || opCode === 408) {
+        extractObjects(decodedResponse)
+
+        objects.forEach(obj => trackUnknownStaticId(obj))
+      }
+
+      captures.push({
+        id: ++captureIndex,
+        opCode,
+        url,
+        status,
+        request: {
+          method: request.method(),
+          headers: request.headers(),
+          bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
+          bodySize: postData ? postData.length : 0,
+          bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
+          bodyBufferSize: postDataBuff ? postDataBuff.length : 0
+          // decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
+        },
+        response: {
+          headers,
+          bodyB64: Buffer.from(body).toString('base64'),
+          bodySize: body.length
+          // decodedResponse
+        },
+        objectCount: objects.length,
+        objects,
+        isMyPacket
+      })
+
+      if (isMyPacket) {
+        myPlayerPackets.push({
+          id: ++myPlayerPacketIndex,
+          opCode,
+          url,
+          status,
+          request: requestData,
+          bodyB64: Buffer.from(body).toString('base64'),
+          bodySize: body.length,
+          bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
+          bodyBufferSize: postDataBuff ? postDataBuff.length : 0,
+          // decodedResponse,
+          objectCount: objects.length,
+          objects,
+          timestamp: new Date().toISOString()
+        })
+        console.log(`[${new Date().toLocaleTimeString()}] MY PACKET: ${url} (opcode: ${opCode})`)
+        if (autoSave) saveMyPlayerPackets()
+      }
+
+      if (opCode === 312 || opCode === 408) {
+        objectPackets.push({
+          opCode,
+          url,
+          request: {
+            method: request.method(),
+            headers: request.headers(),
+            bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
+            bodySize: postData ? postData.length : 0,
+            bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
+            bodyBufferSize: postDataBuff ? postDataBuff.length : 0
+            // decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
+          },
+          response: {
+            headers,
+            bodyB64: Buffer.from(body).toString('base64'),
+            bodySize: body.length
+            // decodedResponse
+          },
+          objectCount: objects.length,
+          objects
+        })
+
+        if (autoSave) saveObjectPackets()
+      }
+
+      if (opCode === 312) {
+        console.log(
+          '312 packet getting tokens',
+          JSON.stringify(decodedReq, (key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          )
+        )
+        //request:          [312,284,[["1309965043442"],{"0":105,"1":223,"2":166,"3":213,"4":171,"5":90,"6":183,"7":199,"8":35,"9":86,"10":245,"11":99}],""]
+
+        if (!PACKET312.sessionToken) {
+          const rawToken = decodedReq[2]?.[0]?.[0]
+          PACKET312.sessionToken =
+            typeof rawToken === 'bigint'
+              ? rawToken
+              : typeof rawToken === 'number'
+                ? BigInt(rawToken)
+                : rawToken
+          PACKET312.buff = decodedReq[2]?.[1] // auth token?
+
+          console.log(
+            '312 packet decodedReq[0][2]',
+            JSON.stringify(decodedReq[2], (key, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            )
+          )
+          console.log(
+            'PACKET312.sessionToken type:',
+            typeof PACKET312.sessionToken,
+            'value:',
+            PACKET312.sessionToken
+          )
+        }
+      }
+
+      if (opCode === 312 && objects.length > 0) {
+        const tileIds = decodedReq[1]
+
+        const allCoordX = objects.map(o => o.x)
+        const allCoordY = objects.map(o => o.y)
+        const minX = Math.min(...allCoordX)
+        const maxX = Math.max(...allCoordX)
+        const minY = Math.min(...allCoordY)
+        const maxY = Math.max(...allCoordY)
+        const kingdom = objects[0].kingdom
+
+        /*
+  [
+   [ 312, "sequence ie:2242", [["sessionToken?"], "212bytesAuth?"], ""],
+   [ ["tileId1", "tileId2"],["0's as many tilesId" ],[],[] ]
+
+  ]
+
+
+  */
+
+        packets312analyze.push({
+          opCode,
+          url,
+          requestBodyB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
+          responseBodyB64: Buffer.from(body).toString('base64'),
+          kingdom,
+          tileIds: JSON.stringify(tileIds),
+          range: `xy1=${minX}-${minY}, xy2=${maxX}-${maxY}`,
+          objectCount: objects.length
+        })
+
+        if (autoSave) saveObjectPackets312()
+      }
+
+      // console.log(`[${new Date().toLocaleTimeString()}] Captured: ${url} (${body.length} bytes)`)
+
+      if (autoSave) saveToFile()
+    } catch (e) {
+      console.error('Capture error:', e.message)
+    }
+  })
+}
+
+async function browserInitialize() {
+  browser = await firefox.launch({ headless: false })
+  const options = {
+    screen: { width: 1360, height: 1024 },
+    viewport: { width: 1360, height: 1024 },
+    deviceScaleFactor: 1,
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36',
+    extraHTTPHeaders: {
+      'Accept-Language': 'en-US,en;q=0.9',
+      'sec-ch-ua': '"Chromium";v="125", "Not(A:Brand";v="99", "Google Chrome";v="125"' // Remove "HeadlessChrome"
+    }
+  }
+
+  // if (await fileExists(authPath)) {
+  //   options.storageState = authPath
+  // }
+
+  context = await browser.newContext(options)
+  page = await context.newPage()
+}
+
+async function browserLoadUrlAndLogin() {
+  if (!page) return
+
+  await page.goto('https://totalbattle.com/es', { timeout: 70000 })
+  await page.waitForTimeout(10000)
+
+  // Login if needed
+  const loginInput = page.getByRole('textbox', { name: 'E-mail' })
+  if (await loginInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+    console.log(`  Logging in...`)
+    const loginButton = page.locator('#registration').getByText('Iniciar sesión')
+    if (await loginButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await loginButton.click()
+      await page.waitForTimeout(500)
+    }
+    await loginInput.fill(config.accountUser)
+    await page.getByRole('textbox', { name: 'Contraseña' }).fill(config.accountPwd)
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click()
+  }
+}
+
 app.post('/api/scanKingdom', handleScanKingdom)
 
 app.post('/api/timer/start', handleStartTimer)
@@ -416,10 +730,19 @@ app.post('/api/stop', async (req, res) => {
   }
 })
 
+// Health check endpoint for Docker
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage()
+  })
+})
+
 app.get('/api/jobs/status', async (req, res) => {
   try {
-    const jobQueue = getJobQueue()
-    const status = await jobQueue.getStatus()
+    const status = await getQueueStatus()
     res.json({ success: true, ...status })
   } catch (error) {
     res.status(500).json({ success: false, error: error.message })
@@ -428,30 +751,26 @@ app.get('/api/jobs/status', async (req, res) => {
 
 app.get('/api/jobs/:jobId', async (req, res) => {
   try {
-    const jobQueue = getJobQueue()
-    const job = await jobQueue.getJob(req.params.jobId)
+    const job = await getJob(req.params.jobId)
     if (job) {
-      res.json({ success: true, job })
+      const state = await job.getState()
+      res.json({
+        success: true,
+        job: {
+          id: job.id,
+          name: job.name,
+          data: job.data,
+          state,
+          progress: job.progress,
+          attemptsMade: job.attemptsMade,
+          failedReason: job.failedReason,
+          finishedOn: job.finishedOn,
+          processedOn: job.processedOn
+        }
+      })
     } else {
       res.status(404).json({ success: false, error: 'Job not found' })
     }
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message })
-  }
-})
-
-app.post('/api/jobs/cancel', async (req, res) => {
-  try {
-    const { type, kingdom } = req.body
-    const jobQueue = getJobQueue()
-
-    const cancelled = await jobQueue.cancelJobs(job => {
-      if (type && job.type !== type) return false
-      if (kingdom && job.payload.kingdom !== kingdom) return false
-      return true
-    })
-
-    res.json({ success: true, cancelled })
   } catch (error) {
     res.status(500).json({ success: false, error: error.message })
   }
@@ -461,6 +780,95 @@ app.get('/api/timers', (req, res) => {
   const timerManager = getTimerManager()
   const active = timerManager.getActiveTimers()
   res.json({ success: true, timers: active })
+})
+
+app.get('/api/unknown-staticids', (req, res) => {
+  // do nothing, its for frontend not to crash
+  res.json({ success: true, items: [], count: 0 })
+})
+
+app.get('/api/static-db', (req, res) => {
+  console.log('Sending staticId Db with', getStaticIdSize(), 'entries')
+  const entries = staticId.getStaticIdValues()
+  res.json({ success: true, items: entries, count: staticId.getStaticIdSize() })
+})
+
+// Objects database endpoints
+app.get('/api/objects', (req, res) => {
+  const objects = getAllObjects()
+  res.json({ success: true, count: objects.length, objects })
+})
+
+app.get('/api/objects/stats', (req, res) => {
+  const stats = getStats()
+  res.json({ success: true, ...stats })
+})
+
+app.post('/api/objects/find', async (req, res) => {
+  const { staticId, level, amount = 10 } = req.body
+
+  const result = findObjects({ staticId, level, amount })
+  res.json({ success: true, ...result })
+})
+
+app.post('/api/objects/find-and-notify', async (req, res) => {
+  const { staticId, level, amount = 10, notificationConfig } = req.body
+
+  const result = findObjects({ staticId, level, amount })
+
+  if (result.objects.length > 0) {
+    await addJob(JOB_TYPES.NOTIFICATION, {
+      type: 'objects-found',
+      objects: result.objects,
+      searchCriteria: { staticId, level, amount }
+    })
+  }
+
+  res.json({ success: true, ...result, notified: result.objects.length > 0 })
+})
+
+// Scan for merc timer
+app.post('/api/timer/scan-mercs', async (req, res) => {
+  const { interval = 60000 } = req.body
+
+  const timerManager = getTimerManager()
+
+  const timerKey = 'merc-scanner'
+
+  // Build payload for find-objects job
+  const jobData = {
+    staticId: 400, // Merc static ID
+    amount: 20,
+    triggeredBy: 'timer-mercs'
+  }
+
+  await timerManager.scheduleCustom(timerKey, parseInt(interval), JOB_TYPES.FIND_OBJECTS, jobData)
+
+  res.json({ success: true, message: `Merc scanner started every ${interval}ms`, interval })
+})
+
+app.post('/api/timer/stop-mercs', async (req, res) => {
+  const timerManager = getTimerManager()
+  await timerManager.stopNamedTimer('merc-scanner')
+  res.json({ success: true, message: 'Merc scanner stopped' })
+})
+
+// Manual find and queue notification
+app.post('/api/scan-mercs-now', async (req, res) => {
+  const { level, amount = 20 } = req.body
+
+  const result = findObjects({ staticId: 400, level, amount })
+
+  if (result.objects.length > 0) {
+    await addJob(JOB_TYPES.NOTIFICATION, {
+      type: 'mercs-found',
+      objects: result.objects,
+      searchCriteria: { staticId: 400, level, amount }
+    })
+    res.json({ success: true, found: result.returned, total: result.total, notified: true })
+  } else {
+    res.json({ success: true, found: 0, notified: false })
+  }
 })
 
 app.get('/api/captures', (req, res) => {
@@ -477,21 +885,19 @@ app.get('/api/captures/:id', (req, res) => {
   }
 })
 
-app.get('/api/export', (req, res) => {
-  res.setHeader('Content-Type', 'application/json')
-  res.setHeader('Content-Disposition', `attachment; filename="captures-${Date.now()}.json"`)
-  res.json(captures)
-})
-
 app.post('/api/browser/start', async (req, res) => {
   try {
     if (browser) {
       return res.json({ success: false, error: 'Browser already running' })
     }
 
-    browser = await firefox.launch({ headless: true })
-    context = await browser.newContext()
-    page = await context.newPage()
+    await browserInitialize()
+
+    setupWebsocketListener()
+    patchSendbird()
+    setupPacketCaptureListener()
+
+    await browserLoadUrlAndLogin()
 
     res.json({ success: true, message: 'Browser started' })
   } catch (error) {
@@ -527,110 +933,8 @@ app.post('/api/capturing/start', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Browser not running' })
   }
 
-  try {
-    capturingEnabled = true
-
-    page.on('request', async request => {
-      if (!capturingEnabled) return
-      const url = request.url()
-
-      if (url.includes('totalbattle.com')) {
-        try {
-          const postData = request.postData()
-          const headers = request.headers()
-
-          if (postData && headers['content-type'] === 'application/octet-stream') {
-            let postDataBuff = null
-
-            try {
-              postDataBuff = Buffer.from(postData)
-            } catch (e) {}
-
-            const opCode =
-              postDataBuff && postDataBuff.length >= 8
-                ? new DataView(postDataBuff.buffer).getUint32(0, true)
-                : null
-
-            if (opCode) {
-              uniqueOpcodes.add(opCode)
-
-              const body = (await request.response().then(r => r?.buffer())) || Buffer.alloc(0)
-              const decodedReq = postDataBuff ? decodeMsgPack2(postDataBuff) : null
-              const decodedRes = body.length >= 8 ? decodeMsgPack2(Buffer.from(body)) : null
-
-              let objects = []
-              if (decodedReq && decodedReq[0] === 312) {
-                objects = extractObjects(decodedReq[1])
-                objects.forEach(obj => addOrUpdateStaticId(obj.staticId, obj))
-              }
-
-              captures.push({
-                id: captureIndex++,
-                opCode,
-                url,
-                request: {
-                  method: request.method(),
-                  headers,
-                  bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
-                  bodySize: postData ? postData.length : 0,
-                  bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
-                  bodyBufferSize: postDataBuff ? postDataBuff.length : 0
-                },
-                response: {
-                  headers: (await request.response())?.headers() || {},
-                  bodyB64: Buffer.from(body).toString('base64'),
-                  bodySize: body.length
-                },
-                decodedRequest: decodedReq,
-                decodedResponse: decodedRes,
-                objectCount: objects.length,
-                objects,
-                timestamp: new Date().toISOString()
-              })
-
-              if (objects.length > 0) {
-                myPlayerPackets.push({
-                  id: captureIndex,
-                  opCode,
-                  objects,
-                  timestamp: new Date().toISOString()
-                })
-
-                myPlayerPackets.push({
-                  id: captureIndex,
-                  opCode,
-                  request: {
-                    method: request.method(),
-                    headers,
-                    bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
-                    bodyBufferB64: postDataBuff
-                      ? Buffer.from(postDataBuff).toString('base64')
-                      : null
-                  },
-                  objectCount: objects.length,
-                  objects,
-                  timestamp: new Date().toISOString()
-                })
-              }
-
-              if (opCode === 312) {
-                console.log(
-                  `[${new Date().toLocaleTimeString()}] MY PACKET: ${url} (opcode: ${opCode})`
-                )
-                if (autoSave) saveMyPlayerPackets()
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Error capturing packet:', e)
-        }
-      }
-    })
-
-    res.json({ success: true, message: 'Capturing started' })
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message })
-  }
+  capturingEnabled = true
+  res.json({ success: true, message: 'Capturing started' })
 })
 
 app.post('/api/capturing/stop', async (req, res) => {
@@ -641,32 +945,34 @@ app.post('/api/capturing/stop', async (req, res) => {
   res.json({ success: true, message: 'Capturing stopped' })
 })
 
-app.get('/api/staticids', (req, res) => {
-  const data = Object.fromEntries(staticIdDb)
-  res.json({ success: true, count: staticIdDb.size, staticIds: data })
-})
-
-app.get('/api/opcodes', (req, res) => {
-  res.json({ success: true, opcodes: Array.from(uniqueOpcodes).sort((a, b) => a - b) })
-})
+// app.get('/api/opcodes', (req, res) => {
+//   res.json({ success: true, opcodes: Array.from(uniqueOpcodes).sort((a, b) => a - b) })
+// })
 
 async function main() {
   console.log('[Main] Starting server...')
 
   await ensureSaveDir()
-  loadStaticDb()
+  staticId.loadStaticDb()
 
-  console.log('[Main] Initializing job system...')
-  await initializeJobs({
-    maxRetries: 3,
-    maxConcurrent: 5,
-    pollInterval: 100
-  })
+  console.log('[Main] Starting BullMQ worker...')
+
+  const handlers = {
+    [JOB_TYPES.SEND_PACKET]: sendPacketHandler,
+    [JOB_TYPES.EXTRACT_OBJECTS]: extractObjectsHandler,
+    [JOB_TYPES.SAVE_OBJECTS]: saveObjectsHandler,
+    [JOB_TYPES.FIND_OBJECTS]: findObjectsHandler,
+    [JOB_TYPES.NOTIFICATION]: notificationHandler
+  }
+
+  await startWorker(handlers)
 
   const server = app.listen(PORT, () => {
     console.log(`[Main] Server running on http://localhost:${PORT}`)
+    console.log('[Main] BullMQ Worker started')
     console.log('[Main] API endpoints:')
-    console.log('  POST /api/scanKingdom - Queue manual kingdom scan')
+    console.log('  GET  /api/health - Health check')
+    console.log('  POST /api/scanKingdom - Queue kingdom scan')
     console.log('  POST /api/timer/start - Start periodic scanning')
     console.log('  POST /api/timer/stop - Stop periodic scanning')
     console.log('  GET  /api/jobs/status - Get job queue status')
@@ -677,14 +983,16 @@ async function main() {
 
   process.on('SIGINT', async () => {
     console.log('\n[Main] Shutting down...')
-    await shutdownJobs()
+    await stopWorker()
+    await closeQueue()
     if (browser) await browser.close()
     process.exit(0)
   })
 
   process.on('SIGTERM', async () => {
     console.log('\n[Main] Shutting down...')
-    await shutdownJobs()
+    await stopWorker()
+    await closeQueue()
     if (browser) await browser.close()
     process.exit(0)
   })

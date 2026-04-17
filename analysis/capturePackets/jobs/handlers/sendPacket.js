@@ -1,28 +1,30 @@
-const { multiDecodeMsgPack2, encodeMsgPack2MultiFragments } = require('../../message-pack/messagePack')
-const { PRIORITY } = require('../PriorityJobQueue')
+const {
+  multiDecodeMsgPack2,
+  encodeMsgPack2MultiFragments
+} = require('../../../message-pack/messagePack.js')
+const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 
 const DEFAULT_HEADERS = {
   'Content-Type': 'application/octet-stream',
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
-  'Referer': 'https://totalbattle.com/'
+  Referer: 'https://totalbattle.com/'
 }
 
 async function sendPacketHandler(payload) {
   const {
     url,
-    data,
+    packetData, // Accept both naming conventions
     headers = DEFAULT_HEADERS,
     kingdom,
     triggeredBy = 'manual',
-    onSuccess = null,
-    onError = null
+    notificationConfig = {}
   } = payload
 
   console.log(`[SendPacket] Sending packet to ${url} (triggeredBy: ${triggeredBy})`)
 
   try {
     // Encode the packet
-    const encoded = encodeMsgPack2MultiFragments(data)
+    const encoded = encodeMsgPack2MultiFragments(packetData)
 
     // Send to server
     const response = await fetch(url, {
@@ -58,23 +60,27 @@ async function sendPacketHandler(payload) {
       kingdom,
       responseLength: bytes.length,
       decoded: decoded.results,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      nextJobs: [
+        {
+          type: JOB_TYPES.EXTRACT_OBJECTS,
+          priority: PRIORITY.NORMAL,
+          payload: {
+            packetData: decoded.results,
+            kingdom,
+            triggeredBy,
+            notificationConfig
+          }
+        }
+      ]
     }
 
     console.log(`[SendPacket] Success - ${decoded.results.length} objects in response`)
 
-    // Return data for chaining handlers
-    return {
-      ...result,
-      nextJobs: [
-        { type: 'extract-objects', payload: { packetData: decoded.results, kingdom, triggeredBy } },
-        { type: 'extract-player', payload: { packetData: decoded.results, triggeredBy } }
-      ]
-    }
-
+    return result
   } catch (error) {
     console.error(`[SendPacket] Error:`, error.message)
-    
+
     return {
       success: false,
       triggeredBy,

@@ -1,0 +1,59 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: playwtb-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CHAT_CHANNEL_URL=${CHAT_CHANNEL_URL:-}
+      - CHAT_ACCOUNT_USER=${CHAT_ACCOUNT_USER:-}
+      - CHAT_ACCOUNT_PWD=${CHAT_ACCOUNT_PWD:-}
+      - CHAT_CHANNEL_ID=${CHAT_CHANNEL_ID:-}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+    volumes:
+      - ./captures:/app/captures
+      - ./staticId-db.json:/app/staticId-db.json
+      - ./myplayer.json:/app/myplayer.json
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - playwtb-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: playwtb-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+    networks:
+      - playwtb-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  playwtb-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local
