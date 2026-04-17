@@ -10,6 +10,7 @@ const {
   addCritical,
   addHigh,
   addLow,
+  addJobAndWait,
   getTimerManager,
   startWorker,
   stopWorker,
@@ -25,10 +26,11 @@ const {
   extractObjectsHandler,
   saveObjectsHandler,
   findObjectsHandler,
-  notificationHandler
+  notificationHandler,
+  processPacketHandler
 } = require('./jobs/handlers')
 const { findObjects, getStats, getAllObjects } = require('./jobs/database')
-
+const { getRedis } = require('./jobs/redis')
 loadEnvFile()
 
 const config = {
@@ -42,104 +44,104 @@ const config = {
 
 const SAVE_DIR = path.join(__dirname, 'captures')
 // const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
-const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
-const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json')
+// const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
+// const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json')
 // const OBJECT_PACKETS312_FILE = path.join(__dirname, 'samples', 'objectpackets312.json')
 // const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
 // const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
 
-const PACKET312 = {
-  kingdoms: [],
-  currentKingdom: null,
-  sessionToken: null,
-  buff: null
-}
+// const PACKET312 = {
+//   kingdoms: [],
+//   currentKingdom: null,
+//   sessionToken: null,
+//   buff: null
+// }
 
-function mapToUint8Array(map) {
-  if (!map) return null
-  if (map instanceof Uint8Array) return map
-  const keys = Object.keys(map)
-    .map(Number)
-    .sort((a, b) => a - b)
-  if (keys.length === 0) return null
-  const arr = new Uint8Array(keys.length)
-  for (const k of keys) {
-    arr[k] = map[k]
-  }
-  return arr
-}
+// function mapToUint8Array(map) {
+//   if (!map) return null
+//   if (map instanceof Uint8Array) return map
+//   const keys = Object.keys(map)
+//     .map(Number)
+//     .sort((a, b) => a - b)
+//   if (keys.length === 0) return null
+//   const arr = new Uint8Array(keys.length)
+//   for (const k of keys) {
+//     arr[k] = map[k]
+//   }
+//   return arr
+// }
 
-let saveFileIndex = 0
-const MAX_CAPTURES_PER_FILE = 500
+// let saveFileIndex = 0
+// const MAX_CAPTURES_PER_FILE = 500
 
-async function fileExists(filePath) {
-  try {
-    await fs.access(filePath, fs.constants.F_OK)
-    return true
-  } catch {
-    return false
-  }
-}
+// async function fileExists(filePath) {
+//   try {
+//     await fs.access(filePath, fs.constants.F_OK)
+//     return true
+//   } catch {
+//     return false
+//   }
+// }
 
-function extractObjects(data) {
-  const objects = []
+// function extractObjects(data) {
+//   const objects = []
 
-  function isValidObject(arr) {
-    if (!Array.isArray(arr) || arr.length !== 12) return false
-    if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
-    if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
-    if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
-    if (typeof arr[11] !== 'boolean') return false
-    return true
-  }
+//   function isValidObject(arr) {
+//     if (!Array.isArray(arr) || arr.length !== 12) return false
+//     if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
+//     if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
+//     if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
+//     if (typeof arr[11] !== 'boolean') return false
+//     return true
+//   }
 
-  function findObjects(arr, depth = 0) {
-    if (depth > 200) return
-    for (const item of arr) {
-      if (Array.isArray(item)) {
-        if (isValidObject(item)) {
-          const staticId = item[1]
-          const known = staticId.getStaticIdData(staticId)
-          const obj = {
-            objectId: item[0][0],
-            staticId: staticId,
-            name: known?.name || null,
-            entryType: known?.entryType || null,
-            unk1: item[2],
-            unk2: item[3],
-            unk3: item[4],
-            level: item[5],
-            unk4: item[6],
-            unk5: item[7],
-            kingdom: item[8][0],
-            x: item[8][1],
-            y: item[8][2],
-            unk6: item[9][0],
-            extra: item[10],
-            isActive: item[11]
-          }
-          objects.push(obj)
-        } else {
-          findObjects(item, depth + 1)
-        }
-      }
-    }
-  }
+//   function findObjects(arr, depth = 0) {
+//     if (depth > 200) return
+//     for (const item of arr) {
+//       if (Array.isArray(item)) {
+//         if (isValidObject(item)) {
+//           const staticId = item[1]
+//           const known = staticId.getStaticIdData(staticId)
+//           const obj = {
+//             objectId: item[0][0],
+//             staticId: staticId,
+//             name: known?.name || null,
+//             entryType: known?.entryType || null,
+//             unk1: item[2],
+//             unk2: item[3],
+//             unk3: item[4],
+//             level: item[5],
+//             unk4: item[6],
+//             unk5: item[7],
+//             kingdom: item[8][0],
+//             x: item[8][1],
+//             y: item[8][2],
+//             unk6: item[9][0],
+//             extra: item[10],
+//             isActive: item[11]
+//           }
+//           objects.push(obj)
+//         } else {
+//           findObjects(item, depth + 1)
+//         }
+//       }
+//     }
+//   }
 
-  findObjects(data)
-  return objects
-}
+//   findObjects(data)
+//   return objects
+// }
 
-function getFirstValue(data) {
-  for (let item of data) {
-    if (typeof item === 'number') return item
-    if (Array.isArray(item)) {
-      const resultado = getFirstValue(item)
-      if (resultado !== undefined) return resultado
-    }
-  }
-  return null
-}
+// function getFirstValue(data) {
+//   for (let item of data) {
+//     if (typeof item === 'number') return item
+//     if (Array.isArray(item)) {
+//       const resultado = getFirstValue(item)
+//       if (resultado !== undefined) return resultado
+//     }
+//   }
+//   return null
+// }
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -151,56 +153,56 @@ let browser = null
 let context = null
 let page = null
 let captures = []
-let captureIndex = 0
-let autoSave = true
+// let captureIndex = 0
+// let autoSave = true
 let capturingEnabled = false
-let uniqueOpcodes = new Set()
-let myPlayerPackets = []
-let objectPackets = []
+// let uniqueOpcodes = new Set()
+// let myPlayerPackets = []
+// let objectPackets = []
 
-async function saveMyPlayerPackets() {
-  if (!myPlayerPackets.length) return
-  try {
-    const existing = (await fileExists(MYPLAYER_FILE))
-      ? JSON.parse(fs.readFileSync(MYPLAYER_FILE, 'utf8'))
-      : []
-    const merged = [...existing, ...myPlayerPackets].slice(-1000)
-    fs.writeFileSync(MYPLAYER_FILE, JSON.stringify(merged, null, 2))
-    console.log(`Saved ${myPlayerPackets.length} player packets (total: ${merged.length})`)
-    myPlayerPackets = []
-  } catch (e) {
-    console.error('Save my player packets error:', e.message)
-  }
-}
+// async function saveMyPlayerPackets() {
+//   if (!myPlayerPackets.length) return
+//   try {
+//     const existing = (await fileExists(MYPLAYER_FILE))
+//       ? JSON.parse(fs.readFileSync(MYPLAYER_FILE, 'utf8'))
+//       : []
+//     const merged = [...existing, ...myPlayerPackets].slice(-1000)
+//     fs.writeFileSync(MYPLAYER_FILE, JSON.stringify(merged, null, 2))
+//     console.log(`Saved ${myPlayerPackets.length} player packets (total: ${merged.length})`)
+//     myPlayerPackets = []
+//   } catch (e) {
+//     console.error('Save my player packets error:', e.message)
+//   }
+// }
 
-async function saveObjectPackets() {
-  try {
-    const existing = (await fileExists(OBJECT_PACKETS_FILE))
-      ? JSON.parse(fs.readFileSync(OBJECT_PACKETS_FILE, 'utf8'))
-      : []
-    const merged = [...existing, ...objectPackets].slice(-MAX_CAPTURES_PER_FILE)
-    fs.writeFileSync(OBJECT_PACKETS_FILE, JSON.stringify(merged, null, 2))
-    console.log(`Saved ${objectPackets.length} object packets (total: ${merged.length})`)
-    objectPackets = []
-  } catch (e) {
-    console.error('Save object packets error:', e.message)
-  }
-}
+// async function saveObjectPackets() {
+//   try {
+//     const existing = (await fileExists(OBJECT_PACKETS_FILE))
+//       ? JSON.parse(fs.readFileSync(OBJECT_PACKETS_FILE, 'utf8'))
+//       : []
+//     const merged = [...existing, ...objectPackets].slice(-MAX_CAPTURES_PER_FILE)
+//     fs.writeFileSync(OBJECT_PACKETS_FILE, JSON.stringify(merged, null, 2))
+//     console.log(`Saved ${objectPackets.length} object packets (total: ${merged.length})`)
+//     objectPackets = []
+//   } catch (e) {
+//     console.error('Save object packets error:', e.message)
+//   }
+// }
 
-async function saveCaptures() {
-  if (!captures.length) return
-  try {
-    const savePath = path.join(SAVE_DIR, `captures-${saveFileIndex}.json`)
-    fs.writeFileSync(savePath, JSON.stringify(captures, null, 2))
-    saveFileIndex++
-    console.log(
-      `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${savePath}`
-    )
-    captures = []
-  } catch (e) {
-    console.error('Save captures error:', e.message)
-  }
-}
+// async function saveCaptures() {
+//   if (!captures.length) return
+//   try {
+//     const savePath = path.join(SAVE_DIR, `captures-${saveFileIndex}.json`)
+//     fs.writeFileSync(savePath, JSON.stringify(captures, null, 2))
+//     saveFileIndex++
+//     console.log(
+//       `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${savePath}`
+//     )
+//     captures = []
+//   } catch (e) {
+//     console.error('Save captures error:', e.message)
+//   }
+// }
 
 async function ensureSaveDir() {
   try {
@@ -235,14 +237,13 @@ const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
   return result
 }
 
-function buildPacketPayload(kingdomId, tiles, tokenBigInt) {
+async function buildPacketPayload(kingdomId, tiles, tokenBigInt, token2) {
   const url = kingdomUrls[kingdomId]
-  if (!url) return null
+  if (!url || !tokenBigInt || !token2) return null
 
   const randomSeq = Math.floor(Math.random() * 32000) + 1
-
   const packetData = [
-    [312, randomSeq, [[tokenBigInt], mapToUint8Array(PACKET312.buff)], ''],
+    [312, randomSeq, [[tokenBigInt], token2], ''],
     [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
   ]
 
@@ -263,13 +264,17 @@ async function handleScanKingdom(req, res) {
     return res.json({ success: false, error: 'enter kingdom' })
   }
 
-  if (!PACKET312.sessionToken) {
+  const _token1 = await redisClient.get('mysession:token1:BigInt')
+  if (!_token1) {
     return res.json({ success: false, error: 'no session token' })
   }
 
-  if (!PACKET312.buff) {
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
     return res.json({ success: false, error: 'no auth buf' })
   }
+  const token1 = BigInt(_token1)
+  const token2 = new Uint8Array(_token2)
 
   const kingdomList = kingdoms
     .split(',')
@@ -280,16 +285,16 @@ async function handleScanKingdom(req, res) {
     return res.json({ success: false, error: 'no valid kingdoms' })
   }
 
-  // Ensure token is BigInt
-  const tokenValue = PACKET312.sessionToken
-  const tokenBigInt =
-    typeof tokenValue === 'bigint'
-      ? tokenValue
-      : typeof tokenValue === 'number'
-        ? BigInt(tokenValue)
-        : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
-          ? BigInt(tokenValue)
-          : tokenValue
+  // // Ensure token is BigInt
+  // const tokenValue = PACKET312.sessionToken
+  // const tokenBigInt =
+  //   typeof tokenValue === 'bigint'
+  //     ? tokenValue
+  //     : typeof tokenValue === 'number'
+  //       ? BigInt(tokenValue)
+  //       : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
+  //         ? BigInt(tokenValue)
+  //         : tokenValue
 
   const tilesArray = generateArrays()
   const jobIds = []
@@ -298,7 +303,7 @@ async function handleScanKingdom(req, res) {
 
   for (const kingdomId of kingdomList) {
     for (const tiles of tilesArray) {
-      const payload = buildPacketPayload(kingdomId, tiles, tokenBigInt)
+      const payload = buildPacketPayload(kingdomId, tiles, token1, token2)
 
       const job =
         priority === 'CRITICAL'
@@ -331,9 +336,17 @@ async function handleStartTimer(req, res) {
     return res.json({ success: false, error: 'enter kingdom' })
   }
 
-  if (!PACKET312.sessionToken || !PACKET312.buff) {
-    return res.json({ success: false, error: 'missing session token or auth buf' })
+  const _token1 = await redisClient.get('mysession:token1:BigInt')
+  if (!_token1) {
+    return res.json({ success: false, error: 'no session token1' })
   }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    return res.json({ success: false, error: 'no session token2' })
+  }
+  const token1 = BigInt(_token1)
+  const token2 = new Uint8Array(_token2)
 
   const kingdomList = kingdoms
     .split(',')
@@ -349,20 +362,20 @@ async function handleStartTimer(req, res) {
   for (const kingdomId of kingdomList) {
     for (const tiles of tilesArray) {
       // Ensure token is BigInt
-      const tokenValue = PACKET312.sessionToken
-      const tokenBigInt =
-        typeof tokenValue === 'bigint'
-          ? tokenValue
-          : typeof tokenValue === 'number'
-            ? BigInt(tokenValue)
-            : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
-              ? BigInt(tokenValue)
-              : tokenValue
+      // const tokenValue = PACKET312.sessionToken
+      // const tokenBigInt =
+      //   typeof tokenValue === 'bigint'
+      //     ? tokenValue
+      //     : typeof tokenValue === 'number'
+      //       ? BigInt(tokenValue)
+      //       : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
+      //         ? BigInt(tokenValue)
+      //         : tokenValue
 
       timerManager.scheduleScanKingdom(kingdomId, {
         intervalMs: parseInt(interval),
         payloadBuilder: async kId => {
-          return buildPacketPayload(kId, tiles, tokenBigInt)
+          return buildPacketPayload(kId, tiles, token1, token2)
         }
       })
     }
@@ -449,219 +462,40 @@ function setupPacketCaptureListener() {
     const url = response.url()
     if (!url.includes('rubens-realm')) return
 
-    // if (captureIndex == 100 && !sessionSaved) {
-    //   //save session
-    //   sessionSaved = true
-    //   await context.storageState({ path: authPath })
-    // }
-
     try {
       const status = response.status()
-      const headers = response.headers()
-      const body = await response.body()
+      const responseHeaders = response.headers()
+      const responseBody = await response.body()
 
-      if (!body || body.length === 0) return
+      if (!responseBody || responseBody.length === 0) return
       if (headers['content-type']?.includes('text/html')) return
 
       const request = response.request()
-      const postData = request.postData()
+      // const postData = request.postData()
       const postDataBuff = request.postDataBuffer()
-      // if (postDataBuff) {
-      //   console.log(`Recibidos ${postDataBuff.length} bytes de datos binarios.`)
-      //   // Aquí puedes procesar el Buffer, por ejemplo, guardarlo como archivo
-      // }
 
-      const decodedReq = decodeMsgPack2(Buffer.from(postDataBuff))
+      const requestKey = `request_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
+      const responseKey = `response_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
 
-      let decodedResponse = decodeMsgPack2(Buffer.from(body))
-      const opCode = getFirstValue(decodedResponse)
+      // 1. Guardar el binario directamente (Redis maneja Buffers de forma nativa)
+      // Ponemos un TTL de 15min ('EX', 900) para no llenar la RAM si el worker falla
+      const redisClient = getRedis()
+      await redisClient.set(requestKey, postDataBuff, 'EX', 60 * 15)
+      await redisClient.set(responseKey, responseBody, 'EX', 900)
 
-      if (opCode !== null) {
-        uniqueOpcodes.add(opCode)
-      }
-
-      if (opCode === 402 && !myPlayerInfo.internalPlayerId) {
-        const extractedId = extractInternalIdFrom402(decodedResponse)
-        if (extractedId) {
-          myPlayerInfo.internalPlayerId = extractedId
-          console.log(
-            `[${new Date().toLocaleTimeString()}] Found internal player ID: ${myPlayerInfo.internalPlayerId}`
-          )
-        }
-      }
-
-      if (opCode === 203) {
-        if (!myPlayerInfo.internalPlayerId) {
-          const id = decodedResponse[1]?.[0]?.[0]
-          if (typeof id === 'number' && id > 1000000000000) {
-            myPlayerInfo.internalPlayerId = id
-            console.log(`Found internal player ID: ${myPlayerInfo.internalPlayerId}`)
-          }
-        }
-
-        if (!myPlayerInfo.sessionToken) {
-          myPlayerInfo.sessionToken = extractSessionToken(decodedResponse)
-
-          console.log(`Found session token: ${myPlayerInfo.sessionToken}`)
-        }
-      }
-
-      const isMyPacket = containsPlayerId(
-        decodedResponse,
-        myPlayerInfo.playerId,
-        myPlayerInfo.internalPlayerId
-      )
-
-      let objects = []
-      if (opCode === 312 || opCode === 408) {
-        extractObjects(decodedResponse)
-
-        objects.forEach(obj => trackUnknownStaticId(obj))
-      }
-
-      captures.push({
-        id: ++captureIndex,
-        opCode,
+      const payload = {
         url,
         status,
-        request: {
-          method: request.method(),
-          headers: request.headers(),
-          bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
-          bodySize: postData ? postData.length : 0,
-          bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
-          bodyBufferSize: postDataBuff ? postDataBuff.length : 0
-          // decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
-        },
-        response: {
-          headers,
-          bodyB64: Buffer.from(body).toString('base64'),
-          bodySize: body.length
-          // decodedResponse
-        },
-        objectCount: objects.length,
-        objects,
-        isMyPacket
+        requestKey,
+        responseKey,
+        requestMethod: request.method(),
+        requestHeaders: request.headers(),
+        responseHeaders
+      }
+
+      await addJob(JOB_TYPES.PROCESS_PACKET, payload, {
+        priority: PRIORITY.CRITICAL
       })
-
-      if (isMyPacket) {
-        myPlayerPackets.push({
-          id: ++myPlayerPacketIndex,
-          opCode,
-          url,
-          status,
-          request: requestData,
-          bodyB64: Buffer.from(body).toString('base64'),
-          bodySize: body.length,
-          bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
-          bodyBufferSize: postDataBuff ? postDataBuff.length : 0,
-          // decodedResponse,
-          objectCount: objects.length,
-          objects,
-          timestamp: new Date().toISOString()
-        })
-        console.log(`[${new Date().toLocaleTimeString()}] MY PACKET: ${url} (opcode: ${opCode})`)
-        if (autoSave) saveMyPlayerPackets()
-      }
-
-      if (opCode === 312 || opCode === 408) {
-        objectPackets.push({
-          opCode,
-          url,
-          request: {
-            method: request.method(),
-            headers: request.headers(),
-            bodyB64: postData ? Buffer.from(postData).toString('base64') : null,
-            bodySize: postData ? postData.length : 0,
-            bodyBufferB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
-            bodyBufferSize: postDataBuff ? postDataBuff.length : 0
-            // decodedRequest: postData ? decodeFull(Buffer.from(postData)) : null
-          },
-          response: {
-            headers,
-            bodyB64: Buffer.from(body).toString('base64'),
-            bodySize: body.length
-            // decodedResponse
-          },
-          objectCount: objects.length,
-          objects
-        })
-
-        if (autoSave) saveObjectPackets()
-      }
-
-      if (opCode === 312) {
-        console.log(
-          '312 packet getting tokens',
-          JSON.stringify(decodedReq, (key, value) =>
-            typeof value === 'bigint' ? value.toString() : value
-          )
-        )
-        //request:          [312,284,[["1309965043442"],{"0":105,"1":223,"2":166,"3":213,"4":171,"5":90,"6":183,"7":199,"8":35,"9":86,"10":245,"11":99}],""]
-
-        if (!PACKET312.sessionToken) {
-          const rawToken = decodedReq[2]?.[0]?.[0]
-          PACKET312.sessionToken =
-            typeof rawToken === 'bigint'
-              ? rawToken
-              : typeof rawToken === 'number'
-                ? BigInt(rawToken)
-                : rawToken
-          PACKET312.buff = decodedReq[2]?.[1] // auth token?
-
-          console.log(
-            '312 packet decodedReq[0][2]',
-            JSON.stringify(decodedReq[2], (key, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-            )
-          )
-          console.log(
-            'PACKET312.sessionToken type:',
-            typeof PACKET312.sessionToken,
-            'value:',
-            PACKET312.sessionToken
-          )
-        }
-      }
-
-      if (opCode === 312 && objects.length > 0) {
-        const tileIds = decodedReq[1]
-
-        const allCoordX = objects.map(o => o.x)
-        const allCoordY = objects.map(o => o.y)
-        const minX = Math.min(...allCoordX)
-        const maxX = Math.max(...allCoordX)
-        const minY = Math.min(...allCoordY)
-        const maxY = Math.max(...allCoordY)
-        const kingdom = objects[0].kingdom
-
-        /*
-  [
-   [ 312, "sequence ie:2242", [["sessionToken?"], "212bytesAuth?"], ""],
-   [ ["tileId1", "tileId2"],["0's as many tilesId" ],[],[] ]
-
-  ]
-
-
-  */
-
-        packets312analyze.push({
-          opCode,
-          url,
-          requestBodyB64: postDataBuff ? Buffer.from(postDataBuff).toString('base64') : null,
-          responseBodyB64: Buffer.from(body).toString('base64'),
-          kingdom,
-          tileIds: JSON.stringify(tileIds),
-          range: `xy1=${minX}-${minY}, xy2=${maxX}-${maxY}`,
-          objectCount: objects.length
-        })
-
-        if (autoSave) saveObjectPackets312()
-      }
-
-      // console.log(`[${new Date().toLocaleTimeString()}] Captured: ${url} (${body.length} bytes)`)
-
-      if (autoSave) saveToFile()
     } catch (e) {
       console.error('Capture error:', e.message)
     }
@@ -939,9 +773,7 @@ app.post('/api/capturing/start', async (req, res) => {
 
 app.post('/api/capturing/stop', async (req, res) => {
   capturingEnabled = false
-  if (captures.length > 0) {
-    await saveCaptures()
-  }
+
   res.json({ success: true, message: 'Capturing stopped' })
 })
 
@@ -962,7 +794,8 @@ async function main() {
     [JOB_TYPES.EXTRACT_OBJECTS]: extractObjectsHandler,
     [JOB_TYPES.SAVE_OBJECTS]: saveObjectsHandler,
     [JOB_TYPES.FIND_OBJECTS]: findObjectsHandler,
-    [JOB_TYPES.NOTIFICATION]: notificationHandler
+    [JOB_TYPES.NOTIFICATION]: notificationHandler,
+    [JOB_TYPES.PROCESS_PACKET]: processPacketHandler
   }
 
   await startWorker(handlers)

@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Packet Capture</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Segolas', 'Consolas', monospace;
+        margin: 0;
+        padding: 20px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .header h1 {
+        color: #569cd6;
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      button {
+        padding: 10px 20px;
+        background: #0e639c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      button:hover {
+        background: #1177bb;
+      }
+      button:disabled {
+        background: #444;
+        cursor: not-allowed;
+      }
+      button.danger {
+        background: #c00;
+      }
+      button.danger:hover {
+        background: #e00;
+      }
+
+      input[type='checkbox'] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 15px;
+        background: #2d2d2d;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      label:hover {
+        background: #3a3a3a;
+      }
+      label.active {
+        background: #1e3a1e;
+        color: #4caf50;
+      }
+
+      .panel {
+        background: #252526;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        overflow: hidden;
+      }
+      .panel-header {
+        font-weight: bold;
+        padding: 10px 15px;
+        background: #2d2d2d;
+        border-bottom: 1px solid #3c3c3c;
+        font-size: 14px;
+      }
+      .count {
+        color: #569cd6;
+        font-weight: bold;
+        margin-left: 15px;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      @media (max-width: 1200px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .captures-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .capture-item {
+        padding: 10px 15px;
+        border-bottom: 1px solid #3c3c3c;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .capture-item:hover {
+        background: #2d2d2d;
+      }
+      .capture-item.selected {
+        background: #2d4a2d;
+      }
+      .capture-item.my-packet {
+        background: #1e3a1e;
+      }
+      .capture-item.my-packet:hover {
+        background: #2a4a2a;
+      }
+      .capture-item .url {
+        color: #9cdcfe;
+      }
+      .capture-item .meta {
+        color: #888;
+        font-size: 11px;
+        margin-top: 4px;
+      }
+
+      #detail {
+        width: 100%;
+        height: 300px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border: none;
+        padding: 10px;
+        font-family: 'Consolas', monospace;
+        font-size: 12px;
+        resize: vertical;
+        border-radius: 0 0 8px 8px;
+      }
+
+      .opcodes-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 15px;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+      .opcode-tag {
+        padding: 4px 10px;
+        background: #0e639c;
+        border-radius: 4px;
+        font-size: 12px;
+        color: white;
+      }
+
+      #log {
+        background: #1e1e1e;
+        padding: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+
+      .empty-state {
+        padding: 20px;
+        color: #666;
+        text-align: center;
+      }
+      .my-packet-tag {
+        background: #2e5e2e;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        margin-right: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header"><h1>Packet Capture Tool</h1></div>
+
+    <div class="controls">
+      <button id="btnStart">Start Browser</button>
+      <button id="btnStop" disabled class="danger">Stop</button>
+      <label id="captureToggle">
+        <input type="checkbox" id="cbCapture" />
+        <span>Capture Packets</span>
+      </label>
+      <button id="btnScan312">scan kingdom 312</button>
+      <input type="text" id="kingdoms" value="147" placeholder="enter kingdoms ie: 147,142,143" />
+    </div>
+
+    <div class="controls">
+      <button id="btnRefresh">Refresh</button>
+
+      <button id="btnClear" class="danger">Clear</button>
+
+      <span class="count" id="captureCount">Captures: 0</span>
+    </div>
+
+    <div class="controls">
+      <label>Filter Opcodes (comma separated):</label>
+      <input
+        type="text"
+        id="opcodeFilter"
+        placeholder="e.g. 312,315,316"
+        style="
+          padding: 8px;
+          width: 250px;
+          border-radius: 4px;
+          border: 1px solid #444;
+          background: #2d2d2d;
+          color: #d4d4d4;
+        "
+      />
+    </div>
+
+    <div class="main-grid">
+      <div class="panel">
+        <div class="panel-header">
+          Captured Packets
+          <span class="count" id="listCount">(0)</span>
+        </div>
+        <div class="captures-list" id="capturesList">
+          <div class="empty-state">Click "Capture Packets" to start</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Packet Details</div>
+        <textarea id="detail" readonly placeholder="Click on a packet to see details..."></textarea>
+      </div>
+    </div>
+
+    <!-- <div class="panel">
+      <div class="panel-header">
+        Unique Opcodes
+        <span class="count" id="opcodeCount">(0)</span>
+      </div>
+      <div class="opcodes-list" id="opcodesList">
+        <div class="empty-state">No opcodes captured yet</div>
+      </div>
+    </div> -->
+
+    <!-- <div class="panel">
+      <div class="panel-header">
+        My Player Packets
+        <span class="count" id="myPlayerCount">(0)</span>
+        <span id="internalIdDisplay" style="margin-left: 20px; color: #4caf50"></span>
+      </div>
+      <div class="captures-list" id="myPlayerList">
+        <div class="empty-state">No player packets yet</div>
+      </div>
+    </div> -->
+
+    <div class="panel">
+      <div class="panel-header">
+        Unknown StaticIDs
+        <span class="count" id="unknownCount">(0)</span>
+      </div>
+      <div class="captures-list" id="unknownList" style="max-height: 200px">
+        <div class="empty-state">No unknown static IDs</div>
+      </div>
+    </div>
+
+    <!-- <div class="panel">
+      <div class="panel-header">
+        Chat StaticIDs
+        <span class="count" id="chatCount">(0)</span>
+      </div>
+      <div class="captures-list" id="chatList" style="max-height: 150px">
+        <div class="empty-state">No chat static IDs from MESG messages</div>
+      </div>
+    </div> -->
+
+    <div class="panel">
+      <div class="panel-header">
+        Static ID Database
+        <span class="count" id="dbCount">(0)</span>
+      </div>
+      <div class="captures-list" id="dbList" style="max-height: 250px">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">Log</div>
+      <div id="log"></div>
+    </div>
+
+    <script>
+      const API = '/api'
+      let selectedId = null
+      let refreshInterval = null
+      let allCaptures = []
+
+      function log(msg) {
+        const el = document.getElementById('log')
+        el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`
+        el.scrollTop = el.scrollHeight
+      }
+
+      function updateUI(connected) {
+        document.getElementById('btnStart').disabled = connected
+        document.getElementById('btnStop').disabled = !connected
+        document.getElementById('btnRefresh').disabled = !connected
+
+        document.getElementById('cbCapture').disabled = !connected
+      }
+
+      function updateCaptureToggle(enabled) {
+        const label = document.getElementById('captureToggle')
+        const cb = document.getElementById('cbCapture')
+        cb.checked = enabled
+        label.className = enabled ? 'active' : ''
+      }
+
+      async function refreshCaptures() {
+        try {
+          const res = await fetch(API + '/captures')
+          const data = await res.json()
+          if (data.success) {
+            allCaptures = data.captures || []
+            document.getElementById('captureCount').textContent = 'Captures: ' + allCaptures.length
+            document.getElementById('listCount').textContent = '(' + allCaptures.length + ')'
+            renderCaptures(allCaptures)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+
+      // async function refreshOpcodes() {
+      //   try {
+      //     const res = await fetch(API + '/opcodes')
+      //     const data = await res.json()
+      //     if (data.success) {
+      //       document.getElementById('opcodeCount').textContent = '(' + data.count + ')'
+      //       renderOpcodes(data.opcodes || [])
+      //     }
+      //   } catch (e) {
+      //     log('Error: ' + e.message)
+      //   }
+      // }
+
+      // async function refreshMyPlayer() {
+      //   try {
+      //     const res = await fetch(API + '/myplayer')
+      //     const data = await res.json()
+      //     if (data.success) {
+      //       document.getElementById('myPlayerCount').textContent = '(' + data.count + ')'
+      //       document.getElementById('internalIdDisplay').textContent = data.internalPlayerId
+      //         ? `Internal ID: ${data.internalPlayerId}`
+      //         : ''
+      //       renderMyPlayerPackets(data.packets || [])
+      //     }
+      //   } catch (e) {
+      //     log('Error: ' + e.message)
+      //   }
+      // }
+
+      async function refreshUnknownStaticIds() {
+        try {
+          const res = await fetch(API + '/unknown-staticids')
+          const data = await res.json()
+          if (data.success) {
+            document.getElementById('unknownCount').textContent = '(' + data.count + ')'
+            renderUnknownStaticIds(data.items || [])
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+
+      // async function refreshChatStaticIds() {
+      //   try {
+      //     const res = await fetch(API + '/chat-staticids')
+      //     const data = await res.json()
+      //     if (data.success) {
+      //       document.getElementById('chatCount').textContent = '(' + data.count + ')'
+      //       renderChatStaticIds(data.items || [])
+      //     }
+      //   } catch (e) {
+      //     log('Error: ' + e.message)
+      //   }
+      // }
+
+      async function refreshStaticDb() {
+        try {
+          const res = await fetch(API + '/static-db')
+          const data = await res.json()
+          if (data.success) {
+            document.getElementById('dbCount').textContent = '(' + data.count + ')'
+            renderStaticDb(data.items || [])
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+
+      function renderStaticDb(items) {
+        const el = document.getElementById('dbList')
+        if (items.length === 0) {
+          el.innerHTML = '<div class="empty-state">No entries in database</div>'
+          return
+        }
+        el.innerHTML = items
+          .map(item => {
+            const name = item.name || 'Unknown'
+            const entryType = item.entryType || 'N/A'
+            const level = item.level !== undefined ? `Lv${item.level}` : ''
+            return `<div class="capture-item">
+            <div class="url">${item.staticId} - <span style="color:#4caf50">${name}</span></div>
+            <div class="meta">Type: ${entryType} ${level ? '| ' + level : ''}</div>
+          </div>`
+          })
+          .join('')
+      }
+
+      function getFilteredOpcodes() {
+        const filter = document.getElementById('opcodeFilter').value
+        if (!filter) return new Set()
+        return new Set(
+          filter
+            .split(',')
+            .map(s => parseInt(s.trim()))
+            .filter(n => !isNaN(n))
+        )
+      }
+
+      function renderCaptures(captures) {
+        const el = document.getElementById('capturesList')
+        const filteredOpcodes = getFilteredOpcodes()
+        const filtered = captures.filter(c => !filteredOpcodes.has(c.opCode))
+        if (filtered.length === 0) {
+          el.innerHTML =
+            '<div class="empty-state">No captures' +
+            (filteredOpcodes.size > 0 ? ' (filter active)' : '') +
+            '</div>'
+          return
+        }
+        el.innerHTML = filtered
+          .map(c => {
+            const url = new URL(c.url)
+            const path = url.pathname + url.search
+            const size = c.response?.bodySize ? `(${c.response.bodySize}B)` : ''
+            const selected = c.id === selectedId ? 'selected' : ''
+            const myTag = c.isMyPacket ? '<span class="my-packet-tag">ME</span>' : ''
+            return `<div class="capture-item ${selected}" onclick="showCapture(${c.id}, 'captures')">
+            ${myTag}<div class="url">${path}</div>
+            <div class="meta">ID:${c.id} | Op:${c.opCode} | ${size}</div>
+          </div>`
+          })
+          .join('')
+      }
+
+      // function renderMyPlayerPackets(packets) {
+      //   const el = document.getElementById('myPlayerList')
+      //   if (packets.length === 0) {
+      //     el.innerHTML = '<div class="empty-state">No player packets yet</div>'
+      //     return
+      //   }
+      //   el.innerHTML = packets
+      //     .map(p => {
+      //       const url = new URL(p.url)
+      //       const path = url.pathname + url.search
+      //       const size = p.response?.bodySize ? `(${p.response.bodySize}B)` : ''
+      //       return `<div class="capture-item my-packet" onclick="showCapture(${p.id}, 'myplayer')">
+      //       <div class="url">${path}</div>
+      //       <div class="meta">ID:${p.id} | Op:${p.opCode} | ${size}</div>
+      //     </div>`
+      //     })
+      //     .join('')
+      // }
+
+      function renderUnknownStaticIds(items) {
+        const el = document.getElementById('unknownList')
+        if (items.length === 0) {
+          el.innerHTML = '<div class="empty-state">No unknown static IDs</div>'
+          return
+        }
+        el.innerHTML = items
+          .sort((a, b) => b.timestamp - a.timestamp)
+          .map(item => {
+            const coords = item.kingdom ? `[${item.kingdom},${item.x},${item.y}]` : ''
+            return `<div class="capture-item">
+            <div class="url">StaticID: ${item.staticId}</div>
+            <div class="meta" style="color:#569cd6">${coords}</div>
+          </div>`
+          })
+          .join('')
+      }
+
+      // function renderChatStaticIds(items) {
+      //   const el = document.getElementById('chatList')
+      //   if (items.length === 0) {
+      //     el.innerHTML = '<div class="empty-state">No chat static IDs from MESG messages</div>'
+      //     return
+      //   }
+      //   el.innerHTML = items
+      //     .map(item => {
+      //       return `<div class="capture-item">
+      //       <div class="url">StaticID: ${item.staticId}</div>
+      //       <div class="meta">EntryType: ${item.entryType} | Name: ${item.name}</div>
+      //     </div>`
+      //     })
+      //     .join('')
+      // }
+
+      // function renderOpcodes(opcodes) {
+      //   const el = document.getElementById('opcodesList')
+      //   if (opcodes.length === 0) {
+      //     el.innerHTML = '<div class="empty-state">No opcodes captured yet</div>'
+      //     return
+      //   }
+      //   el.innerHTML = opcodes.map(op => `<span class="opcode-tag">${op}</span>`).join('')
+      // }
+
+      async function showCapture(id, source) {
+        selectedId = id
+        const endpoint = '/captures/' + id
+        const res = await fetch(API + endpoint)
+        const data = await res.json()
+        if (data.success) {
+          const c = data.packet || data.capture
+          document.getElementById('detail').value = formatDetail(c)
+        }
+      }
+
+      function formatDetail(c) {
+        let s = ''
+        s += `=== PACKET #${c.id} ===\n`
+        s += `URL: ${c.url}\n`
+        s += `Opcode: ${c.opCode}\n`
+        s += `Status: ${c.status}\n`
+        s += `Size: ${c.response?.bodySize || 0} bytes\n`
+        if (c.request) {
+          s += `\n=== REQUEST ===\n`
+          s += `Method: ${c.request.method}\n`
+          if (c.request.decodedRequest) {
+            s += `Decoded:\n${JSON.stringify(c.request.decodedRequest, null, 2)}\n`
+          }
+        }
+        s += `\n=== RESPONSE ===\n`
+        s += `Decoded:\n${JSON.stringify(c.response?.decodedResponse || [], null, 2)}\n`
+        if (c.objects && c.objects.length > 0) {
+          s += `\n=== OBJECTS (${c.objects.length}) ===\n`
+          s += JSON.stringify(c.objects, null, 2)
+        }
+        return s
+      }
+
+      async function toggleCapture(enabled) {
+        try {
+          const res = await fetch(API + '/capturing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled })
+          })
+          const data = await res.json()
+          if (data.success) {
+            log(enabled ? 'Capturing started' : 'Capturing stopped')
+            updateCaptureToggle(data.capturing)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+
+      document.getElementById('btnStart').addEventListener('click', async () => {
+        log('Starting browser...')
+        const res = await fetch(API + '/browser/start', { method: 'POST' })
+        const data = await res.json()
+        if (data.success) {
+          log('Browser started!')
+          updateUI(true)
+          refreshInterval = setInterval(() => {
+            refreshCaptures()
+            // refreshOpcodes()
+            // refreshMyPlayer()
+            refreshUnknownStaticIds()
+            // refreshChatStaticIds()
+            refreshStaticDb()
+          }, 1000)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
+      document.getElementById('btnStop').addEventListener('click', async () => {
+        if (refreshInterval) {
+          clearInterval(refreshInterval)
+          refreshInterval = null
+        }
+        await fetch(API + '/browser/stop', { method: 'POST' })
+        log('Browser stopped')
+        updateUI(false)
+        updateCaptureToggle(false)
+      })
+
+      document.getElementById('btnScan312').addEventListener('click', async () => {
+        log('Scanning - sending 312 packets...')
+        const kingdoms = document.getElementById('kingdoms').value || ''
+        if (kingdoms.trim() === '') return
+
+        //check if kingdoms have commas, split and check if each is a valid number
+        const kds = kingdoms.split(',')
+        if (
+          !kds.every(item => {
+            const trimmed = item.trim()
+            // Validamos que no esté vacío y que sea un número real
+            return trimmed !== '' && !isNaN(trimmed)
+          })
+        ) {
+          alert('enter valid kingdoms')
+          return
+        }
+
+        const res = await fetch(API + '/scanKingdom', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kingdoms })
+        })
+        const data = await res.json()
+        if (data.success) {
+          console.log('data', data.data)
+          log('Packet 312 sent')
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
+      document
+        .getElementById('cbCapture')
+        .addEventListener('change', e => toggleCapture(e.target.checked))
+
+      document.getElementById('btnRefresh').addEventListener('click', () => {
+        refreshCaptures()
+        // refreshOpcodes()
+        // refreshMyPlayer()
+        refreshUnknownStaticIds()
+        // refreshChatStaticIds()
+        refreshStaticDb()
+      })
+
+      document.getElementById('opcodeFilter').addEventListener('input', () => {
+        if (allCaptures.length > 0) {
+          renderCaptures(allCaptures)
+        }
+      })
+
+      document.getElementById('btnClear').addEventListener('click', async () => {
+        await fetch(API + '/clear-all', { method: 'POST' })
+        log('Cleared all')
+        selectedId = null
+        document.getElementById('detail').value = ''
+        refreshCaptures()
+        // refreshOpcodes()
+        // refreshMyPlayer()
+        refreshUnknownStaticIds()
+        // refreshChatStaticIds()
+      })
+    </script>
+  </body>
+</html>

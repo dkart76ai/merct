@@ -15,7 +15,8 @@ const JOB_TYPES = {
   EXTRACT_PLAYER: 'extract-player',
   NOTIFICATION: 'notification',
   SCAN_KINGDOM: 'scan-kingdom',
-  SCAN_FOR_MERC: 'scan-for-merc'
+  SCAN_FOR_MERC: 'scan-for-merc',
+  PROCESS_PACKET: 'process-packet'
 }
 
 const PRIORITY = {
@@ -52,7 +53,7 @@ function getQueue() {
 
 async function addJob(type, data, options = {}) {
   const q = getQueue()
-  
+
   const jobOptions = {}
 
   if (options.priority !== undefined) {
@@ -72,9 +73,11 @@ async function addJob(type, data, options = {}) {
   }
 
   const job = await q.add(type, data, jobOptions)
-  
-  console.log(`[Queue] Added job ${job.id} (${type}) with priority ${options.priority || PRIORITY.NORMAL}`)
-  
+
+  console.log(
+    `[Queue] Added job ${job.id} (${type}) with priority ${options.priority || PRIORITY.NORMAL}`
+  )
+
   return job
 }
 
@@ -96,48 +99,52 @@ async function addDelayed(type, data, delayMs) {
 
 function getTimerManagerInstance() {
   const { TimerManager } = require('./TimerManager')
-  
+
   if (!timerManager) {
     const queueInstance = getQueue()
     timerManager = new TimerManager(queueInstance)
   }
-  
+
   return timerManager
 }
 
 async function startWorker(handlers) {
   const connection = getRedis()
-  
-  worker = new Worker(QUEUE_NAME, async job => {
-    console.log(`[Worker] Processing job ${job.id} (${job.name}) priority ${job.priority}`)
-    
-    const handler = handlers[job.name]
-    if (!handler) {
-      throw new Error(`No handler registered for job type: ${job.name}`)
-    }
-    
-    const result = await handler(job.data)
-    
-    // Process chained jobs if handler returned them
-    if (result && result.nextJobs) {
-      for (const nextJob of result.nextJobs) {
-        await addJob(nextJob.type, nextJob.payload, {
-          priority: nextJob.priority || PRIORITY.NORMAL
-        })
+
+  worker = new Worker(
+    QUEUE_NAME,
+    async job => {
+      console.log(`[Worker] Processing job ${job.id} (${job.name}) priority ${job.priority}`)
+
+      const handler = handlers[job.name]
+      if (!handler) {
+        throw new Error(`No handler registered for job type: ${job.name}`)
+      }
+
+      const result = await handler(job.data)
+
+      // Process chained jobs if handler returned them
+      if (result && result.nextJobs) {
+        for (const nextJob of result.nextJobs) {
+          await addJob(nextJob.type, nextJob.payload, {
+            priority: nextJob.priority || PRIORITY.NORMAL
+          })
+        }
+      }
+
+      console.log(`[Worker] Job ${job.id} completed`)
+
+      return result
+    },
+    {
+      connection,
+      concurrency: 5,
+      limiter: {
+        max: 10,
+        duration: 1000
       }
     }
-    
-    console.log(`[Worker] Job ${job.id} completed`)
-    
-    return result
-  }, {
-    connection,
-    concurrency: 5,
-    limiter: {
-      max: 10,
-      duration: 1000
-    }
-  })
+  )
 
   worker.on('completed', job => {
     console.log(`[Worker] Job ${job.id} completed successfully`)
@@ -166,7 +173,7 @@ async function stopWorker() {
 
 async function getQueueStatus() {
   const q = getQueue()
-  
+
   const [waiting, active, completed, failed, delayed] = await Promise.all([
     q.getWaitingCount(),
     q.getActiveCount(),
@@ -196,6 +203,44 @@ async function cleanOldJobs() {
   await q.clean(24 * 3600, 500, 'failed')
 }
 
+async function addJobAndWait(type, data, options = {}) {
+  const q = getQueue()
+
+  const jobOptions = {}
+  if (options.priority !== undefined) {
+    jobOptions.priority = options.priority
+  }
+
+  // Don't repeat, we want to wait for this one
+  if (options.delay) {
+    jobOptions.delay = options.delay
+  }
+
+  const job = await q.add(type, data, jobOptions)
+
+  console.log(`[Queue] Added job ${job.id} (${type}), waiting for result...`)
+
+  try {
+    // Wait for job to complete (with timeout)
+    const result = await job.waitUntilFinished(q.eventsEmitter, {
+      timeout: options.timeout || 30000 // 30 second default
+    })
+
+    return {
+      jobId: job.id,
+      success: true,
+      result
+    }
+  } catch (error) {
+    console.error(`[Queue] Job ${job.id} failed or timed out:`, error.message)
+    return {
+      jobId: job.id,
+      success: false,
+      error: error.message
+    }
+  }
+}
+
 async function pauseQueue() {
   const q = getQueue()
   await q.pause()
@@ -223,6 +268,7 @@ module.exports = {
   addHigh,
   addLow,
   addDelayed,
+  addJobAndWait,
   getTimerManager: getTimerManagerInstance,
   startWorker,
   stopWorker,

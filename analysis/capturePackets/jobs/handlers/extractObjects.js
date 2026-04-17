@@ -46,13 +46,16 @@ function extractObjects(data) {
 }
 
 async function extractObjectsHandler(data) {
-  const { packetData, kingdom, triggeredBy } = data
+  const { buffer, triggeredBy } = data
+
+  const _buffer = Buffer.from(buffer, 'base64')
+  const packetData = new Uint8Array(_buffer)
 
   console.log(`[ExtractObjects] Processing data`)
 
   try {
     const objects = extractObjects(packetData)
-    
+
     console.log(`[ExtractObjects] Found ${objects.length} objects`)
 
     if (objects.length === 0) {
@@ -76,7 +79,6 @@ async function extractObjectsHandler(data) {
         }
       ]
     }
-
   } catch (error) {
     console.error(`[ExtractObjects] Error:`, error.message)
     throw error

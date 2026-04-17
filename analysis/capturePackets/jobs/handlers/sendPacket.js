@@ -66,7 +66,8 @@ async function sendPacketHandler(payload) {
           type: JOB_TYPES.EXTRACT_OBJECTS,
           priority: PRIORITY.NORMAL,
           payload: {
-            packetData: decoded.results,
+            buffer: Buffer.from(decoded.results).toString('base64'),
+            // packetData: decoded.results,
             kingdom,
             triggeredBy,
             notificationConfig

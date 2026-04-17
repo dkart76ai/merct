@@ -1,0 +1,256 @@
+const path = require('path')
+const { addJob, JOB_TYPES, PRIORITY } = require('../index')
+const { getRedis } = require('../redis')
+
+const redisClient = getRedis()
+
+let captureIndex = 0
+let saveFileIndex = 0
+const captures = []
+
+const SAVE_DIR = path.join(__dirname, 'captures')
+const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
+const MAX_CAPTURES_PER_FILE = 500
+
+const myPlayerInfo = {
+  name: 'Maedve',
+  coords: { k: 277, x: 91, y: 53 },
+  cityLevel: 9,
+  heroLevel: 6,
+  playerId: 'tb:68568818',
+  might: 7045,
+  clan: 'LOW'
+}
+//  await redisClient.set('app:shared_token', newToken, 'EX', 86400);
+function mapToUint8Array(map) {
+  if (!map) return null
+  if (map instanceof Uint8Array) return map
+  const keys = Object.keys(map)
+    .map(Number)
+    .sort((a, b) => a - b)
+  if (keys.length === 0) return null
+  const arr = new Uint8Array(keys.length)
+  for (const k of keys) {
+    arr[k] = map[k]
+  }
+  return arr
+}
+
+function getFirstValue(data) {
+  for (let item of data) {
+    if (typeof item === 'number') return item
+    if (Array.isArray(item)) {
+      const resultado = getFirstValue(item)
+      if (resultado !== undefined) return resultado
+    }
+  }
+
+  return null
+}
+
+function containsPlayerId(data, playerId, internalId) {
+  if (!data) return false
+  const str = JSON.stringify(data)
+  if (playerId && str.includes(playerId)) return true
+  if (internalId && str.includes(String(internalId))) return true
+  return false
+}
+
+function saveToFile() {
+  try {
+    if (!fs.existsSync(SAVE_DIR)) {
+      fs.mkdirSync(SAVE_DIR, { recursive: true })
+    }
+
+    const saveFile = path.join(SAVE_DIR, `captures-${String(saveFileIndex).padStart(3, '0')}.json`)
+    fs.writeFileSync(saveFile, JSON.stringify(captures, null, 2))
+    // console.log(
+    //   `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
+    // )
+
+    if (captures.length >= MAX_CAPTURES_PER_FILE) {
+      captures = []
+      captureIndex = 0
+      saveFileIndex++
+      console.log(
+        `[${new Date().toLocaleTimeString()}] Rotation: switched to captures-${String(saveFileIndex).padStart(3, '0')}.json`
+      )
+    }
+  } catch (e) {
+    console.error('Save error:', e.message)
+  }
+}
+
+function saveCapturedPacket(
+  opCode,
+  url,
+  status,
+  requestMethod,
+  requestHeaders,
+  requestBodyB64,
+  responseHeaders,
+  responseBodyB64,
+  tileIds,
+  isMyPacket
+) {
+  captures.push({
+    id: ++captureIndex,
+    opCode,
+    url,
+    status,
+    tileIds,
+    isMyPacket,
+    request: {
+      method: requestMethod,
+      headers: requestHeaders,
+      // bodyB64: requestBodyB64,
+      bodyBufferB64: requestBodyB64
+    },
+    response: {
+      headers: responseHeaders,
+      bodyB64: responseBodyB64
+    }
+  })
+
+  saveToFile()
+}
+
+async function extractInternalIdFrom402(data) {
+  //also found on 203 packets
+  if (!data || !Array.isArray(data)) return null
+
+  for (const item of data) {
+    if (Array.isArray(item) && item.length > 0) {
+      if (Array.isArray(item[0]) && item[0].length === 1) {
+        const id = item[0][0]
+        if ((typeof id === 'number' || typeof id === 'bigint') && id > 1000000000000) {
+          await redisClient.set('myPlayerId:bigint', id.toString(), 'EX', 86400)
+          return
+        }
+      }
+    }
+  }
+}
+
+async function extractMySessionTokens(decodedReq) {
+  console.log(
+    '312 packet getting tokens',
+    JSON.stringify(decodedReq, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    )
+  )
+  //request:  [312,284,[["1309965043442"],{"0":105,"1":223,"2":166,"3":213,"4":171,"5":90,"6":183,"7":199,"8":35,"9":86,"10":245,"11":99}],""]
+
+  const mySessionToken = decodedReq[2]?.[0]?.[0]
+  // mySessionToken =
+  //   typeof rawToken === 'bigint'
+  //     ? rawToken
+  //     : typeof rawToken === 'number'
+  //       ? BigInt(rawToken)
+  //       : rawToken
+  const token2 = decodedReq[2]?.[1] // auth token?
+  const mySessionToken2 = mapToUint8Array(token2)
+
+  await redisClient.set('mysession:token1:BigInt', mySessionToken.toString(), 'EX', 86400)
+  await redisClient.set('mysession:token2:Uint8Array', Buffer.from(mySessionToken2), 'EX', 86400)
+
+  //    const val = await redisClient.get('mysession:token1');
+
+  // if (val !== null) {
+  //   const recoveredBigInt = BigInt(val);
+
+  //   // Ahora puedes hacer operaciones matemáticas de BigInt
+  //   console.log(recoveredBigInt + 1n);
+  // }
+
+  //    const data = await redisClient.getBuffer('mi_clave_binaria');
+
+  // if (data) {
+  //   const recuperado = new Uint8Array(data);
+  //   console.log(recuperado); // Uint8Array [10, 20, 30, 40]
+  // }
+}
+
+async function processPacketHandler(data) {
+  const { url, status, requestKey, responseKey, requestMethod, requestHeaders, responseHeaders } =
+    data
+
+  // Recuperar el binario original
+  const requestData = await redisClient.getBuffer(requestKey)
+  const responseData = await redisClient.getBuffer(responseKey)
+
+  if (!requestData || !responseData) {
+    throw new Error('Los datos binarios expiraron o no se encontraron')
+  }
+
+  const decodedReq = decodeMsgPack2(Buffer.from(requestData))
+
+  let decodedResponse = decodeMsgPack2(Buffer.from(responseData))
+  const opCode = getFirstValue(decodedResponse)
+
+  console.log(`[processPacket]`)
+
+  //save all packets
+  requestBodyB64 = requestData ? Buffer.from(requestData).toString('base64') : null
+  responseBodyB64 = responseData ? Buffer.from(responseData).toString('base64') : null
+
+  //-----------------------
+
+  let isMyPacket = false
+  const internalPlayerId = await redisClient.get('myPlayerId:bigint')
+  if (internalPlayerId !== null) {
+    isMyPacket = containsPlayerId(decodedResponse, myPlayerInfo.playerId, BigInt(internalPlayerId))
+  }
+
+  //-----------------------
+  const tileIds = decodedReq[1]
+  saveCapturedPacket(
+    opCode,
+    url,
+    status,
+    requestMethod,
+    requestHeaders,
+    requestBodyB64,
+    responseHeaders,
+    responseBodyB64,
+    tileIds,
+    isMyPacket
+  )
+  //-----------------------
+
+  //-----------------------
+
+  if (opCode === 312) {
+    extractMySessionTokens(decodedReq)
+  }
+
+  if (opCode === 402) {
+    extractInternalIdFrom402(decodedResponse)
+  }
+
+  if (opCode === 312 || opCode === 408) {
+    const payload = {
+      buffer: Buffer.from(decodedResponse).toString('base64'),
+
+      triggeredBy: 'process-packet'
+    }
+
+    await addJob(JOB_TYPES.EXTRACT_OBJECTS, payload, {
+      priority: PRIORITY.NORMAL
+    })
+
+    // objects.forEach(obj => trackUnknownStaticId(obj))
+  }
+
+  // 3. Limpieza (opcional pero recomendado)
+  await redisClient.del(requestKey)
+  await redisClient.del(responseKey)
+
+  return {
+    success: true
+  }
+}
+
+module.exports = {
+  processPacketHandler
+}

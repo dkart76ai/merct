@@ -20,7 +20,7 @@ async function saveObjectsHandler(data) {
       success: true,
       saved: result.objects.length,
       created: result.created,
-      updated: result.updated
+      updated: result.updated,
       nextJobs: [
         {
           type: JOB_TYPES.FIND_OBJECTS,
