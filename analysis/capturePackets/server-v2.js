@@ -237,23 +237,23 @@ const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
   return result
 }
 
-async function buildPacketPayload(kingdomId, tiles, tokenBigInt, token2) {
-  const url = kingdomUrls[kingdomId]
-  if (!url || !tokenBigInt || !token2) return null
+// async function buildPacketPayload(kingdomId, tiles, tokenBigInt, token2) {
+//   const url = kingdomUrls[kingdomId]
+//   if (!url || !tokenBigInt || !token2) return null
 
-  const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [
-    [312, randomSeq, [[tokenBigInt], token2], ''],
-    [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
-  ]
+//   const randomSeq = Math.floor(Math.random() * 32000) + 1
+//   const packetData = [
+//     [312, randomSeq, [[tokenBigInt], token2], ''],
+//     [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
+//   ]
 
-  return {
-    url,
-    packetData,
-    kingdom: kingdomId,
-    notificationConfig: config
-  }
-}
+//   return {
+//     url,
+//     packetData,
+//     kingdom: kingdomId,
+//     notificationConfig: config
+//   }
+// }
 
 async function handleScanKingdom(req, res) {
   const { kingdoms, priority = 'HIGH' } = req.body
@@ -264,17 +264,17 @@ async function handleScanKingdom(req, res) {
     return res.json({ success: false, error: 'enter kingdom' })
   }
 
-  const _token1 = await redisClient.get('mysession:token1:BigInt')
-  if (!_token1) {
-    return res.json({ success: false, error: 'no session token' })
-  }
+  // const _token1 = await redisClient.get('mysession:token1:BigInt')
+  // if (!_token1) {
+  //   return res.json({ success: false, error: 'no session token' })
+  // }
 
-  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
-  if (!_token2) {
-    return res.json({ success: false, error: 'no auth buf' })
-  }
-  const token1 = BigInt(_token1)
-  const token2 = new Uint8Array(_token2)
+  // const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  // if (!_token2) {
+  //   return res.json({ success: false, error: 'no auth buf' })
+  // }
+  // const token1 = BigInt(_token1)
+  // const token2 = new Uint8Array(_token2)
 
   const kingdomList = kingdoms
     .split(',')
@@ -303,8 +303,11 @@ async function handleScanKingdom(req, res) {
 
   for (const kingdomId of kingdomList) {
     for (const tiles of tilesArray) {
-      const payload = buildPacketPayload(kingdomId, tiles, token1, token2)
-
+      // const payload = buildPacketPayload(kingdomId, tiles, token1, token2)
+      const payload = {
+        kingdomId,
+        tiles
+      }
       const job =
         priority === 'CRITICAL'
           ? await addCritical(JOB_TYPES.SEND_PACKET, {
@@ -336,17 +339,17 @@ async function handleStartTimer(req, res) {
     return res.json({ success: false, error: 'enter kingdom' })
   }
 
-  const _token1 = await redisClient.get('mysession:token1:BigInt')
-  if (!_token1) {
-    return res.json({ success: false, error: 'no session token1' })
-  }
+  // const _token1 = await redisClient.get('mysession:token1:BigInt')
+  // if (!_token1) {
+  //   return res.json({ success: false, error: 'no session token1' })
+  // }
 
-  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
-  if (!_token2) {
-    return res.json({ success: false, error: 'no session token2' })
-  }
-  const token1 = BigInt(_token1)
-  const token2 = new Uint8Array(_token2)
+  // const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  // if (!_token2) {
+  //   return res.json({ success: false, error: 'no session token2' })
+  // }
+  // const token1 = BigInt(_token1)
+  // const token2 = new Uint8Array(_token2)
 
   const kingdomList = kingdoms
     .split(',')
@@ -374,9 +377,10 @@ async function handleStartTimer(req, res) {
 
       timerManager.scheduleScanKingdom(kingdomId, {
         intervalMs: parseInt(interval),
-        payloadBuilder: async kId => {
-          return buildPacketPayload(kId, tiles, token1, token2)
-        }
+        tiles
+        // payloadBuilder: async kId => {
+        //   return buildPacketPayload(kId, tiles, token1, token2)
+        // }
       })
     }
   }

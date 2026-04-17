@@ -11,8 +11,9 @@ class TimerManager {
   async scheduleScanKingdom(kingdomId, options = {}) {
     const {
       intervalMs = 60000,
-      payloadBuilder,
-      jobType = JOB_TYPES.SEND_PACKET
+
+      tiles
+
     } = options
 
     const timerKey = `kingdom:${kingdomId}`
@@ -24,18 +25,17 @@ class TimerManager {
     }
 
     // Build job data - call payloadBuilder if provided (await if async)
-    const basePayload = payloadBuilder 
-      ? await Promise.resolve(payloadBuilder(kingdomId))
-      : {}
+
 
     const jobData = {
       kingdomId,
       triggeredBy: 'timer',
       intervalMs,
-      ...basePayload  // Includes: url, packetData, notificationConfig
+      tiles,
+      // ...basePayload  // Includes: url, packetData, notificationConfig
     }
 
-    const job = await this.queue.add(jobType, jobData, {
+    const job = await this.queue.add(JOB_TYPES.SEND_PACKET, jobData, {
       priority: PRIORITY.LOW,
       repeat: repeatOptions,
       jobId: `timer:${timerKey}`
@@ -43,7 +43,7 @@ class TimerManager {
 
     this.timers.set(timerKey, {
       repeatJobKey: job.repeatJobKey,
-      jobType
+      JOB_TYPES.SEND_PACKET
     })
 
     this.timerConfigs.set(timerKey, {
@@ -52,7 +52,7 @@ class TimerManager {
       startedAt: Date.now()
     })
 
-    console.log(`[Timer] Scheduled ${jobType} for kingdom ${kingdomId} every ${intervalMs}ms`)
+    console.log(`[Timer] Scheduled ${JOB_TYPES.SEND_PACKET} for kingdom ${kingdomId} every ${intervalMs}ms`)
 
     return job
   }

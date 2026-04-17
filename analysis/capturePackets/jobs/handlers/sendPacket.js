@@ -3,33 +3,60 @@ const {
   encodeMsgPack2MultiFragments
 } = require('../../../message-pack/messagePack.js')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
+const { getRedis } = require('../redis')
+const { kingdomUrls } = require('../../kingdomUrls.js')
 
-const DEFAULT_HEADERS = {
+const HEADERS = {
   'Content-Type': 'application/octet-stream',
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
   Referer: 'https://totalbattle.com/'
 }
 
+function buildPacketPayload(tiles, tokenBigInt, token2) {
+  if (!tokenBigInt || !token2) return null
+
+  const randomSeq = Math.floor(Math.random() * 32000) + 1
+  const packetData = [
+    [312, randomSeq, [[tokenBigInt], token2], ''],
+    [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
+  ]
+
+  return {
+    packetData,
+
+    notificationConfig: config
+  }
+}
+
 async function sendPacketHandler(payload) {
-  const {
-    url,
-    packetData, // Accept both naming conventions
-    headers = DEFAULT_HEADERS,
-    kingdom,
-    triggeredBy = 'manual',
-    notificationConfig = {}
-  } = payload
+  const { kingdomId, tiles, triggeredBy = 'manual', notificationConfig = {} } = payload
+
+  const redisClient = getRedis()
+
+  const _token1 = await redisClient.get('mysession:token1:BigInt')
+  if (!_token1) {
+    return res.json({ success: false, error: 'no session token1' })
+  }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    return res.json({ success: false, error: 'no session token2' })
+  }
+  const token1 = BigInt(_token1)
+  const token2 = new Uint8Array(_token2)
 
   console.log(`[SendPacket] Sending packet to ${url} (triggeredBy: ${triggeredBy})`)
 
   try {
+    const packetData = buildPacketPayload(tiles, token1, token2)
     // Encode the packet
     const encoded = encodeMsgPack2MultiFragments(packetData)
 
     // Send to server
+    const url = kingdomUrls[kingdomId]
     const response = await fetch(url, {
       method: 'POST',
-      headers,
+      headers: HEADERS,
       body: encoded
     })
 
@@ -93,6 +120,5 @@ async function sendPacketHandler(payload) {
 }
 
 module.exports = {
-  sendPacketHandler,
-  DEFAULT_HEADERS
+  sendPacketHandler
 }
