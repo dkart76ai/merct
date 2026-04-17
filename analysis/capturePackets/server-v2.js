@@ -132,16 +132,16 @@ const SAVE_DIR = path.join(__dirname, 'captures')
 //   return objects
 // }
 
-// function getFirstValue(data) {
-//   for (let item of data) {
-//     if (typeof item === 'number') return item
-//     if (Array.isArray(item)) {
-//       const resultado = getFirstValue(item)
-//       if (resultado !== undefined) return resultado
-//     }
-//   }
-//   return null
-// }
+function getFirstValue(data) {
+  for (let item of data) {
+    if (typeof item === 'number') return item
+    if (Array.isArray(item)) {
+      const resultado = getFirstValue(item)
+      if (resultado !== undefined) return resultado
+    }
+  }
+  return null
+}
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -401,6 +401,18 @@ async function patchSendbird() {
   })
 }
 
+function updateCapturesForClient(
+  id,
+  url,
+
+  responseBody
+) {
+  let decodedResponse = decodeMsgPack2(Buffer.from(responseBody))
+  const opCode = getFirstValue(decodedResponse)
+
+  captures.push({ id, url, opCode, response: { size: responseBody.length } })
+}
+
 function setupPacketCaptureListener() {
   if (!page) return
 
@@ -444,6 +456,13 @@ function setupPacketCaptureListener() {
       await addJob(JOB_TYPES.PROCESS_PACKET, payload, {
         priority: PRIORITY.CRITICAL
       })
+
+      updateCapturesForClient(
+        ++captureIndex,
+        url,
+
+        responseBody
+      )
     } catch (e) {
       console.error('Capture error:', e.message)
     }
