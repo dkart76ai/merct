@@ -320,6 +320,8 @@ async function handleStartTimer(req, res) {
   const timerManager = getTimerManager()
 
   for (const kingdomId of kingdomList) {
+    timerManager.stopScan(kingdomId)
+
     for (const tiles of tilesArray) {
       timerManager.scheduleScanKingdom(kingdomId, {
         intervalMs: parseInt(interval),

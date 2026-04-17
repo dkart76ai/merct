@@ -6,6 +6,7 @@ class TimerManager {
     this.queue = queue
     this.timers = new Map()
     this.timerConfigs = new Map()
+    this.kingdomTimerKeys = new Map()
   }
 
   async scheduleScanKingdom(kingdomId, options = {}) {
@@ -14,9 +15,8 @@ class TimerManager {
       tiles
     } = options
 
-    const timerKey = `kingdom:${kingdomId}`
-
-    await this.stopScan(kingdomId)
+    const tilesKey = tiles.join(',')
+    const timerKey = `kingdom:${kingdomId}:${tilesKey}`
 
     const repeatOptions = {
       every: intervalMs
@@ -29,7 +29,7 @@ class TimerManager {
       tiles
     }
 
-    const job = await this.queue.add(JOB_TYPES.SEND_PACKET, jobData, {
+const job = await this.queue.add(JOB_TYPES.SEND_PACKET, jobData, {
       priority: PRIORITY.LOW,
       repeat: repeatOptions,
       jobId: `timer:${timerKey}`
@@ -37,16 +37,23 @@ class TimerManager {
 
     this.timers.set(timerKey, {
       repeatJobKey: job.repeatJobKey,
-      JOB_TYPES.SEND_PACKET
+      jobType: JOB_TYPES.SEND_PACKET
     })
 
     this.timerConfigs.set(timerKey, {
-      kingdomId,tiles,
+      kingdomId,
+      tiles,
+      tilesKey,
       intervalMs,
       startedAt: Date.now()
     })
 
-    console.log(`[Timer] Scheduled ${JOB_TYPES.SEND_PACKET} for kingdom ${kingdomId} every ${intervalMs}ms`)
+    if (!this.kingdomTimerKeys.has(kingdomId)) {
+      this.kingdomTimerKeys.set(kingdomId, [])
+    }
+    this.kingdomTimerKeys.get(kingdomId).push(timerKey)
+
+    console.log(`[Timer] Scheduled ${JOB_TYPES.SEND_PACKET} for kingdom ${kingdomId} tiles ${tilesKey} every ${intervalMs}ms`)
 
     return job
   }
@@ -88,8 +95,17 @@ class TimerManager {
   }
 
   async stopScan(kingdomId) {
-    const timerKey = `kingdom:${kingdomId}`
-    return this.stopByKey(timerKey)
+    const timerKeys = this.kingdomTimerKeys.get(kingdomId) || []
+    let stopped = false
+
+    for (const timerKey of timerKeys) {
+      const result = await this.stopByKey(timerKey)
+      if (result) stopped = true
+    }
+
+    this.kingdomTimerKeys.delete(kingdomId)
+
+    return stopped
   }
 
   async stopNamedTimer(name) {
@@ -101,6 +117,9 @@ class TimerManager {
     const timer = this.timers.get(timerKey)
 
     if (timer) {
+      const config = this.timerConfigs.get(timerKey)
+      const kingdomId = config?.kingdomId
+
       try {
         if (timer.repeatJobKey) {
           await this.queue.removeRepeatableByKey(timer.repeatJobKey)
@@ -112,6 +131,16 @@ class TimerManager {
 
       this.timers.delete(timerKey)
       this.timerConfigs.delete(timerKey)
+
+      if (kingdomId) {
+        const keys = this.kingdomTimerKeys.get(kingdomId)
+        if (keys) {
+          const idx = keys.indexOf(timerKey)
+          if (idx > -1) keys.splice(idx, 1)
+          if (keys.length === 0) this.kingdomTimerKeys.delete(kingdomId)
+        }
+      }
+
       return true
     }
 
@@ -127,29 +156,33 @@ class TimerManager {
   }
 
   isRunning(kingdomId) {
-    const timerKey = `kingdom:${kingdomId}`
-    return this.timers.has(timerKey)
+    const timerKeys = this.kingdomTimerKeys.get(kingdomId) || []
+    return timerKeys.length > 0
   }
 
-  getConfig(kingdomId) {
-    return this.timerConfigs.get(`kingdom:${kingdomId}`) || null
+  getConfigs(kingdomId) {
+    const timerKeys = this.kingdomTimerKeys.get(kingdomId) || []
+    return timerKeys.map(key => this.timerConfigs.get(key)).filter(Boolean)
   }
 
   getActiveTimers() {
-    return Array.from(this.timerConfigs.entries()).map(([key, config]) => ({
-      key,
-      ...config
-    }))
+    const result = []
+    for (const [key, config] of this.timerConfigs.entries()) {
+      result.push({ key, ...config })
+    }
+    return result
   }
 
   getNextRunTime(kingdomId) {
-    const config = this.timerConfigs.get(`kingdom:${kingdomId}`)
-    if (!config) return null
+    const configs = this.getConfigs(kingdomId)
+    if (!configs || configs.length === 0) return null
 
-    const elapsed = Date.now() - config.startedAt
-    const nextRun = config.startedAt + Math.ceil(elapsed / config.intervalMs) * config.intervalMs
+    const nextTimes = configs.map(config => {
+      const elapsed = Date.now() - config.startedAt
+      return config.startedAt + Math.ceil(elapsed / config.intervalMs) * config.intervalMs
+    })
 
-    return nextRun
+    return Math.min(...nextTimes)
   }
 }
 
