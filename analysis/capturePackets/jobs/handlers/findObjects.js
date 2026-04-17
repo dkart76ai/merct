@@ -25,7 +25,6 @@ async function findObjectsHandler(data) {
             type: JOB_TYPES.NOTIFICATION,
             priority: PRIORITY.HIGH,
             payload: {
-              type: 'objects-found',
               objects: result.objects,
               searchCriteria: { staticId, level, amount },
               triggeredBy

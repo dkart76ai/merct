@@ -1,5 +1,5 @@
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
-const staticId = require('../../staticId.js')
+const staticIdDB = require('../../staticId.js')
 
 function extractObjects(data) {
   const objects = []
@@ -37,7 +37,7 @@ function extractObjects(data) {
           })
 
           // track unknown static id
-          const dbEntry = staticId.getStaticIdData(staticId)
+          const dbEntry = staticIdDB.getStaticIdData(staticId)
           const isComplete =
             dbEntry &&
             dbEntry.name &&

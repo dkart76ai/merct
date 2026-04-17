@@ -21,6 +21,7 @@ const {
   PRIORITY
 } = require('./jobs/index.js')
 const staticId = require('./staticId.js')
+const { setChatPage, sendMessage, notifyDiscord } = require('./jobs/chatSender')
 const {
   sendPacketHandler,
   extractObjectsHandler,
@@ -531,6 +532,9 @@ async function browserInitialize() {
 
   context = await browser.newContext(options)
   page = await context.newPage()
+
+  // Set chat page for notification handler
+  setChatPage(page)
 }
 
 async function browserLoadUrlAndLogin() {
@@ -822,6 +826,9 @@ async function main() {
     console.log('  POST /api/browser/start - Start browser')
     console.log('  POST /api/browser/stop - Stop browser')
     console.log('  POST /api/capturing/start - Start packet capture')
+
+    notifyDiscord('٩(̾●̮̮̃̾•̃̾)۶') //┌∩┐(◣_◢)┌∩┐
+    sendMessage('٩(̾●̮̮̃̾•̃̾)۶') // ۜ\(סּںסּَ` )/ۜ
   })
 
   process.on('SIGINT', async () => {
