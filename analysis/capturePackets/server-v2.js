@@ -486,10 +486,10 @@ function setupPacketCaptureListener() {
       const responseKey = `response_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
 
       // 1. Guardar el binario directamente (Redis maneja Buffers de forma nativa)
-      // Ponemos un TTL de 15min ('EX', 900) para no llenar la RAM si el worker falla
+      // Ponemos un TTL de 5min ('EX', 300) para no llenar la RAM si el worker falla
       const redisClient = getRedis()
-      await redisClient.set(requestKey, postDataBuff, 'EX', 60 * 15)
-      await redisClient.set(responseKey, responseBody, 'EX', 900)
+      await redisClient.set(requestKey, postDataBuff, 'EX', 60 * 5)
+      await redisClient.set(responseKey, responseBody, 'EX', 300)
 
       const payload = {
         url,
@@ -641,9 +641,12 @@ app.get('/api/unknown-staticids', (req, res) => {
 
 app.get('/api/static-db', (req, res) => {
   const count = staticId.getStaticIdSize()
-  console.log('Sending staticId Db with', count, 'entries')
-  const entries = staticId.getStaticIdValues()
-  res.json({ success: true, items: entries, count })
+  const limit = parseInt(req.query.limit) || 100
+  const offset = parseInt(req.query.offset) || 0
+  const allEntries = staticId.getStaticIdValues()
+  const entries = allEntries.slice(offset, offset + limit)
+  console.log('Sending staticId Db', offset, '-', offset + entries.length, 'of', count)
+  res.json({ success: true, items: entries, count, offset, limit })
 })
 
 // Objects database endpoints

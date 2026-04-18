@@ -255,6 +255,11 @@
         Static ID Database
         <span class="count" id="staticDbCount">(0)</span>
       </div>
+      <div class="controls" style="padding: 10px 15px;">
+        <button id="btnPrevPage" style="padding: 5px 10px;">&larr; Prev</button>
+        <span id="pageInfo" style="font-size:12px;color:#888;">Page 1</span>
+        <button id="btnNextPage" style="padding: 5px 10px;">Next &rarr;</button>
+      </div>
       <div class="list" id="staticDbList">
         <div class="list-item">Loading...</div>
       </div>
@@ -269,6 +274,7 @@
     <script>
       const API = '/api'
       let refreshInterval = null
+      let staticDbPage = { offset: 0, limit: 50, count: 0 }
 
       function log(msg) {
         const el = document.getElementById('log')
@@ -319,10 +325,17 @@
 
       async function refreshStaticDb() {
         try {
-          const res = await fetch(API + '/static-db')
+          const url = API + '/static-db?limit=' + staticDbPage.limit + '&offset=' + staticDbPage.offset
+          const res = await fetch(url)
           const data = await res.json()
           if (data.success) {
+            staticDbPage.count = data.count
             document.getElementById('staticDbCount').textContent = '(' + data.count + ')'
+            const pageNum = Math.floor(staticDbPage.offset / staticDbPage.limit) + 1
+            const totalPages = Math.ceil(data.count / staticDbPage.limit)
+            document.getElementById('pageInfo').textContent = 'Page ' + pageNum + ' of ' + totalPages
+            document.getElementById('btnPrevPage').disabled = staticDbPage.offset === 0
+            document.getElementById('btnNextPage').disabled = staticDbPage.offset + staticDbPage.limit >= data.count
             const el = document.getElementById('staticDbList')
             if (data.items.length === 0) {
               el.innerHTML = '<div class="list-item">No entries</div>'
@@ -502,6 +515,21 @@
           log(data.message)
         } else {
           log('Error: ' + data.error)
+        }
+      })
+
+      // Pagination handlers
+      document.getElementById('btnPrevPage').addEventListener('click', () => {
+        if (staticDbPage.offset > 0) {
+          staticDbPage.offset = Math.max(0, staticDbPage.offset - staticDbPage.limit)
+          refreshStaticDb()
+        }
+      })
+
+      document.getElementById('btnNextPage').addEventListener('click', () => {
+        if (staticDbPage.offset + staticDbPage.limit < staticDbPage.count) {
+          staticDbPage.offset += staticDbPage.limit
+          refreshStaticDb()
         }
       })
 
