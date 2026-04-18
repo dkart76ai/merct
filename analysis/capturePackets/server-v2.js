@@ -494,6 +494,16 @@ app.get('/api/debug', (req, res) => {
   })
 })
 
+// app.get('/api/db/check', (req, res) => {
+//   const { findObjects } = require('./jobs/database')
+//   const objs = findObjects({ staticId: 400, level: 10, amount: 5 })
+//   res.json({
+//     found: objs.objects.length,
+//     total: objs.total,
+//     objects: objs.objects.slice(0, 3).map(o => `${o.kingdom}:${o.x}:${o.y} L${o.level}`)
+//   })
+// })
+
 app.get('/api/jobs/status', async (req, res) => {
   try {
     const status = await getQueueStatus()

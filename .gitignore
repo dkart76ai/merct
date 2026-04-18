@@ -19,3 +19,4 @@ Triumph.framework.js
 /build/
 analysis/decoderMsgPack/build/*
 analysis/temp_mod/*
+analysis/capturePackets/jobs/handlers/captures/captures*.json

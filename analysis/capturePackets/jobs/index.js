@@ -42,8 +42,8 @@ function getQueue() {
           age: 1
         },
         removeOnFail: {
-          count: 5,
-          age: 30
+          count: 10,
+          age: 300
         }
       }
     })

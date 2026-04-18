@@ -106,6 +106,14 @@ async function extractObjectsHandler(data) {
 
     console.log(`\x1b[32m [ExtractObjects] Found ${objects.length} objects \x1b[0m`)
 
+    // Convert BigInt to string for serialization
+    const safeObjects = objects.map(obj => {
+      const safe = { ...obj }
+      if (typeof safe.objectId === 'bigint') safe.objectId = safe.objectId.toString()
+      if (typeof safe.staticId === 'bigint') safe.staticId = Number(safe.staticId)
+      return safe
+    })
+
     await getRedisClient().del(bufferKey)
 
     // Chain: Save objects first, then find-objects will trigger notification
@@ -114,9 +122,9 @@ async function extractObjectsHandler(data) {
       nextJobs: [
         {
           type: JOB_TYPES.SAVE_OBJECTS,
-          priority: PRIORITY.NORMAL,
+          priority: PRIORITY.HIGH,
           payload: {
-            objects
+            objects: safeObjects
           }
         }
       ]

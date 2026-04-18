@@ -110,6 +110,7 @@ function saveCapturedPacket(
   requestBodyB64,
   responseHeaders,
   responseBodyB64,
+  decodedRequest,
   decodedResponse,
   tileIds,
   isMyPacket
@@ -209,7 +210,7 @@ async function processPacketHandler(data) {
   }
 
   const _decodedReq = multiDecodeMsgPack2(Buffer.from(requestData))
-  const decodedReq = _decodedReq.results
+  const decodedRequest = _decodedReq.results
 
   const _decodedResponse = multiDecodeMsgPack2(Buffer.from(responseData))
   const decodedResponse = _decodedResponse.results
@@ -231,7 +232,7 @@ async function processPacketHandler(data) {
   //-----------------------
   let tileIds = []
   if (opCode === 312) {
-    tileIds = decodedReq[1]
+    tileIds = decodedRequest[1]
   }
 
   saveCapturedPacket(
@@ -243,6 +244,7 @@ async function processPacketHandler(data) {
     requestBodyB64,
     responseHeaders,
     responseBodyB64,
+    decodedRequest,
     decodedResponse,
     tileIds,
     isMyPacket
@@ -252,7 +254,7 @@ async function processPacketHandler(data) {
   //-----------------------
 
   if (opCode === 312) {
-    extractMySessionTokens(decodedReq)
+    extractMySessionTokens(decodedRequest)
   }
 
   if (opCode === 402) {
@@ -262,7 +264,7 @@ async function processPacketHandler(data) {
   if (opCode === 312 || opCode === 408) {
     // pass rawBytes (encoded)to extract_objects as they are smaller
     const msgPackDataKey = `msgPackData:${Date.now()}:${Math.random().toString(36).substring(7)}`
-    await redisClient.set(msgPackDataKey, Buffer.from(responseData), 'EX', 60 * 5)
+    await redisClient.set(msgPackDataKey, Buffer.from(responseData), 'EX', 60 * 10)
 
     const payload = {
       bufferKey: msgPackDataKey

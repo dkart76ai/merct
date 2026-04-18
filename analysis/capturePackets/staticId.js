@@ -24,7 +24,10 @@ function loadStaticDb() {
 function saveStaticDb() {
   try {
     const data = Object.fromEntries(staticIdDb)
-    fs.writeFileSync(STATIC_DB_FILE, JSON.stringify(data, null, 2))
+    fs.writeFileSync(
+      STATIC_DB_FILE,
+      JSON.stringify(data, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
+    )
   } catch (e) {
     console.error('Error saving staticId-db:', e.message)
   }

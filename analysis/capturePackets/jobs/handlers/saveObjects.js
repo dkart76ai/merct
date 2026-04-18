@@ -5,6 +5,15 @@ async function saveObjectsHandler(data) {
   const { objects } = data
 
   console.log(`[SaveObjects] Saving ${objects?.length || 0} objects`)
+  if (objects && objects.length > 0) {
+    console.log(
+      `[SaveObjects] First object:`,
+      JSON.stringify(objects[0], (k, v) => (typeof v === 'bigint' ? v.toString() : v)).substring(
+        0,
+        200
+      )
+    )
+  }
 
   try {
     if (!objects || objects.length === 0) {
@@ -13,7 +22,9 @@ async function saveObjectsHandler(data) {
 
     const result = saveObjects(objects)
 
-    console.log(`[SaveObjects] Created: ${result.created}, Updated: ${result.updated}`)
+    console.log(
+      `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
+    )
 
     // Chain to find-objects after saving
     return {

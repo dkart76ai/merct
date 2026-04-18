@@ -16,6 +16,7 @@ function getKey(obj) {
 
 function saveObject(obj) {
   const key = getKey(obj)
+  console.log(`[DB] saveObject called: key=${key}, kingdom=${obj.kingdom}, x=${obj.x}, y=${obj.y}`)
   const existing = objectsDb.get(key)
 
   if (existing) {
@@ -41,6 +42,7 @@ function saveObject(obj) {
     objectsDb.set(key, newObj)
     stats.totalSaved++
     stats.lastSavedAt = Date.now()
+    console.log(`[DB] Saved new object: ${key}, staticId: ${obj.staticId}, level: ${obj.level}`)
     return { action: 'created', key }
   }
 }

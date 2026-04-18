@@ -68,7 +68,7 @@ async function sendPacketHandler(payload) {
     const msgPackDataKey = `msgPackData:${Date.now()}:${Math.random().toString(36).substring(7)}`
 
     // Store raw bytes (Uint8Array), not decoded results
-    await redisClient.set(msgPackDataKey, bytes, 'EX', 60 * 5)
+    await redisClient.set(msgPackDataKey, bytes, 'EX', 60 * 10)
 
     const result = {
       success: true,
