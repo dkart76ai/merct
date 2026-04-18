@@ -38,98 +38,9 @@ const config = {
   accountUser: process.env.CHAT_ACCOUNT_USER,
   accountPwd: process.env.CHAT_ACCOUNT_PWD
 }
-// const authPath = path.join(__dirname, 'auth', 'user.json')
 
 const SAVE_DIR = path.join(__dirname, 'captures')
-// const OPCODES_FILE = path.join(__dirname, 'opcodes.json')
-// const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
-// const OBJECT_PACKETS_FILE = path.join(__dirname, 'samples', 'objectpackets.json')
-// const OBJECT_PACKETS312_FILE = path.join(__dirname, 'samples', 'objectpackets312.json')
-// const PROCESS_STATICID_FILE = path.join(__dirname, 'process-staticid.json')
-// const CHAT_STATICID_FILE = path.join(__dirname, 'chat-staticid.json')
 let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
-
-// const PACKET312 = {
-//   kingdoms: [],
-//   currentKingdom: null,
-//   sessionToken: null,
-//   buff: null
-// }
-
-// function mapToUint8Array(map) {
-//   if (!map) return null
-//   if (map instanceof Uint8Array) return map
-//   const keys = Object.keys(map)
-//     .map(Number)
-//     .sort((a, b) => a - b)
-//   if (keys.length === 0) return null
-//   const arr = new Uint8Array(keys.length)
-//   for (const k of keys) {
-//     arr[k] = map[k]
-//   }
-//   return arr
-// }
-
-// let saveFileIndex = 0
-// const MAX_CAPTURES_PER_FILE = 500
-
-// async function fileExists(filePath) {
-//   try {
-//     await fs.access(filePath, fs.constants.F_OK)
-//     return true
-//   } catch {
-//     return false
-//   }
-// }
-
-// function extractObjects(data) {
-//   const objects = []
-
-//   function isValidObject(arr) {
-//     if (!Array.isArray(arr) || arr.length !== 12) return false
-//     if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
-//     if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
-//     if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
-//     if (typeof arr[11] !== 'boolean') return false
-//     return true
-//   }
-
-//   function findObjects(arr, depth = 0) {
-//     if (depth > 200) return
-//     for (const item of arr) {
-//       if (Array.isArray(item)) {
-//         if (isValidObject(item)) {
-//           const staticId = item[1]
-//           const known = staticId.getStaticIdData(staticId)
-//           const obj = {
-//             objectId: item[0][0],
-//             staticId: staticId,
-//             name: known?.name || null,
-//             entryType: known?.entryType || null,
-//             unk1: item[2],
-//             unk2: item[3],
-//             unk3: item[4],
-//             level: item[5],
-//             unk4: item[6],
-//             unk5: item[7],
-//             kingdom: item[8][0],
-//             x: item[8][1],
-//             y: item[8][2],
-//             unk6: item[9][0],
-//             extra: item[10],
-//             isActive: item[11]
-//           }
-//           objects.push(obj)
-//         } else {
-//           findObjects(item, depth + 1)
-//         }
-//       }
-//     }
-//   }
-
-//   findObjects(data)
-//   return objects
-// }
 
 function getFirstValue(data) {
   if (!data || !Array.isArray(data)) return null
@@ -159,55 +70,7 @@ let context = null
 let page = null
 let captures = []
 let captureIndex = 0
-// let autoSave = true
 let capturingEnabled = true
-// let uniqueOpcodes = new Set()
-// let myPlayerPackets = []
-// let objectPackets = []
-
-// async function saveMyPlayerPackets() {
-//   if (!myPlayerPackets.length) return
-//   try {
-//     const existing = (await fileExists(MYPLAYER_FILE))
-//       ? JSON.parse(fs.readFileSync(MYPLAYER_FILE, 'utf8'))
-//       : []
-//     const merged = [...existing, ...myPlayerPackets].slice(-1000)
-//     fs.writeFileSync(MYPLAYER_FILE, JSON.stringify(merged, null, 2))
-//     console.log(`Saved ${myPlayerPackets.length} player packets (total: ${merged.length})`)
-//     myPlayerPackets = []
-//   } catch (e) {
-//     console.error('Save my player packets error:', e.message)
-//   }
-// }
-
-// async function saveObjectPackets() {
-//   try {
-//     const existing = (await fileExists(OBJECT_PACKETS_FILE))
-//       ? JSON.parse(fs.readFileSync(OBJECT_PACKETS_FILE, 'utf8'))
-//       : []
-//     const merged = [...existing, ...objectPackets].slice(-MAX_CAPTURES_PER_FILE)
-//     fs.writeFileSync(OBJECT_PACKETS_FILE, JSON.stringify(merged, null, 2))
-//     console.log(`Saved ${objectPackets.length} object packets (total: ${merged.length})`)
-//     objectPackets = []
-//   } catch (e) {
-//     console.error('Save object packets error:', e.message)
-//   }
-// }
-
-// async function saveCaptures() {
-//   if (!captures.length) return
-//   try {
-//     const savePath = path.join(SAVE_DIR, `captures-${saveFileIndex}.json`)
-//     fs.writeFileSync(savePath, JSON.stringify(captures, null, 2))
-//     saveFileIndex++
-//     console.log(
-//       `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${savePath}`
-//     )
-//     captures = []
-//   } catch (e) {
-//     console.error('Save captures error:', e.message)
-//   }
-// }
 
 async function ensureSaveDir() {
   try {
@@ -534,10 +397,6 @@ async function browserInitialize() {
     }
   }
 
-  // if (await fileExists(authPath)) {
-  //   options.storageState = authPath
-  // }
-
   context = await browser.newContext(options)
   page = await context.newPage()
 
@@ -555,18 +414,23 @@ async function browserLoadUrlAndLogin() {
   const loginInput = page.getByRole('textbox', { name: 'E-mail' })
   if (await loginInput.isVisible({ timeout: 5000 }).catch(() => false)) {
     console.log(`  Logging in...`)
-    const loginButtonTab = page.getByText('Iniciar sesión')
+    const loginButtonTab = page.locator('span[data-id="login"]')
     if (await loginButtonTab.isVisible({ timeout: 5000 }).catch(() => false)) {
       await loginButtonTab.click()
       await page.waitForTimeout(500)
+    } else {
+      console.log('iniciar session, not found')
     }
+
+    await loginInput.fill(config.accountUser)
 
     const passwordInput = page.getByRole('textbox', { name: 'Contraseña' })
     const loginButton = page.getByRole('button', { name: 'Iniciar sesión' })
     if (await passwordInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await loginInput.fill(config.accountUser)
       await passwordInput.fill(config.accountPwd)
       await loginButton.click()
+    } else {
+      console.log('pwd input not found')
     }
   }
 }
@@ -656,24 +520,6 @@ app.get('/api/static-db', (req, res) => {
   console.log('Sending staticId Db', offset, '-', offset + entries.length, 'of', count)
   res.json({ success: true, items: entries, count, offset, limit })
 })
-
-// Objects database endpoints
-// app.get('/api/objects', (req, res) => {
-//   const objects = getAllObjects()
-//   res.json({ success: true, count: objects.length, objects })
-// })
-
-// app.get('/api/objects/stats', (req, res) => {
-//   const stats = getStats()
-//   res.json({ success: true, ...stats })
-// })
-
-// app.post('/api/objects/find', async (req, res) => {
-//   const { staticId, level, amount = 10 } = req.body
-
-//   const result = findObjects({ staticId, level, amount })
-//   res.json({ success: true, ...result })
-// })
 
 app.post('/api/objects/find-and-notify', async (req, res) => {
   const { staticId, level, amount = 10, notificationConfig } = req.body
@@ -806,10 +652,6 @@ app.post('/api/capturing/stop', async (req, res) => {
 
   res.json({ success: true, message: 'Capturing stopped', capturing: false })
 })
-
-// app.get('/api/opcodes', (req, res) => {
-//   res.json({ success: true, opcodes: Array.from(uniqueOpcodes).sort((a, b) => a - b) })
-// })
 
 async function main() {
   console.log('[Main] Starting server...')
