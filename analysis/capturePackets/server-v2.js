@@ -132,12 +132,18 @@ let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
 // }
 
 function getFirstValue(data) {
-  for (let item of data) {
-    if (typeof item === 'number') return item
-    if (Array.isArray(item)) {
-      const resultado = getFirstValue(item)
-      if (resultado !== undefined) return resultado
+  if (!data || !Array.isArray(data)) return null
+
+  try {
+    for (let item of data) {
+      if (typeof item === 'number') return item
+      if (Array.isArray(item)) {
+        const resultado = getFirstValue(item)
+        if (resultado !== undefined) return resultado
+      }
     }
+  } catch (e) {
+    console.error('[getFirstValue] ', e.message)
   }
   return null
 }
@@ -154,7 +160,7 @@ let page = null
 let captures = []
 let captureIndex = 0
 // let autoSave = true
-let capturingEnabled = false
+let capturingEnabled = true
 // let uniqueOpcodes = new Set()
 // let myPlayerPackets = []
 // let objectPackets = []
@@ -365,35 +371,35 @@ function extractChatStaticIds(message) {
 
     const msgData = JSON.parse(jsonMatch[1])
     if (msgData.data) {
-      try {
-        const data = JSON.parse(msgData.data)
-        if (data.subs) {
-          for (const key in data.subs) {
-            const sub = data.subs[key]
-            if (sub.staticId && sub.entryType) {
-              staticId.addOrUpdateStaticId(sub.staticId, {
-                entryType: sub.entryType,
-                name: sub.name || null
-              })
+      const data = JSON.parse(msgData.data)
+      if (data.subs) {
+        for (const key in data.subs) {
+          const sub = data.subs[key]
+          if (sub.staticId && sub.entryType) {
+            staticId.addOrUpdateStaticId(sub.staticId, {
+              entryType: sub.entryType,
+              name: sub.name || null
+            })
 
-              const unknown = unknownStaticIds.get(String(sub.staticId))
+            const unknown = unknownStaticIds.get(String(sub.staticId))
 
-              const isComplete =
-                unknown &&
-                unknown.name &&
-                unknown.entryType &&
-                unknown.level != null &&
-                unknown.level >= 0
+            const isComplete =
+              unknown &&
+              unknown.name &&
+              unknown.entryType &&
+              unknown.level != null &&
+              unknown.level >= 0
 
-              if (isComplete) {
-                unknownStaticIds.delete(sub.staticId)
-              }
+            if (isComplete) {
+              unknownStaticIds.delete(sub.staticId)
             }
           }
         }
-      } catch (e) {}
+      }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('[extractChatStaticIds] Error: parsing data', e.message)
+  }
 }
 
 function setupWebsocketListener() {

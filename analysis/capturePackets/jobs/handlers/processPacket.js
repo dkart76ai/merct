@@ -1,7 +1,7 @@
 const path = require('path')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 const { getRedis } = require('../redis')
-const { multiDecodeMsgPack2, decodeMsgPack2 } = require('../../../message-pack/messagePack.js')
+const { multiDecodeMsgPack2 } = require('../../../message-pack/messagePack.js')
 const fs = require('fs')
 
 const redisClient = getRedis()
@@ -39,6 +39,8 @@ function mapToUint8Array(map) {
 }
 
 function getFirstValue(data) {
+  if (!data || !Array.isArray(data)) return null
+
   for (let item of data) {
     if (typeof item === 'number') return item
     if (Array.isArray(item)) {
@@ -52,7 +54,9 @@ function getFirstValue(data) {
 
 function containsPlayerId(data, playerId, internalId) {
   if (!data) return false
-  const str = JSON.stringify(data)
+  const str = JSON.stringify(data, (key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  )
   if (playerId && str.includes(playerId)) return true
   if (internalId && str.includes(String(internalId))) return true
   return false
@@ -65,7 +69,10 @@ function saveToFile() {
     }
 
     const saveFile = path.join(SAVE_DIR, `captures-${String(saveFileIndex).padStart(3, '0')}.json`)
-    fs.writeFileSync(saveFile, JSON.stringify(captures, null, 2))
+    fs.writeFileSync(
+      saveFile,
+      JSON.stringify(captures, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
+    )
     // console.log(
     //   `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
     // )
@@ -187,12 +194,10 @@ async function processPacketHandler(data) {
     throw new Error('Los datos binarios expiraron o no se encontraron')
   }
 
-  const decodedReq = decodeMsgPack2(Buffer.from(requestData))
+  const decodedReq = multiDecodeMsgPack2(Buffer.from(requestData))
 
-  let decodedResponse = decodeMsgPack2(Buffer.from(responseData))
+  const decodedResponse = multiDecodeMsgPack2(Buffer.from(responseData))
   const opCode = getFirstValue(decodedResponse)
-
-  console.log(`[processPacket]`)
 
   //save all packets
   requestBodyB64 = requestData ? Buffer.from(requestData).toString('base64') : null

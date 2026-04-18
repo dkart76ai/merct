@@ -1,7 +1,12 @@
+const { loadEnvFile } = require('node:process')
+loadEnvFile()
+
 let globalPage = null
 const channelUrl = process.env.CHAT_CHANNEL_URL || ''
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK || ''
 const staticIdDB = require('../staticId.js')
+
+console.log('[ChatSender] Initialized', DISCORD_WEBHOOK, channelUrl)
 
 function setChatPage(page) {
   globalPage = page
@@ -13,7 +18,11 @@ function getChatPage() {
 }
 
 async function notifyDiscord(msg = '', coord = null) {
-  if (!DISCORD_WEBHOOK) return
+  if (!DISCORD_WEBHOOK) {
+    console.log('[ChatSender] No DISCORD_WEBHOOK configured')
+    return
+  }
+
   try {
     let message = msg
     if (coord) {
@@ -33,7 +42,10 @@ async function notifyDiscord(msg = '', coord = null) {
 }
 
 async function sendMessage(msg = '', coord = null, staticId = 400) {
-  if (!channelUrl) return
+  if (!channelUrl) {
+    console.log('[ChatSender] No channelUrl configured')
+    return
+  }
 
   const page = getChatPage()
   if (!page) return
