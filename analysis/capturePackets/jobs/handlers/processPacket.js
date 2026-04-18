@@ -9,6 +9,7 @@ const redisClient = getRedis()
 let captureIndex = 0
 let saveFileIndex = 0
 let captures = []
+let capturesDecoded = []
 
 const SAVE_DIR = path.join(__dirname, 'captures')
 const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
@@ -73,12 +74,22 @@ function saveToFile() {
       saveFile,
       JSON.stringify(captures, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
     )
+
+    const saveFile2 = path.join(
+      SAVE_DIR,
+      `capturesDecoded-${String(saveFileIndex).padStart(3, '0')}.json`
+    )
+    fs.writeFileSync(
+      saveFile2,
+      JSON.stringify(capturesDecoded, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
+    )
     // console.log(
     //   `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
     // )
 
     if (captures.length >= MAX_CAPTURES_PER_FILE) {
       captures = []
+      capturesDecoded = []
       captureIndex = 0
       saveFileIndex++
       console.log(
@@ -118,10 +129,12 @@ function saveCapturedPacket(
     },
     response: {
       headers: responseHeaders,
-      bodyB64: responseBodyB64,
-      decodedResponse
+      bodyB64: responseBodyB64
+      // decodedResponse
     }
   })
+
+  capturesDecoded.push({ id: ++captureIndex, opCode, url, decodedResponse })
 
   saveToFile()
 }
