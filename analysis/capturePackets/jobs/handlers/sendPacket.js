@@ -88,10 +88,6 @@ async function sendPacketHandler(payload) {
     const result = {
       success: true,
       triggeredBy,
-      kingdom,
-      responseLength: bytes.length,
-      decoded: decoded.results,
-      timestamp: Date.now(),
       nextJobs: [
         {
           type: JOB_TYPES.EXTRACT_OBJECTS,

@@ -17,9 +17,6 @@ async function findObjectsHandler(data) {
 
       return {
         success: true,
-        found: result.total,
-        returned: result.returned,
-        objects: result.objects,
         nextJobs: [
           {
             type: JOB_TYPES.NOTIFICATION,
