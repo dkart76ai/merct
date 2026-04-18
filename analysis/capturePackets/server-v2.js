@@ -649,7 +649,8 @@ app.get('/api/browser/status', async (req, res) => {
   const token1 = await redisClient.get('mysession:token1:BigInt')
   const token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
 
-  const memoryUsage = await page.evaluate(() => performance.memory)
+  let memoryUsage = 0
+  if (page) memoryUsage = await page.evaluate(() => performance.memory)
 
   res.json({
     success: true,
