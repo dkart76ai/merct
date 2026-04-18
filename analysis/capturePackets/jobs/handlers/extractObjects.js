@@ -37,21 +37,6 @@ function extractObjects(data) {
             isActive: item[11]
           }
           objects.push(obj)
-
-          // track unknown static id
-          const dbEntry = staticIdDB.getStaticIdData(staticId)
-          const isComplete =
-            dbEntry &&
-            dbEntry.name &&
-            dbEntry.entryType &&
-            dbEntry.level != null &&
-            dbEntry.level >= 0
-
-          if (!isComplete) {
-            await addJob(JOB_TYPES.NOTIFICATION, {
-              objects: [obj]
-            })
-          }
         } else {
           findObjects(item, depth + 1)
         }
@@ -60,6 +45,27 @@ function extractObjects(data) {
   }
 
   findObjects(data)
+
+  const incompleteObjData = []
+
+  objects.ForEach(obj => {
+    const dbEntry = staticIdDB.getStaticIdData(obj.staticId)
+    const isComplete =
+      dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level != null && dbEntry.level >= 0
+
+    if (!isComplete) {
+      incompleteObjData.push(obj)
+    }
+  })
+
+  if (incompleteObjData.length > 0) {
+    console.log(`[ExtractObjects] Found ${incompleteObjData.length} incomplete object entries`)
+    addJob(JOB_TYPES.FIND_OBJECTS, PRIORITY.HIGH, {
+      message: 'obj missing data',
+      objects: incompleteObjData
+    })
+  }
+
   return objects
 }
 
@@ -83,8 +89,6 @@ async function extractObjectsHandler(data) {
     // Chain: Save objects first, then find-objects will trigger notification
     return {
       success: true,
-      count: objects.length,
-      objects,
       triggeredBy,
       nextJobs: [
         {
