@@ -4,7 +4,7 @@ const fs = require('fs')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
 const { kingdomUrls } = require('./kingdomUrls.js')
-const { multiDecodeMsgPack2, decodeMsgPack2 } = require('../message-pack/messagePack.js')
+const { multiDecodeMsgPack2 } = require('../message-pack/messagePack.js')
 const {
   addJob,
   addCritical,
@@ -455,7 +455,7 @@ function updateCapturesForClient(
 
   responseBody
 ) {
-  let decodedResponse = decodeMsgPack2(Buffer.from(responseBody))
+  let decodedResponse = multiDecodeMsgPack2(Buffer.from(responseBody))
   const opCode = getFirstValue(decodedResponse)
 
   captures.push({ id, url, opCode, response: { size: responseBody.length } })

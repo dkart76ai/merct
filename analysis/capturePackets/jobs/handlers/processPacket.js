@@ -194,9 +194,12 @@ async function processPacketHandler(data) {
     throw new Error('Los datos binarios expiraron o no se encontraron')
   }
 
-  const decodedReq = multiDecodeMsgPack2(Buffer.from(requestData))
+  const _decodedReq = multiDecodeMsgPack2(Buffer.from(requestData))
+  const decodedReq = _decodedReq.results
 
-  const decodedResponse = multiDecodeMsgPack2(Buffer.from(responseData))
+  const _decodedResponse = multiDecodeMsgPack2(Buffer.from(responseData))
+  const decodedResponse = _decodedResponse.results
+
   const opCode = getFirstValue(decodedResponse)
 
   //save all packets
