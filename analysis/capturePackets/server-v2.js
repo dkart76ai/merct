@@ -40,7 +40,6 @@ const config = {
 }
 
 const SAVE_DIR = path.join(__dirname, 'captures')
-let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
 
 function getFirstValue(data) {
   if (!data || !Array.isArray(data)) return null
@@ -71,6 +70,8 @@ let page = null
 let captures = []
 let captureIndex = 0
 let capturingEnabled = true
+let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
+const redisClient = getRedis()
 
 async function ensureSaveDir() {
   try {
@@ -148,12 +149,10 @@ async function handleScanKingdom(req, res) {
       const job =
         priority === 'CRITICAL'
           ? await addCritical(JOB_TYPES.SEND_PACKET, {
-              ...payload,
-              triggeredBy: 'manual'
+              ...payload
             })
           : await addHigh(JOB_TYPES.SEND_PACKET, {
-              ...payload,
-              triggeredBy: 'manual'
+              ...payload
             })
 
       jobIds.push({ kingdom, jobId: job.id })
@@ -353,7 +352,7 @@ function setupPacketCaptureListener() {
 
       // 1. Guardar el binario directamente (Redis maneja Buffers de forma nativa)
       // Ponemos un TTL de 5min ('EX', 300) para no llenar la RAM si el worker falla
-      const redisClient = getRedis()
+
       await redisClient.set(requestKey, postDataBuff, 'EX', 60 * 5)
       await redisClient.set(responseKey, responseBody, 'EX', 300)
 
@@ -548,8 +547,7 @@ app.post('/api/timer/scan-mercs', async (req, res) => {
   // Build payload for find-objects job
   const jobData = {
     staticId: 400, // Merc static ID
-    amount: 20,
-    triggeredBy: 'timer-mercs'
+    amount: 20
   }
 
   await timerManager.scheduleCustom(timerKey, parseInt(interval), JOB_TYPES.FIND_OBJECTS, jobData)
@@ -616,11 +614,16 @@ app.post('/api/browser/start', async (req, res) => {
   }
 })
 
-app.get('/api/browser/status', (req, res) => {
+app.get('/api/browser/status', async (req, res) => {
+  const token1 = await redisClient.get('mysession:token1:BigInt')
+  const token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+
   res.json({
     success: true,
     running: !!browser,
-    capturing: capturingEnabled
+    capturing: capturingEnabled,
+    token1,
+    token2
   })
 })
 
