@@ -21,15 +21,11 @@ function buildPacketPayload(tiles, tokenBigInt, token2) {
     [tiles, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [], []]
   ]
 
-  return {
-    packetData,
-
-    notificationConfig: config
-  }
+  return packetData
 }
 
 async function sendPacketHandler(payload) {
-  const { kingdom, tiles, triggeredBy = 'manual', notificationConfig = {} } = payload
+  const { kingdom, tiles } = payload
 
   const redisClient = getRedis()
 
@@ -42,16 +38,15 @@ async function sendPacketHandler(payload) {
   if (!_token2) {
     throw new Error('no session token2')
   }
-  try {
-    console.log('[SendPacket] ', { _token1, _token2 })
-    const token1 = BigInt(_token1)
-    const token2 = new Uint8Array(_token2)
-  } catch (error) {
-    console.error(`[SendPacket] Error:`, error.message)
-  }
+
+  console.log('[SendPacket] ', { _token1, _token2 })
 
   try {
+    const token1 = BigInt(_token1)
+    const token2 = new Uint8Array(_token2)
+
     const packetData = buildPacketPayload(tiles, token1, token2)
+
     // Encode the packet
     const encoded = encodeMsgPack2MultiFragments(packetData)
 
@@ -87,17 +82,14 @@ async function sendPacketHandler(payload) {
 
     const result = {
       success: true,
-      triggeredBy,
       nextJobs: [
         {
           type: JOB_TYPES.EXTRACT_OBJECTS,
           priority: PRIORITY.NORMAL,
           payload: {
             buffer: Buffer.from(decoded.results).toString('base64'),
-            // packetData: decoded.results,
-            kingdom,
-            triggeredBy,
-            notificationConfig
+
+            kingdom
           }
         }
       ]
@@ -111,7 +103,6 @@ async function sendPacketHandler(payload) {
 
     return {
       success: false,
-      triggeredBy,
       kingdom,
       error: error.message,
       timestamp: Date.now()

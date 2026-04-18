@@ -2,7 +2,7 @@ const { saveObjects } = require('../database')
 const { JOB_TYPES, PRIORITY } = require('../index')
 
 async function saveObjectsHandler(data) {
-  const { objects, triggeredBy } = data
+  const { objects } = data
 
   console.log(`[SaveObjects] Saving ${objects?.length || 0} objects`)
 
@@ -18,18 +18,17 @@ async function saveObjectsHandler(data) {
     // Chain to find-objects after saving
     return {
       success: true,
-      saved: result.objects.length,
-      created: result.created,
-      updated: result.updated,
+      // saved: result.objects.length,
+      // created: result.created,
+      // updated: result.updated,
       nextJobs: [
         {
           type: JOB_TYPES.FIND_OBJECTS,
           priority: PRIORITY.NORMAL,
           payload: {
             staticId: 400, // Merc static ID
-            amount: 20,
-            triggeredBy,
-            fromSave: true // Indicates this came from a save operation
+            amount: 20
+            // fromSave: true // Indicates this came from a save operation
           }
         }
       ]

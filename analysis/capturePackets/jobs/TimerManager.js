@@ -21,7 +21,6 @@ class TimerManager {
 
     const jobData = {
       kingdom,
-      triggeredBy: 'timer',
       intervalMs,
       tiles
     }

@@ -32,6 +32,13 @@
         flex-wrap: wrap;
         align-items: center;
       }
+      .tokens {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
       button {
         padding: 10px 20px;
         background: #0e639c;
@@ -179,6 +186,10 @@
           <input type="checkbox" id="cbCapturing" disabled />
           <span>Capture Packets</span>
         </label>
+        <div class="tokens">
+          <div id="token1">none</div>
+          <div id="token2">none</div>
+        </div>
       </div>
     </div>
 
@@ -255,10 +266,10 @@
         Static ID Database
         <span class="count" id="staticDbCount">(0)</span>
       </div>
-      <div class="controls" style="padding: 10px 15px;">
-        <button id="btnPrevPage" style="padding: 5px 10px;">&larr; Prev</button>
-        <span id="pageInfo" style="font-size:12px;color:#888;">Page 1</span>
-        <button id="btnNextPage" style="padding: 5px 10px;">Next &rarr;</button>
+      <div class="controls" style="padding: 10px 15px">
+        <button id="btnPrevPage" style="padding: 5px 10px">&larr; Prev</button>
+        <span id="pageInfo" style="font-size: 12px; color: #888">Page 1</span>
+        <button id="btnNextPage" style="padding: 5px 10px">Next &rarr;</button>
       </div>
       <div class="list" id="staticDbList">
         <div class="list-item">Loading...</div>
@@ -325,7 +336,8 @@
 
       async function refreshStaticDb() {
         try {
-          const url = API + '/static-db?limit=' + staticDbPage.limit + '&offset=' + staticDbPage.offset
+          const url =
+            API + '/static-db?limit=' + staticDbPage.limit + '&offset=' + staticDbPage.offset
           const res = await fetch(url)
           const data = await res.json()
           if (data.success) {
@@ -333,9 +345,11 @@
             document.getElementById('staticDbCount').textContent = '(' + data.count + ')'
             const pageNum = Math.floor(staticDbPage.offset / staticDbPage.limit) + 1
             const totalPages = Math.ceil(data.count / staticDbPage.limit)
-            document.getElementById('pageInfo').textContent = 'Page ' + pageNum + ' of ' + totalPages
+            document.getElementById('pageInfo').textContent =
+              'Page ' + pageNum + ' of ' + totalPages
             document.getElementById('btnPrevPage').disabled = staticDbPage.offset === 0
-            document.getElementById('btnNextPage').disabled = staticDbPage.offset + staticDbPage.limit >= data.count
+            document.getElementById('btnNextPage').disabled =
+              staticDbPage.offset + staticDbPage.limit >= data.count
             const el = document.getElementById('staticDbList')
             if (data.items.length === 0) {
               el.innerHTML = '<div class="list-item">No entries</div>'
@@ -371,6 +385,12 @@
             document.getElementById('btnBrowserStop').disabled = !data.running
             document.getElementById('cbCapturing').disabled = !data.running
             document.getElementById('cbCapturing').checked = data.capturing
+            const token1El = document.getElementById('token1')
+            const token2El = document.getElementById('token2')
+            token1El.textContent = data.token1 ? 'ready' : 'none'
+            token2El.textContent = data.token2 ? 'ready' : 'none'
+            token1El.style.color = data.token1 ? '#4caf50' : '#888'
+            token2El.style.color = data.token2 ? '#4caf50' : '#888'
           }
         } catch (e) {
           log('Browser status error: ' + e.message)

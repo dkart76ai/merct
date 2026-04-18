@@ -261,9 +261,7 @@ async function processPacketHandler(data) {
 
   if (opCode === 312 || opCode === 408) {
     const payload = {
-      buffer: Buffer.from(decodedResponse).toString('base64'),
-
-      triggeredBy: 'process-packet'
+      buffer: Buffer.from(decodedResponse).toString('base64')
     }
 
     await addJob(JOB_TYPES.EXTRACT_OBJECTS, payload, {

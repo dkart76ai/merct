@@ -2,7 +2,7 @@ const { findObjects } = require('../database')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 
 async function findObjectsHandler(data) {
-  const { staticId, level, amount, triggeredBy, notificationConfig } = data
+  const { staticId, level, amount } = data
 
   console.log(`[FindObjects] Searching: staticId=${staticId}, level=${level}, amount=${amount}`)
 
@@ -23,8 +23,7 @@ async function findObjectsHandler(data) {
             priority: PRIORITY.HIGH,
             payload: {
               objects: result.objects,
-              searchCriteria: { staticId, level, amount },
-              triggeredBy
+              searchCriteria: { staticId, level, amount }
             }
           }
         ]

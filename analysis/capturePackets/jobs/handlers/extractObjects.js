@@ -48,7 +48,7 @@ function extractObjects(data) {
 
   const incompleteObjData = []
 
-  objects.ForEach(obj => {
+  objects.forEach(obj => {
     const dbEntry = staticIdDB.getStaticIdData(obj.staticId)
     const isComplete =
       dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level != null && dbEntry.level >= 0
@@ -70,7 +70,7 @@ function extractObjects(data) {
 }
 
 async function extractObjectsHandler(data) {
-  const { buffer, triggeredBy } = data
+  const { buffer } = data
 
   const _buffer = Buffer.from(buffer, 'base64')
   const packetData = new Uint8Array(_buffer)
@@ -89,14 +89,12 @@ async function extractObjectsHandler(data) {
     // Chain: Save objects first, then find-objects will trigger notification
     return {
       success: true,
-      triggeredBy,
       nextJobs: [
         {
           type: JOB_TYPES.SAVE_OBJECTS,
           priority: PRIORITY.NORMAL,
           payload: {
-            objects,
-            triggeredBy
+            objects
           }
         }
       ]
