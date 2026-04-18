@@ -459,6 +459,10 @@ function updateCapturesForClient(
   const opCode = getFirstValue(decodedResponse)
 
   captures.push({ id, url, opCode, response: { size: responseBody.length } })
+
+  if (captures.length > 100) {
+    captures = captures.slice(-50)
+  }
 }
 
 function setupPacketCaptureListener() {
