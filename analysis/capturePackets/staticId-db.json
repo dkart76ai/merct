@@ -653,6 +653,11 @@
     "name": "Mercenary exchange",
     "entryType": "poi"
   },
+  "560": {
+    "staticId": 560,
+    "entryType": "poi",
+    "name": null
+  },
   "565": {
     "staticId": 565,
     "entryType": "poi",
@@ -4256,6 +4261,11 @@
     "staticId": 152004,
     "entryType": "poi",
     "name": "Escuadrón rúnico común"
+  },
+  "152104": {
+    "staticId": 152104,
+    "entryType": "poi",
+    "name": null
   },
   "152107": {
     "staticId": 152107,

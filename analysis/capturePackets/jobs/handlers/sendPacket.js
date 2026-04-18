@@ -45,8 +45,6 @@ async function sendPacketHandler(payload) {
   const token1 = BigInt(_token1)
   const token2 = new Uint8Array(_token2)
 
-  console.log(`[SendPacket] Sending packet to ${url} (triggeredBy: ${triggeredBy})`)
-
   try {
     const packetData = buildPacketPayload(tiles, token1, token2)
     // Encode the packet
@@ -54,6 +52,7 @@ async function sendPacketHandler(payload) {
 
     // Send to server
     const url = kingdomUrls[kingdomId]
+    console.log(`[SendPacket] Sending packet to ${url}  `)
     const response = await fetch(url, {
       method: 'POST',
       headers: HEADERS,

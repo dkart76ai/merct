@@ -132,7 +132,7 @@ async function startWorker(handlers) {
         }
       }
 
-      console.log(`[Worker] Job ${job.id} completed`)
+      console.log(`[Worker] Job  ${job.name} ${job.id} completed`)
 
       return result
     },
@@ -232,7 +232,7 @@ async function addJobAndWait(type, data, options = {}) {
       result
     }
   } catch (error) {
-    console.error(`[Queue] Job ${job.id} failed or timed out:`, error.message)
+    console.error(`[Queue] Job  ${job.name} ${job.id} failed or timed out:`, error.message)
     return {
       jobId: job.id,
       success: false,

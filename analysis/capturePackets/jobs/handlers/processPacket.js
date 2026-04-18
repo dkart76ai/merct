@@ -1,12 +1,14 @@
 const path = require('path')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 const { getRedis } = require('../redis')
+const { multiDecodeMsgPack2, decodeMsgPack2 } = require('../../../message-pack/messagePack.js')
+const fs = require('fs')
 
 const redisClient = getRedis()
 
 let captureIndex = 0
 let saveFileIndex = 0
-const captures = []
+let captures = []
 
 const SAVE_DIR = path.join(__dirname, 'captures')
 const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
@@ -77,7 +79,7 @@ function saveToFile() {
       )
     }
   } catch (e) {
-    console.error('Save error:', e.message)
+    console.error('[processPacket] Save error:', e.message)
   }
 }
 
@@ -90,6 +92,7 @@ function saveCapturedPacket(
   requestBodyB64,
   responseHeaders,
   responseBodyB64,
+  decodedResponse,
   tileIds,
   isMyPacket
 ) {
@@ -108,7 +111,8 @@ function saveCapturedPacket(
     },
     response: {
       headers: responseHeaders,
-      bodyB64: responseBodyB64
+      bodyB64: responseBodyB64,
+      decodedResponse
     }
   })
 
@@ -203,7 +207,11 @@ async function processPacketHandler(data) {
   }
 
   //-----------------------
-  const tileIds = decodedReq[1]
+  let tileIds = []
+  if (opCode === 312) {
+    tileIds = decodedReq[1]
+  }
+
   saveCapturedPacket(
     opCode,
     url,
@@ -213,6 +221,7 @@ async function processPacketHandler(data) {
     requestBodyB64,
     responseHeaders,
     responseBodyB64,
+    decodedResponse,
     tileIds,
     isMyPacket
   )

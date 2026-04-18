@@ -28,7 +28,7 @@ async function notifyDiscord(msg = '', coord = null) {
       })
     })
   } catch (error) {
-    console.error(`[${config.workerId}] Discord notify failed:`, error.message)
+    console.error(`[chat-sender] Discord notify failed:`, error.message)
   }
 }
 
@@ -85,6 +85,8 @@ async function sendMessage(msg = '', coord = null, staticId = 400) {
         })
         return { success: true, messageId: msg.messageId }
       } catch (e) {
+        console.error(`[chat-sender] Discord sendmessage failed:`, error.message)
+
         return { success: false, error: e.message }
       }
     },

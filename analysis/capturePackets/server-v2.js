@@ -152,7 +152,7 @@ let browser = null
 let context = null
 let page = null
 let captures = []
-// let captureIndex = 0
+let captureIndex = 0
 // let autoSave = true
 let capturingEnabled = false
 // let uniqueOpcodes = new Set()
@@ -470,7 +470,7 @@ function setupPacketCaptureListener() {
       const responseBody = await response.body()
 
       if (!responseBody || responseBody.length === 0) return
-      if (headers['content-type']?.includes('text/html')) return
+      if (responseHeaders['content-type']?.includes('text/html')) return
 
       const request = response.request()
       // const postData = request.postData()
@@ -634,9 +634,10 @@ app.get('/api/unknown-staticids', (req, res) => {
 })
 
 app.get('/api/static-db', (req, res) => {
-  console.log('Sending staticId Db with', getStaticIdSize(), 'entries')
+  const count = staticId.getStaticIdSize()
+  console.log('Sending staticId Db with', count, 'entries')
   const entries = staticId.getStaticIdValues()
-  res.json({ success: true, items: entries, count: staticId.getStaticIdSize() })
+  res.json({ success: true, items: entries, count })
 })
 
 // Objects database endpoints
