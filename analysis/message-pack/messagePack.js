@@ -408,12 +408,12 @@ function multiDecodeMsgPack2(buff) {
     console.warn('multiDecodeMsgPack2: Empty buffer received')
     return { results: [], bufLen: 0, len: 0 }
   }
-  
+
   if (buff.length < 8) {
     console.warn('multiDecodeMsgPack2: Buffer too small for header:', buff.length, 'bytes')
     return { results: [], bufLen: 0, len: 0 }
   }
-  
+
   const decoder = new MsgPackDecoder(buff)
   // 2. Leemos los dos enteros del encabezado (4 buff cada uno)
   // Usamos getUint32. El primero está en offset 0, el segundo en offset 4.
@@ -428,6 +428,7 @@ function multiDecodeMsgPack2(buff) {
   try {
     while (decoder.off < buff.length) {
       // console.log('Decodificando en offset:', decoder.off)
+      if (decoder.off >= longitud2) break
       const data = decoder.decode()
       if (data !== undefined) {
         results.push(data)
@@ -699,7 +700,7 @@ function encodeMsgPack2MultiFragments(fragmentos, len = null) {
   const view = new DataView(finalBuf.buffer)
 
   const totalLength = finalBuf.length
-  const msgpackPayloadLength = len ? len : (totalLength - 8)
+  const msgpackPayloadLength = len ? len : totalLength - 8
 
   view.setUint32(0, totalLength, true)
   view.setUint32(4, msgpackPayloadLength, true)
