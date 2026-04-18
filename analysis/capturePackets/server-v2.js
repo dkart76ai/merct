@@ -30,7 +30,7 @@ const {
   notificationHandler,
   processPacketHandler
 } = require('./jobs/handlers')
-const { findObjects, getStats, getAllObjects } = require('./jobs/database')
+const { findObjects, getStats, getAllObjects, startCleanup } = require('./jobs/database')
 const { getRedis } = require('./jobs/redis')
 loadEnvFile()
 
@@ -812,6 +812,7 @@ async function main() {
 
   await ensureSaveDir()
   staticId.loadStaticDb()
+  startCleanup()
 
   console.log('[Main] Starting BullMQ worker...')
 
