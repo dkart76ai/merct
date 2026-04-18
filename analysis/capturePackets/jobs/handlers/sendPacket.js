@@ -39,8 +39,6 @@ async function sendPacketHandler(payload) {
     throw new Error('no session token2')
   }
 
-  console.log('[SendPacket] ', { _token1, _token2 })
-
   try {
     const token1 = BigInt(_token1)
     const token2 = new Uint8Array(_token2)
@@ -67,18 +65,10 @@ async function sendPacketHandler(payload) {
     const buffer = await response.arrayBuffer()
     const bytes = new Uint8Array(buffer)
 
-    console.log(`[SendPacket] Received ${bytes.length} bytes from server`)
+    const msgPackDataKey = `msgPackData:${Date.now()}:${Math.random().toString(36).substring(7)}`
 
-    if (bytes.length < 8) {
-      throw new Error(`Response too small: ${bytes.length} bytes`)
-    }
-
-    // Decode response
-    const decoded = multiDecodeMsgPack2(bytes)
-
-    if (!decoded.results || decoded.results.length === 0) {
-      throw new Error('No results in decoded response')
-    }
+    // Store raw bytes (Uint8Array), not decoded results
+    await redisClient.set(msgPackDataKey, bytes, 'EX', 60 * 5)
 
     const result = {
       success: true,
@@ -87,15 +77,14 @@ async function sendPacketHandler(payload) {
           type: JOB_TYPES.EXTRACT_OBJECTS,
           priority: PRIORITY.NORMAL,
           payload: {
-            buffer: Buffer.from(decoded.results).toString('base64'),
-
+            bufferKey: msgPackDataKey,
             kingdom
           }
         }
       ]
     }
 
-    console.log(`[SendPacket] Success - ${decoded.results.length} objects in response`)
+    console.log(`[SendPacket] Success  `)
 
     return result
   } catch (error) {

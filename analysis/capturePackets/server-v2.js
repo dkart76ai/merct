@@ -321,7 +321,7 @@ function updateCapturesForClient(
 
   captures.push({ id, url, opCode, response: { size: responseBody.length } })
 
-  if (captures.length > 100) {
+  if (captures.length > 50) {
     captures = captures.slice(-50)
   }
 }
@@ -334,6 +334,9 @@ function setupPacketCaptureListener() {
 
     const url = response.url()
     if (!url.includes('rubens-realm')) return
+
+    // const _kingdom = url.split('rubens-realm')[1]
+    // const kingdom = parseInt(_kingdom)
 
     try {
       const status = response.status()
@@ -406,31 +409,43 @@ async function browserInitialize() {
 async function browserLoadUrlAndLogin() {
   if (!page) return
 
-  await page.goto('https://totalbattle.com/es', { timeout: 70000 })
-  await page.waitForTimeout(10000)
+  // 1. Ve a la página y espera lo mínimo necesario
+  await page.goto('https://totalbattle.com/es', { waitUntil: 'domcontentloaded' })
 
-  // Login if needed
+  // 2. Define los locadores (sin ejecutarlos aún)
   const loginInput = page.getByRole('textbox', { name: 'E-mail' })
-  if (await loginInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-    console.log(`  Logging in...`)
-    const loginButtonTab = page.locator('span[data-id="login"]')
-    if (await loginButtonTab.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await loginButtonTab.click()
-      await page.waitForTimeout(500)
-    } else {
-      console.log('iniciar session, not found')
-    }
+  const loginButtonTab = page.locator('span[data-id="login"]')
+  const passwordInput = page.getByRole('textbox', { name: 'Contraseña' })
+  const loginButton = page.getByRole('button', { name: 'Iniciar sesión' })
 
+  for (let i = 0; i < 2; i++) {
+    // 3. Lógica de Login con esperas explícitas
+    try {
+      // Esperamos a que el botón de la pestaña o el input aparezcan (lo que ocurra primero)
+      await loginButtonTab.waitFor({ state: 'visible', timeout: 10000 })
+
+      if (await loginButtonTab.isVisible()) {
+        console.log('Abriendo pestaña de login...')
+        await loginButtonTab.click()
+      }
+      break
+    } catch (error) {
+      console.error('El formulario de login no apareció o tardó demasiado', error)
+    }
+  }
+
+  try {
+    // Llenar datos (Playwright esperará automáticamente a que sean editables)
+    console.log('Ingresando credenciales...')
     await loginInput.fill(config.accountUser)
+    await passwordInput.fill(config.accountPwd)
 
-    const passwordInput = page.getByRole('textbox', { name: 'Contraseña' })
-    const loginButton = page.getByRole('button', { name: 'Iniciar sesión' })
-    if (await passwordInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await passwordInput.fill(config.accountPwd)
-      await loginButton.click()
-    } else {
-      console.log('pwd input not found')
-    }
+    // En lugar de click simple, espera la navegación tras el click
+    await loginButton.click()
+
+    console.log('Login exitoso')
+  } catch (error) {
+    console.error('El formulario de login no apareció o tardó demasiado', error)
   }
 }
 
@@ -460,6 +475,22 @@ app.get('/api/health', (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     memory: process.memoryUsage()
+  })
+})
+
+// Debug endpoint to check memory and DB stats
+app.get('/api/debug', (req, res) => {
+  const used = process.memoryUsage()
+  const dbStats = getStats()
+  res.json({
+    memory: {
+      heapUsed: Math.round(used.heapUsed / 1024 / 1024) + ' MB',
+      heapTotal: Math.round(used.heapTotal / 1024 / 1024) + ' MB',
+      rss: Math.round(used.rss / 1024 / 1024) + ' MB',
+      external: Math.round(used.external / 1024 / 1024) + ' MB'
+    },
+    database: dbStats,
+    uptime: process.uptime()
   })
 })
 
@@ -618,12 +649,15 @@ app.get('/api/browser/status', async (req, res) => {
   const token1 = await redisClient.get('mysession:token1:BigInt')
   const token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
 
+  const memoryUsage = await page.evaluate(() => performance.memory)
+
   res.json({
     success: true,
     running: !!browser,
     capturing: capturingEnabled,
     token1,
-    token2
+    token2,
+    memoryUsage
   })
 })
 

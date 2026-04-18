@@ -13,7 +13,7 @@ let capturesDecoded = []
 
 const SAVE_DIR = path.join(__dirname, 'captures')
 const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
-const MAX_CAPTURES_PER_FILE = 500
+const MAX_CAPTURES_PER_FILE = 50
 
 const myPlayerInfo = {
   name: 'Maedve',
@@ -260,8 +260,12 @@ async function processPacketHandler(data) {
   }
 
   if (opCode === 312 || opCode === 408) {
+    // pass rawBytes (encoded)to extract_objects as they are smaller
+    const msgPackDataKey = `msgPackData:${Date.now()}:${Math.random().toString(36).substring(7)}`
+    await redisClient.set(msgPackDataKey, Buffer.from(responseData), 'EX', 60 * 5)
+
     const payload = {
-      buffer: Buffer.from(decodedResponse).toString('base64')
+      bufferKey: msgPackDataKey
     }
 
     await addJob(JOB_TYPES.EXTRACT_OBJECTS, payload, {

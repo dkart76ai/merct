@@ -1,5 +1,16 @@
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
+const { getRedis } = require('../redis')
 const staticIdDB = require('../../staticId.js')
+const { multiDecodeMsgPack2 } = require('../../../message-pack/messagePack.js')
+
+let redisClient = null
+
+function getRedisClient() {
+  if (!redisClient) {
+    redisClient = getRedis()
+  }
+  return redisClient
+}
 
 function extractObjects(data) {
   const objects = []
@@ -70,21 +81,32 @@ function extractObjects(data) {
 }
 
 async function extractObjectsHandler(data) {
-  const { buffer } = data
+  const { bufferKey } = data
+  console.log(`[ExtractObjects] Looking for key: ${bufferKey}`)
 
-  const _buffer = Buffer.from(buffer, 'base64')
-  const packetData = new Uint8Array(_buffer)
+  const dataBuffer = await getRedisClient().getBuffer(bufferKey)
 
-  console.log(`[ExtractObjects] Processing data`)
+  if (!dataBuffer) {
+    console.error(`[ExtractObjects] Key not found or empty: ${bufferKey}`)
+    return { success: false, error: 'buffer not found in Redis' }
+  }
+
+  console.log(`[ExtractObjects] Got ${dataBuffer.length} bytes `)
+
+  const _decodedResponse = multiDecodeMsgPack2(Buffer.from(dataBuffer))
+  const decodedResponse = _decodedResponse.results
 
   try {
-    const objects = extractObjects(packetData)
-
-    console.log(`[ExtractObjects] Found ${objects.length} objects`)
+    const objects = extractObjects(decodedResponse)
 
     if (objects.length === 0) {
+      console.log(`[ExtractObjects] Found ${objects.length} objects`)
       return { success: true, count: 0, objects: [] }
     }
+
+    console.log(`\x1b[32m [ExtractObjects] Found ${objects.length} objects \x1b[0m`)
+
+    await getRedisClient().del(bufferKey)
 
     // Chain: Save objects first, then find-objects will trigger notification
     return {

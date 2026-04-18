@@ -190,6 +190,7 @@
           <div id="token1">none</div>
           <div id="token2">none</div>
         </div>
+        <div class="memory-usage" id="memoryUsage">nada</div>
       </div>
     </div>
 
@@ -216,6 +217,42 @@
           <div class="stat-item">
             <div class="stat-value" id="statFailed">0</div>
             <div class="stat-label">Failed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug / Memory -->
+    <div class="panel">
+      <div class="panel-header">
+        Debug / Memory
+        <button id="btnRefreshDebug" style="padding: 5px 10px; font-size: 12px">Refresh</button>
+      </div>
+      <div class="controls" style="padding: 15px">
+        <div class="stat">
+          <div class="stat-item">
+            <div class="stat-value" id="debugHeapUsed">-</div>
+            <div class="stat-label">Heap Used</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="debugHeapTotal">-</div>
+            <div class="stat-label">Heap Total</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="debugRss">-</div>
+            <div class="stat-label">RSS</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="debugDbObjects">-</div>
+            <div class="stat-label">DB Objects</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="debugDbCleaned">-</div>
+            <div class="stat-label">DB Cleaned</div>
+          </div>
+        </div>
+      </div>
+    </div>
           </div>
         </div>
       </div>
@@ -308,7 +345,7 @@
         }
       }
 
-      async function refreshTimers() {
+async function refreshTimers() {
         try {
           const res = await fetch(API + '/timers')
           const data = await res.json()
@@ -317,22 +354,35 @@
             if (data.timers.length === 0) {
               el.innerHTML = '<div class="list-item">No active timers</div>'
             } else {
-              el.innerHTML = data.timers
-                .map(
-                  t => `
+              el.innerHTML = data.timers.map(t => `
                 <div class="list-item">
                   <span>${t.key || t.name}</span>
                   <span style="color:#569cd6">${t.intervalMs}ms</span>
                 </div>
-              `
-                )
-                .join('')
+              `).join('')
             }
           }
-        } catch (e) {
-          log('Timers error: ' + e.message)
-        }
+        } catch (e) { log('Timers error: ' + e.message) }
       }
+
+      async function refreshDebug() {
+        try {
+          const res = await fetch(API + '/debug')
+          const data = await res.json()
+          if (data.memory) {
+            document.getElementById('debugHeapUsed').textContent = data.memory.heapUsed
+            document.getElementById('debugHeapTotal').textContent = data.memory.heapTotal
+            document.getElementById('debugRss').textContent = data.memory.rss
+            document.getElementById('debugDbObjects').textContent = data.database?.uniqueObjects || 0
+            document.getElementById('debugDbCleaned').textContent = data.database?.totalCleaned || 0
+          }
+        } catch (e) {
+           log('Debug error: ' + e.message) }
+      }
+
+
+
+
 
       async function refreshStaticDb() {
         try {
@@ -385,8 +435,10 @@
             document.getElementById('btnBrowserStop').disabled = !data.running
             document.getElementById('cbCapturing').disabled = !data.running
             document.getElementById('cbCapturing').checked = data.capturing
+            const memoryUsageEl = document.getElementById('memoryUsage')
             const token1El = document.getElementById('token1')
             const token2El = document.getElementById('token2')
+            memoryUsageEl.textContent = data.memoryUsage
             token1El.textContent = data.token1 ? 'ready' : 'none'
             token2El.textContent = data.token2 ? 'ready' : 'none'
             token1El.style.color = data.token1 ? '#4caf50' : '#888'
@@ -402,7 +454,8 @@
           checkBrowserStatus()
           refreshJobsStatus()
           refreshTimers()
-        }, 2000)
+          refreshDebug()
+        }, 5000)
       }
 
       function stopAutoRefresh() {
@@ -441,6 +494,11 @@
       document.getElementById('btnRefreshJobs').addEventListener('click', async () => {
         refreshJobsStatus()
         refreshTimers()
+      })
+
+      // Debug handlers
+      document.getElementById('btnRefreshDebug').addEventListener('click', async () => {
+        refreshDebug()
       })
 
       // Kingdom scanner handlers
@@ -557,6 +615,7 @@
       refreshJobsStatus()
       refreshTimers()
       refreshStaticDb()
+      refreshDebug()
       checkBrowserStatus()
       if (document.getElementById('browserStatus').textContent === 'Running') {
         startAutoRefresh()

@@ -32,18 +32,18 @@ function getQueue() {
     queue = new Queue(QUEUE_NAME, {
       connection: getRedis(),
       defaultJobOptions: {
-        attempts: 3,
+        attempts: 2,
         backoff: {
           type: 'exponential',
           delay: 1000
         },
         removeOnComplete: {
-          count: 1000,
-          age: 24 * 3600
+          count: 1,
+          age: 1
         },
         removeOnFail: {
-          count: 5000,
-          age: 7 * 24 * 3600
+          count: 5,
+          age: 30
         }
       }
     })
