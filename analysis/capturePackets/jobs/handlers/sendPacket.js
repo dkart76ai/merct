@@ -29,21 +29,26 @@ function buildPacketPayload(tiles, tokenBigInt, token2) {
 }
 
 async function sendPacketHandler(payload) {
-  const { kingdomId, tiles, triggeredBy = 'manual', notificationConfig = {} } = payload
+  const { kingdom, tiles, triggeredBy = 'manual', notificationConfig = {} } = payload
 
   const redisClient = getRedis()
 
   const _token1 = await redisClient.get('mysession:token1:BigInt')
   if (!_token1) {
-    return res.json({ success: false, error: 'no session token1' })
+    throw new Error('no session token1')
   }
 
   const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
   if (!_token2) {
-    return res.json({ success: false, error: 'no session token2' })
+    throw new Error('no session token2')
   }
-  const token1 = BigInt(_token1)
-  const token2 = new Uint8Array(_token2)
+  try {
+    console.log('[SendPacket] ', { _token1, _token2 })
+    const token1 = BigInt(_token1)
+    const token2 = new Uint8Array(_token2)
+  } catch (error) {
+    console.error(`[SendPacket] Error:`, error.message)
+  }
 
   try {
     const packetData = buildPacketPayload(tiles, token1, token2)
@@ -51,7 +56,7 @@ async function sendPacketHandler(payload) {
     const encoded = encodeMsgPack2MultiFragments(packetData)
 
     // Send to server
-    const url = kingdomUrls[kingdomId]
+    const url = kingdomUrls[kingdom]
     console.log(`[SendPacket] Sending packet to ${url}  `)
     const response = await fetch(url, {
       method: 'POST',

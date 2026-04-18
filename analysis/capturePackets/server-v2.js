@@ -276,11 +276,10 @@ async function handleScanKingdom(req, res) {
 
   console.log(`[API] Queuing ${tilesArray.length * kingdomList.length} scan jobs`)
 
-  for (const kingdomId of kingdomList) {
+  for (const kingdom of kingdomList) {
     for (const tiles of tilesArray) {
-      // const payload = buildPacketPayload(kingdomId, tiles, token1, token2)
       const payload = {
-        kingdomId,
+        kingdom,
         tiles
       }
       const job =
@@ -294,7 +293,7 @@ async function handleScanKingdom(req, res) {
               triggeredBy: 'manual'
             })
 
-      jobIds.push({ kingdomId, jobId: job.id })
+      jobIds.push({ kingdom, jobId: job.id })
     }
   }
 
@@ -325,11 +324,11 @@ async function handleStartTimer(req, res) {
   const tilesArray = generateArrays()
   const timerManager = getTimerManager()
 
-  for (const kingdomId of kingdomList) {
-    timerManager.stopScan(kingdomId)
+  for (const kingdom of kingdomList) {
+    timerManager.stopScan(kingdom)
 
     for (const tiles of tilesArray) {
-      timerManager.scheduleScanKingdom(kingdomId, {
+      timerManager.scheduleScanKingdom(kingdom, {
         intervalMs: parseInt(interval),
         tiles
       })
@@ -351,8 +350,8 @@ async function handleStopTimer(req, res) {
 
   if (kingdoms) {
     const kingdomList = kingdoms.split(',').map(k => parseInt(k.trim()))
-    for (const kingdomId of kingdomList) {
-      timerManager.stopScan(kingdomId)
+    for (const kingdom of kingdomList) {
+      timerManager.stopScan(kingdom)
     }
     res.json({ success: true, message: `Stopped timers for ${kingdomList.length} kingdoms` })
   } else {
@@ -556,14 +555,19 @@ async function browserLoadUrlAndLogin() {
   const loginInput = page.getByRole('textbox', { name: 'E-mail' })
   if (await loginInput.isVisible({ timeout: 5000 }).catch(() => false)) {
     console.log(`  Logging in...`)
-    const loginButton = page.locator('#registration').getByText('Iniciar sesión')
-    if (await loginButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await loginButton.click()
+    const loginButtonTab = page.getByText('Iniciar sesión')
+    if (await loginButtonTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await loginButtonTab.click()
       await page.waitForTimeout(500)
     }
-    await loginInput.fill(config.accountUser)
-    await page.getByRole('textbox', { name: 'Contraseña' }).fill(config.accountPwd)
-    await page.getByRole('button', { name: 'Iniciar sesión' }).click()
+
+    const passwordInput = page.getByRole('textbox', { name: 'Contraseña' })
+    const loginButton = page.getByRole('button', { name: 'Iniciar sesión' })
+    if (await passwordInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await loginInput.fill(config.accountUser)
+      await passwordInput.fill(config.accountPwd)
+      await loginButton.click()
+    }
   }
 }
 

@@ -163,16 +163,17 @@ async function extractMySessionTokens(decodedReq) {
       typeof value === 'bigint' ? value.toString() : value
     )
   )
+  // 312 packet getting tokens [[312,2807,[["1309965043442"],{"0":105,"1":227,"2":98,"3":249,"4":171,"5":90,"6":183,"7":199,"8":35,"9":185,"10":113,"11":96}],""],[[2284],[45713],[],[]],
   //request:  [312,284,[["1309965043442"],{"0":105,"1":223,"2":166,"3":213,"4":171,"5":90,"6":183,"7":199,"8":35,"9":86,"10":245,"11":99}],""]
 
-  const mySessionToken = decodedReq[2]?.[0]?.[0]
+  const mySessionToken = decodedReq[0]?.[2]?.[0]?.[0] || null
   // mySessionToken =
   //   typeof rawToken === 'bigint'
   //     ? rawToken
   //     : typeof rawToken === 'number'
   //       ? BigInt(rawToken)
   //       : rawToken
-  const token2 = decodedReq[2]?.[1] // auth token?
+  const token2 = decodedReq[0]?.[2]?.[1] || null // auth token?
   const mySessionToken2 = mapToUint8Array(token2)
 
   await redisClient.set('mysession:token1:BigInt', mySessionToken.toString(), 'EX', 86400)
