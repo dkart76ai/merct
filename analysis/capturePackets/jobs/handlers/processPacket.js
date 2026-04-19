@@ -11,7 +11,7 @@ let saveFileIndex = 0
 let captures = []
 let capturesDecoded = []
 
-const SAVE_DIR = path.join(__dirname, 'captures')
+const SAVE_DIR = path.join(__dirname, '../../captures')
 const MAX_CAPTURES_PER_FILE = 50
 
 const myPlayerInfo = {
@@ -124,13 +124,11 @@ function saveCapturedPacket(
     request: {
       method: requestMethod,
       headers: requestHeaders,
-      // bodyB64: requestBodyB64,
-      bodyBufferB64: requestBodyB64
+      bodyB64: requestBodyB64
     },
     response: {
       headers: responseHeaders,
       bodyB64: responseBodyB64
-      // decodedResponse
     }
   })
 

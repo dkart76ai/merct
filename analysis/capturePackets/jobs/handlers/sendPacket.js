@@ -17,7 +17,7 @@ const HEADERS = {
 let captureIndex = 0
 let saveFileIndex = 0
 
-const SAVE_DIR = path.join(__dirname, 'packetSender')
+const SAVE_DIR = path.join(__dirname, '../../packetSender')
 
 function savePacketToFile(url, tiles, request, response) {
   let captures = []
@@ -34,8 +34,11 @@ function savePacketToFile(url, tiles, request, response) {
     }
   })
 
-  const saveFile = path.join(SAVE_DIR, `pktsend-${String(saveFileIndex++).padStart(3, '0')}.json`)
+  if (!fs.existsSync(SAVE_DIR)) {
+    fs.mkdirSync(SAVE_DIR, { recursive: true })
+  }
 
+  const saveFile = path.join(SAVE_DIR, `pktsend-${String(saveFileIndex++).padStart(3, '0')}.json`)
   //save packet to analyze
   fs.writeFileSync(
     saveFile,
