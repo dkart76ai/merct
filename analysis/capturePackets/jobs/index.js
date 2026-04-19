@@ -199,8 +199,11 @@ async function getJob(jobId) {
 
 async function cleanOldJobs() {
   const q = getQueue()
-  await q.clean(24 * 3600, 1000, 'completed')
-  await q.clean(24 * 3600, 500, 'failed')
+  // Clean ALL completed jobs (max 10000, age 0 = all)
+  await q.clean(0, 10000, 'completed')
+  // Clean ALL failed jobs
+  await q.clean(0, 5000, 'failed')
+  console.log('[Queue] Cleaned all completed and failed jobs')
 }
 
 async function addJobAndWait(type, data, options = {}) {

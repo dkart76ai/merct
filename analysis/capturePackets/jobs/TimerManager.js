@@ -10,7 +10,7 @@ class TimerManager {
   }
 
   async scheduleScanKingdom(kingdom, options = {}) {
-    const { intervalMs = 60000, tiles } = options
+    const { intervalMs = 60000 * 3, tiles } = options
 
     const tilesKey = tiles.join(',')
     const timerKey = `kingdom:${kingdom}:${tilesKey}`

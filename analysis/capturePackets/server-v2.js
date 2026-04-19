@@ -14,6 +14,7 @@ const {
   getTimerManager,
   startWorker,
   stopWorker,
+  cleanOldJobs,
   getQueueStatus,
   getJob,
   closeQueue,
@@ -40,6 +41,7 @@ const config = {
 }
 
 const SAVE_DIR = path.join(__dirname, 'captures')
+const SAVE_DIR2 = path.join(__dirname, 'packetSender')
 
 function getFirstValue(data) {
   if (!data || !Array.isArray(data)) return null
@@ -77,6 +79,9 @@ async function ensureSaveDir() {
   try {
     if (!fs.existsSync(SAVE_DIR)) {
       fs.mkdirSync(SAVE_DIR, { recursive: true })
+    }
+    if (!fs.existsSync(SAVE_DIR2)) {
+      fs.mkdirSync(SAVE_DIR2, { recursive: true })
     }
   } catch (e) {
     console.error('Ensure save dir error:', e.message)
@@ -742,6 +747,8 @@ async function main() {
   process.on('SIGINT', async () => {
     console.log('\n[Main] Shutting down...')
     await stopWorker()
+    await cleanOldJobs()
+    console.log('[Main] Cleaning Redis...')
     await closeQueue()
     if (browser) await browser.close()
     process.exit(0)
@@ -750,6 +757,8 @@ async function main() {
   process.on('SIGTERM', async () => {
     console.log('\n[Main] Shutting down...')
     await stopWorker()
+    await cleanOldJobs()
+    console.log('[Main] Cleaning Redis...')
     await closeQueue()
     if (browser) await browser.close()
     process.exit(0)
