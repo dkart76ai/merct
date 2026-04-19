@@ -12,7 +12,6 @@ let captures = []
 let capturesDecoded = []
 
 const SAVE_DIR = path.join(__dirname, 'captures')
-const MYPLAYER_FILE = path.join(__dirname, 'myplayer.json')
 const MAX_CAPTURES_PER_FILE = 50
 
 const myPlayerInfo = {
@@ -135,7 +134,7 @@ function saveCapturedPacket(
     }
   })
 
-  capturesDecoded.push({ id: ++captureIndex, opCode, url, decodedResponse })
+  capturesDecoded.push({ id: ++captureIndex, opCode, url, decodedRequest, decodedResponse })
 
   saveToFile()
 }

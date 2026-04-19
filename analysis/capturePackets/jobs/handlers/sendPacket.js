@@ -1,3 +1,5 @@
+const fs = require('fs')
+const path = require('path')
 const {
   multiDecodeMsgPack2,
   encodeMsgPack2MultiFragments
@@ -10,6 +12,35 @@ const HEADERS = {
   'Content-Type': 'application/octet-stream',
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
   Referer: 'https://totalbattle.com/'
+}
+
+let captureIndex = 0
+let saveFileIndex = 0
+
+const SAVE_DIR = path.join(__dirname, 'packetSender')
+
+function savePacketToFile(url, tiles, request, response) {
+  let captures = []
+  captures.push({
+    id: ++captureIndex,
+    opcode: 312,
+    url,
+    tiles,
+    request: {
+      bodyBufferB64: Buffer.from(request).toString('base64')
+    },
+    response: {
+      bodyB64: Buffer.from(response).toString('base64')
+    }
+  })
+
+  const saveFile = path.join(SAVE_DIR, `pktsend-${String(saveFileIndex++).padStart(3, '0')}.json`)
+
+  //save packet to analyze
+  fs.writeFileSync(
+    saveFile,
+    JSON.stringify(captures, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
+  )
 }
 
 function buildPacketPayload(tiles, tokenBigInt, token2) {
@@ -64,6 +95,8 @@ async function sendPacketHandler(payload) {
     // Get response buffer
     const buffer = await response.arrayBuffer()
     const bytes = new Uint8Array(buffer)
+
+    savePacketToFile(url, tiles, encoded, bytes)
 
     const msgPackDataKey = `msgPackData:${Date.now()}:${Math.random().toString(36).substring(7)}`
 
