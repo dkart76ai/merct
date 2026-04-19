@@ -19,5 +19,5 @@ Triumph.framework.js
 /build/
 analysis/decoderMsgPack/build/*
 analysis/temp_mod/*
-analysis/capturePackets/jobs/handlers/captures/captures*.json
-analysis/capturePackets/jobs/handlers/packetSender/pktsend*.json
+analysis/capturePackets/packetSender/*.json
+analysis/capturePackets/captures/*.json
