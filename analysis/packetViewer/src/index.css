@@ -20,6 +20,8 @@ body {
   padding: 10px 20px;
   background: #252526;
   border-bottom: 1px solid #3c3c3c;
+  display: flex;
+  justify-content: space-between;
 }
 
 .header h1 {
