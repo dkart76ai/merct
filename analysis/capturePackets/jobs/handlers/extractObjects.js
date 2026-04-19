@@ -71,7 +71,7 @@ function extractObjects(data) {
 
   if (incompleteObjData.length > 0) {
     console.log(`[ExtractObjects] Found ${incompleteObjData.length} incomplete object entries`)
-    addJob(JOB_TYPES.FIND_OBJECTS, PRIORITY.HIGH, {
+    addJob(JOB_TYPES.NOTIFICATION, PRIORITY.HIGH, {
       message: 'obj missing data',
       objects: incompleteObjData
     })
