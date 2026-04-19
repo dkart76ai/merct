@@ -403,7 +403,8 @@ function decodeMsgPack2(buff) {
   return data
 }
 
-function multiDecodeMsgPack2(buff) {
+function multiDecodeMsgPack2(buff, decodeAll = false) {
+  console.log('decodeall value', decodeAll)
   if (!buff || buff.length === 0) {
     console.warn('multiDecodeMsgPack2: Empty buffer received')
     return { results: [], bufLen: 0, len: 0 }
@@ -428,7 +429,9 @@ function multiDecodeMsgPack2(buff) {
   try {
     while (decoder.off < buff.length) {
       // console.log('Decodificando en offset:', decoder.off)
-      if (decoder.off >= longitud2) break
+      if (!decodeAll) {
+        if (decoder.off >= longitud2) break
+      }
       const data = decoder.decode()
       if (data !== undefined) {
         results.push(data)
@@ -444,11 +447,11 @@ function multiDecodeMsgPack2(buff) {
   return { results, bufLen: longitud1, len: longitud2 }
 }
 
-function multiDecodeMsgPackBase64(base64String) {
+function multiDecodeMsgPackBase64(base64String, decodeAll = false) {
   try {
     const bytes = decodeBase64(base64String)
 
-    return multiDecodeMsgPack2(bytes)
+    return multiDecodeMsgPack2(bytes, decodeAll)
   } catch (e) {
     throw new Error('Failed to decode: ' + e.message)
   }
