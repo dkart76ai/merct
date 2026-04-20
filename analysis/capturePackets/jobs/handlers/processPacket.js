@@ -9,7 +9,7 @@ const redisClient = getRedis()
 let captureIndex = 0
 let saveFileIndex = 0
 let captures = []
-let capturesDecoded = []
+// let capturesDecoded = []
 
 const SAVE_DIR = path.join(__dirname, '../../captures')
 const MAX_CAPTURES_PER_FILE = 50
@@ -74,21 +74,21 @@ function saveToFile() {
       JSON.stringify(captures, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
     )
 
-    const saveFile2 = path.join(
-      SAVE_DIR,
-      `capturesDecoded-${String(saveFileIndex).padStart(3, '0')}.json`
-    )
-    fs.writeFileSync(
-      saveFile2,
-      JSON.stringify(capturesDecoded, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
-    )
+    // const saveFile2 = path.join(
+    //   SAVE_DIR,
+    //   `capturesDecoded-${String(saveFileIndex).padStart(3, '0')}.json`
+    // )
+    // fs.writeFileSync(
+    //   saveFile2,
+    //   JSON.stringify(capturesDecoded, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
+    // )
     // console.log(
     //   `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
     // )
 
     if (captures.length >= MAX_CAPTURES_PER_FILE) {
       captures = []
-      capturesDecoded = []
+      // capturesDecoded = []
       captureIndex = 0
       saveFileIndex++
       console.log(
@@ -114,6 +114,9 @@ function saveCapturedPacket(
   tileIds,
   isMyPacket
 ) {
+  const ignoreList = [318]
+  if (ignoreList.includes(opCode)) return
+
   captures.push({
     id: ++captureIndex,
     opCode,
@@ -132,26 +135,9 @@ function saveCapturedPacket(
     }
   })
 
-  capturesDecoded.push({ id: ++captureIndex, opCode, url, decodedRequest, decodedResponse })
+  // capturesDecoded.push({ id: ++captureIndex, opCode, url, decodedRequest, decodedResponse })
 
   saveToFile()
-}
-
-async function extractInternalIdFrom402(data) {
-  //also found on 203 packets
-  if (!data || !Array.isArray(data)) return null
-
-  for (const item of data) {
-    if (Array.isArray(item) && item.length > 0) {
-      if (Array.isArray(item[0]) && item[0].length === 1) {
-        const id = item[0][0]
-        if ((typeof id === 'number' || typeof id === 'bigint') && id > 1000000000000) {
-          await redisClient.set('myPlayerId:bigint', id.toString(), 'EX', 86400)
-          return
-        }
-      }
-    }
-  }
 }
 
 async function extractMySessionTokens(decodedReq) {
@@ -164,7 +150,7 @@ async function extractMySessionTokens(decodedReq) {
   // 312 packet getting tokens [[312,2807,[["1309965043442"],{"0":105,"1":227,"2":98,"3":249,"4":171,"5":90,"6":183,"7":199,"8":35,"9":185,"10":113,"11":96}],""],[[2284],[45713],[],[]],
   //request:  [312,284,[["1309965043442"],{"0":105,"1":223,"2":166,"3":213,"4":171,"5":90,"6":183,"7":199,"8":35,"9":86,"10":245,"11":99}],""]
 
-  const mySessionToken = decodedReq[0]?.[2]?.[0]?.[0] || null
+  const myPlayerId = decodedReq[0]?.[2]?.[0]?.[0] || null
   // mySessionToken =
   //   typeof rawToken === 'bigint'
   //     ? rawToken
@@ -174,7 +160,7 @@ async function extractMySessionTokens(decodedReq) {
   const token2 = decodedReq[0]?.[2]?.[1] || null // auth token?
   const mySessionToken2 = mapToUint8Array(token2)
 
-  await redisClient.set('mysession:token1:BigInt', mySessionToken.toString(), 'EX', 86400)
+  await redisClient.set('myPlayerId:BigInt', myPlayerId.toString(), 'EX', 86400)
   await redisClient.set('mysession:token2:Uint8Array', Buffer.from(mySessionToken2), 'EX', 86400)
 
   //    const val = await redisClient.get('mysession:token1');
@@ -252,10 +238,6 @@ async function processPacketHandler(data) {
 
   if (opCode === 312) {
     extractMySessionTokens(decodedRequest)
-  }
-
-  if (opCode === 402) {
-    extractInternalIdFrom402(decodedResponse)
   }
 
   if (opCode === 312 || opCode === 408) {
