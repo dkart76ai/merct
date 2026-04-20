@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import JsonView from '@uiw/react-json-view'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 
@@ -7,9 +7,27 @@ import { multiDecodeMsgPackBase64 } from 'message-pack'
 function App() {
   const [packets, setPackets] = useState([])
   const [selectedPacket, setSelectedPacket] = useState(null)
+  const [decodedRequest, setDecodedRequest] = useState([null])
+  const [decodedResponse, setDecodedResponse] = useState(null)
 
   const [error, setError] = useState(null)
   const [decodeAll, setDecodeAll] = useState(true)
+
+  useEffect(() => {
+    // Decode request body
+    const requestBody = selectedPacket?.request?.bodyB64
+    if (requestBody) {
+      const decodedRequest = multiDecodeMsgPackBase64(requestBody, decodeAll)
+      setDecodedRequest(decodedRequest)
+    }
+
+    // Decode response body
+    const responseBody = selectedPacket?.response?.bodyB64
+    if (responseBody) {
+      const decodedResponse = multiDecodeMsgPackBase64(responseBody, decodeAll)
+      setDecodedResponse(decodedResponse)
+    }
+  }, [selectedPacket, decodeAll])
 
   const handleFileLoad = e => {
     const file = e.target.files[0]
@@ -33,20 +51,6 @@ function App() {
   const handleSelectPacket = packet => {
     setSelectedPacket(packet)
     setError(null)
-  }
-
-  // Decode request body
-  let decodedRequest = null
-  const requestBody = selectedPacket?.request?.bodyB64
-  if (requestBody) {
-    decodedRequest = multiDecodeMsgPackBase64(requestBody, decodeAll)
-  }
-
-  // Decode response body
-  let decodedResponse = null
-  const responseBody = selectedPacket?.response?.bodyB64
-  if (responseBody) {
-    decodedResponse = multiDecodeMsgPackBase64(responseBody, decodeAll)
   }
 
   return (
@@ -96,7 +100,7 @@ function App() {
                   <div className='url'>{packet.url}</div>
                   <div className='meta'>
                     <span className='opCode'>Op: {packet.opCode}</span>
-                    <span>(status: {packet.status || ''})</span>
+                    <span>(resp.size: {packet.response.bodyB64.length || ''})</span>
                   </div>
                 </div>
               ))
@@ -139,11 +143,15 @@ function App() {
                   </div>
 
                   <div className='json-viewer'>
-                    <JsonView
-                      value={decodedRequest}
-                      displayDataTypes={false}
-                      style={githubDarkTheme}
-                    />
+                    {!decodedRequest ? (
+                      <div style={{ color: 'red' }}>No data</div>
+                    ) : (
+                      <JsonView
+                        value={decodedRequest}
+                        displayDataTypes={false}
+                        style={githubDarkTheme}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -169,11 +177,15 @@ function App() {
                   </div>
 
                   <div className='json-viewer'>
-                    <JsonView
-                      value={decodedResponse}
-                      displayDataTypes={false}
-                      style={githubDarkTheme}
-                    />
+                    {!decodedResponse ? (
+                      <div style={{ color: 'red' }}>No data</div>
+                    ) : (
+                      <JsonView
+                        value={decodedResponse}
+                        displayDataTypes={false}
+                        style={githubDarkTheme}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
