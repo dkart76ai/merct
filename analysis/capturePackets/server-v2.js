@@ -4,7 +4,7 @@ const fs = require('fs')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
 const { kingdomUrls } = require('./kingdomUrls.js')
-const { multiDecodeMsgPack2 } = require('../message-pack/messagePack.js')
+const { multiDecodeMsgPack2 } = require('message-pack')
 const {
   addJob,
   addCritical,
@@ -453,15 +453,21 @@ async function browserLoadUrlAndLogin() {
     await loginInput.fill(config.accountUser)
     await passwordInput.fill(config.accountPwd)
 
-    // En lugar de click simple, espera la navegación tras el click
-    await loginButton.waitFor({ state: 'visible', timeout: 10000 })
-    if (await loginButton.isVisible()) {
-      await loginButton.click()
-    }
-
     console.log('Login exitoso')
   } catch (error) {
     console.error('El formulario de login no apareció o tardó demasiado', error)
+  }
+
+  for (let i = 0; i < 2; i++) {
+    try {
+      await loginButton.waitFor({ state: 'visible', timeout: 10000 })
+      if (await loginButton.isVisible()) {
+        await loginButton.click()
+      }
+      break
+    } catch (error) {
+      console.error('el boton login no apareció o tardó demasiado', error)
+    }
   }
 }
 
@@ -728,6 +734,10 @@ async function main() {
   initDb()
   staticId.loadStaticDb()
   startCleanup()
+
+  // Initialize worker pool (non-blocking CPU tasks)
+  const { getPool } = require('./lib/workerPool')
+  getPool()
 
   console.log('[Main] Starting BullMQ worker...')
 
