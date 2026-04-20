@@ -5,7 +5,7 @@ const { createStream } = require('rotating-file-stream')
 const msgpack = require('@msgpack/msgpack')
 
 const app = express()
-const LOGS_DIR = path.join(__dirname, 'logs')
+const LOGS_DIR = path.join(__dirname, '../capturePackets/logs')
 
 // 1. Configurar el stream de escritura (Binario y Rotativo)
 const logStream = createStream('traffic.bin', {
