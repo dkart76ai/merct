@@ -6,13 +6,13 @@ const fs = require('fs')
 
 const redisClient = getRedis()
 
-let captureIndex = 0
-let saveFileIndex = 0
-let captures = []
+// let captureIndex = 0
+// let saveFileIndex = 0
+// let captures = []
 // let capturesDecoded = []
 
-const SAVE_DIR = path.join(__dirname, '../../captures')
-const MAX_CAPTURES_PER_FILE = 20
+// const SAVE_DIR = path.join(__dirname, '../../captures')
+// const MAX_CAPTURES_PER_FILE = 20
 
 const myPlayerInfo = {
   name: 'Maedve',
@@ -62,84 +62,84 @@ function containsPlayerId(data, playerId, internalId) {
   return false
 }
 
-function saveToFile() {
-  try {
-    if (!fs.existsSync(SAVE_DIR)) {
-      fs.mkdirSync(SAVE_DIR, { recursive: true })
-    }
+// function saveToFile() {
+//   try {
+//     if (!fs.existsSync(SAVE_DIR)) {
+//       fs.mkdirSync(SAVE_DIR, { recursive: true })
+//     }
 
-    const saveFile = path.join(SAVE_DIR, `captures-${String(saveFileIndex).padStart(3, '0')}.json`)
-    fs.writeFileSync(
-      saveFile,
-      JSON.stringify(captures, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
-    )
+//     const saveFile = path.join(SAVE_DIR, `captures-${String(saveFileIndex).padStart(3, '0')}.json`)
+//     fs.writeFileSync(
+//       saveFile,
+//       JSON.stringify(captures, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
+//     )
 
-    // const saveFile2 = path.join(
-    //   SAVE_DIR,
-    //   `capturesDecoded-${String(saveFileIndex).padStart(3, '0')}.json`
-    // )
-    // fs.writeFileSync(
-    //   saveFile2,
-    //   JSON.stringify(capturesDecoded, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
-    // )
-    // console.log(
-    //   `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
-    // )
+//     // const saveFile2 = path.join(
+//     //   SAVE_DIR,
+//     //   `capturesDecoded-${String(saveFileIndex).padStart(3, '0')}.json`
+//     // )
+//     // fs.writeFileSync(
+//     //   saveFile2,
+//     //   JSON.stringify(capturesDecoded, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2)
+//     // )
+//     // console.log(
+//     //   `[${new Date().toLocaleTimeString()}] Saved ${captures.length} captures to ${path.basename(saveFile)}`
+//     // )
 
-    if (captures.length >= MAX_CAPTURES_PER_FILE) {
-      captures = []
-      // capturesDecoded = []
-      captureIndex = 0
-      saveFileIndex++
-      console.log(
-        `[${new Date().toLocaleTimeString()}] Rotation: switched to captures-${String(saveFileIndex).padStart(3, '0')}.json`
-      )
-    }
-  } catch (e) {
-    console.error('[processPacket] Save error:', e.message)
-  }
-}
+//     if (captures.length >= MAX_CAPTURES_PER_FILE) {
+//       captures = []
+//       // capturesDecoded = []
+//       captureIndex = 0
+//       saveFileIndex++
+//       console.log(
+//         `[${new Date().toLocaleTimeString()}] Rotation: switched to captures-${String(saveFileIndex).padStart(3, '0')}.json`
+//       )
+//     }
+//   } catch (e) {
+//     console.error('[processPacket] Save error:', e.message)
+//   }
+// }
 
-function saveCapturedPacket(
-  opCode,
-  url,
-  status,
-  requestMethod,
-  requestHeaders,
-  requestBodyB64,
-  responseHeaders,
-  responseBodyB64,
-  decodedRequest,
-  decodedResponse,
-  tileIds,
-  isMyPacket
-) {
-  const ignoreList = [318]
-  if (ignoreList.includes(opCode)) return
+// function saveCapturedPacket(
+//   opCode,
+//   url,
+//   status,
+//   requestMethod,
+//   requestHeaders,
+//   requestBodyB64,
+//   responseHeaders,
+//   responseBodyB64,
+//   decodedRequest,
+//   decodedResponse,
+//   tileIds,
+//   isMyPacket
+// ) {
+//   const ignoreList = [318]
+//   if (ignoreList.includes(opCode)) return
 
-  captures.push({
-    id: ++captureIndex,
-    opCode,
-    url,
-    status,
-    tileIds,
-    isMyPacket,
-    timestamp: Date.now(),
-    request: {
-      method: requestMethod,
-      headers: requestHeaders,
-      bodyB64: requestBodyB64
-    },
-    response: {
-      headers: responseHeaders,
-      bodyB64: responseBodyB64
-    }
-  })
+//   captures.push({
+//     id: ++captureIndex,
+//     opCode,
+//     url,
+//     status,
+//     tileIds,
+//     isMyPacket,
+//     timestamp: Date.now(),
+//     request: {
+//       method: requestMethod,
+//       headers: requestHeaders,
+//       bodyB64: requestBodyB64
+//     },
+//     response: {
+//       headers: responseHeaders,
+//       bodyB64: responseBodyB64
+//     }
+//   })
 
-  // capturesDecoded.push({ id: ++captureIndex, opCode, url, decodedRequest, decodedResponse })
+//   // capturesDecoded.push({ id: ++captureIndex, opCode, url, decodedRequest, decodedResponse })
 
-  saveToFile()
-}
+//   saveToFile()
+// }
 
 async function extractMySessionTokens(decodedReq) {
   console.log(
@@ -219,20 +219,20 @@ async function processPacketHandler(data) {
     tileIds = decodedRequest[1]
   }
 
-  saveCapturedPacket(
-    opCode,
-    url,
-    status,
-    requestMethod,
-    requestHeaders,
-    requestBodyB64,
-    responseHeaders,
-    responseBodyB64,
-    decodedRequest,
-    decodedResponse,
-    tileIds,
-    isMyPacket
-  )
+  // saveCapturedPacket(
+  //   opCode,
+  //   url,
+  //   status,
+  //   requestMethod,
+  //   requestHeaders,
+  //   requestBodyB64,
+  //   responseHeaders,
+  //   responseBodyB64,
+  //   decodedRequest,
+  //   decodedResponse,
+  //   tileIds,
+  //   isMyPacket
+  // )
   //-----------------------
 
   //-----------------------

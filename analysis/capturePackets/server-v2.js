@@ -5,6 +5,8 @@ const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
 const { kingdomUrls } = require('./kingdomUrls.js')
 const { multiDecodeMsgPack2 } = require('message-pack')
+const { createStream } = require('rotating-file-stream')
+const msgpack = require('@msgpack/msgpack')
 const {
   addJob,
   addCritical,
@@ -48,8 +50,29 @@ const config = {
   accountPwd: process.env.CHAT_ACCOUNT_PWD
 }
 
-const SAVE_DIR = path.join(__dirname, 'captures')
-const SAVE_DIR2 = path.join(__dirname, 'packetSender')
+// const SAVE_DIR = path.join(__dirname, 'captures')
+// const SAVE_DIR2 = path.join(__dirname, 'packetSender')
+const LOGS_DIR = path.join(__dirname, 'logs')
+
+// 1. Configurar el stream de escritura (Binario y Rotativo)
+const logStream = createStream('traffic.bin', {
+  size: '10M', // Rota cada 10MB para que sean fáciles de descargar
+  interval: '1d', // O cada día
+  path: LOGS_DIR
+})
+
+// Función para guardar el par (Llamada desde tu lógica de red)
+function saveTrafficPair(reqBuffer, resBuffer) {
+  const pair = {
+    ts: Date.now(),
+    req: reqBuffer, // Buffer original de MessagePack
+    res: resBuffer // Buffer original de MessagePack
+  }
+
+  // Serializamos el par completo
+  const encoded = msgpack.encode(pair)
+  logStream.write(encoded)
+}
 
 function getFirstValue(data, depth = 0) {
   if (depth > 10) return null // Prevent stack overflow on circular/deep structures
@@ -78,20 +101,20 @@ app.use(express.static(path.join(__dirname, 'public')))
 let browser = null
 let context = null
 let page = null
-let captures = []
-let captureIndex = 0
+// let captures = []
+// let captureIndex = 0
 let capturingEnabled = true
 let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
 const redisClient = getRedis()
 
 async function ensureSaveDir() {
   try {
-    if (!fs.existsSync(SAVE_DIR)) {
-      fs.mkdirSync(SAVE_DIR, { recursive: true })
+    if (!fs.existsSync(LOGS_DIR)) {
+      fs.mkdirSync(LOGS_DIR, { recursive: true })
     }
-    if (!fs.existsSync(SAVE_DIR2)) {
-      fs.mkdirSync(SAVE_DIR2, { recursive: true })
-    }
+    // if (!fs.existsSync(SAVE_DIR2)) {
+    //   fs.mkdirSync(SAVE_DIR2, { recursive: true })
+    // }
   } catch (e) {
     console.error('Ensure save dir error:', e.message)
   }
@@ -387,6 +410,7 @@ function setupPacketCaptureListener() {
         priority: PRIORITY.CRITICAL
       })
 
+      saveTrafficPair(postDataBuff, responseBody)
       // updateCapturesForClient(
       //   ++captureIndex,
       //   url,
@@ -648,17 +672,17 @@ app.post('/api/scan-mercs-now', async (req, res) => {
 })
 
 app.get('/api/captures', (req, res) => {
-  res.json({ success: true, captures: captures.slice(-50), count: captures.length })
+  res.json({ success: true, captures: [], count: 0 })
 })
 
 app.get('/api/captures/:id', (req, res) => {
-  const id = parseInt(req.params.id)
-  const capture = captures.find(c => c.id === id)
-  if (capture) {
-    res.json({ success: true, capture })
-  } else {
-    res.status(404).json({ success: false, error: 'Not found' })
-  }
+  // const id = parseInt(req.params.id)
+  // const capture = captures.find(c => c.id === id)
+  // if (capture) {
+  //   res.json({ success: true, capture:[] })
+  // } else {
+  res.status(404).json({ success: false, error: 'Not found' })
+  // }
 })
 
 app.post('/api/browser/start', async (req, res) => {

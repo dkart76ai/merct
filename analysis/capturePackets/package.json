@@ -9,12 +9,14 @@
     "old": "node --max-old-space-size=8192 server.js"
   },
   "dependencies": {
+    "@msgpack/msgpack": "^3.1.3",
     "better-sqlite3": "^11.0.0",
     "bullmq": "^5.1.0",
     "express": "^4.18.2",
     "ioredis": "^5.10.1",
     "message-pack": "file:../message-pack",
     "piscina": "^4.9.2",
-    "playwright": "^1.40.0"
+    "playwright": "^1.40.0",
+    "rotating-file-stream": "^3.2.9"
   }
 }
