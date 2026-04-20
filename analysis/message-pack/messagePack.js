@@ -89,12 +89,78 @@ class MsgPackDecoder {
         return this.readMap(this.view.getUint16((this.off += 2) - 2, true), true)
       case 0xdf:
         return this.readMap(this.view.getUint32((this.off += 4) - 4, true), true)
+
+      // 10.5 Extensiones de longitud fija (fixext)
+      case 0xd4:
+        return this.readExt(1)
+      case 0xd5:
+        return this.readExt(2)
+      case 0xd6:
+        return this.readExt(4)
+      case 0xd7:
+        return this.readExt(8) // <--- El que buscabas
+      case 0xd8:
+        return this.readExt(16)
+
+      // Extensiones de longitud variable
+      case 0xc7:
+        return this.readExt(this.view.getUint8(this.off++))
+      case 0xc8:
+        return this.readExt(this.view.getUint16((this.off += 2) - 2, true))
+      case 0xc9:
+        return this.readExt(this.view.getUint32((this.off += 4) - 4, true))
     }
 
     // 11. Enteros Negativos (0xe0 - 0xff)
     if (byte >= 0xe0) return byte - 0x100
 
     throw new Error(`Tipo no soportado: 0x${byte.toString(16)}`)
+  }
+
+  readExt(len) {
+    // El tipo de extensión es un entero de 8 bits con signo
+    const type = this.view.getInt8(this.off++)
+
+    // Extraemos los datos (Uint8Array)
+    const data = this.buf.subarray(this.off, this.off + len)
+    this.off += len
+
+    // Si es un Timestamp (Tipo -1), podrías procesarlo aquí,
+    // de lo contrario, retornas un objeto con el tipo y los datos raw.
+    if (type === -1) {
+      return this.decodeTimestamp(data)
+    }
+
+    return { type, data }
+  }
+
+  decodeTimestamp(data) {
+    const dataView = new DataView(data.buffer, data.byteOffset, data.byteLength)
+
+    // 1. Timestamp 32 (fixext 4): Segundos en 32 bits sin signo
+    if (data.length === 4) {
+      const sec = dataView.getUint32(0, false) // Siempre Big-Endian en la especificación
+      return new Date(sec * 1000)
+    }
+
+    // 2. Timestamp 64 (fixext 8): 34 bits nano + 30 bits segundos
+    if (data.length === 8) {
+      const nsecAndSec = dataView.getBigUint64(0, false)
+      // Los 34 bits de mayor peso son nanosegundos
+      const nsec = Number(nsecAndSec >> 30n)
+      // Los 30 bits de menor peso son segundos
+      const sec = Number(nsecAndSec & 0x3fffffffn)
+      return new Date(sec * 1000 + nsec / 1e6)
+    }
+
+    // 3. Timestamp 96 (ext 12): 32 bits nano + 64 bits segundos
+    if (data.length === 12) {
+      const nsec = dataView.getUint32(0, false)
+      const sec = dataView.getBigInt64(4, false) // Los segundos están después de los nanos
+      return new Date(Number(sec) * 1000 + nsec / 1e6)
+    }
+
+    return data // Si no mide 4, 8 o 12, devolvemos el buffer original
   }
 
   readString(len) {
@@ -404,7 +470,6 @@ function decodeMsgPack2(buff) {
 }
 
 function multiDecodeMsgPack2(buff, decodeAll = false) {
-  console.log('decodeall value', decodeAll)
   if (!buff || buff.length === 0) {
     console.warn('multiDecodeMsgPack2: Empty buffer received')
     return { results: [], bufLen: 0, len: 0 }
@@ -584,6 +649,12 @@ class MsgPackEncoder {
     }
 
     if (type === 'object') {
+      // --- NUEVA LÓGICA PARA EXTENSIONES ---
+      // Detectamos si el objeto tiene la forma { type: number, data: Uint8Array }
+      if (val !== null && val.type !== undefined && val.data instanceof Uint8Array) {
+        return this.writeExtension(val.type, val.data)
+      }
+
       const keys = Object.keys(val)
       const len = keys.length
       if (len <= 15) {
@@ -601,6 +672,43 @@ class MsgPackEncoder {
       }
       return
     }
+  }
+
+  writeExtension(type, data) {
+    const len = data.length
+
+    // 1. Escribir el prefijo según la longitud
+    if (len === 1) {
+      this.writeUint8(0xd4)
+    } else if (len === 2) {
+      this.writeUint8(0xd5)
+    } else if (len === 4) {
+      this.writeUint8(0xd6)
+    } else if (len === 8) {
+      this.writeUint8(0xd7) // El byte d7 que buscabas
+    } else if (len === 16) {
+      this.writeUint8(0xd8)
+    } else {
+      // Extensiones de longitud variable
+      if (len < 256) {
+        this.writeUint8(0xc7)
+        this.writeUint8(len)
+      } else if (len < 65536) {
+        this.writeUint8(0xc8)
+        this.writeUint16LE(len) // Ojo: La especificación dice BE, pero sigo tu estilo LE
+      } else {
+        this.writeUint8(0xc9)
+        this.writeUint32LE(len)
+      }
+    }
+
+    // 2. Escribir el tipo de extensión (1 byte con signo)
+    this.writeInt8(type)
+
+    // 3. Escribir los datos
+    this.ensureSpace(len)
+    this.buffer.set(data, this.off)
+    this.off += len
   }
 
   writeUint8(v) {
