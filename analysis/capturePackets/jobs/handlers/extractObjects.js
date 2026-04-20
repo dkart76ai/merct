@@ -14,8 +14,11 @@ function getRedisClient() {
 
 function extractObjects(data) {
   const objects = []
+  const players = [] // players and cities are the same
+  const cities = [] //keep separated for update later
 
-  function isValidObject(arr) {
+  function isValidObject12(arr) {
+    // opcode=312
     if (!Array.isArray(arr) || arr.length !== 12) return false
     if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
     if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
@@ -24,12 +27,47 @@ function extractObjects(data) {
     return true
   }
 
+  function isValidPlayerObject42(arr) {
+    //  opcode=312
+    if (!Array.isArray(arr) || arr.length !== 42) return false
+    if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
+    if (!Array.isArray(arr[2]) || arr[2].length !== 1) return false
+    if (typeof arr[3] !== 'number') return false //staticid
+    if (!Array.isArray(arr[4]) || arr[4].length !== 1) return false
+    if (typeof arr[7] !== 'number') return false //kingdom
+    if (typeof arr[13] !== 'number') return false //level
+    if (!Array.isArray(arr[17]) || arr[17].length !== 3) return false //coord
+    if (!Array.isArray(arr[18]) || arr[18].length !== 3) return false //coord
+    if (!Array.isArray(arr[26]) || arr[26].length !== 4) return false
+    if (!Array.isArray(arr[39]) || arr[39].length !== 1) return false
+    if (typeof arr[11] !== 'boolean') return false //shield?
+    return true
+  }
+
+  function isValidPlayerObject23(arr) {
+    // opcode=402
+    if (!Array.isArray(arr) || arr.length !== 23) return false
+    if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false //objectid
+    if (typeof arr[1] !== 'string') return false //tb:xx
+    if (typeof arr[2] !== 'string') return false //name
+    if (typeof arr[3] !== 'string') return false //localization
+    if (typeof arr[8] !== 'number') return false //level
+    if (typeof arr[10] !== 'number') return false //MIGHT
+    if (!Array.isArray(arr[11]) || arr[11].length !== 1) return false //clanid
+    if (typeof arr[13] !== 'string') return false //CLAN NAME
+    if (!Array.isArray(arr[15]) || arr[15].length !== 3) return false //coord
+    if (!Array.isArray(arr[16]) || arr[16].length !== 1) return false //unknown
+    if (typeof arr[17] !== 'number') return false //GOLD INGOT
+    if (typeof arr[21] !== 'string') return false //timezone
+    return true
+  }
+
   async function findObjects(arr, depth = 0) {
     if (depth > 200) return
 
     for (const item of arr) {
       if (Array.isArray(item)) {
-        if (isValidObject(item)) {
+        if (isValidObject12(item)) {
           const staticId = item[1]
           const obj = {
             objectId: item[0][0],
@@ -48,6 +86,36 @@ function extractObjects(data) {
             isActive: item[11]
           }
           objects.push(obj)
+        } else if (isValidPlayerObject42(item)) {
+          // opcode=312
+          const city = {
+            playerId: String(item[0][0]), // cant handle bigint
+            staticId: arr[3], //staticid
+            level: arr[13], //level
+            kingdom: arr[17][0], //kingdom
+            x: arr[17][1], //coordx
+            y: arr[17][2], //coordy
+            haveShield: arr[11] //shield?
+          }
+          cities.push(city)
+        } else if (isValidPlayerObject23(item)) {
+          // opcode=402
+          const player = {
+            playerId: String(item[0][0]), // cant handle bigint
+            key: arr[1], //tb:xx
+            name: arr[2], //name
+            localization: arr[3], //localization
+            level: arr[8], //level
+            might: arr[10], //MIGHT
+            clanId: arr[11][0], //clanid
+            clanName: arr[13], //CLAN NAME
+            kingdom: arr[15][0], //coord
+            x: arr[15][1], //coord
+            y: arr[15][2], //coord
+            gold: arr[17], //GOLD INGOT
+            timezone: arr[21] //timezone
+          }
+          players.push(player)
         } else {
           findObjects(item, depth + 1)
         }
@@ -77,7 +145,7 @@ function extractObjects(data) {
     })
   }
 
-  return objects
+  return { objects, players, cities }
 }
 
 async function extractObjectsHandler(data) {
@@ -97,7 +165,7 @@ async function extractObjectsHandler(data) {
   const decodedResponse = _decodedResponse.results
 
   try {
-    const objects = extractObjects(decodedResponse)
+    const { objects, players, cities } = extractObjects(decodedResponse)
 
     if (objects.length === 0) {
       console.log(`[ExtractObjects] Found ${objects.length} objects`)
