@@ -51,14 +51,15 @@ const config = {
 const SAVE_DIR = path.join(__dirname, 'captures')
 const SAVE_DIR2 = path.join(__dirname, 'packetSender')
 
-function getFirstValue(data) {
+function getFirstValue(data, depth = 0) {
+  if (depth > 10) return null // Prevent stack overflow on circular/deep structures
   if (!data || !Array.isArray(data)) return null
 
   try {
     for (let item of data) {
       if (typeof item === 'number') return item
       if (Array.isArray(item)) {
-        const resultado = getFirstValue(item)
+        const resultado = getFirstValue(item, depth + 1)
         if (resultado !== undefined) return resultado
       }
     }
@@ -323,21 +324,21 @@ async function patchSendbird() {
   })
 }
 
-function updateCapturesForClient(
-  id,
-  url,
+// function updateCapturesForClient(
+//   id,
+//   url,
 
-  responseBody
-) {
-  let decodedResponse = multiDecodeMsgPack2(Buffer.from(responseBody))
-  const opCode = getFirstValue(decodedResponse)
+//   responseBody
+// ) {
+//   let decodedResponse = multiDecodeMsgPack2(Buffer.from(responseBody))
+//   const opCode = getFirstValue(decodedResponse)
 
-  captures.push({ id, url, opCode, response: { size: responseBody.length } })
+//   captures.push({ id, url, opCode, response: { size: responseBody.length } })
 
-  if (captures.length > 50) {
-    captures = captures.slice(-50)
-  }
-}
+//   if (captures.length > 50) {
+//     captures = captures.slice(-50)
+//   }
+// }
 
 function setupPacketCaptureListener() {
   if (!page) return
@@ -386,12 +387,12 @@ function setupPacketCaptureListener() {
         priority: PRIORITY.CRITICAL
       })
 
-      updateCapturesForClient(
-        ++captureIndex,
-        url,
+      // updateCapturesForClient(
+      //   ++captureIndex,
+      //   url,
 
-        responseBody
-      )
+      //   responseBody
+      // )
     } catch (e) {
       console.error('Capture error:', e.message)
     }
