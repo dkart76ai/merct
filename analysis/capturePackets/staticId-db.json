@@ -653,6 +653,11 @@
     "name": "Mercenary exchange",
     "entryType": "poi"
   },
+  "510": {
+    "staticId": 510,
+    "entryType": "poi",
+    "name": null
+  },
   "560": {
     "staticId": 560,
     "entryType": "poi",
