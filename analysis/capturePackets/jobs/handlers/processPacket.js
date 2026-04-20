@@ -124,6 +124,7 @@ function saveCapturedPacket(
     status,
     tileIds,
     isMyPacket,
+    timestamp: Date.now(),
     request: {
       method: requestMethod,
       headers: requestHeaders,
@@ -250,7 +251,7 @@ async function processPacketHandler(data) {
     }
 
     await addJob(JOB_TYPES.EXTRACT_OBJECTS, payload, {
-      priority: PRIORITY.NORMAL
+      priority: PRIORITY.CRITICAL
     })
 
     // objects.forEach(obj => trackUnknownStaticId(obj))

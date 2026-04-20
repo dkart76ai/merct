@@ -88,6 +88,9 @@ async function addCritical(type, data) {
 async function addHigh(type, data) {
   return addJob(type, data, { priority: PRIORITY.HIGH })
 }
+async function addNormal(type, data) {
+  return addJob(type, data, { priority: PRIORITY.NORMAL })
+}
 
 async function addLow(type, data) {
   return addJob(type, data, { priority: PRIORITY.LOW })
@@ -269,6 +272,7 @@ module.exports = {
   addJob,
   addCritical,
   addHigh,
+  addNormal,
   addLow,
   addDelayed,
   addJobAndWait,

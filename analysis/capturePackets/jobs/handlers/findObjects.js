@@ -20,7 +20,7 @@ async function findObjectsHandler(data) {
         nextJobs: [
           {
             type: JOB_TYPES.NOTIFICATION,
-            priority: PRIORITY.HIGH,
+            priority: PRIORITY.LOW,
             payload: {
               objects: result.objects,
               searchCriteria: { staticId, level, amount }

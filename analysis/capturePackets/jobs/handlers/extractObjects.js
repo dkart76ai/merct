@@ -140,6 +140,7 @@ function extractObjects(data) {
   if (incompleteObjData.length > 0) {
     console.log(`[ExtractObjects] Found ${incompleteObjData.length} incomplete object entries`)
     addJob(JOB_TYPES.NOTIFICATION, PRIORITY.HIGH, {
+      priority: PRIORITY.LOW,
       message: 'obj missing data',
       objects: incompleteObjData
     })
@@ -190,7 +191,7 @@ async function extractObjectsHandler(data) {
       nextJobs: [
         {
           type: JOB_TYPES.SAVE_OBJECTS,
-          priority: PRIORITY.HIGH,
+          priority: PRIORITY.CRITICAL,
           payload: {
             objects: safeObjects
           }

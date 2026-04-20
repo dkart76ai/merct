@@ -27,6 +27,7 @@ function savePacketToFile(opcode, url, tiles, request, response) {
     url,
     status: 200,
     tileIds: tiles,
+    timestamp: Date.now(),
     request: {
       method: 'POST',
       bodyB64: Buffer.from(request).toString('base64')
@@ -160,7 +161,7 @@ async function sendPacketHandler(payload) {
       nextJobs: [
         {
           type: JOB_TYPES.EXTRACT_OBJECTS,
-          priority: PRIORITY.NORMAL,
+          priority: PRIORITY.CRITICAL,
           payload: {
             bufferKey: msgPackDataKey,
             kingdom

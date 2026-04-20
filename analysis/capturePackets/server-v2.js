@@ -9,6 +9,7 @@ const {
   addJob,
   addCritical,
   addHigh,
+  addNormal,
   addLow,
   addJobAndWait,
   getTimerManager,
@@ -119,7 +120,7 @@ const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
 }
 
 async function handleScanKingdom(req, res) {
-  const { kingdoms, priority = 'HIGH' } = req.body
+  const { kingdoms, priority = 'NORMAL' } = req.body
 
   console.log(`[API] scanKingdom request - kingdoms: ${kingdoms}, priority: ${priority}`)
 
@@ -147,7 +148,7 @@ async function handleScanKingdom(req, res) {
   //         ? BigInt(tokenValue)
   //         : tokenValue
 
-  const tilesArray = generateArrays(9, 2396, 50, 1)
+  const tilesArray = generateArrays(9, 2396, 50, 12)
   const jobIds = []
 
   console.log(`[API] Queuing ${tilesArray.length * kingdomList.length} scan jobs`)
@@ -159,11 +160,11 @@ async function handleScanKingdom(req, res) {
         tiles
       }
       const job =
-        priority === 'CRITICAL'
-          ? await addCritical(JOB_TYPES.SEND_PACKET, {
+        priority === 'HIGH'
+          ? await addHigh(JOB_TYPES.SEND_PACKET, {
               ...payload
             })
-          : await addHigh(JOB_TYPES.SEND_PACKET, {
+          : await addNormal(JOB_TYPES.SEND_PACKET, {
               ...payload
             })
 
@@ -453,7 +454,10 @@ async function browserLoadUrlAndLogin() {
     await passwordInput.fill(config.accountPwd)
 
     // En lugar de click simple, espera la navegación tras el click
-    await loginButton.click()
+    await loginButton.waitFor({ state: 'visible', timeout: 10000 })
+    if (await loginButton.isVisible()) {
+      await loginButton.click()
+    }
 
     console.log('Login exitoso')
   } catch (error) {
@@ -581,6 +585,7 @@ app.post('/api/objects/find-and-notify', async (req, res) => {
   if (result.objects.length > 0) {
     await addJob(JOB_TYPES.NOTIFICATION, {
       type: 'objects-found',
+      priority: PRIORITY.LOW,
       objects: result.objects,
       searchCriteria: { staticId, level, amount }
     })
@@ -603,7 +608,9 @@ app.post('/api/timer/scan-mercs', async (req, res) => {
     amount: 20
   }
 
-  await timerManager.scheduleCustom(timerKey, parseInt(interval), JOB_TYPES.FIND_OBJECTS, jobData)
+  await timerManager.scheduleCustom(timerKey, parseInt(interval), JOB_TYPES.FIND_OBJECTS, jobData, {
+    priority: PRIORITY.LOW
+  })
 
   res.json({ success: true, message: `Merc scanner started every ${interval}ms`, interval })
 })
@@ -623,6 +630,7 @@ app.post('/api/scan-mercs-now', async (req, res) => {
   if (result.objects.length > 0) {
     await addJob(JOB_TYPES.NOTIFICATION, {
       type: 'mercs-found',
+      priority: PRIORITY.LOW,
       objects: result.objects,
       searchCriteria: { staticId: 400, level, amount }
     })

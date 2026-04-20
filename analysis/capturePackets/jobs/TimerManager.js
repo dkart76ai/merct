@@ -69,7 +69,7 @@ class TimerManager {
       jobType,
       { ...jobData, customTimerName: name },
       {
-        priority: options.priority || PRIORITY.NORMAL,
+        priority: options.priority || PRIORITY.IDLE,
         repeat: repeatOptions,
         jobId: `timer:${timerKey}`
       }

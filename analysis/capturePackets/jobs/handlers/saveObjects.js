@@ -35,7 +35,7 @@ async function saveObjectsHandler(data) {
       nextJobs: [
         {
           type: JOB_TYPES.FIND_OBJECTS,
-          priority: PRIORITY.NORMAL,
+          priority: PRIORITY.IDLE,
           payload: {
             staticId: 400, // Merc static ID
             amount: 20
