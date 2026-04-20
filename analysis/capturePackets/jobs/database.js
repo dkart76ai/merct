@@ -1,7 +1,50 @@
-const objectsDb = new Map()
+const Database = require('better-sqlite3')
+const path = require('path')
 
-const TTL_WARNING_MS = 10 * 60 * 1000 // 10 minutes
-const TTL_CLEAN_MS = 20 * 60 * 1000 // 20 minutes
+const DB_FILE = path.join(__dirname, 'objects.db')
+
+let db = null
+
+function initDb() {
+  if (db) return db
+  
+  db = new Database(DB_FILE)
+  
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS objects (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key TEXT UNIQUE NOT NULL,
+      objectId TEXT,
+      staticId INTEGER,
+      level INTEGER,
+      kingdom INTEGER,
+      x INTEGER,
+      y INTEGER,
+      firstSeenAt INTEGER,
+      lastSeenAt INTEGER,
+      seenCount INTEGER DEFAULT 1,
+      warning INTEGER DEFAULT 0,
+      warningSetAt INTEGER,
+      data TEXT
+    )
+  `)
+  
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_key ON objects(key)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_staticId ON objects(staticId)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_level ON objects(level)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_lastSeenAt ON objects(lastSeenAt)`)
+  
+  console.log('[SQLite] Database initialized:', DB_FILE)
+  return db
+}
+
+function getDb() {
+  if (!db) initDb()
+  return db
+}
+
+const TTL_WARNING_MS = 10 * 60 * 1000
+const TTL_CLEAN_MS = 20 * 60 * 1000
 
 let stats = {
   totalSaved: 0,
@@ -16,32 +59,41 @@ function getKey(obj) {
 
 function saveObject(obj) {
   const key = getKey(obj)
-  console.log(`[DB] saveObject called: key=${key}, kingdom=${obj.kingdom}, x=${obj.x}, y=${obj.y}`)
-  const existing = objectsDb.get(key)
-
+  const now = Date.now()
+  const database = getDb()
+  
+  const existing = database.prepare('SELECT * FROM objects WHERE key = ?').get(key)
+  
   if (existing) {
-    const merged = {
-      ...obj,
-      firstSeenAt: existing.firstSeenAt,
-      lastSeenAt: Date.now(),
-      seenCount: (existing.seenCount || 1) + 1,
-      warning: false,
-      warningSetAt: null
-    }
-    objectsDb.set(key, merged)
+    database.prepare(`
+      UPDATE objects SET 
+        lastSeenAt = ?,
+        seenCount = seenCount + 1,
+        warning = 0,
+        warningSetAt = NULL
+      WHERE key = ?
+    `).run(now, key)
+    
     return { action: 'updated', key }
   } else {
-    const newObj = {
-      ...obj,
-      firstSeenAt: Date.now(),
-      lastSeenAt: Date.now(),
-      seenCount: 1,
-      warning: false,
-      warningSetAt: null
-    }
-    objectsDb.set(key, newObj)
+    database.prepare(`
+      INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y, firstSeenAt, lastSeenAt, seenCount, warning, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
+    `).run(
+      key,
+      obj.objectId?.toString() || null,
+      obj.staticId,
+      obj.level,
+      obj.kingdom,
+      obj.x,
+      obj.y,
+      now,
+      now,
+      JSON.stringify(obj)
+    )
+    
     stats.totalSaved++
-    stats.lastSavedAt = Date.now()
+    stats.lastSavedAt = now
     console.log(`[DB] Saved new object: ${key}, staticId: ${obj.staticId}, level: ${obj.level}`)
     return { action: 'created', key }
   }
@@ -53,112 +105,161 @@ function saveObjects(objects) {
     updated: 0,
     objects: []
   }
-
+  
+  const database = getDb()
+  const insert = database.prepare(`
+    INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y, firstSeenAt, lastSeenAt, seenCount, warning, data)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
+  `)
+  
+  const update = database.prepare(`
+    UPDATE objects SET 
+      lastSeenAt = ?,
+      seenCount = seenCount + 1,
+      warning = 0,
+      warningSetAt = NULL
+    WHERE key = ?
+  `)
+  
+  const now = Date.now()
+  
   for (const obj of objects) {
-    const result = saveObject(obj)
-    if (result.action === 'created') {
-      results.created++
-    } else {
+    const key = getKey(obj)
+    const existing = database.prepare('SELECT id FROM objects WHERE key = ?').get(key)
+    
+    if (existing) {
+      update.run(now, key)
       results.updated++
+    } else {
+      insert.run(
+        key,
+        obj.objectId?.toString() || null,
+        obj.staticId,
+        obj.level,
+        obj.kingdom,
+        obj.x,
+        obj.y,
+        now,
+        now,
+        JSON.stringify(obj)
+      )
+      results.created++
+      stats.totalSaved++
     }
-    results.objects.push(result.key)
+    results.objects.push(key)
   }
-
+  
+  stats.lastSavedAt = Date.now()
   return results
 }
 
 function findObjects(query) {
   const { staticId, level, amount = 10, withWarning = false } = query
-
-  let results = []
-  const now = Date.now()
-
-  for (const obj of objectsDb.values()) {
-    if (staticId !== undefined && obj.staticId !== staticId) continue
-    if (level !== undefined && obj.level !== level) continue
-    if (withWarning !== undefined && obj.warning !== withWarning) continue
-    results.push(obj)
+  
+  const database = getDb()
+  let sql = 'SELECT * FROM objects WHERE 1=1'
+  const params = []
+  
+  if (staticId !== undefined) {
+    sql += ' AND staticId = ?'
+    params.push(staticId)
   }
-
-  results.sort((a, b) => b.lastSeenAt - a.lastSeenAt)
-  const limited = results.slice(0, amount)
-
+  
+  if (level !== undefined) {
+    sql += ' AND level = ?'
+    params.push(level)
+  }
+  
+  if (withWarning !== undefined) {
+    sql += ' AND warning = ?'
+    params.push(withWarning ? 1 : 0)
+  }
+  
+  sql += ' ORDER BY lastSeenAt DESC LIMIT ?'
+  params.push(amount)
+  
+  const rows = database.prepare(sql).all(...params)
+  
   return {
-    total: results.length,
-    returned: limited.length,
-    objects: limited
+    total: rows.length,
+    returned: rows.length,
+    objects: rows
   }
 }
 
 function getStats() {
-  let warningCount = 0
-  for (const obj of objectsDb.values()) {
-    if (obj.warning) warningCount++
-  }
+  const database = getDb()
+  const total = database.prepare('SELECT COUNT(*) as count FROM objects').get()
+  const warning = database.prepare('SELECT COUNT(*) as count FROM objects WHERE warning = 1').get()
+  
   return {
     ...stats,
-    uniqueObjects: objectsDb.size,
-    warningCount
+    uniqueObjects: total.count,
+    warningCount: warning.count
   }
 }
 
 function clearDb() {
-  objectsDb.clear()
+  const database = getDb()
+  database.prepare('DELETE FROM objects').run()
   stats = {
     totalSaved: 0,
     totalCleaned: 0,
     lastSavedAt: null
   }
+  console.log('[DB] Database cleared')
 }
 
 function getAllObjects() {
-  return Array.from(objectsDb.values())
+  const database = getDb()
+  return database.prepare('SELECT * FROM objects ORDER BY lastSeenAt DESC').all()
 }
 
 function getObject(key) {
-  return objectsDb.get(key)
+  const database = getDb()
+  return database.prepare('SELECT * FROM objects WHERE key = ?').get(key)
 }
 
 function deleteObject(key) {
-  return objectsDb.delete(key)
+  const database = getDb()
+  const result = database.prepare('DELETE FROM objects WHERE key = ?').run(key)
+  return result.changes > 0
 }
 
 function startCleanup() {
   if (cleanupInterval) return
-
+  
   cleanupInterval = setInterval(() => {
+    const database = getDb()
     const now = Date.now()
-    let warningSet = 0
-    let cleaned = 0
-    const toDelete = []
-
-    for (const [key, obj] of objectsDb.entries()) {
-      const age = now - obj.lastSeenAt
-
-      if (obj.warning) {
-        if (age >= TTL_CLEAN_MS) {
-          toDelete.push(key)
-          cleaned++
-        }
-      } else if (age >= TTL_WARNING_MS) {
-        obj.warning = true
-        obj.warningSetAt = now
-        warningSet++
-      }
-    }
-
-    for (const key of toDelete) {
-      objectsDb.delete(key)
-    }
-
-    if (cleaned > 0) {
-      stats.totalCleaned += cleaned
-      console.log(`[DB] Cleaned ${cleaned} objects (warning expired), ${warningSet} marked warning`)
+    
+    // Get count before update
+    const warnBefore = database.prepare('SELECT COUNT(*) as c FROM objects WHERE warning = 0 AND lastSeenAt < ?').get(now - TTL_WARNING_MS)
+    
+    // Mark old objects as warning
+    database.prepare(`
+      UPDATE objects SET warning = 1, warningSetAt = ?
+      WHERE warning = 0 AND lastSeenAt < ?
+    `).run(now, now - TTL_WARNING_MS)
+    
+    // Get count after update (now marked as warning)
+    const warnAfter = database.prepare('SELECT COUNT(*) as c FROM objects WHERE warning = 1').get()
+    const warningSet = warnAfter.c - (warnBefore.c > warnAfter.c ? 0 : warnBefore.c)
+    
+    // Count to clean
+    const toClean = database.prepare('SELECT COUNT(*) as c FROM objects WHERE warning = 1 AND lastSeenAt < ?').get(now - TTL_CLEAN_MS)
+    
+    // Clean old warning objects
+    database.prepare('DELETE FROM objects WHERE warning = 1 AND lastSeenAt < ?').run(now - TTL_CLEAN_MS)
+    
+    if (toClean.c > 0) {
+      stats.totalCleaned += toClean.c
+      console.log(`[DB] Cleaned ${toClean.c} objects, ${warningSet} marked warning`)
     } else if (warningSet > 0) {
       console.log(`[DB] Marked ${warningSet} objects with warning`)
     }
   }, 60000)
-
+  
   console.log('[DB] Cleanup started (check every 60s)')
 }
 
@@ -170,7 +271,17 @@ function stopCleanup() {
   }
 }
 
+function closeDb() {
+  if (db) {
+    db.close()
+    db = null
+    console.log('[DB] Database closed')
+  }
+}
+
 module.exports = {
+  initDb,
+  getDb,
   saveObject,
   saveObjects,
   findObjects,
@@ -180,5 +291,6 @@ module.exports = {
   getObject,
   deleteObject,
   startCleanup,
-  stopCleanup
+  stopCleanup,
+  closeDb
 }

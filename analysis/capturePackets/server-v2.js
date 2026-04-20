@@ -31,7 +31,14 @@ const {
   notificationHandler,
   processPacketHandler
 } = require('./jobs/handlers')
-const { findObjects, getStats, getAllObjects, startCleanup } = require('./jobs/database')
+const {
+  initDb,
+  findObjects,
+  getStats,
+  getAllObjects,
+  startCleanup,
+  closeDb
+} = require('./jobs/database')
 const { getRedis } = require('./jobs/redis')
 loadEnvFile()
 
@@ -140,7 +147,7 @@ async function handleScanKingdom(req, res) {
   //         ? BigInt(tokenValue)
   //         : tokenValue
 
-  const tilesArray = generateArrays()
+  const tilesArray = generateArrays(9, 2396, 50, 1)
   const jobIds = []
 
   console.log(`[API] Queuing ${tilesArray.length * kingdomList.length} scan jobs`)
@@ -188,7 +195,7 @@ async function handleStartTimer(req, res) {
   if (kingdomList.length === 0) {
     return res.json({ success: false, error: 'no valid kingdoms' })
   }
-  const tilesArray = generateArrays()
+  const tilesArray = generateArrays(9, 2396, 50, 1)
   const timerManager = getTimerManager()
 
   for (const kingdom of kingdomList) {
@@ -661,7 +668,7 @@ app.post('/api/browser/start', async (req, res) => {
 })
 
 app.get('/api/browser/status', async (req, res) => {
-  const token1 = await redisClient.get('mysession:token1:BigInt')
+  const token1 = await redisClient.get('myPlayerId:BigInt')
   const token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
 
   let memoryUsage = 0
@@ -710,6 +717,7 @@ async function main() {
   console.log('[Main] Starting server...')
 
   await ensureSaveDir()
+  initDb()
   staticId.loadStaticDb()
   startCleanup()
 
@@ -750,6 +758,7 @@ async function main() {
     await cleanOldJobs()
     console.log('[Main] Cleaning Redis...')
     await closeQueue()
+    closeDb()
     if (browser) await browser.close()
     process.exit(0)
   })
@@ -760,6 +769,7 @@ async function main() {
     await cleanOldJobs()
     console.log('[Main] Cleaning Redis...')
     await closeQueue()
+    closeDb()
     if (browser) await browser.close()
     process.exit(0)
   })
