@@ -57,9 +57,9 @@ function App() {
           <span style={{ fontSize: '8px;', fontStyle: 'bold' }}>JSON file content</span>
           <p style={{ color: '#eee', fontSize: '10px' }}>
             <pre>
-              <p style={{ margin: '0' }}>{`[ { status,opCode,url,id,`}</p>
-              <p style={{ margin: '0' }}>{`request:{method,url,bodyB64},`}</p>
-              <p style={{ margin: '0' }}>{`response:{status,bodyB64}} ]`}</p>
+              <p style={{ margin: '0' }}>{`[ { status, opCode, url, id,`}</p>
+              <p style={{ margin: '0' }}>{`request:{ method, bodyB64},`}</p>
+              <p style={{ margin: '0' }}>{`response:{ bodyB64 }} ]`}</p>
             </pre>
           </p>
         </div>
