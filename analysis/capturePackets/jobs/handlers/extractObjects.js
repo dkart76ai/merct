@@ -1,7 +1,7 @@
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 const { getRedis } = require('../redis')
 const staticIdDB = require('../../staticId.js')
-const { multiDecodeMsgPack2 } = require('../../../message-pack/messagePack.js')
+const { multiDecodeMsgPack2 } = require('message-pack')
 
 let redisClient = null
 
@@ -160,20 +160,20 @@ async function extractObjectsHandler(data) {
     return { success: false, error: 'buffer not found in Redis' }
   }
 
-  console.log(`[ExtractObjects] Got ${dataBuffer.length} bytes `)
+  console.log(`[ExtractObjects] Got ${dataBuffer.length} bytes, using worker`)
 
-  const _decodedResponse = multiDecodeMsgPack2(Buffer.from(dataBuffer))
-  const decodedResponse = _decodedResponse.results
+  // Use worker pool for decode (non-blocking)
+  const { decodeAndExtract } = require('../../lib/workerPool.js')
+  const decoded = await decodeAndExtract(Buffer.from(dataBuffer).toString('base64'))
 
   try {
-    const { objects, players, cities } = extractObjects(decodedResponse)
-
-    if (objects.length === 0) {
-      console.log(`[ExtractObjects] Found ${objects.length} objects`)
+    if (decoded.count === 0 || !decoded.objects) {
+      console.log(`[ExtractObjects] Found 0 objects`)
       return { success: true, count: 0, objects: [] }
     }
 
-    console.log(`\x1b[32m [ExtractObjects] Found ${objects.length} objects \x1b[0m`)
+    const objects = decoded.objects
+    console.log(`\x1b[32m [ExtractObjects] Found ${objects.length} objects (via worker)\x1b[0m`)
 
     // Convert BigInt to string for serialization
     const safeObjects = objects.map(obj => {

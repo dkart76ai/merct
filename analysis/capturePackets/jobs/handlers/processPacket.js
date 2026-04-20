@@ -1,7 +1,7 @@
 const path = require('path')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 const { getRedis } = require('../redis')
-const { multiDecodeMsgPack2 } = require('../../../message-pack/messagePack.js')
+const { decode } = require('../../lib/workerPool')
 const fs = require('fs')
 
 const redisClient = getRedis()
@@ -12,7 +12,7 @@ let captures = []
 // let capturesDecoded = []
 
 const SAVE_DIR = path.join(__dirname, '../../captures')
-const MAX_CAPTURES_PER_FILE = 50
+const MAX_CAPTURES_PER_FILE = 20
 
 const myPlayerInfo = {
   name: 'Maedve',
@@ -193,11 +193,11 @@ async function processPacketHandler(data) {
     throw new Error('Los datos binarios expiraron o no se encontraron')
   }
 
-  const _decodedReq = multiDecodeMsgPack2(Buffer.from(requestData))
-  const decodedRequest = _decodedReq.results
-
-  const _decodedResponse = multiDecodeMsgPack2(Buffer.from(responseData))
-  const decodedResponse = _decodedResponse.results
+  // Use worker for decode (non-blocking)
+  const [decodedRequest, decodedResponse] = await Promise.all([
+    decode(Buffer.from(requestData).toString('base64')),
+    decode(Buffer.from(responseData).toString('base64'))
+  ])
 
   const opCode = getFirstValue(decodedResponse)
 

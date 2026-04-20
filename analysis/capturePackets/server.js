@@ -17,7 +17,7 @@ const {
   encodeBase64,
   decodeBase64,
   decodeMsgPack2
-} = require('../message-pack/messagePack.js')
+} = require('message-pack')
 const {
   getStaticIdValues,
   getStaticIdData,
