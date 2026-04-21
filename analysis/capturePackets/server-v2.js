@@ -24,6 +24,8 @@ const {
   JOB_TYPES,
   PRIORITY
 } = require('./jobs/index.js')
+const { getPool, processPacket } = require('./lib/workerPool')
+
 const staticId = require('./staticId.js')
 const { setChatPage, sendMessage, notifyDiscord } = require('./jobs/chatSender')
 const {
@@ -41,8 +43,8 @@ const {
   getAllObjects,
   startCleanup,
   closeDb
-} = require('./jobs/database')
-const { getRedis } = require('./jobs/redis')
+} = require('./lib/database.js')
+const { getRedis } = require('./lib/redis.js')
 loadEnvFile()
 
 const config = {
@@ -387,36 +389,35 @@ function setupPacketCaptureListener() {
       // const postData = request.postData()
       const postDataBuff = request.postDataBuffer()
 
-      const requestKey = `request_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
-      const responseKey = `response_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
+      // const requestKey = `request_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
+      // const responseKey = `response_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
 
       // 1. Guardar el binario directamente (Redis maneja Buffers de forma nativa)
       // Ponemos un TTL de 5min ('EX', 300) para no llenar la RAM si el worker falla
 
-      await redisClient.set(requestKey, postDataBuff, 'EX', 60 * 5)
-      await redisClient.set(responseKey, responseBody, 'EX', 300)
+      // await redisClient.set(requestKey, postDataBuff, 'EX', 60 * 5)
+      // await redisClient.set(responseKey, responseBody, 'EX', 300)
 
       const payload = {
-        url,
-        status,
-        requestKey,
-        responseKey,
-        requestMethod: request.method(),
-        requestHeaders: request.headers(),
-        responseHeaders
+        // url,
+        // status,
+        request: postDataBuff,
+        response: responseBody
+        // requestMethod: request.method(),
+        // requestHeaders: request.headers(),
+        // responseHeaders
       }
 
-      await addJob(JOB_TYPES.PROCESS_PACKET, payload, {
-        priority: PRIORITY.CRITICAL
-      })
+      // await addJob(JOB_TYPES.PROCESS_PACKET, payload, {
+      //   priority: PRIORITY.CRITICAL
+      // })
 
       saveTrafficPair(postDataBuff, responseBody)
-      // updateCapturesForClient(
-      //   ++captureIndex,
-      //   url,
 
-      //   responseBody
-      // )
+      const result = await processPacket(payload)
+
+      //save to db directly, el thread hacer todo, procesar,extraer obj,guardar db
+      // await saveObjects(result.objects)
     } catch (e) {
       console.error('Capture error:', e.message)
     }
@@ -761,7 +762,6 @@ async function main() {
   startCleanup()
 
   // Initialize worker pool (non-blocking CPU tasks)
-  const { getPool } = require('./lib/workerPool')
   getPool()
 
   console.log('[Main] Starting BullMQ worker...')

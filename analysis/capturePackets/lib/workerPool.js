@@ -1,5 +1,20 @@
 const path = require('path')
+const {
+  multiDecodeMsgPack2,
+  encodeMsgPack2MultiFragments,
+  encodeBase64,
+  decodeBase64
+} = require('message-pack')
 
+const {
+  decode: decodeSync,
+  decodeBuffer: decodeBufferSync,
+  encode: encodeSync,
+  processPacket: processPacketSync
+} = require('../workers/tasks')
+
+// Toggle for fallback
+const USE_WORKERS = process.env.USE_WORKERS !== 'false'
 const WORKER_POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
 
 let pool = null
@@ -35,73 +50,64 @@ function getPool() {
   return pool
 }
 
-// Toggle for fallback
-const USE_WORKERS = process.env.USE_WORKERS !== 'false'
-
 // Sync fallback (direct call without worker)
-const {
-  multiDecodeMsgPack2,
-  encodeMsgPack2MultiFragments,
-  encodeBase64,
-  decodeBase64
-} = require('message-pack')
 
-function isValidObject(arr) {
-  if (!Array.isArray(arr) || arr.length !== 12) return false
-  if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
-  if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
-  if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
-  if (typeof arr[11] !== 'boolean') return false
-  return true
-}
+// function isValidObject(arr) {
+//   if (!Array.isArray(arr) || arr.length !== 12) return false
+//   if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
+//   if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
+//   if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
+//   if (typeof arr[11] !== 'boolean') return false
+//   return true
+// }
 
-function extractObjects(data) {
-  const objects = []
-  function findObjectsRecursive(arr, depth = 0) {
-    if (depth > 200) return
-    for (const item of arr) {
-      if (Array.isArray(item)) {
-        if (isValidObject(item)) {
-          objects.push({
-            objectId: item[0][0],
-            staticId: item[1],
-            level: item[5],
-            kingdom: item[8][0],
-            x: item[8][1],
-            y: item[8][2]
-          })
-        } else {
-          findObjectsRecursive(item, depth + 1)
-        }
-      }
-    }
-  }
-  findObjectsRecursive(data)
-  return objects
-}
+// function extractObjects(data) {
+//   const objects = []
+//   function findObjectsRecursive(arr, depth = 0) {
+//     if (depth > 200) return
+//     for (const item of arr) {
+//       if (Array.isArray(item)) {
+//         if (isValidObject(item)) {
+//           objects.push({
+//             objectId: item[0][0],
+//             staticId: item[1],
+//             level: item[5],
+//             kingdom: item[8][0],
+//             x: item[8][1],
+//             y: item[8][2]
+//           })
+//         } else {
+//           findObjectsRecursive(item, depth + 1)
+//         }
+//       }
+//     }
+//   }
+//   findObjectsRecursive(data)
+//   return objects
+// }
 
-function decodeSync(base64) {
-  if (!base64) throw new Error('No base64 data provided')
+// function decodeSync(base64) {
+//   if (!base64) throw new Error('No base64 data provided')
 
-  const bytes = decodeBase64(base64)
-  const result = multiDecodeMsgPack2(bytes)
-  return result.results
-}
+//   const bytes = decodeBase64(base64)
+//   const result = multiDecodeMsgPack2(bytes)
+//   return result.results
+// }
 
-function decodeBufferSync(buffer) {
-  if (!buffer) throw new Error('No buffer provided')
+// function decodeBufferSync(buffer) {
+//   if (!buffer) throw new Error('No buffer provided')
 
-  const bytes = Buffer.isBuffer(buffer) ? new Uint8Array(buffer) : buffer
-  const result = multiDecodeMsgPack2(bytes)
-  return result.results
-}
+//   const bytes = Buffer.isBuffer(buffer) ? new Uint8Array(buffer) : buffer
+//   const result = multiDecodeMsgPack2(bytes)
+//   return result.results
+// }
 
-function encodeSync(data) {
-  if (!data) throw new Error('No data provided')
+// function encodeSync(data) {
+//   if (!data) throw new Error('No data provided')
 
-  const encoded = encodeMsgPack2MultiFragments(data)
-  return encodeBase64(encoded)
-}
+//   const encoded = encodeMsgPack2MultiFragments(data)
+//   return encodeBase64(encoded)
+// }
 
 // Wrapper functions with fallback
 async function decode(base64) {
@@ -109,7 +115,8 @@ async function decode(base64) {
 
   const p = getPool()
   if (!p || !USE_WORKERS) {
-    return decodeSync(base64)
+    const result = decodeSync(base64)
+    return result.results
   }
   try {
     const result = await p.run(base64, { name: 'decode' })
@@ -117,7 +124,8 @@ async function decode(base64) {
     return result.data
   } catch (e) {
     console.warn('[Worker Pool] Falling back to sync:', e.message)
-    return decodeSync(base64)
+    const result = decodeSync(base64)
+    return result.results
   }
 }
 
@@ -153,43 +161,61 @@ async function encode(data) {
   }
 }
 
-async function extract(decodedData) {
-  if (!decodedData) throw new Error('No data provided')
+// async function extract(decodedData) {
+//   if (!decodedData) throw new Error('No data provided')
+
+//   const p = getPool()
+//   if (!p || !USE_WORKERS) {
+//     return { count: extractObjects(decodedData).length, objects: extractObjects(decodedData) }
+//   }
+//   try {
+//     const result = await p.run(decodedData, { name: 'extract' })
+//     if (!result.success) throw new Error(result.error)
+//     return { count: result.count, objects: result.objects }
+//   } catch (e) {
+//     return { count: extractObjects(decodedData).length, objects: extractObjects(decodedData) }
+//   }
+// }
+
+// async function decodeAndExtract(base64) {
+//   if (!base64) throw new Error('No base64 data provided')
+
+//   const p = getPool()
+//   if (!p || !USE_WORKERS) {
+//     const decoded = decode(base64)
+//     const objects = extractObjects(decoded)
+//     return { decoded, count: objects.length, objects }
+//   }
+//   try {
+//     const result = await p.run(base64, { name: 'decodeAndExtract' })
+//     if (!result.success) throw new Error(result.error)
+//     return {
+//       decoded: result.decoded,
+//       count: result.count,
+//       objects: result.objects
+//     }
+//   } catch (e) {
+//     const decoded = decode(base64)
+//     const objects = extractObjects(decoded)
+//     return { decoded, count: objects.length, objects }
+//   }
+// }
+
+async function processPacket({ request, response }) {
+  if (!request || !response) throw new Error('No data provided')
 
   const p = getPool()
   if (!p || !USE_WORKERS) {
-    return { count: extractObjects(decodedData).length, objects: extractObjects(decodedData) }
+    processPacketSync({ request, response })
+    return { success: false, error: 'Workers disabled' }
   }
-  try {
-    const result = await p.run(decodedData, { name: 'extract' })
-    if (!result.success) throw new Error(result.error)
-    return { count: result.count, objects: result.objects }
-  } catch (e) {
-    return { count: extractObjects(decodedData).length, objects: extractObjects(decodedData) }
-  }
-}
 
-async function decodeAndExtract(base64) {
-  if (!base64) throw new Error('No base64 data provided')
-
-  const p = getPool()
-  if (!p || !USE_WORKERS) {
-    const decoded = decodeSync(base64)
-    const objects = extractObjects(decoded)
-    return { decoded, count: objects.length, objects }
-  }
   try {
-    const result = await p.run(base64, { name: 'decodeAndExtract' })
+    const result = await p.run({ request, response }, { name: 'processPacket' })
     if (!result.success) throw new Error(result.error)
-    return {
-      decoded: result.decoded,
-      count: result.count,
-      objects: result.objects
-    }
+    return result
   } catch (e) {
-    const decoded = decodeSync(base64)
-    const objects = extractObjects(decoded)
-    return { decoded, count: objects.length, objects }
+    return { success: false, error: e.message }
   }
 }
 
@@ -198,10 +224,11 @@ module.exports = {
   decode,
   decodeBuffer,
   encode,
-  extract,
-  decodeAndExtract,
-  decodeSync,
-  decodeBufferSync,
-  encodeSync,
-  USE_WORKERS
+  // extract,
+  // decodeAndExtract,
+  processPacket
+  // decodeSync,
+  // decodeBufferSync,
+  // encodeSync,
+  // USE_WORKERS
 }

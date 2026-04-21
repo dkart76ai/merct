@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const { multiDecodeMsgPack2, encodeMsgPack2MultiFragments } = require('message-pack')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
-const { getRedis } = require('../redis')
+const { getRedis } = require('../../lib/redis.js')
 const { kingdomUrls } = require('../../kingdomUrls.js')
 
 const HEADERS = {

@@ -1,5 +1,5 @@
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
-const { getRedis } = require('../redis')
+const { getRedis } = require('../../lib/redis.js')
 const staticIdDB = require('../../staticId.js')
 const { multiDecodeMsgPack2 } = require('message-pack')
 

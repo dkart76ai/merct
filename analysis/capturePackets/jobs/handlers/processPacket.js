@@ -1,6 +1,6 @@
 const path = require('path')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
-const { getRedis } = require('../redis')
+const { getRedis } = require('../../lib/redis')
 const { decode } = require('../../lib/workerPool')
 const fs = require('fs')
 

@@ -1,4 +1,4 @@
-const { findObjects } = require('../database')
+const { findObjects } = require('../../lib/database')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 
 async function findObjectsHandler(data) {

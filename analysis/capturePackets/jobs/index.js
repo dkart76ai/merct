@@ -1,5 +1,5 @@
 const { Queue, Worker } = require('bullmq')
-const { getRedis } = require('./redis')
+const { getRedis } = require('../lib/redis')
 
 const QUEUE_NAME = 'playwtb-jobs'
 

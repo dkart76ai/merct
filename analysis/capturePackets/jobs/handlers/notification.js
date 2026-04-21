@@ -1,4 +1,4 @@
-const { getRedis } = require('../redis')
+const { getRedis } = require('../../lib/redis')
 const { sendMessage, notifyDiscord } = require('../chatSender')
 
 async function notificationHandler(data) {

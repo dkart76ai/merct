@@ -1,11 +1,11 @@
-const { saveObjects } = require('../database')
+const { saveObjects } = require('../../lib/database')
 const { JOB_TYPES, PRIORITY } = require('../index')
 
 async function saveObjectsHandler(data) {
   const { objects } = data
 
-  console.log(`[SaveObjects] Saving ${objects?.length || 0} objects`)
   if (objects && objects.length > 0) {
+    console.log(`[SaveObjects] Saving ${objects?.length || 0} objects`)
     console.log(
       `[SaveObjects] First object:`,
       JSON.stringify(objects[0], (k, v) => (typeof v === 'bigint' ? v.toString() : v)).substring(
