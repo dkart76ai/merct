@@ -7,7 +7,6 @@ class MsgPackDecoder {
     this.view = new DataView(this.buf.buffer, this.buf.byteOffset, this.buf.byteLength, true)
     this.off = 0
     this.decoder = new TextDecoder()
-    this.len = this.view.getUint32(0, true, true)
   }
 
   decode() {
