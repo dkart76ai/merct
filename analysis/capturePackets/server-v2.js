@@ -77,42 +77,48 @@ const packet31xStream = createStream('packet311_312.bin', {
 })
 
 /**
- * Procesa y guarda el paquete basado en su opcode
- * @param {number} opcode - El opcode ya extraído
+ * Procesa y guarda el paquete basado en su opCode
+ * @param {number} opCode - El opCode ya extraído
  * @param {Buffer} packetBuffer - El buffer completo del paquete
  */
-// Almacén de streams activos por opcode
+// Almacén de streams activos por opCode
 const opcodeStreams = new Map()
 
-function savePacketByOpcode(opcode, packetBuffer) {
-  let stream = opcodeStreams.get(opcode)
+function savePacketByOpcode(opCode, packetBuffer) {
+  let stream = opcodeStreams.get(opCode)
 
-  // Si no existe el stream para este opcode, lo creamos
+  // Si no existe el stream para este opCode, lo creamos
   if (!stream) {
-    stream = rfs.createStream(`${opcode}.bin`, {
+    stream = createStream(`${opCode}.bin`, {
       size: '2M', // Rotar al llegar a 2MB
       path: PACKET_SAMPLE_DIR,
       maxFiles: 1 // Mantener solo la muestra actual de 2MB
     })
 
     stream.on('rotated', filename => {
-      console.log(`Muestra de 2MB completada para Opcode ${opcode}: ${filename}`)
-      // Opcional: Cerrar el stream si ya no quieres capturar más de este opcode
+      console.log(`Muestra de 2MB completada para Opcode ${opCode}: ${filename}`)
+      // Opcional: Cerrar el stream si ya no quieres capturar más de este opCode
       // stream.end();
-      // opcodeStreams.delete(opcode);
+      // opcodeStreams.delete(opCode);
     })
 
-    opcodeStreams.set(opcode, stream)
+    opcodeStreams.set(opCode, stream)
   }
 
   // Escribir el buffer directamente (binario)
-  stream.write(packetBuffer)
+  const encoded = JSON.stringify(
+    packetBuffer,
+    (k, v) => (typeof v === 'bigint' ? v.toString() : v),
+    2
+  )
+  stream.write(encoded)
 }
 
 // Función para guardar el par (Llamada desde tu lógica de red)
-function saveTrafficPair(reqBuffer, resBuffer) {
+function saveTrafficPair(url, reqBuffer, resBuffer) {
   const pair = {
     ts: Date.now(),
+    url,
     req: reqBuffer, // Buffer original de MessagePack
     res: resBuffer // Buffer original de MessagePack
   }
@@ -402,6 +408,28 @@ async function patchSendbird() {
   })
 }
 
+async function setupBlockPacketsSentToServer() {
+  await page.route('**/rubens-realm**', async route => {
+    const request = route.request()
+
+    // 1. Obtener el contenido del body (como string o JSON)
+    const postDataBuff = request.postDataBuffer()
+    const { opCode: opCode } = getRequestHeader(postDataBuff)
+
+    /*
+    311 something with tile id's, si esta bloqueado no pinta el tile, y se cuelga el juego
+    318 ping or get time , it return a timestamp
+    */
+    if ([318].includes(opCode)) {
+      console.log('Bloqueando packet with opcode ', opCode)
+      await route.abort()
+    } else {
+      // Si todo está bien, la petición sigue su curso
+      await route.continue()
+    }
+  })
+}
+
 function setupPacketCaptureListener() {
   if (!page) return
 
@@ -426,26 +454,26 @@ function setupPacketCaptureListener() {
       // const postData = request.postData()
       const postDataBuff = request.postDataBuffer()
 
+      const { opCode: opCode } = getRequestHeader(postDataBuff)
+
       const ignoreOpcodes = [318]
       if (!ignoreOpcodes.includes(opCode)) {
-        saveTrafficPair(postDataBuff, responseBody)
+        saveTrafficPair(url, postDataBuff, responseBody)
       }
-
-      const { opCode: opCode } = getRequestHeader(postDataBuff)
 
       if ([311, 312].includes(opCode)) {
         const tiles = getMsgPack2ndBlockRequest(postDataBuff)
         savePackets311_312({ url, opCode, tiles })
       }
 
-      //  save 20 packet sample of each  opcode
-      let packetSampleCounter = packetSample.get(opcode) || 0
+      //  save 20 packet sample of each  opCode
+      let packetSampleCounter = packetSample.get(opCode) || 0
       if (packetSampleCounter < 20) {
         packetSample.set(opCode, packetSampleCounter + 1)
 
         const { results: decodedRequest } = multiDecodeMsgPack2(postDataBuff, true)
         const { results: decodedResponse } = multiDecodeMsgPack2(responseBody)
-        savePacketByOpcode(opcode, {
+        savePacketByOpcode(opCode, {
           opCode,
           url,
           request: decodedRequest,
@@ -560,9 +588,9 @@ async function browserLoadUrlAndLogin() {
     // fill() espera automáticamente a que el elemento sea visible y accionable
     console.log('Ingresando credenciales...')
     await loginInput.click()
-    await loginInput.pressSequentially(config.accountUser, { delay: 50 })
+    await loginInput.pressSequentially(config.accountUser, { delay: 20 })
     await passwordInput.click()
-    await passwordInput.pressSequentially(config.accountPwd, { delay: 50 })
+    await passwordInput.pressSequentially(config.accountPwd, { delay: 20 })
 
     // 3. Click en el botón de login
     console.log('Clickeando el botón...')
@@ -573,7 +601,7 @@ async function browserLoadUrlAndLogin() {
 
     // 4. Verificación post-login
     // En lugar de un console.log inmediato, espera a que algo cambie (ej. desaparezca el input)
-    await expect(loginInput).isHidden()
+    await loginInput.waitFor({ state: 'hidden', timeout: 5000 })
     console.log('Login exitoso')
   } catch (error) {
     console.error('Error durante el proceso de login:', error)
@@ -779,6 +807,9 @@ app.post('/api/browser/start', async (req, res) => {
 
     setupWebsocketListener()
     patchSendbird()
+
+    setupBlockPacketsSentToServer()
+
     setupPacketCaptureListener()
 
     await browserLoadUrlAndLogin()
