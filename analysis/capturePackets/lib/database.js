@@ -1,6 +1,6 @@
 const Database = require('better-sqlite3')
 const path = require('path')
-
+const { isMainThread } = require('worker_threads')
 const DB_FILE = path.join(__dirname, 'objects.db')
 
 let db = null
@@ -8,8 +8,14 @@ let db = null
 function initDb() {
   if (db) return db
 
-  db = new Database(DB_FILE)
+  // 1. Añadimos timeout para que el worker espere si la DB está bloqueada
+  db = new Database(DB_FILE, { timeout: 7000 })
+  // 2. Activamos modo WAL (Write-Ahead Logging)
+  // Esto permite que los hilos de lectura no bloqueen al hilo de escritura
+  db.pragma('journal_mode = WAL')
+  db.pragma('synchronous = NORMAL')
 
+  // if (isMainThread) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS objects (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,6 +41,8 @@ function initDb() {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_lastSeenAt ON objects(lastSeenAt)`)
 
   console.log('[SQLite] Database initialized:', DB_FILE)
+  // }
+
   return db
 }
 
@@ -46,11 +54,11 @@ function getDb() {
 const TTL_WARNING_MS = 10 * 60 * 1000
 const TTL_CLEAN_MS = 20 * 60 * 1000
 
-let stats = {
-  totalSaved: 0,
-  totalCleaned: 0,
-  lastSavedAt: null
-}
+// let stats = {
+//   totalSaved: 0,
+//   totalCleaned: 0,
+//   lastSavedAt: null
+// }
 let cleanupInterval = null
 
 function getKey(obj) {
@@ -100,8 +108,8 @@ function saveObject(obj) {
         JSON.stringify(obj)
       )
 
-    stats.totalSaved++
-    stats.lastSavedAt = now
+    // stats.totalSaved++
+    // stats.lastSavedAt = now
     console.log(`[DB] Saved new object: ${key}, staticId: ${obj.staticId}, level: ${obj.level}`)
     return { action: 'created', key }
   }
@@ -113,7 +121,7 @@ function saveObjects(objects) {
     updated: 0,
     objects: []
   }
-
+  console.log('[DB] Saving object, db:', DB_FILE)
   const database = getDb()
   const insert = database.prepare(`
     INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y, firstSeenAt, lastSeenAt, seenCount, warning, data)
@@ -129,35 +137,44 @@ function saveObjects(objects) {
     WHERE key = ?
   `)
 
+  const check = database.prepare('SELECT id FROM objects WHERE key = ?')
   const now = Date.now()
 
-  for (const obj of objects) {
-    const key = getKey(obj)
-    const existing = database.prepare('SELECT id FROM objects WHERE key = ?').get(key)
+  // 3. ENVOLVEMOS TODO EN UNA TRANSACCIÓN IMMEDIATE
+  // Esto avisa a otros hilos: "Voy a escribir, esperen su turno"
+  const transaction = database.transaction(objects => {
+    for (const obj of objects) {
+      const key = getKey(obj)
+      const existing = check.get(key)
 
-    if (existing) {
-      update.run(now, key)
-      results.updated++
-    } else {
-      insert.run(
-        key,
-        obj.objectId?.toString() || null,
-        obj.staticId,
-        obj.level,
-        obj.kingdom,
-        obj.x,
-        obj.y,
-        now,
-        now,
-        JSON.stringify(obj)
-      )
-      results.created++
-      stats.totalSaved++
+      if (existing) {
+        update.run(now, key)
+        results.updated++
+      } else {
+        insert.run(
+          key,
+          obj.objectId?.toString() || null,
+          obj.staticId,
+          obj.level,
+          obj.kingdom,
+          obj.x,
+          obj.y,
+          now,
+          now,
+          JSON.stringify(obj)
+        )
+        results.created++
+        // stats.totalSaved++
+      }
+      results.objects.push(key)
     }
-    results.objects.push(key)
-  }
+  })
 
-  stats.lastSavedAt = Date.now()
+  // Ejecutamos con .immediate() para evitar deadlocks
+  transaction.immediate(objects)
+
+  // stats.lastSavedAt = Date.now()
+  console.log('[database] objects saved', objects.length)
   return results
 }
 
@@ -197,24 +214,28 @@ function findObjects(query) {
 
 function getStats() {
   const database = getDb()
+
+  // Forzamos un checkpoint o lectura limpia
+  database.pragma('optimize')
+
   const total = database.prepare('SELECT COUNT(*) as count FROM objects').get()
   const warning = database.prepare('SELECT COUNT(*) as count FROM objects WHERE warning = 1').get()
+  // console.log('getStats obj total count:', total)
 
   return {
-    ...stats,
-    uniqueObjects: total.count,
-    warningCount: warning.count
+    uniqueObjects: total.count || 0,
+    warningCount: warning.count || 0
   }
 }
 
 function clearDb() {
   const database = getDb()
   database.prepare('DELETE FROM objects').run()
-  stats = {
-    totalSaved: 0,
-    totalCleaned: 0,
-    lastSavedAt: null
-  }
+  // stats = {
+  //   totalSaved: 0,
+  //   totalCleaned: 0,
+  //   lastSavedAt: null
+  // }
   console.log('[DB] Database cleared')
 }
 
@@ -235,6 +256,7 @@ function deleteObject(key) {
 }
 
 function startCleanup() {
+  // solo debe llamarse en el hilo principal (main.js)
   if (cleanupInterval) return
 
   cleanupInterval = setInterval(() => {
@@ -271,7 +293,7 @@ function startCleanup() {
       .run(now - TTL_CLEAN_MS)
 
     if (toClean.c > 0) {
-      stats.totalCleaned += toClean.c
+      // stats.totalCleaned += toClean.c
       console.log(`[DB] Cleaned ${toClean.c} objects, ${warningSet} marked warning`)
     } else if (warningSet > 0) {
       console.log(`[DB] Marked ${warningSet} objects with warning`)

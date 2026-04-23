@@ -9,14 +9,14 @@ let timerManager = null
 
 const JOB_TYPES = {
   SEND_PACKET: 'send-packet',
-  EXTRACT_OBJECTS: 'extract-objects',
-  SAVE_OBJECTS: 'save-objects',
+  // EXTRACT_OBJECTS: 'extract-objects',
+  // SAVE_OBJECTS: 'save-objects',
   FIND_OBJECTS: 'find-objects',
-  EXTRACT_PLAYER: 'extract-player',
+  // EXTRACT_PLAYER: 'extract-player',
   NOTIFICATION: 'notification',
   SCAN_KINGDOM: 'scan-kingdom',
-  SCAN_FOR_MERC: 'scan-for-merc',
-  PROCESS_PACKET: 'process-packet'
+  SCAN_FOR_MERC: 'scan-for-merc'
+  // PROCESS_PACKET: 'process-packet'
 }
 
 const PRIORITY = {

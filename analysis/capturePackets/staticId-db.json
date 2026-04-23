@@ -19,6 +19,11 @@
     "entryType": "tile",
     "name": "Océano"
   },
+  "6": {
+    "staticId": 6,
+    "entryType": "tile",
+    "name": null
+  },
   "9": {
     "staticId": 9,
     "entryType": "tile",
@@ -4085,6 +4090,11 @@
     "entryType": "spawn",
     "name": "Unknown"
   },
+  "4007": {
+    "staticId": 4007,
+    "entryType": "spawn",
+    "name": null
+  },
   "4010": {
     "staticId": 4010,
     "level": 50,
@@ -4292,6 +4302,16 @@
     "entryType": "poi",
     "name": "Escuadrón rúnico de asalto",
     "level": 45
+  },
+  "170107": {
+    "staticId": 170107,
+    "entryType": "spawn",
+    "name": null
+  },
+  "170108": {
+    "staticId": 170108,
+    "entryType": "poi",
+    "name": null
   },
   "180001": {
     "staticId": 180001,

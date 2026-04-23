@@ -1,7 +1,7 @@
 {
   "name": "message-pack",
-  "version": "1.0.0",
-  "main": "messagePack.js",
+  "version": "1.0.1",
+  "main": "messagePackv3.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
