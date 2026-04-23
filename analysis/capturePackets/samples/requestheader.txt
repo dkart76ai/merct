@@ -1,0 +1,8 @@
+game send 2 messagepack block together
+[packet info + session]
+[data]
+
+
+first block contain packet info + session
+
+[312, seq, [[playerId], <Buffer 12bytes session>], '']
