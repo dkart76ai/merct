@@ -4,7 +4,11 @@ const fs = require('fs')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
 const { kingdomUrls } = require('./kingdomUrls.js')
-const { multiDecodeMsgPack2 } = require('message-pack')
+const {
+  multiDecodeMsgPack2,
+  getRequestHeader,
+  getMsgPack2ndBlockRequest
+} = require('./messagePack.js')
 const { createStream } = require('rotating-file-stream')
 const msgpack = require('@msgpack/msgpack')
 const {
@@ -55,13 +59,55 @@ const config = {
 // const SAVE_DIR = path.join(__dirname, 'captures')
 // const SAVE_DIR2 = path.join(__dirname, 'packetSender')
 const LOGS_DIR = path.join(__dirname, 'logs')
+const PACKET311312_DIR = path.join(__dirname, 'P311312')
+const PACKET_SAMPLE_DIR = path.join(__dirname, 'packet-sample')
+const packetSample = new Map()
 
 // 1. Configurar el stream de escritura (Binario y Rotativo)
 const logStream = createStream('traffic.bin', {
-  size: '10M', // Rota cada 10MB para que sean fáciles de descargar
-  interval: '1d', // O cada día
+  size: '2M', // Rota cada 10MB para que sean fáciles de descargar
+  interval: '30m', // O cada día
   path: LOGS_DIR
 })
+
+const packet31xStream = createStream('packet311_312.bin', {
+  size: '2M', // Rota cada 10MB para que sean fáciles de descargar
+  interval: '30m', // O cada día
+  path: PACKET311312_DIR
+})
+
+/**
+ * Procesa y guarda el paquete basado en su opcode
+ * @param {number} opcode - El opcode ya extraído
+ * @param {Buffer} packetBuffer - El buffer completo del paquete
+ */
+// Almacén de streams activos por opcode
+const opcodeStreams = new Map()
+
+function savePacketByOpcode(opcode, packetBuffer) {
+  let stream = opcodeStreams.get(opcode)
+
+  // Si no existe el stream para este opcode, lo creamos
+  if (!stream) {
+    stream = rfs.createStream(`${opcode}.bin`, {
+      size: '2M', // Rotar al llegar a 2MB
+      path: PACKET_SAMPLE_DIR,
+      maxFiles: 1 // Mantener solo la muestra actual de 2MB
+    })
+
+    stream.on('rotated', filename => {
+      console.log(`Muestra de 2MB completada para Opcode ${opcode}: ${filename}`)
+      // Opcional: Cerrar el stream si ya no quieres capturar más de este opcode
+      // stream.end();
+      // opcodeStreams.delete(opcode);
+    })
+
+    opcodeStreams.set(opcode, stream)
+  }
+
+  // Escribir el buffer directamente (binario)
+  stream.write(packetBuffer)
+}
 
 // Función para guardar el par (Llamada desde tu lógica de red)
 function saveTrafficPair(reqBuffer, resBuffer) {
@@ -76,23 +122,23 @@ function saveTrafficPair(reqBuffer, resBuffer) {
   logStream.write(encoded)
 }
 
-function getFirstValue(data, depth = 0) {
-  if (depth > 10) return null // Prevent stack overflow on circular/deep structures
-  if (!data || !Array.isArray(data)) return null
+// function getFirstValue(data, depth = 0) {
+//   if (depth > 10) return null // Prevent stack overflow on circular/deep structures
+//   if (!data || !Array.isArray(data)) return null
 
-  try {
-    for (let item of data) {
-      if (typeof item === 'number') return item
-      if (Array.isArray(item)) {
-        const resultado = getFirstValue(item, depth + 1)
-        if (resultado !== undefined) return resultado
-      }
-    }
-  } catch (e) {
-    console.error('[getFirstValue] ', e.message)
-  }
-  return null
-}
+//   try {
+//     for (let item of data) {
+//       if (typeof item === 'number') return item
+//       if (Array.isArray(item)) {
+//         const resultado = getFirstValue(item, depth + 1)
+//         if (resultado !== undefined) return resultado
+//       }
+//     }
+//   } catch (e) {
+//     console.error('[getFirstValue] ', e.message)
+//   }
+//   return null
+// }
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -114,12 +160,19 @@ async function ensureSaveDir() {
     if (!fs.existsSync(LOGS_DIR)) {
       fs.mkdirSync(LOGS_DIR, { recursive: true })
     }
-    // if (!fs.existsSync(SAVE_DIR2)) {
-    //   fs.mkdirSync(SAVE_DIR2, { recursive: true })
-    // }
+    if (!fs.existsSync(PACKET311312_DIR)) {
+      fs.mkdirSync(PACKET311312_DIR, { recursive: true })
+    }
+    if (!fs.existsSync(PACKET_SAMPLE_DIR)) {
+      fs.mkdirSync(PACKET_SAMPLE_DIR, { recursive: true })
+    }
   } catch (e) {
     console.error('Ensure save dir error:', e.message)
   }
+}
+
+function savePackets311_312(data) {
+  packet31xStream.write(JSON.stringify(data) + '\n')
 }
 
 const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
@@ -349,22 +402,6 @@ async function patchSendbird() {
   })
 }
 
-// function updateCapturesForClient(
-//   id,
-//   url,
-
-//   responseBody
-// ) {
-//   let decodedResponse = multiDecodeMsgPack2(Buffer.from(responseBody))
-//   const opCode = getFirstValue(decodedResponse)
-
-//   captures.push({ id, url, opCode, response: { size: responseBody.length } })
-
-//   if (captures.length > 50) {
-//     captures = captures.slice(-50)
-//   }
-// }
-
 function setupPacketCaptureListener() {
   if (!page) return
 
@@ -374,7 +411,7 @@ function setupPacketCaptureListener() {
     const url = response.url()
     if (!url.includes('rubens-realm')) return
 
-    // const _kingdom = url.split('rubens-realm')[1]
+    const _kingdom = url.split('rubens-realm')[1]
     // const kingdom = parseInt(_kingdom)
 
     try {
@@ -389,35 +426,35 @@ function setupPacketCaptureListener() {
       // const postData = request.postData()
       const postDataBuff = request.postDataBuffer()
 
-      // const requestKey = `request_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
-      // const responseKey = `response_data:${Date.now()}:${Math.random().toString(36).substring(7)}`
-
-      // 1. Guardar el binario directamente (Redis maneja Buffers de forma nativa)
-      // Ponemos un TTL de 5min ('EX', 300) para no llenar la RAM si el worker falla
-
-      // await redisClient.set(requestKey, postDataBuff, 'EX', 60 * 5)
-      // await redisClient.set(responseKey, responseBody, 'EX', 300)
-
-      const payload = {
-        // url,
-        // status,
-        request: postDataBuff,
-        response: responseBody
-        // requestMethod: request.method(),
-        // requestHeaders: request.headers(),
-        // responseHeaders
-      }
-
-      // await addJob(JOB_TYPES.PROCESS_PACKET, payload, {
-      //   priority: PRIORITY.CRITICAL
-      // })
-
       saveTrafficPair(postDataBuff, responseBody)
 
-      const result = await processPacket(payload)
+      const { opCode: opCode } = getRequestHeader(postDataBuff)
 
-      //save to db directly, el thread hacer todo, procesar,extraer obj,guardar db
-      // await saveObjects(result.objects)
+      if ([311, 312].includes(opCode)) {
+        const tiles = getMsgPack2ndBlockRequest(postDataBuff)
+        savePackets311_312({ url, opCode, tiles })
+      }
+
+      //  save 20 packet sample of each  opcode
+      let packetSampleCounter = packetSample.get(opcode) || 0
+      if (packetSampleCounter < 20) {
+        packetSample.set(opCode, packetSampleCounter + 1)
+
+        const { results: decodedRequest } = multiDecodeMsgPack2(postDataBuff, true)
+        const { results: decodedResponse } = multiDecodeMsgPack2(responseBody)
+        savePacketByOpcode(opcode, {
+          opCode,
+          url,
+          request: decodedRequest,
+          response: decodedResponse
+        })
+      }
+
+      const payload = {
+        request: postDataBuff,
+        response: responseBody
+      }
+      const result = await processPacket(payload)
     } catch (e) {
       console.error('Capture error:', e.message)
     }
@@ -445,55 +482,96 @@ async function browserInitialize() {
   setChatPage(page)
 }
 
+// async function browserLoadUrlAndLogin() {
+//   if (!page) return
+
+//   // 1. Ve a la página y espera lo mínimo necesario
+//   await page.goto('https://totalbattle.com/es', { waitUntil: 'domcontentloaded' })
+
+//   // 2. Define los locadores (sin ejecutarlos aún)
+//   const loginInput = page.getByRole('textbox', { name: 'E-mail' })
+//   const loginButtonTab = page.locator('span[data-id="login"]')
+//   const passwordInput = page.getByRole('textbox', { name: 'Contraseña' })
+//   const loginButton = page.getByRole('button', { name: 'Iniciar sesión' })
+
+//   for (let i = 0; i < 2; i++) {
+//     // 3. Lógica de Login con esperas explícitas
+//     try {
+//       // Esperamos a que el botón de la pestaña o el input aparezcan (lo que ocurra primero)
+//       await loginButtonTab.waitFor({ state: 'visible', timeout: 10000 })
+
+//       if (await loginButtonTab.isVisible()) {
+//         console.log('Abriendo pestaña de login...')
+//         await loginButtonTab.click()
+//       }
+//       break
+//     } catch (error) {
+//       console.error('El formulario de login no apareció o tardó demasiado', error)
+//     }
+//   }
+//   await page.waitForTimeout(1000)
+
+//   try {
+//     // Llenar datos (Playwright esperará automáticamente a que sean editables)
+//     console.log('Ingresando credenciales...')
+//     await loginInput.fill(config.accountUser)
+//     await page.waitForTimeout(500)
+//     await passwordInput.fill(config.accountPwd)
+//   } catch (error) {
+//     console.error('El formulario de login no apareció o tardó demasiado', error)
+//   }
+
+//   await page.waitForTimeout(1000)
+
+//   console.log('clickeando el boton...')
+//   for (let i = 0; i < 2; i++) {
+//     try {
+//       await loginButton.waitFor({ state: 'visible', timeout: 10000 })
+//       if (await loginButton.isVisible()) {
+//         await loginButton.click()
+//       }
+//       break
+//     } catch (error) {
+//       console.error('el boton login no apareció o tardó demasiado', error)
+//     }
+//   }
+
+//   console.log('Login exitoso')
+// }
 async function browserLoadUrlAndLogin() {
   if (!page) return
 
-  // 1. Ve a la página y espera lo mínimo necesario
   await page.goto('https://totalbattle.com/es', { waitUntil: 'domcontentloaded' })
 
-  // 2. Define los locadores (sin ejecutarlos aún)
   const loginInput = page.getByRole('textbox', { name: 'E-mail' })
   const loginButtonTab = page.locator('span[data-id="login"]')
   const passwordInput = page.getByRole('textbox', { name: 'Contraseña' })
   const loginButton = page.getByRole('button', { name: 'Iniciar sesión' })
 
-  for (let i = 0; i < 2; i++) {
-    // 3. Lógica de Login con esperas explícitas
-    try {
-      // Esperamos a que el botón de la pestaña o el input aparezcan (lo que ocurra primero)
-      await loginButtonTab.waitFor({ state: 'visible', timeout: 10000 })
-
-      if (await loginButtonTab.isVisible()) {
-        console.log('Abriendo pestaña de login...')
-        await loginButtonTab.click()
-      }
-      break
-    } catch (error) {
-      console.error('El formulario de login no apareció o tardó demasiado', error)
-    }
-  }
-
   try {
-    // Llenar datos (Playwright esperará automáticamente a que sean editables)
+    // 1. Abrir pestaña de login (si es necesario)
+    // Usamos click directamente, Playwright esperará hasta 30s por defecto
+    await loginButtonTab.click().catch(() => console.log('Pestaña ya abierta'))
+
+    // 2. Llenar credenciales
+    // fill() espera automáticamente a que el elemento sea visible y accionable
     console.log('Ingresando credenciales...')
     await loginInput.fill(config.accountUser)
     await passwordInput.fill(config.accountPwd)
 
+    // 3. Click en el botón de login
+    console.log('Clickeando el botón...')
+
+    // Forzamos el click si hay elementos flotantes que estorben,
+    // o simplemente esperamos a que esté habilitado
+    await loginButton.click()
+
+    // 4. Verificación post-login
+    // En lugar de un console.log inmediato, espera a que algo cambie (ej. desaparezca el input)
+    await expect(loginInput).isHidden()
     console.log('Login exitoso')
   } catch (error) {
-    console.error('El formulario de login no apareció o tardó demasiado', error)
-  }
-
-  for (let i = 0; i < 2; i++) {
-    try {
-      await loginButton.waitFor({ state: 'visible', timeout: 10000 })
-      if (await loginButton.isVisible()) {
-        await loginButton.click()
-      }
-      break
-    } catch (error) {
-      console.error('el boton login no apareció o tardó demasiado', error)
-    }
+    console.error('Error durante el proceso de login:', error)
   }
 }
 
@@ -759,7 +837,7 @@ async function main() {
   await ensureSaveDir()
   initDb()
   staticId.loadStaticDb()
-  startCleanup()
+  //startCleanup()
 
   // Initialize worker pool (non-blocking CPU tasks)
   getPool()
@@ -767,12 +845,12 @@ async function main() {
   console.log('[Main] Starting BullMQ worker...')
 
   const handlers = {
-    [JOB_TYPES.SEND_PACKET]: sendPacketHandler,
-    [JOB_TYPES.EXTRACT_OBJECTS]: extractObjectsHandler,
-    [JOB_TYPES.SAVE_OBJECTS]: saveObjectsHandler,
+    // [JOB_TYPES.SEND_PACKET]: sendPacketHandler,
+    // [JOB_TYPES.EXTRACT_OBJECTS]: extractObjectsHandler,
+    // [JOB_TYPES.SAVE_OBJECTS]: saveObjectsHandler,
     [JOB_TYPES.FIND_OBJECTS]: findObjectsHandler,
-    [JOB_TYPES.NOTIFICATION]: notificationHandler,
-    [JOB_TYPES.PROCESS_PACKET]: processPacketHandler
+    [JOB_TYPES.NOTIFICATION]: notificationHandler
+    // [JOB_TYPES.PROCESS_PACKET]: processPacketHandler
   }
 
   await startWorker(handlers)
@@ -791,8 +869,8 @@ async function main() {
     console.log('  POST /api/browser/stop - Stop browser')
     console.log('  POST /api/capturing/start - Start packet capture')
 
-    notifyDiscord('٩(̾●̮̮̃̾•̃̾)۶') //┌∩┐(◣_◢)┌∩┐
-    sendMessage('٩(̾●̮̮̃̾•̃̾)۶') // ۜ\(סּںסּَ` )/ۜ
+    // notifyDiscord('٩(̾●̮̮̃̾•̃̾)۶') //┌∩┐(◣_◢)┌∩┐
+    // sendMessage('٩(̾●̮̮̃̾•̃̾)۶') // ۜ\(סּںסּَ` )/ۜ
   })
 
   process.on('SIGINT', async () => {

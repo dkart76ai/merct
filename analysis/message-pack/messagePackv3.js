@@ -43,7 +43,7 @@ class MsgPackTurboDecoder {
       const len = byte & 0x0f
       // --- INTERCEPCIÓN DEL TOKEN ---
       // Si el mapa tiene 12 items, es el Session Token
-      if (len === 12) return this.readTokenAsUint8Array()
+      // if (len === 12) return this.readTokenAsUint8Array()
       return this.readMap(len)
     }
 
@@ -59,25 +59,23 @@ class MsgPackTurboDecoder {
       // Enteros Unsigned
       case 0xcc:
         return this.buf[this.off++]
+      case 0xd0:
+        return this.view.getInt8(this.off++)
+
       case 0xcd: {
         const v = this.view.getUint16(this.off, true) // LE como pediste
         this.off += 2
         return v
       }
-      case 0xce: {
-        const v = this.view.getUint32(this.off, true)
-        this.off += 4
-        return v
-      }
-      case 0xcf:
-        return this.readUInt64Turbo()
-
-      // Enteros Signed
-      case 0xd0:
-        return this.view.getInt8(this.off++)
       case 0xd1: {
         const v = this.view.getInt16(this.off, true)
         this.off += 2
+        return v
+      }
+
+      case 0xce: {
+        const v = this.view.getUint32(this.off, true)
+        this.off += 4
         return v
       }
       case 0xd2: {
@@ -85,15 +83,23 @@ class MsgPackTurboDecoder {
         this.off += 4
         return v
       }
-      case 0xd3:
-        return this.readInt64Turbo()
 
-      // Floats
       case 0xca: {
         const v = this.view.getFloat32(this.off, true)
         this.off += 4
         return v
       }
+
+      case 0xcf:
+        return this.readUInt64Turbo()
+
+      // Enteros Signed
+
+      case 0xd3:
+        return this.readInt64Turbo()
+
+      // Floats
+
       case 0xcb: {
         const v = this.view.getFloat64(this.off, true)
         this.off += 8
@@ -112,6 +118,21 @@ class MsgPackTurboDecoder {
         const len = this.view.getUint32(this.off, true)
         this.off += 4
         return this.readString(len)
+      }
+
+      // Binarios (Cero copia usando subarray)
+      case 0xc4:
+        return this.readBin(this.buf[this.off++])
+
+      case 0xc5: {
+        const len = this.view.getUint16(this.off, true)
+        this.off += 2
+        return this.readBin(len)
+      }
+      case 0xc6: {
+        const len = this.view.getUint32(this.off, true)
+        this.off += 4
+        return this.readBin(len)
       }
 
       // Arrays y Mapas largos
@@ -134,20 +155,6 @@ class MsgPackTurboDecoder {
         const len = this.view.getUint32(this.off, true)
         this.off += 4
         return this.readMap(len)
-      }
-
-      // Binarios (Cero copia usando subarray)
-      case 0xc4:
-        return this.readBin(this.buf[this.off++])
-      case 0xc5: {
-        const len = this.view.getUint16(this.off, true)
-        this.off += 2
-        return this.readBin(len)
-      }
-      case 0xc6: {
-        const len = this.view.getUint32(this.off, true)
-        this.off += 4
-        return this.readBin(len)
       }
 
       // Extensiones (Fixext)
@@ -198,6 +205,10 @@ class MsgPackTurboDecoder {
 
   readString(len) {
     if (len === 0) return ''
+
+    // Seguridad para evitar Heap Out of Memory
+    if (this.stringCache.size > 5000) this.stringCache.clear()
+
     // Optimización: Cache de llaves de objetos para evitar TextDecoder
     if (len < 16) {
       const slice = this.buf.subarray(this.off, this.off + len)
@@ -224,8 +235,8 @@ class MsgPackTurboDecoder {
   readTokenAsUint8Array() {
     const token = new Uint8Array(12)
     for (let i = 0; i < 12; i++) {
-      this.parse() // Saltamos la llave (ej: "0")
-      token[i] = this.parse() // Guardamos el valor directamente
+      this.decode() // Saltamos la llave (ej: "0")
+      token[i] = Number(this.decode()) // Guardamos el valor directamente
     }
     return token
   }
@@ -254,14 +265,14 @@ class MsgPackTurboDecoder {
 
   decodeTimestamp(data) {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength)
-    if (data.length === 4) return new Date(view.getUint32(0, false) * 1000)
+    if (data.length === 4) return new Date(view.getUint32(0, true) * 1000)
     if (data.length === 8) {
-      const val = view.getBigUint64(0, false)
+      const val = view.getBigUint64(0, true)
       return new Date(Number(val & 0x3fffffffn) * 1000 + Number(val >> 30n) / 1e6)
     }
     if (data.length === 12) {
-      const nano = view.getUint32(0, false)
-      const sec = view.getBigInt64(4, false)
+      const nano = view.getUint32(0, true)
+      const sec = view.getBigInt64(4, true)
       return new Date(Number(sec) * 1000 + nano / 1e6)
     }
     return data
@@ -276,6 +287,8 @@ class MsgPackLazyDecoder extends MsgPackTurboDecoder {
   // Busca un camino específico, ej: [0, "data", "players", 5, "hp"]
   extractPath(path) {
     try {
+      if (this.off >= this.buf.length) return undefined
+
       for (const key of path) {
         const byte = this.buf[this.off]
 
@@ -346,22 +359,32 @@ class MsgPackLazyDecoder extends MsgPackTurboDecoder {
       case 0xd9:
         this.off += this.buf[this.off++]
         break // str 8
-      case 0xda:
-        this.off += this.view.getUint16((this.off += 2) - 2, true)
+      case 0xda: {
+        const len = this.view.getUint16(this.off, true)
+        this.off += len + 2
         break // str 16
-      case 0xdb:
-        this.off += this.view.getUint32((this.off += 4) - 4, true)
+      }
+      case 0xdb: {
+        const len = this.view.getUint32(this.off, true)
+        this.off += len + 4
         break // str 32
-      case 0xc4:
-        this.off += this.buf[this.off++]
-        break // bin 8
-      case 0xc5:
-        this.off += this.view.getUint16((this.off += 2) - 2, true)
-        break // bin 16
-      case 0xc6:
-        this.off += this.view.getUint32((this.off += 4) - 4, true)
-        break // bin 32
+      }
+      case 0xc4: {
+        const len = this.buf[this.off++]
+        this.off += len
 
+        break // bin 8
+      }
+      case 0xc5: {
+        const len = this.view.getUint16(this.off, true)
+        this.off += len + 2
+        break // bin 16
+      }
+      case 0xc6: {
+        const len = this.view.getUint32(this.off, true)
+        this.off += len + 4
+        break // bin 32
+      }
       // Recursión controlada para estructuras anidadas
       case 0xdc: {
         let l = this.view.getUint16((this.off += 2) - 2, true)
@@ -390,6 +413,37 @@ class MsgPackLazyDecoder extends MsgPackTurboDecoder {
         break
       }
 
+      case 0xd4:
+        this.off += 2
+        break // fixext 1 (1 byte tipo + 1 byte data)
+      case 0xd5:
+        this.off += 3
+        break // fixext 2 (1 + 2)
+      case 0xd6:
+        this.off += 5
+        break // fixext 4 (1 + 4)
+      case 0xd7:
+        this.off += 9
+        break // fixext 8 (1 + 8)
+      case 0xd8:
+        this.off += 17
+        break // fixext 16 (1 + 16)
+
+      case 0xc7: // ext 8
+        this.off += this.buf[this.off++] + 1
+        break
+      case 0xc8: {
+        // ext 16
+        const len = this.view.getUint16(this.off, true)
+        this.off += len + 3
+        break
+      }
+      case 0xc9: {
+        // ext 32
+        const len = this.view.getUint32(this.off, true)
+        this.off += len + 5 // len + 4 bytes len + 1 tipo
+        break
+      }
       default:
         if (byte >= 0x90 && byte <= 0x9f) {
           let l = byte & 0x0f
@@ -405,26 +459,25 @@ class MsgPackLazyDecoder extends MsgPackTurboDecoder {
   }
 
   skip() {
-    // Usamos un contador para rastrear cuántos elementos faltan por saltar
-    // Esto evita la recursión y es mucho más rápido en V8.
     let itemsToSkip = 1
 
     while (itemsToSkip > 0) {
       const byte = this.buf[this.off++]
       itemsToSkip--
 
-      // --- Casos Atómicos (No añaden más elementos que saltar) ---
-      if (byte <= 0x7f || (byte >= 0xe0 && byte <= 0xff)) continue // fixint
+      // Casos atómicos inmediatos
+      if (byte <= 0x7f || (byte >= 0xe0 && byte <= 0xff)) continue
       if (byte >= 0xa0 && byte <= 0xbf) {
         this.off += byte & 0x1f
         continue
-      } // fixstr
+      }
 
+      // Casos con switch
       switch (byte) {
         case 0xc0:
         case 0xc2:
         case 0xc3:
-          continue // null, bool
+          continue
         case 0xcc:
         case 0xd0:
           this.off += 1
@@ -444,45 +497,79 @@ class MsgPackLazyDecoder extends MsgPackTurboDecoder {
           this.off += 8
           continue
 
-        // Strings y Bins (leemos longitud y saltamos)
         case 0xd9:
-        case 0xc4:
-          this.off += this.buf[this.off++]
+        case 0xc4: {
+          const len = this.buf[this.off++]
+          this.off += len
           continue
+        }
         case 0xda:
-        case 0xc5:
-          this.off += this.view.getUint16(this.off, false) + 2
+        case 0xc5: {
+          const len = this.view.getUint16(this.off, true)
+          this.off += len + 2
+
           continue
+        }
         case 0xdb:
-        case 0xc6:
-          this.off += this.view.getUint32(this.off, false) + 4
+        case 0xc6: {
+          const len = this.view.getUint32(this.off, true)
+          this.off += len + 4
+          continue
+        }
+
+        case 0xdc:
+          itemsToSkip += this.view.getUint16(this.off, true)
+          this.off += 2
+          continue
+        case 0xdd:
+          itemsToSkip += this.view.getUint32(this.off, true)
+          this.off += 4
+          continue
+        case 0xde:
+          itemsToSkip += this.view.getUint16(this.off, true) * 2
+          this.off += 2
+          continue
+        case 0xdf:
+          itemsToSkip += this.view.getUint32(this.off, true) * 2
+          this.off += 4
           continue
 
-        // --- Estructuras (Añaden elementos a la pila de saltos) ---
-        case 0xdc: // array 16
-          itemsToSkip += this.view.getUint16(this.off, false)
+        case 0xd4:
           this.off += 2
           continue
-        case 0xdd: // array 32
-          itemsToSkip += this.view.getUint32(this.off, false)
-          this.off += 4
+        case 0xd5:
+          this.off += 3
           continue
-        case 0xde: // map 16 (cada entrada son 2 elementos: llave y valor)
-          itemsToSkip += this.view.getUint16(this.off, false) * 2
-          this.off += 2
+        case 0xd6:
+          this.off += 5
           continue
-        case 0xdf: // map 32
-          itemsToSkip += this.view.getUint32(this.off, false) * 2
-          this.off += 4
+        case 0xd7:
+          this.off += 9
           continue
+        case 0xd8:
+          this.off += 17
+          continue
+        case 0xc7: {
+          const len = this.buf[this.off++]
+          this.off += len + 1 // len + 1 byte de tipo
+          continue
+        }
+        case 0xc8: {
+          const len = this.view.getUint16(this.off, true)
+          this.off += len + 3
+          continue
+        }
+        case 0xc9: {
+          const len = this.view.getUint32(this.off, true)
+          this.off += len + 5
+          continue
+        }
 
         default:
-          // fixarray
+          // IMPORTANTE: Estos deben ser if/else independientes o estar dentro del switch
           if (byte >= 0x90 && byte <= 0x9f) {
             itemsToSkip += byte & 0x0f
-          }
-          // fixmap
-          else if (byte >= 0x80 && byte <= 0x8f) {
+          } else if (byte >= 0x80 && byte <= 0x8f) {
             itemsToSkip += (byte & 0x0f) * 2
           }
       }
@@ -710,7 +797,7 @@ class MsgPackTurboEncoder {
       const sec = Math.floor(ms / 1000)
       const nsec = (ms % 1000) * 1e6
       const val64 = (BigInt(nsec) << 30n) | BigInt(sec)
-      this.view.setBigUint64(this.off, val64, false) // Spec: TS siempre BE
+      this.view.setBigUint64(this.off, val64, true) // Spec: TS siempre BE
       this.off += 8
       return
     }

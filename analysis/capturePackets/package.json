@@ -14,7 +14,7 @@
     "bullmq": "^5.1.0",
     "express": "^4.18.2",
     "ioredis": "^5.10.1",
-    "message-pack": "file:../message-pack",
+    "message-pack": "file:../message-pack/message-pack-1.0.1.tgz",
     "piscina": "^4.9.2",
     "playwright": "^1.40.0",
     "rotating-file-stream": "^3.2.9"

@@ -21,3 +21,12 @@ analysis/decoderMsgPack/build/*
 analysis/temp_mod/*
 analysis/capturePackets/packetSender/*.json
 analysis/capturePackets/captures/*.json
+analysis/capturePackets/logs/*.bin
+analysis/capturePackets/P311312/*.bin
+analysis/capturePackets/packet-sample/*.bin
+analysis/capturePackets/samples/*.bin
+analysis/packetViewer2/logs/*.bin
+warforgebot/
+analysis/capturePackets/lib/objects.db
+analysis/capturePackets/lib/objects.db-shm
+analysis/capturePackets/lib/objects.db-wal
