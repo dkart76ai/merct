@@ -426,7 +426,10 @@ function setupPacketCaptureListener() {
       // const postData = request.postData()
       const postDataBuff = request.postDataBuffer()
 
-      saveTrafficPair(postDataBuff, responseBody)
+      const ignoreOpcodes = [318]
+      if (!ignoreOpcodes.includes(opCode)) {
+        saveTrafficPair(postDataBuff, responseBody)
+      }
 
       const { opCode: opCode } = getRequestHeader(postDataBuff)
 
@@ -556,8 +559,10 @@ async function browserLoadUrlAndLogin() {
     // 2. Llenar credenciales
     // fill() espera automáticamente a que el elemento sea visible y accionable
     console.log('Ingresando credenciales...')
-    await loginInput.fill(config.accountUser)
-    await passwordInput.fill(config.accountPwd)
+    await loginInput.click()
+    await loginInput.pressSequentially(config.accountUser, { delay: 50 })
+    await passwordInput.click()
+    await passwordInput.pressSequentially(config.accountPwd, { delay: 50 })
 
     // 3. Click en el botón de login
     console.log('Clickeando el botón...')
