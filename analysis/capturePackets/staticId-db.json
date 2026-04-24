@@ -2301,7 +2301,8 @@
   "1861": {
     "staticId": 1861,
     "level": 27,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1862": {
     "staticId": 1862,
@@ -2476,7 +2477,9 @@
   },
   "1966": {
     "staticId": 1966,
-    "level": 32
+    "level": 32,
+    "entryType": "poi",
+    "name": "Escuadrón heroico de elfos"
   },
   "1967": {
     "staticId": 1967,
@@ -3359,7 +3362,8 @@
   "2633": {
     "staticId": 2633,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2634": {
     "staticId": 2634,
@@ -3460,7 +3464,8 @@
   "2736": {
     "staticId": 2736,
     "level": 35,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2740": {
     "staticId": 2740,
@@ -3519,7 +3524,8 @@
   "2749": {
     "staticId": 2749,
     "level": 35,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2750": {
     "staticId": 2750,
@@ -3560,7 +3566,8 @@
   "2801": {
     "staticId": 2801,
     "level": 36,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón común de elfos"
   },
   "2802": {
     "staticId": 2802,
@@ -3834,7 +3841,8 @@
   "2907": {
     "staticId": 2907,
     "level": 37,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "2908": {
     "staticId": 2908,
@@ -3922,7 +3930,8 @@
   "2922": {
     "staticId": 2922,
     "level": 41,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de los malditos"
   },
   "2923": {
     "staticId": 2923,
@@ -4267,8 +4276,23 @@
     "level": 45,
     "entryType": "poi"
   },
+  "152000": {
+    "staticId": 152000,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
   "152001": {
     "staticId": 152001,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152002": {
+    "staticId": 152002,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152003": {
+    "staticId": 152003,
     "entryType": "poi",
     "name": "Escuadrón rúnico común"
   },
@@ -4277,18 +4301,148 @@
     "entryType": "poi",
     "name": "Escuadrón rúnico común"
   },
+  "152005": {
+    "staticId": 152005,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152006": {
+    "staticId": 152006,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152007": {
+    "staticId": 152007,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152008": {
+    "staticId": 152008,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152010": {
+    "staticId": 152010,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152011": {
+    "staticId": 152011,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152012": {
+    "staticId": 152012,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152013": {
+    "staticId": 152013,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152014": {
+    "staticId": 152014,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152015": {
+    "staticId": 152015,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152017": {
+    "staticId": 152017,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152019": {
+    "staticId": 152019,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152021": {
+    "staticId": 152021,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152022": {
+    "staticId": 152022,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152023": {
+    "staticId": 152023,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152025": {
+    "staticId": 152025,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico común"
+  },
+  "152101": {
+    "staticId": 152101,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152102": {
+    "staticId": 152102,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152103": {
+    "staticId": 152103,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
   "152104": {
     "staticId": 152104,
     "entryType": "poi",
     "name": null
+  },
+  "152105": {
+    "staticId": 152105,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152106": {
+    "staticId": 152106,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
   },
   "152107": {
     "staticId": 152107,
     "entryType": "poi",
     "name": "Escuadrón rúnico de asalto"
   },
+  "152108": {
+    "staticId": 152108,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
   "152109": {
     "staticId": 152109,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152110": {
+    "staticId": 152110,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152111": {
+    "staticId": 152111,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152113": {
+    "staticId": 152113,
+    "entryType": "poi",
+    "name": "Escuadrón rúnico de asalto"
+  },
+  "152114": {
+    "staticId": 152114,
     "entryType": "poi",
     "name": "Escuadrón rúnico de asalto"
   },
