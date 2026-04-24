@@ -144,14 +144,16 @@ const processPacket = async ({ request, response }) => {
 
     // const opCode = getFirstValue(decodedResponse)
     const { opCode, userId, token } = getRequestHeader(request)
+    // console.log('processpacket', opCode, userId, token)
 
     // let tileIds = []
     // if (opCode === 312) {
     //   tileIds = decodedRequest[1]
     // }
+    const redisClient = getRedis()
 
+    // any packets bring those data, but only save on 312, to not saturate redis with requests
     if (opCode === 312) {
-      // any packets bring those data, but only save on 312, to not saturate redis with requests
       await redisClient.set('myPlayerId:BigInt', userId.toString(), 'EX', 86400)
       await redisClient.set('mysession:token2:Uint8Array', Buffer.from(token), 'EX', 86400)
     }
