@@ -6,8 +6,10 @@ const { loadEnvFile } = require('node:process')
 const { kingdomUrls } = require('./kingdomUrls.js')
 const {
   multiDecodeMsgPack2,
+  encodeMsgPack2MultiFragments,
   getRequestHeader,
-  getMsgPack2ndBlockRequest
+  getMsgPack2ndBlockRequest,
+  scanPacket312
 } = require('./messagePack.js')
 const { createStream } = require('rotating-file-stream')
 const msgpack = require('@msgpack/msgpack')
@@ -59,6 +61,7 @@ const config = {
 // const SAVE_DIR = path.join(__dirname, 'captures')
 // const SAVE_DIR2 = path.join(__dirname, 'packetSender')
 const LOGS_DIR = path.join(__dirname, 'logs')
+const LOGS_DIR2 = path.join(__dirname, 'decoded-logs')
 const PACKET311312_DIR = path.join(__dirname, 'P311312')
 const PACKET_SAMPLE_DIR = path.join(__dirname, 'packet-sample')
 const packetSample = new Map()
@@ -68,6 +71,12 @@ const logStream = createStream('traffic.bin', {
   size: '2M', // Rota cada 10MB para que sean fáciles de descargar
   interval: '30m', // O cada día
   path: LOGS_DIR
+})
+
+const logStream2 = createStream('traffic.bin', {
+  size: '2M', // Rota cada 10MB para que sean fáciles de descargar
+  interval: '30m', // O cada día
+  path: LOGS_DIR2
 })
 
 const packet31xStream = createStream('packet311_312.bin', {
@@ -115,10 +124,11 @@ function savePacketByOpcode(opCode, packetBuffer) {
 }
 
 // Función para guardar el par (Llamada desde tu lógica de red)
-function saveTrafficPair(url, reqBuffer, resBuffer) {
+function saveTrafficPair(url, reqBuffer, resBuffer, opCode) {
   const pair = {
     ts: Date.now(),
     url,
+    opCode,
     req: reqBuffer, // Buffer original de MessagePack
     res: resBuffer // Buffer original de MessagePack
   }
@@ -126,6 +136,22 @@ function saveTrafficPair(url, reqBuffer, resBuffer) {
   // Serializamos el par completo
   const encoded = msgpack.encode(pair)
   logStream.write(encoded)
+
+  // // try again !! save decoded data
+  // const { results: decodedRequest } = multiDecodeMsgPack2(reqBuffer, true)
+  // const { results: decodedResponse } = multiDecodeMsgPack2(resBuffer)
+  // const pair2 = {
+  //   ts: Date.now(),
+  //   url,
+  //   opCode,
+  //   req: decodedRequest, // Buffer original de MessagePack
+  //   res: decodedResponse // Buffer original de MessagePack
+  // }
+  // logStream2.write(const encoded = JSON.stringify(
+  //   pair2,
+  //   (k, v) => (typeof v === 'bigint' ? v.toString() : v),
+  //   2
+  // ))
 }
 
 // function getFirstValue(data, depth = 0) {
@@ -204,10 +230,162 @@ const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
   return result
 }
 
-async function handleScanKingdom(req, res) {
-  const { kingdoms, priority = 'NORMAL' } = req.body
+function buildPacket311Payload(tiles, tokenBigInt, token) {
+  if (!tokenBigInt || !token) return null
 
-  console.log(`[API] scanKingdom request - kingdoms: ${kingdoms}, priority: ${priority}`)
+  const randomSeq = Math.floor(Math.random() * 32000) + 1
+  const packetData = [[311, randomSeq, [[tokenBigInt], token], ''], [[tiles]]]
+
+  return packetData
+}
+
+function buildPacket312Payload(tiles, tokenBigInt, token) {
+  if (!tokenBigInt || !token) return null
+
+  const zeros = new Array(tiles.length).fill(0)
+  const randomSeq = Math.floor(Math.random() * 32000) + 1
+  const packetData = [
+    [312, randomSeq, [[tokenBigInt], token], ''],
+    [tiles, zeros, [], []]
+  ]
+
+  return packetData
+}
+
+function buildPacket313Payload(tokenBigInt, token) {
+  if (!tokenBigInt || !token) return null
+
+  const randomSeq = Math.floor(Math.random() * 32000) + 1
+  const packetData = [[313, randomSeq, [[tokenBigInt], token], ''], []]
+
+  return packetData
+}
+
+function buildPacket22Payload(tokenBigInt, token) {
+  if (!tokenBigInt || !token) return null
+
+  const randomSeq = Math.floor(Math.random() * 32000) + 1
+  const packetData = [
+    [22, randomSeq, [[tokenBigInt], token], ''],
+    [1, 1]
+  ]
+
+  return packetData
+}
+
+async function sendPacket(kingdom) {
+  const redisClient = getRedis()
+
+  const _token1 = await redisClient.get('myPlayerId:BigInt')
+  if (!_token1) {
+    throw new Error('no session token1')
+  }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    throw new Error('no session token2')
+  }
+
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    throw new Error('invalid kingdom')
+  }
+
+  console.log(`[SendPacket] Sending packets to ${url}  `)
+
+  try {
+    const token1 = BigInt(_token1)
+    const token2 = new Uint8Array(_token2)
+
+    //---------- send packet 313
+    const packetData313 = buildPacket313Payload(token1, token2)
+
+    // Encode the packet
+    const encoded313 = encodeMsgPack2MultiFragments(packetData313)
+
+    const HEADERS = {
+      'Content-Type': 'application/octet-stream',
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
+      Referer: 'https://totalbattle.com/'
+    }
+    // Send to server
+    console.log(`[SendPacket] Sending packet313 to ${url}  `)
+    const response313 = await fetch(url, {
+      method: 'POST',
+      headers: HEADERS,
+      body: encoded313
+    })
+
+    if (!response313.ok) {
+      throw new Error(`packet313: Server returned ${response313.status}: ${response313.statusText}`)
+    }
+
+    //---------- send packet 22
+    const packetData22 = buildPacket22Payload(token1, token2)
+
+    // Encode the packet
+    const encoded22 = encodeMsgPack2MultiFragments(packetData22)
+
+    // Send to server
+    console.log(`[SendPacket] Sending packet22 to ${url}  `)
+    const response22 = await fetch(url, {
+      method: 'POST',
+      headers: HEADERS,
+      body: encoded22
+    })
+
+    if (!response22.ok) {
+      throw new Error(`packet22: Server returned ${response22.status}: ${response22.statusText}`)
+    }
+
+    // Get response buffer
+    // const buffer313 = await response313.arrayBuffer()
+    // const bytes313 = new Uint8Array(buffer313)
+
+    //------ send packet 312
+
+    const tilesArray = generateArrays(9, 2396, 50, 12).slice(0, 5)
+
+    for (const tiles of tilesArray) {
+      const packetData312 = buildPacket312Payload(tiles, token1, token2)
+
+      // Encode the packet
+      const encoded312 = encodeMsgPack2MultiFragments(packetData312)
+
+      // Send to server
+      console.log(`[SendPacket] Sending packet312 to ${url}  `)
+      const response312 = await fetch(url, {
+        method: 'POST',
+        headers: HEADERS,
+        body: encoded312
+      })
+
+      if (!response312.ok) {
+        throw new Error(`Server returned ${response312.status}: ${response312.statusText}`)
+      }
+
+      // Get response buffer
+      const buffer312 = await response312.arrayBuffer()
+      const bytes312 = new Uint8Array(buffer312)
+
+      // extract objects
+      //save objects
+      const { players42, objects12 } = scanPacket312(bytes312)
+
+      console.log('results after kingdom scan', { kingdom, players42, objects12 })
+    }
+
+    console.log(`[SendPacket] Success  `)
+  } catch (error) {
+    console.error(`[SendPacket] Error:`, error.message)
+  }
+}
+
+async function handleScanKingdom(req, res) {
+  const { kingdoms } = req.body
+
+  console.log(`[API] scanKingdom request - kingdoms: ${kingdoms} `)
 
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
@@ -222,45 +400,15 @@ async function handleScanKingdom(req, res) {
     return res.json({ success: false, error: 'no valid kingdoms' })
   }
 
-  // // Ensure token is BigInt
-  // const tokenValue = PACKET312.sessionToken
-  // const tokenBigInt =
-  //   typeof tokenValue === 'bigint'
-  //     ? tokenValue
-  //     : typeof tokenValue === 'number'
-  //       ? BigInt(tokenValue)
-  //       : typeof tokenValue === 'string' && !isNaN(Number(tokenValue))
-  //         ? BigInt(tokenValue)
-  //         : tokenValue
-
-  const tilesArray = generateArrays(9, 2396, 50, 12)
-  const jobIds = []
-
-  console.log(`[API] Queuing ${tilesArray.length * kingdomList.length} scan jobs`)
-
-  for (const kingdom of kingdomList) {
-    for (const tiles of tilesArray) {
-      const payload = {
-        kingdom,
-        tiles
-      }
-      const job =
-        priority === 'HIGH'
-          ? await addHigh(JOB_TYPES.SEND_PACKET, {
-              ...payload
-            })
-          : await addNormal(JOB_TYPES.SEND_PACKET, {
-              ...payload
-            })
-
-      jobIds.push({ kingdom, jobId: job.id })
-    }
+  try {
+    await sendPacket(kingdomList[0])
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
   }
 
   res.json({
-    success: true,
-    message: `Queued ${jobIds.length} scan jobs`,
-    jobIds
+    success: true
   })
 }
 
@@ -421,7 +569,7 @@ async function setupBlockPacketsSentToServer() {
     318 ping or get time , it return a timestamp
     */
     if ([318].includes(opCode)) {
-      console.log('Bloqueando packet with opcode ', opCode)
+      // console.log('Bloqueando packet with opcode ', opCode)
       await route.abort()
     } else {
       // Si todo está bien, la petición sigue su curso
@@ -456,15 +604,15 @@ function setupPacketCaptureListener() {
 
       const { opCode: opCode } = getRequestHeader(postDataBuff)
 
-      const ignoreOpcodes = [318]
-      if (!ignoreOpcodes.includes(opCode)) {
-        saveTrafficPair(url, postDataBuff, responseBody)
-      }
+      // const ignoreOpcodes = [318]
+      // if (!ignoreOpcodes.includes(opCode)) {
+      //   saveTrafficPair(url, postDataBuff, responseBody, opCode)
+      // }
 
-      if ([311, 312].includes(opCode)) {
-        const tiles = getMsgPack2ndBlockRequest(postDataBuff)
-        savePackets311_312({ url, opCode, tiles })
-      }
+      // if ([311, 312].includes(opCode)) {
+      //   const tiles = getMsgPack2ndBlockRequest(postDataBuff)
+      //   savePackets311_312({ url, opCode, tiles })
+      // }
 
       //  save 20 packet sample of each  opCode
       let packetSampleCounter = packetSample.get(opCode) || 0
@@ -808,7 +956,7 @@ app.post('/api/browser/start', async (req, res) => {
     setupWebsocketListener()
     patchSendbird()
 
-    setupBlockPacketsSentToServer()
+    // setupBlockPacketsSentToServer()
 
     setupPacketCaptureListener()
 

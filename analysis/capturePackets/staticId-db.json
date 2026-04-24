@@ -4303,6 +4303,16 @@
     "name": "Escuadrón rúnico de asalto",
     "level": 45
   },
+  "170001": {
+    "staticId": 170001,
+    "entryType": "poi",
+    "name": null
+  },
+  "170006": {
+    "staticId": 170006,
+    "entryType": "attack",
+    "name": "Goramar"
+  },
   "170107": {
     "staticId": 170107,
     "entryType": "spawn",

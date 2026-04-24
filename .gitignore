@@ -30,3 +30,5 @@ warforgebot/
 analysis/capturePackets/lib/objects.db
 analysis/capturePackets/lib/objects.db-shm
 analysis/capturePackets/lib/objects.db-wal
+analysis/capturePackets/decoded-logs/*.bin
+analysis/capturePackets/packet-sample/*.txt
