@@ -345,7 +345,7 @@ async function sendPacket(kingdom) {
 
     //------ send packet 312
 
-    const tilesArray = generateArrays(9, 2396, 50, 12).slice(0, 5)
+    const tilesArray = generateArrays(9, 2396, 50, 12)
 
     for (const tiles of tilesArray) {
       const packetData312 = buildPacket312Payload(tiles, token1, token2)
@@ -369,11 +369,16 @@ async function sendPacket(kingdom) {
       const buffer312 = await response312.arrayBuffer()
       const bytes312 = new Uint8Array(buffer312)
 
+      const payload = {
+        request: encoded312,
+        response: bytes312
+      }
+      const result = await processPacket(payload)
       // extract objects
       //save objects
-      const { players42, objects12 } = scanPacket312(bytes312)
+      // const { players42, objects12 } = scanPacket312(bytes312)
 
-      console.log('results after kingdom scan', { kingdom, players42, objects12 })
+      // console.log('results after kingdom scan', { kingdom, players42, objects12 })
     }
 
     console.log(`[SendPacket] Success  `)
@@ -401,7 +406,9 @@ async function handleScanKingdom(req, res) {
   }
 
   try {
-    await sendPacket(kingdomList[0])
+    for (const kingdom of kingdomList) {
+      await sendPacket(kingdom)
+    }
   } catch (error) {
     console.log('error', error.message)
     return res.json({ success: false, error: error.message })

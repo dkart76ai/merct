@@ -323,11 +323,11 @@ function _extractObj12Data(decoder) {
    objectId,       staticId, 0,2,0,level,0,0, [kingdom,x,y], [0], unknown, isUnlocked
 */
   // Entramos al array principal de 12
-  decoder.readArrayHeader()
+  decoder.readArrayHeader() // outside wrapper[]
 
   // [0] ID de objeto (Está en un array de 1)
-  decoder.readArrayHeader()
-  const objectId = decoder.decode()
+  decoder.readArrayHeader() //[objid]
+  const objectId = decoder.decode() // objid valie
 
   // [1] staticId
   const staticId = decoder.decode()
@@ -398,62 +398,61 @@ function _isPlayerObject23(decoder) {
 function _isValidPlayerObject42(decoder) {
   const startOff = decoder.off
   try {
-    const len = decoder.readArrayHeader()
+    const len = decoder.readArrayHeader() // enter inside wrapper []
     if (len !== 42) return false
 
-    // [0]: Array de 1 (ObjectId)
+    // [0]: Array de 1 (ObjectId)  [1189706100123]
     if (decoder.readArrayHeader() !== 1) return false
-    decoder.skip()
+    decoder.skip() // objectId value
 
     // [1]: Desconocido (Saltamos)
-    decoder.skip()
+    decoder.skip() //skip the whole array and content [0]
 
-    // [2]: Array de 1
-    if (decoder.readArrayHeader() !== 1) return false
-    decoder.skip()
+    // [2]: Array de 1 [1189706100452]
+    if (decoder.readArrayHeader() !== 1) return false // goes inside, consume the header byte 0x91
+    decoder.skip() // 1189706100452  (skip number marker +value)
 
-    // [3]: Number (StaticId)
+    // [3]: Number (StaticId) 2
     if (!decoder.isNextNumber()) return false
     decoder.skip()
 
-    // [4]: Array de 1
+    // [4]: Array de 1 [clan id ?]  0=noclan
     if (decoder.readArrayHeader() !== 1) return false
-    decoder.skip()
+    decoder.skip() // [0]
 
     // [5, 6]: Saltamos
-    decoder.skip()
-    decoder.skip()
+    decoder.skip() //0
+    decoder.skip() //32583
 
     // [7]: Number (Kingdom)
     if (!decoder.isNextNumber()) return false
-    decoder.skip()
+    decoder.skip() //277
 
-    // [8-10]: Saltamos
-    decoder.skip()
-    decoder.skip()
-    decoder.skip()
+    // [8-12]: Saltamos
+    decoder.skip() //0
+    decoder.skip() //0
+    decoder.skip() //0
+    decoder.skip() //0
+    decoder.skip() //0
 
-    // [11]: Boolean (Shield)
-    const b11 = decoder.buf[decoder.off]
-    if (b11 !== 0xc2 && b11 !== 0xc3) return false
-    decoder.skip()
-
-    // [12]: Saltamos
-    decoder.skip()
-
-    // [13]: Number (Level)
+    // [13]: Number (level) 12
     if (!decoder.isNextNumber()) return false
+    decoder.skip() //29
 
-    // SALTO GRANDE: Del [14] al [16] (3 elementos)
-    for (let i = 14; i <= 16; i++) decoder.skip()
+    // [14-16]: Number
+    if (!decoder.isNextNumber()) return false
+    decoder.skip() //9
 
-    // [17]: Array de 3 (Coord A)
+    decoder.skip() //0
+    decoder.skip() //0
+
+    // [17]: Array de 3 (source Coord)
     if (decoder.readArrayHeader() !== 3) return false
     decoder.skip()
     decoder.skip()
     decoder.skip()
 
-    // [18]: Array de 3 (Coord B)
+    // [18]: Array de 3 (target Coord) // when different , its attacking something: ie: arena
     if (decoder.readArrayHeader() !== 3) return false
     decoder.skip()
     decoder.skip()
@@ -472,8 +471,14 @@ function _isValidPlayerObject42(decoder) {
     // GRAN SALTO FINAL: Del [27] al [38] (12 elementos)
     for (let i = 27; i <= 38; i++) decoder.skip()
 
-    // [39]: Array de 1
-    if (decoder.readArrayHeader() !== 1) return false
+    // [39]: Boolean (Shield)
+    const b11 = decoder.buf[decoder.off]
+    if (b11 !== 0xc2 && b11 !== 0xc3) return false
+    decoder.skip()
+
+    // [40]: Number timestamp
+    if (!decoder.isNextNumber()) return false
+    decoder.skip() // 1774484547
 
     // Si llegamos aquí sin que falle un "return false", es el objeto correcto
     return true
@@ -488,8 +493,26 @@ function _isValidPlayerObject42(decoder) {
 
 function _extractObj42Data(decoder) {
   /*
-  [[1189808496191],1590,     0,2,0, 1,   0,0, [277,418,82] ,[0] ,1776856789 ,false]
-   objectId,       staticId, 0,2,0,level,0,0, [kingdom,x,y], [0], unknown, isUnlocked
+
+[
+ ["1189748226882n"], // obj id
+ [0],
+ ["1189706126942n"],
+ 2,
+ ["1206885810227n"], // clan id
+ 0, 325636,
+ 277, //kingdom
+ 0, 0, 0, 0, 0,
+ 29, // level
+ 9, 0, 0,
+ [277,450,116], // source coord
+ [277,450,116], // target coord, when attack, this changes to target: ie arena location
+ 0, 0, 0, 0, 0, 0, 0,
+ [0,0,0,0], 0, 0, [0,0,0,[ 0 ],null, ""], 0, 0, 0, [0], [0], 0, 0, 0, 0,
+ true, // is shielded ?
+ 1774484547, // timestamp
+ null
+]
 */
   // Entramos al array principal de 12
   decoder.readArrayHeader()
@@ -498,37 +521,75 @@ function _extractObj42Data(decoder) {
   decoder.readArrayHeader()
   const objectId = decoder.decode()
 
-  // [1] staticId
+  //[1]
+  decoder.skip() // salta el [0]
+
+  // [2] otro ID (Está en un array de 1)
+  decoder.readArrayHeader()
+  const unknownId1 = decoder.decode()
+
+  // [3] staticId
   const staticId = decoder.decode()
 
-  // [2] al [4] No nos interesan (0, 2, 0)
-  decoder.skip() // salta el 0
-  decoder.skip() // salta el 2
-  decoder.skip() // salta el 0
-
-  // [5] Level
-  const level = decoder.decode()
-
-  // [6] y [7] No nos interesan (0, 0)
-  decoder.skip()
-  decoder.skip()
-
-  // [8] Posición [kingdom, x, y]
+  // [4] clan ID de objeto (Está en un array de 1)
   decoder.readArrayHeader()
-  const kingdom = decoder.decode()
-  const x = decoder.decode()
-  const y = decoder.decode()
+  const clanId = decoder.decode()
 
-  // [9]   No nos interesan
-  decoder.skip() // salta [0]
+  // [5] al [6] No nos interesan (0, 325636)
+  decoder.skip() // salta el 0
+  decoder.skip() // salta el 325636
 
-  // [10] isUnlocked (Timestamp)
-  const timestamp = decoder.decode()
+  // [7] kingdom
+  const kingdom = decoder.decode() //277
 
-  // [11] isUnlocked (Boolean)
-  const isUnlocked = decoder.decode()
+  // [8] al [12] No nos interesan (0, 0,0,0,0)
+  decoder.skip()
+  decoder.skip()
+  decoder.skip()
+  decoder.skip()
+  decoder.skip()
 
-  return { objectId, staticId, level, kingdom, x, y, timestamp, isUnlocked }
+  // [13] level
+  const level = decoder.decode() //29
+
+  // [14] al [16] No nos interesan (9, 0, 0)
+  decoder.skip()
+  decoder.skip()
+  decoder.skip()
+
+  // [17] Posición [kingdom, x, y]
+  decoder.readArrayHeader()
+  const sourceKingdom = decoder.decode()
+  const sourceX = decoder.decode()
+  const sourceY = decoder.decode()
+
+  // [18] target Posición [kingdom, x, y]
+  decoder.readArrayHeader()
+  const targetKingdom = decoder.decode()
+  const targetX = decoder.decode()
+  const targetY = decoder.decode()
+
+  // [19 al 38]   No nos interesan
+  for (let i = 19; i <= 38; i++) decoder.skip()
+
+  // [39] shieldOn? (boolen)
+  const isShieldActive = decoder.decode()
+
+  return {
+    objectId,
+    unknownId1,
+    staticId,
+    clanId,
+    kingdom,
+    level,
+    kingdom,
+    x,
+    y,
+    targetKingdom,
+    targetX,
+    targetY,
+    isShieldActive
+  }
 }
 // Auxiliares de ultra velocidad
 function isNextString(decoder) {
@@ -571,12 +632,20 @@ function scanPacket312(buffer) {
       if (_isValidPlayerObject42(decoder)) {
         // this will push an array of msgpack which is the playerobjet42
         // and will need to decode that structure to get the real data
-        results.players42.push(decoder.decode())
+        // { objectId, unknownId1, staticId, clanId, kingdom, level, sourceKingdom, sourceX, sourceY, targetKingdom, targetX, targetY, isShieldActive }
+        const player = _extractObj42Data(decoder)
+        results.players42.push(player)
+        console.log(
+          StyleSheet(
+            'green',
+            `Found player42 ${player.sourceKingdom}:${player.sourceX}:${player.sourceY} ${player.level} shield = ${String(player.isShieldActive)}`
+          )
+        )
         continue // El decode ya movió el off al final del objeto
       }
 
       decoder.off = startOfEntry
-      if (_isValidObject12(decoder)) {
+      if (_isObject12(decoder)) {
         results.objects12.push(_extractObj12Data(decoder))
         continue
       }

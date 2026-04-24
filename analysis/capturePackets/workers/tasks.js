@@ -12,7 +12,7 @@ const {
   encodeMsgPack2,
   scanPacket312
 } = require('../messagePack.js')
-
+const staticId = require('../staticId.js')
 const { getRedis } = require('../lib/redis')
 const { saveObjects } = require('../lib/database')
 
@@ -173,7 +173,20 @@ const processPacket = async ({ request, response }) => {
       console.log(styleText('green', 'This is green!'))
       const { players42, objects12 } = scanPacket312(response)
       console.log('scanPacket312: players42:', players42.length, players42[0])
-      console.log('scanPacket312: objects12:', objects12.length, objects12[0])
+      console.log(
+        `scanPacket312: found ${objects12.length} objects12: `,
+
+        objects12.map(o => {
+          const data = staticId.getStaticIdData(o.staticId)
+          return `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, ${data?.name || 'unknown'} level:${o.level}`
+        })
+      )
+
+      const result = saveObjects(objects12)
+
+      console.log(
+        `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
+      )
 
       return {
         success: true
