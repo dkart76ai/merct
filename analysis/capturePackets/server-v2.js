@@ -32,7 +32,7 @@ const {
 } = require('./jobs/index.js')
 const { getPool, processPacket } = require('./lib/workerPool')
 
-const staticId = require('./staticId.js')
+const staticIdDB = require('./staticId.js')
 const { setChatPage, sendMessage, notifyDiscord } = require('./jobs/chatSender')
 const {
   sendPacketHandler,
@@ -490,7 +490,7 @@ function extractChatStaticIds(message) {
         for (const key in data.subs) {
           const sub = data.subs[key]
           if (sub.staticId && sub.entryType) {
-            staticId.addOrUpdateStaticId(sub.staticId, {
+            staticIdDB.addOrUpdateStaticId(sub.staticId, {
               entryType: sub.entryType,
               name: sub.name || null
             })
@@ -622,19 +622,19 @@ function setupPacketCaptureListener() {
       // }
 
       //  save 20 packet sample of each  opCode
-      let packetSampleCounter = packetSample.get(opCode) || 0
-      if (packetSampleCounter < 20) {
-        packetSample.set(opCode, packetSampleCounter + 1)
+      // let packetSampleCounter = packetSample.get(opCode) || 0
+      // if (packetSampleCounter < 20) {
+      //   packetSample.set(opCode, packetSampleCounter + 1)
 
-        const { results: decodedRequest } = multiDecodeMsgPack2(postDataBuff, true)
-        const { results: decodedResponse } = multiDecodeMsgPack2(responseBody)
-        savePacketByOpcode(opCode, {
-          opCode,
-          url,
-          request: decodedRequest,
-          response: decodedResponse
-        })
-      }
+      //   const { results: decodedRequest } = multiDecodeMsgPack2(postDataBuff, true)
+      //   const { results: decodedResponse } = multiDecodeMsgPack2(responseBody)
+      //   savePacketByOpcode(opCode, {
+      //     opCode,
+      //     url,
+      //     request: decodedRequest,
+      //     response: decodedResponse
+      //   })
+      // }
 
       const payload = {
         request: postDataBuff,
@@ -866,10 +866,10 @@ app.get('/api/unknown-staticids', (req, res) => {
 })
 
 app.get('/api/static-db', (req, res) => {
-  const count = staticId.getStaticIdSize()
+  const count = staticIdDB.getStaticIdSize()
   const limit = parseInt(req.query.limit) || 100
   const offset = parseInt(req.query.offset) || 0
-  const allEntries = staticId.getStaticIdValues()
+  const allEntries = staticIdDB.getStaticIdValues()
   const entries = allEntries.slice(offset, offset + limit)
   console.log('Sending staticId Db', offset, '-', offset + entries.length, 'of', count)
   res.json({ success: true, items: entries, count, offset, limit })
@@ -1027,8 +1027,15 @@ async function main() {
 
   await ensureSaveDir()
   initDb()
-  staticId.loadStaticDb()
+  staticIdDB.loadStaticDb()
   //startCleanup()
+
+  // console.log('staticid', Object.keys(staticIdDB))
+  // console.log(
+  //   'test staticid getter',
+  //   staticIdDB.getStaticIdData(1531),
+  //   'Escuadrón común de elfos lvl30'
+  // )
 
   // Initialize worker pool (non-blocking CPU tasks)
   getPool()

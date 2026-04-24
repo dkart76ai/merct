@@ -2463,7 +2463,8 @@
   "1963": {
     "staticId": 1963,
     "level": 29,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón heroico de bárbaros"
   },
   "1964": {
     "staticId": 1964,
@@ -3315,7 +3316,8 @@
   "2625": {
     "staticId": 2625,
     "level": 30,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Cripta épica"
   },
   "2626": {
     "staticId": 2626,
@@ -3925,7 +3927,8 @@
   "2921": {
     "staticId": 2921,
     "level": 41,
-    "entryType": "poi"
+    "entryType": "poi",
+    "name": "Escuadrón raro de elfos"
   },
   "2922": {
     "staticId": 2922,

@@ -607,6 +607,23 @@ class MsgPackLazyDecoder extends MsgPackTurboDecoder {
     }
     return 0
   }
+
+  // Auxiliares de ultra velocidad
+  isNextString() {
+    const b = this.buf[this.off]
+    return (b >= 0xa0 && b <= 0xbf) || b === 0xd9 || b === 0xda || b === 0xdb
+  }
+
+  isNextNumber() {
+    const b = this.buf[this.off]
+    return (
+      b <= 0x7f || // Positive Fixint (0x00 - 0x7f)
+      (b >= 0xe0 && b <= 0xff) || // Negative Fixint (0xe0 - 0xff)
+      (b >= 0xca && b <= 0xd3) || // Floats (ca, cb) e Integers (cc, cd, ce, cf, d0, d1, d2, d3)
+      b === 0xcb || // Float 64 (muy común para números con decimales)
+      b === 0xcf // Uint 64 (común en IDs de 64 bits)
+    )
+  }
 }
 
 class MsgPackTurboEncoder {

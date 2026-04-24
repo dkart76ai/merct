@@ -12,90 +12,22 @@ const {
   encodeMsgPack2,
   scanPacket312
 } = require('../messagePack.js')
-const staticId = require('../staticId.js')
+const staticIdDB = require('../staticId.js')
 const { getRedis } = require('../lib/redis')
 const { saveObjects } = require('../lib/database')
 
 const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
 
-function isValidObject(arr) {
-  if (!Array.isArray(arr) || arr.length !== 12) return false
-  if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
-  if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
-  if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
-  if (typeof arr[11] !== 'boolean') return false
-  return true
-}
-
-function extractObjects(data) {
-  const objects = []
-
-  function findObjectsRecursive(arr, depth = 0) {
-    if (depth > 200) return
-
-    for (const item of arr) {
-      if (Array.isArray(item)) {
-        if (isValidObject(item)) {
-          const obj = {
-            objectId: item[0][0],
-            staticId: item[1],
-            unk1: item[2],
-            unk2: item[3],
-            unk3: item[4],
-            level: item[5],
-            unk4: item[6],
-            unk5: item[7],
-            kingdom: item[8][0],
-            x: item[8][1],
-            y: item[8][2],
-            unk6: item[9][0],
-            extra: item[10],
-            isActive: item[11]
-          }
-          objects.push(obj)
-        } else {
-          findObjectsRecursive(item, depth + 1)
-        }
-      }
-    }
-  }
-
-  findObjectsRecursive(data)
-  return objects
-}
-
-// function mapToUint8Array(map) {
-//   if (!map) return null
-//   if (map instanceof Uint8Array) return map
-//   const keys = Object.keys(map)
-//     .map(Number)
-//     .sort((a, b) => a - b)
-//   if (keys.length === 0) return null
-//   const arr = new Uint8Array(keys.length)
-//   for (const k of keys) {
-//     arr[k] = map[k]
-//   }
-//   return arr
-// }
-
-// function getFirstValue(data, depth = 0) {
-//   if (depth > 100) return null
-//   if (!data || !Array.isArray(data)) return null
-
-//   for (let item of data) {
-//     if (typeof item === 'number') return item
-//     if (Array.isArray(item)) {
-//       const resultado = getFirstValue(item, depth + 1)
-//       if (resultado !== undefined) return resultado
-//     }
-//   }
-
-//   return null
-// }
-
 //---------------------------------
 // Task handlers for Piscina
 //---------------------------------
+staticIdDB.loadStaticDb()
+// console.log('staticid', Object.keys(staticIdDB))
+// console.log(
+//   'test staticid getter',
+//   staticIdDB.getStaticIdData(1531),
+//   'Escuadrón común de elfos lvl30'
+// )
 
 // Decode msgpack from base64
 const decode = async base64 => {
@@ -158,29 +90,51 @@ const processPacket = async ({ request, response }) => {
       await redisClient.set('mysession:token2:Uint8Array', Buffer.from(token), 'EX', 86400)
     }
 
-    if (opCode === 312 || opCode === 408) {
-      // const objects = extractObjects(decodedResponse)
-      // if (objects && objects.length > 0) {
-      //   console.log(`[SaveObjects] Saving ${objects?.length} objects`)
-      //   const result = saveObjects(objects)
-
-      //   console.log(
-      //     `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
-      //   )
-      // }
-
+    if (opCode === 312) {
       console.log(styleText('red', 'This is not green!'))
-      console.log(styleText('green', 'This is green!'))
+      console.log(styleText('green', 'opcode', opCode))
       const { players42, objects12 } = scanPacket312(response)
-      console.log('scanPacket312: players42:', players42.length, players42[0])
-      console.log(
-        `scanPacket312: found ${objects12.length} objects12: `,
+      console.log('scanPacket312: players42:', players42.length)
+      console.log('scanPacket312: objects12:', objects12.length)
 
-        objects12.map(o => {
-          const data = staticId.getStaticIdData(o.staticId)
-          return `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, ${data?.name || 'unknown'} level:${o.level}`
-        })
-      )
+      // console.log(
+      //   styleText('green'),
+      //   players42
+      //     .slice(0, 5)
+      //     .map(
+      //       player =>
+      //         `${player.sourceKingdom}:${player.sourceX}:${player.sourceY} lvl:${player.level} shield = ${String(player.isShieldActive)}`
+      //     )
+      // )
+
+      // objects12.slice(0, 5).forEach(o => {
+      //   const data = staticIdDB.getStaticIdData(o.staticId)
+      //   console.log(
+      //     `scanPacket312: found ${objects12.length} objects12: `,
+
+      //     `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, lvl:${data?.level}-${data?.name || 'unknown'} level:${o.level}`
+      //   )
+      // })
+
+      objects12.forEach(o => {
+        const data = staticIdDB.getStaticIdData(o.staticId)
+
+        // NOTE : dont delete static id updater
+        if (!data.level) {
+          staticIdDB.addOrUpdateStaticId(sub.staticId, {
+            level: o.level
+          })
+        }
+        // END NOTE
+
+        if (!data?.name || !data?.level) {
+          console.log(
+            `scanPacket312: found ${objects12.length} objects12: `,
+
+            `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, lvl:${data?.level}-${data?.name || 'unknown'} level:${o.level}`
+          )
+        }
+      })
 
       const result = saveObjects(objects12)
 
