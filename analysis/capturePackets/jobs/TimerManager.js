@@ -25,7 +25,7 @@ class TimerManager {
       tiles
     }
 
-    const job = await this.queue.add(JOB_TYPES.SEND_PACKET, jobData, {
+    const job = await this.queue.add(JOB_TYPES.SCAN_KINGDOM, jobData, {
       priority: PRIORITY.LOW,
       repeat: repeatOptions,
       jobId: `timer:${timerKey}`
@@ -33,7 +33,7 @@ class TimerManager {
 
     this.timers.set(timerKey, {
       repeatJobKey: job.repeatJobKey,
-      jobType: JOB_TYPES.SEND_PACKET
+      jobType: JOB_TYPES.SCAN_KINGDOM
     })
 
     this.timerConfigs.set(timerKey, {

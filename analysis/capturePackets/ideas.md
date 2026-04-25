@@ -1,7 +1,7 @@
-set a default kingdom
+#set a default kingdom
 if no in-game channel is set, do nothing/ no notifications (no default as can be dangerous, some1 may notice the bot)
 
-get available channel subscribed, and send to client so  a channel can be selected
+#get available channel subscribed, and send to client so  a channel can be selected
 
 
 store objects from a default kingdom, so it can be used as watchtower
@@ -31,6 +31,11 @@ k optional, should use default if not specified
 all other kingdoms do not store objects, only players information
 
 create periodic scanner for default kingdoms
+- this will send 312 packets and extract and save players+objects
+- objects will have an expiration time, and auto delete
+- user would be able to send bot commands to search objects
+- parameters for commands should be object name, level, amount (for objects)
+- kingdom, name, clan name (for players)
 * use as watchtower
 *
 
@@ -48,4 +53,9 @@ periodic task to populate player information if no available
 if scanner start, as soon as find a merc, send a notification
 
 
+
+//----------
+timer scan default kingdom -> worker_thread -> extract and save objects and players
+timer get player information call job sendpacket 402 -> worker_thread -> save data
+timer scan other kingdoms -> call job sendpacket 313,22,312 -> worker thread -> save players, notify if find mercs
 

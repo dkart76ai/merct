@@ -4,7 +4,8 @@ const {
   decode: decodeSync,
   decodeBuffer: decodeBufferSync,
   encode: encodeSync,
-  processPacket: processPacketSync
+  processPacket: processPacketSync,
+  scanKingdom: scanKingdomSync
 } = require('../workers/tasks')
 
 // Toggle for fallback
@@ -97,17 +98,35 @@ async function encode(data) {
   }
 }
 
-async function processPacket({ request, response }) {
+async function processPacket({ request, response, shouldSaveObjects = false }) {
   if (!request || !response) throw new Error('No data provided')
 
   const p = getPool()
   if (!p || !USE_WORKERS) {
-    processPacketSync({ request, response })
+    processPacketSync({ request, response, shouldSaveObjects })
     return { success: false, error: 'Workers disabled' }
   }
 
   try {
-    const result = await p.run({ request, response }, { name: 'processPacket' })
+    const result = await p.run({ request, response, shouldSaveObjects }, { name: 'processPacket' })
+    if (!result.success) throw new Error(result.error)
+    return result
+  } catch (e) {
+    return { success: false, error: e.message }
+  }
+}
+
+async function scanKingdom({ kingdom, shouldSaveObjects = false }) {
+  if (!request || !response) throw new Error('No data provided')
+
+  const p = getPool()
+  if (!p || !USE_WORKERS) {
+    scanKingdomSync({ kingdom, shouldSaveObjects })
+    return { success: false, error: 'Workers disabled' }
+  }
+
+  try {
+    const result = await p.run({ kingdom, shouldSaveObjects }, { name: 'scanKingdom' })
     if (!result.success) throw new Error(result.error)
     return result
   } catch (e) {
@@ -120,6 +139,6 @@ module.exports = {
   decode,
   decodeBuffer,
   encode,
-
+  scanKingdom,
   processPacket
 }

@@ -178,19 +178,39 @@
 
     <!-- Browser Controls -->
     <div class="panel">
-      <div class="panel-header">Browser <span id="browserStatus" class="count">Stopped</span></div>
+      <div class="panel-header">
+        <div>
+          Browser <span id="browserStatus" class="count">Stopped</span>
+          <span id="gameStatus" class="count">Stopped</span>
+        </div>
+        <div class="tokens">
+          <div>PlayerId: <span id="token1">none</span></div>
+          <div>Session Token: <span id="token2">none</span></div>
+        </div>
+      </div>
       <div class="controls" style="padding: 15px">
         <button id="btnBrowserStart">Start Browser</button>
         <button id="btnBrowserStop" disabled class="danger">Stop Browser</button>
         <label>
           <input type="checkbox" id="cbCapturing" disabled />
-          <span>Capture Packets</span>
+          <span>Capture Packets for analysis</span>
         </label>
-        <div class="tokens">
-          <div id="token1">none</div>
-          <div id="token2">none</div>
-        </div>
-        <div class="memory-usage" id="memoryUsage">nada</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div>
+        <input type="text" style="width: 100px" id="defaultKingdom" />
+        <button type="button" id="btnSetDefaultKingdom">Set default kingdom</button>
+      </div>
+      <div>
+        <select id="gameChatChannelList">
+          <option value="none" disabled>None</option>
+        </select>
+        <button type="button" id="btnSetChatChannel">Set Channel</button>
+        <button id="btnRefreshChatChannels" style="padding: 5px 10px; font-size: 12px">
+          Refresh
+        </button>
       </div>
     </div>
 
@@ -222,70 +242,31 @@
       </div>
     </div>
 
-    <!-- Debug / Memory -->
     <div class="panel">
       <div class="panel-header">
-        Debug / Memory
-        <button id="btnRefreshDebug" style="padding: 5px 10px; font-size: 12px">Refresh</button>
+        <div>Scanner for Kingdom <span id="kingdom"></span></div>
       </div>
       <div class="controls" style="padding: 15px">
-        <div class="stat">
-          <div class="stat-item">
-            <div class="stat-value" id="debugHeapUsed">-</div>
-            <div class="stat-label">Heap Used</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="debugHeapTotal">-</div>
-            <div class="stat-label">Heap Total</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="debugRss">-</div>
-            <div class="stat-label">RSS</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="debugDbObjects">-</div>
-            <div class="stat-label">DB Objects</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="debugDbCleaned">-</div>
-            <div class="stat-label">DB Cleaned</div>
-          </div>
+        <button id="btnScanKingdom" disabled>Scan Now</button>
+        <div style="margin-left: 32px">
+          <span class="section-title">Interval (ms):</span>
+          <input type="number" id="timerInterval" value="60000" style="width: 100px" />
         </div>
-      </div>
-    </div>
-          </div>
-        </div>
+        <button id="btnTimerStart" disabled>Start Timer</button>
+        <button id="btnTimerStop" class="danger" disabled>Stop Timer</button>
       </div>
     </div>
 
-    <!-- Kingdom Scanner -->
+    <!-- Other kingdoms Scanner periodic job scheduler -->
     <div class="panel">
-      <div class="panel-header">Kingdom Scanner</div>
+      <div class="panel-header">Other Kingdoms Scanner</div>
       <div class="controls" style="padding: 15px">
-        <input type="text" id="kingdoms" placeholder="147,142,143" style="width: 250px" />
-        <select id="priority">
-          <option value="HIGH">High Priority</option>
-          <option value="CRITICAL">Critical</option>
-          <option value="NORMAL">Normal</option>
-        </select>
-        <button id="btnScanKingdom">Scan Now</button>
-        <button id="btnTimerStart">Start Timer</button>
-        <button id="btnTimerStop" class="danger">Stop Timer</button>
-      </div>
-      <div class="controls" style="padding: 0 15px 15px">
-        <span class="section-title">Interval (ms):</span>
-        <input type="number" id="timerInterval" value="60000" style="width: 100px" />
-      </div>
-    </div>
+        <input type="text" id="otherKingdoms" placeholder="147,142,143" style="width: 250px" />
 
-    <!-- Merc Scanner -->
-    <div class="panel">
-      <div class="panel-header">Merc Scanner</div>
-      <div class="controls" style="padding: 15px">
-        <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" />
-        <button id="btnScanMercsNow">Scan Now</button>
-        <button id="btnMercTimerStart">Start Timer</button>
-        <button id="btnMercTimerStop" class="danger">Stop Timer</button>
+        <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
+        <button id="btnScanOtherKingdomsNow">Scan Now</button>
+        <button id="btnScanOtherKingdomStart">Start Timer</button>
+        <button id="btnScanOtherKingdomStop" class="danger">Stop Timer</button>
       </div>
     </div>
 
@@ -294,22 +275,6 @@
       <div class="panel-header">Active Timers</div>
       <div class="list" id="timersList">
         <div class="list-item">No active timers</div>
-      </div>
-    </div>
-
-    <!-- Static ID Database -->
-    <div class="panel">
-      <div class="panel-header">
-        Static ID Database
-        <span class="count" id="staticDbCount">(0)</span>
-      </div>
-      <div class="controls" style="padding: 10px 15px">
-        <button id="btnPrevPage" style="padding: 5px 10px">&larr; Prev</button>
-        <span id="pageInfo" style="font-size: 12px; color: #888">Page 1</span>
-        <button id="btnNextPage" style="padding: 5px 10px">Next &rarr;</button>
-      </div>
-      <div class="list" id="staticDbList">
-        <div class="list-item">Loading...</div>
       </div>
     </div>
 
@@ -322,7 +287,7 @@
     <script>
       const API = '/api'
       let refreshInterval = null
-      let staticDbPage = { offset: 0, limit: 50, count: 0 }
+      // let staticDbPage = { offset: 0, limit: 50, count: 0 }
 
       function log(msg) {
         const el = document.getElementById('log')
@@ -345,7 +310,7 @@
         }
       }
 
-async function refreshTimers() {
+      async function refreshTimers() {
         try {
           const res = await fetch(API + '/timers')
           const data = await res.json()
@@ -354,63 +319,12 @@ async function refreshTimers() {
             if (data.timers.length === 0) {
               el.innerHTML = '<div class="list-item">No active timers</div>'
             } else {
-              el.innerHTML = data.timers.map(t => `
+              el.innerHTML = data.timers
+                .map(
+                  t => `
                 <div class="list-item">
                   <span>${t.key || t.name}</span>
                   <span style="color:#569cd6">${t.intervalMs}ms</span>
-                </div>
-              `).join('')
-            }
-          }
-        } catch (e) { log('Timers error: ' + e.message) }
-      }
-
-      async function refreshDebug() {
-        try {
-          const res = await fetch(API + '/debug')
-          const data = await res.json()
-          if (data.memory) {
-            document.getElementById('debugHeapUsed').textContent = data.memory.heapUsed
-            document.getElementById('debugHeapTotal').textContent = data.memory.heapTotal
-            document.getElementById('debugRss').textContent = data.memory.rss
-            document.getElementById('debugDbObjects').textContent = data.database?.uniqueObjects || 0
-            document.getElementById('debugDbCleaned').textContent = data.database?.totalCleaned || 0
-          }
-        } catch (e) {
-           log('Debug error: ' + e.message) }
-      }
-
-
-
-
-
-      async function refreshStaticDb() {
-        try {
-          const url =
-            API + '/static-db?limit=' + staticDbPage.limit + '&offset=' + staticDbPage.offset
-          const res = await fetch(url)
-          const data = await res.json()
-          if (data.success) {
-            staticDbPage.count = data.count
-            document.getElementById('staticDbCount').textContent = '(' + data.count + ')'
-            const pageNum = Math.floor(staticDbPage.offset / staticDbPage.limit) + 1
-            const totalPages = Math.ceil(data.count / staticDbPage.limit)
-            document.getElementById('pageInfo').textContent =
-              'Page ' + pageNum + ' of ' + totalPages
-            document.getElementById('btnPrevPage').disabled = staticDbPage.offset === 0
-            document.getElementById('btnNextPage').disabled =
-              staticDbPage.offset + staticDbPage.limit >= data.count
-            const el = document.getElementById('staticDbList')
-            if (data.items.length === 0) {
-              el.innerHTML = '<div class="list-item">No entries</div>'
-            } else {
-              el.innerHTML = data.items
-                .map(
-                  item => `
-                <div class="list-item">
-                  <span>${item.staticId}</span>
-                  <span style="color:#4caf50">${item.name || 'Unknown'}</span>
-                  <span style="color:#569cd6">${item.entryType || ''}</span>
                 </div>
               `
                 )
@@ -418,7 +332,7 @@ async function refreshTimers() {
             }
           }
         } catch (e) {
-          log('StaticDB error: ' + e.message)
+          log('Timers error: ' + e.message)
         }
       }
 
@@ -435,14 +349,38 @@ async function refreshTimers() {
             document.getElementById('btnBrowserStop').disabled = !data.running
             document.getElementById('cbCapturing').disabled = !data.running
             document.getElementById('cbCapturing').checked = data.capturing
-            const memoryUsageEl = document.getElementById('memoryUsage')
+
+            const kingdomEl = document.getElementById('kingdom')
+            kingdomEl.textContent = data.kingdom
+            document.getElementById('btnScanKingdom').disabled = data.kingdom.trim() == ''
+            document.getElementById('btnTimerStart').disabled = data.kingdom.trim() == ''
+            document.getElementById('btnTimerStop').disabled = data.kingdom.trim() == ''
+
             const token1El = document.getElementById('token1')
             const token2El = document.getElementById('token2')
-            memoryUsageEl.textContent = data.memoryUsage
+
             token1El.textContent = data.token1 ? 'ready' : 'none'
             token2El.textContent = data.token2 ? 'ready' : 'none'
             token1El.style.color = data.token1 ? '#4caf50' : '#888'
             token2El.style.color = data.token2 ? '#4caf50' : '#888'
+
+            if (data.activeChatChannel) {
+              const gameChatChannelList = document.getElementById('gameChatChannelList')
+              gameChatChannelList.innerHTML = ''
+
+              const opcion = document.createElement('option')
+              opcion.value = data.activeChatChannel
+              opcion.text = data.activeChatChannel
+              opcion.selected = true
+
+              gameChatChannelList.appendChild(opcion)
+            }
+
+            if (data.gameLoaded) {
+              const gameStatusEl = document.getElementById('gameStatus')
+              gameStatusEl.textContent = data.running ? 'Playing' : 'Stopped'
+              getGameChatChannels()
+            }
           }
         } catch (e) {
           log('Browser status error: ' + e.message)
@@ -454,7 +392,6 @@ async function refreshTimers() {
           checkBrowserStatus()
           refreshJobsStatus()
           refreshTimers()
-          refreshDebug()
         }, 5000)
       }
 
@@ -462,6 +399,36 @@ async function refreshTimers() {
         if (refreshInterval) {
           clearInterval(refreshInterval)
           refreshInterval = null
+        }
+      }
+
+      async function getGameChatChannels() {
+        try {
+          const res = await fetch(API + '/gameChatChannels')
+          const data = await res.json()
+          if (data.success) {
+            const gameChatChannelList = document.getElementById('gameChatChannelList')
+
+            log('got chat channels ' + data.channels.length)
+            if (Array.isArray(data.channels) && data.channels.length > 0) {
+              gameChatChannelList.innerHTML = ''
+
+              data.channels.forEach((channel, index) => {
+                const opcion = document.createElement('option')
+
+                opcion.value = channel._url
+                opcion.text = channel._name
+
+                if (data.activeChatChannel === channel._url) {
+                  opcion.selected = true
+                }
+
+                gameChatChannelList.appendChild(opcion)
+              })
+            }
+          }
+        } catch (e) {
+          log('Browser status error: ' + e.message)
         }
       }
 
@@ -473,6 +440,7 @@ async function refreshTimers() {
         if (data.success) {
           log('Browser started!')
           startAutoRefresh()
+          getGameChatChannels()
         } else {
           log('Error: ' + data.error)
         }
@@ -490,27 +458,63 @@ async function refreshTimers() {
         log(e.target.checked ? 'Capturing started' : 'Capturing stopped')
       })
 
+      //set chat channel
+      document.getElementById('btnSetChatChannel').addEventListener('click', async () => {
+        const gameChatChannelList = document.getElementById('gameChatChannelList')
+        console.log('front chat channel selected', gameChatChannelList.value)
+        const res = await fetch(API + '/gameChatChannels', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channel: gameChatChannelList.value })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+      //set default kingom
+      document.getElementById('btnSetDefaultKingdom').addEventListener('click', async () => {
+        const kingdom = document.getElementById('defaultKingdom').value
+        console.log('front kingdom val', kingdom)
+        const res = await fetch(API + '/kingdom', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kingdom })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
+      document.getElementById('gameChatChannelList').addEventListener('change', async e => {
+        console.log('Selected Value:', e.target.value)
+        console.log('Selected Text:', e.target.options[e.target.selectedIndex].text)
+      })
+
+      // chat channels
+      document.getElementById('btnRefreshChatChannels').addEventListener('click', async () => {
+        getGameChatChannels()
+      })
+
       // Job queue handlers
       document.getElementById('btnRefreshJobs').addEventListener('click', async () => {
         refreshJobsStatus()
         refreshTimers()
       })
 
-      // Debug handlers
-      document.getElementById('btnRefreshDebug').addEventListener('click', async () => {
-        refreshDebug()
-      })
-
       // Kingdom scanner handlers
       document.getElementById('btnScanKingdom').addEventListener('click', async () => {
-        const kingdoms = document.getElementById('kingdoms').value.trim()
-        const priority = document.getElementById('priority').value
-        if (!kingdoms) return log('Enter kingdoms')
+        // const kingdoms = document.getElementById('kingdoms').value.trim()
 
         const res = await fetch(API + '/scanKingdom', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kingdoms, priority })
+          method: 'POST'
+          // headers: { 'Content-Type': 'application/json' },
+          // body: JSON.stringify({ kingdoms })
         })
         const data = await res.json()
         if (data.success) {
@@ -555,28 +559,29 @@ async function refreshTimers() {
         }
       })
 
-      // Merc scanner handlers
-      document.getElementById('btnScanMercsNow').addEventListener('click', async () => {
-        const level = parseInt(document.getElementById('mercLevel').value) || undefined
-        const res = await fetch(API + '/scan-mercs-now', {
+      // Other kingdoms scanner handlers
+      document.getElementById('btnScanOtherKingdomsNow').addEventListener('click', async () => {
+        const otherKingdoms = document.getElementById('otherKingdoms').value
+        const res = await fetch(API + '/scan-other-kingdoms-now', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ level })
+          body: JSON.stringify({ kingdoms: otherKingdoms })
         })
         const data = await res.json()
         if (data.success) {
-          log(`Found ${data.found} mercs, notified: ${data.notified}`)
+          log(data.message)
         } else {
           log('Error: ' + data.error)
         }
       })
 
-      document.getElementById('btnMercTimerStart').addEventListener('click', async () => {
+      document.getElementById('btnScanOtherKingdomStart').addEventListener('click', async () => {
+        const otherKingdoms = document.getElementById('otherKingdoms').value
         const interval = parseInt(document.getElementById('timerInterval').value) || 60000
-        const res = await fetch(API + '/timer/scan-mercs', {
+        const res = await fetch(API + '/timer/scan-other-kingdoms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ interval })
+          body: JSON.stringify({ interval, kingdoms: otherKingdoms })
         })
         const data = await res.json()
         if (data.success) {
@@ -586,36 +591,24 @@ async function refreshTimers() {
         }
       })
 
-      document.getElementById('btnMercTimerStop').addEventListener('click', async () => {
-        const res = await fetch(API + '/timer/stop-mercs', { method: 'POST' })
+      document.getElementById('btnScanOtherKingdomStop').addEventListener('click', async () => {
+        const otherKingdoms = document.getElementById('otherKingdoms').value
+        const res = await fetch(API + '/timer/stop-scan-other-kingdoms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kingdoms: otherKingdoms })
+        })
         const data = await res.json()
         if (data.success) {
           log(data.message)
         } else {
           log('Error: ' + data.error)
-        }
-      })
-
-      // Pagination handlers
-      document.getElementById('btnPrevPage').addEventListener('click', () => {
-        if (staticDbPage.offset > 0) {
-          staticDbPage.offset = Math.max(0, staticDbPage.offset - staticDbPage.limit)
-          refreshStaticDb()
-        }
-      })
-
-      document.getElementById('btnNextPage').addEventListener('click', () => {
-        if (staticDbPage.offset + staticDbPage.limit < staticDbPage.count) {
-          staticDbPage.offset += staticDbPage.limit
-          refreshStaticDb()
         }
       })
 
       // Initial load
       refreshJobsStatus()
       refreshTimers()
-      refreshStaticDb()
-      refreshDebug()
       checkBrowserStatus()
       if (document.getElementById('browserStatus').textContent === 'Running') {
         startAutoRefresh()
