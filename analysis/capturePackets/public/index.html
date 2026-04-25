@@ -525,14 +525,14 @@
       })
 
       document.getElementById('btnTimerStart').addEventListener('click', async () => {
-        const kingdoms = document.getElementById('kingdoms').value.trim()
+        // const kingdoms = document.getElementById('kingdoms').value.trim()
         const interval = parseInt(document.getElementById('timerInterval').value) || 60000
-        if (!kingdoms) return log('Enter kingdoms')
+        // if (!kingdoms) return log('Enter kingdoms')
 
         const res = await fetch(API + '/timer/start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kingdoms, interval })
+          body: JSON.stringify({ interval })
         })
         const data = await res.json()
         if (data.success) {
@@ -543,13 +543,13 @@
       })
 
       document.getElementById('btnTimerStop').addEventListener('click', async () => {
-        const kingdoms = document.getElementById('kingdoms').value.trim()
-        if (!kingdoms) return log('Enter kingdoms')
+        // const kingdoms = document.getElementById('kingdoms').value.trim()
+        // if (!kingdoms) return log('Enter kingdoms')
 
         const res = await fetch(API + '/timer/stop', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kingdoms })
+          method: 'POST'
+          // headers: { 'Content-Type': 'application/json' },
+          // body: JSON.stringify({ kingdoms })
         })
         const data = await res.json()
         if (data.success) {

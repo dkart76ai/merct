@@ -1,9 +1,6 @@
 const path = require('path')
 
 const {
-  decode: decodeSync,
-  decodeBuffer: decodeBufferSync,
-  encode: encodeSync,
   processPacket: processPacketSync,
   scanKingdom: scanKingdomSync
 } = require('../workers/tasks')
@@ -47,56 +44,6 @@ function getPool() {
 }
 
 // Wrapper functions with fallback
-async function decode(base64) {
-  if (!base64) throw new Error('No base64 data provided, decode from workerpool.js')
-
-  const p = getPool()
-  if (!p || !USE_WORKERS) {
-    const result = decodeSync(base64)
-    return result.results
-  }
-  try {
-    const result = await p.run(base64, { name: 'decode' })
-    if (!result.success) throw new Error(result.error)
-    return result.data
-  } catch (e) {
-    console.warn('[Worker Pool] Falling back to sync:', e.message)
-    const result = decodeSync(base64)
-    return result.results
-  }
-}
-
-async function decodeBuffer(buffer) {
-  if (!buffer) throw new Error('No buffer provided')
-
-  const p = getPool()
-  if (!p || !USE_WORKERS) {
-    return decodeBufferSync(buffer)
-  }
-  try {
-    const result = await p.run(buffer, { name: 'decodeBuffer' })
-    if (!result.success) throw new Error(result.error)
-    return result.data
-  } catch (e) {
-    return decodeBufferSync(buffer)
-  }
-}
-
-async function encode(data) {
-  if (!data) throw new Error('No data provided')
-
-  const p = getPool()
-  if (!p || !USE_WORKERS) {
-    return encodeSync(data)
-  }
-  try {
-    const result = await p.run(data, { name: 'encode' })
-    if (!result.success) throw new Error(result.error)
-    return result.data
-  } catch (e) {
-    return encodeSync(data)
-  }
-}
 
 async function processPacket({ request, response, shouldSaveObjects = false }) {
   if (!request || !response) throw new Error('No data provided')
@@ -136,9 +83,7 @@ async function scanKingdom({ kingdom, shouldSaveObjects = false }) {
 
 module.exports = {
   getPool,
-  decode,
-  decodeBuffer,
-  encode,
+
   scanKingdom,
   processPacket
 }

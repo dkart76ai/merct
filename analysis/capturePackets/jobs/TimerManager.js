@@ -10,10 +10,9 @@ class TimerManager {
   }
 
   async scheduleScanKingdom(kingdom, options = {}) {
-    const { intervalMs = 60000 * 3, tiles } = options
+    const { intervalMs = 60000 * 3, shouldSaveObjects } = options
 
-    const tilesKey = tiles.join(',')
-    const timerKey = `kingdom:${kingdom}:${tilesKey}`
+    const timerKey = `kingdom:${kingdom}`
 
     const repeatOptions = {
       every: intervalMs
@@ -21,8 +20,8 @@ class TimerManager {
 
     const jobData = {
       kingdom,
-      intervalMs,
-      tiles
+      shouldSaveObjects,
+      intervalMs
     }
 
     const job = await this.queue.add(JOB_TYPES.SCAN_KINGDOM, jobData, {
@@ -38,8 +37,8 @@ class TimerManager {
 
     this.timerConfigs.set(timerKey, {
       kingdom,
-      tiles,
-      tilesKey,
+      shouldSaveObjects,
+
       intervalMs,
       startedAt: Date.now()
     })

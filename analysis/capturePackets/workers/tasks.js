@@ -283,7 +283,6 @@ async function scanKingdom(kingdom, shouldSaveObjects) {
 }
 
 module.exports = {
-  generateArrays,
   processPacket,
   scanKingdom
 }

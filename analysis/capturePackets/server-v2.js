@@ -42,7 +42,7 @@ const {
   notificationHandler
   // processPacketHandler
 } = require('./jobs/handlers')
-const { generateArrays } = require('./workers/tasks.js')
+
 const {
   initDb,
   findObjects,
@@ -200,19 +200,6 @@ async function ensureSaveDir() {
   }
 }
 
-// function savePackets311_312(data) {
-//   packet31xStream.write(JSON.stringify(data) + '\n')
-// }
-
-// function buildPacket311Payload(tiles, tokenBigInt, token) {
-//   if (!tokenBigInt || !token) return null
-
-//   const randomSeq = Math.floor(Math.random() * 32000) + 1
-//   const packetData = [[311, randomSeq, [[tokenBigInt], token], ''], [[tiles]]]
-
-//   return packetData
-// }
-
 async function handleScanKingdom(req, res) {
   // manual scan default kingdoms, use worker_threads, no jobs
   const kingdom = await redisClient.get(DEFAULT_KINGDOM)
@@ -221,6 +208,7 @@ async function handleScanKingdom(req, res) {
   }
 
   try {
+    //llama directo al worker thread
     await scanKingdom(kingdom, true /* save objects */)
   } catch (error) {
     console.log('error', error.message)
@@ -233,59 +221,40 @@ async function handleScanKingdom(req, res) {
 }
 
 async function handleStartTimer(req, res) {
-  const { kingdoms, interval = 60000, priority = 'LOW' } = req.body
+  const { interval = 60000, priority = 'LOW' } = req.body
 
-  console.log(`[API] startTimer - kingdoms: ${kingdoms}, interval: ${interval}ms`)
-
-  if (!kingdoms || kingdoms.trim() === '') {
-    return res.json({ success: false, error: 'enter kingdom' })
+  const kingdom = await redisClient.get(DEFAULT_KINGDOM)
+  if (!kingdom) {
+    return res.json({ success: false, error: 'no default kingdom is set' })
   }
 
-  const kingdomList = kingdoms
-    .split(',')
-    .map(k => parseInt(k.trim()))
-    .filter(k => kingdomUrls[k])
+  console.log(`[API] startTimer - kingdom: ${kingdom}, interval: ${interval}ms`)
 
-  if (kingdomList.length === 0) {
-    return res.json({ success: false, error: 'no valid kingdoms' })
-  }
-  const tilesArray = generateArrays(9, 2396, 50, 1)
   const timerManager = getTimerManager()
 
-  for (const kingdom of kingdomList) {
-    timerManager.stopScan(kingdom)
-
-    for (const tiles of tilesArray) {
-      timerManager.scheduleScanKingdom(kingdom, {
-        intervalMs: parseInt(interval),
-        tiles
-      })
-    }
-  }
+  timerManager.stopScan(kingdom)
+  //crea un queue, periodico, para llamar a  scanKingdom con worker_threads
+  timerManager.scheduleScanKingdom(kingdom, {
+    intervalMs: parseInt(interval),
+    shouldSaveObjects: true
+  })
 
   res.json({
     success: true,
-    message: `Started timer for ${kingdomList.length} kingdoms`,
-    kingdoms: kingdomList,
-    interval
+    message: `Started timer for ${kingdom} kingdom`
   })
 }
 
 async function handleStopTimer(req, res) {
-  const { kingdoms } = req.body
+  const kingdom = await redisClient.get(DEFAULT_KINGDOM)
+  if (!kingdom) {
+    return res.json({ success: false, error: 'no default kingdom is set' })
+  }
 
   const timerManager = getTimerManager()
 
-  if (kingdoms) {
-    const kingdomList = kingdoms.split(',').map(k => parseInt(k.trim()))
-    for (const kingdom of kingdomList) {
-      timerManager.stopScan(kingdom)
-    }
-    res.json({ success: true, message: `Stopped timers for ${kingdomList.length} kingdoms` })
-  } else {
-    timerManager.stopAll()
-    res.json({ success: true, message: 'Stopped all timers' })
-  }
+  timerManager.stopScan(kingdom)
+  res.json({ success: true, message: `Stopped timers for ${kingdom} kingdom` })
 }
 
 function extractChatStaticIds(message) {

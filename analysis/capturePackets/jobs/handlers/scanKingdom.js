@@ -1,16 +1,13 @@
-const fs = require('fs')
-const path = require('path')
-const { multiDecodeMsgPack2, encodeMsgPack2MultiFragments } = require('message-pack')
 const { addJob, JOB_TYPES, PRIORITY } = require('../index')
 const { getRedis } = require('../../lib/redis.js')
 const { kingdomUrls } = require('../../kingdomUrls.js')
-
-// TODO: THIS SHOULD NOT SEND PACKET, IT SHOULD START THE WORKER THREAD, SO WORKER DO THE JOB
+const { scanKingdom } = require('../../lib/workerPool.js')
 
 async function scanKingdomHandler(payload) {
-  const { kingdom } = payload
+  const { kingdom, shouldSaveObjects } = payload
 
   try {
+    const result = scanKingdom(kingdom, shouldSaveObjects)
     return result
   } catch (error) {
     console.error(`[SendPacket] Error:`, error.message)
