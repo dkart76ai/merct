@@ -94,12 +94,15 @@ async function addDelayed(type, data, delayMs) {
   return addJob(type, data, { priority: PRIORITY.LOW, delay: delayMs })
 }
 
-function getTimerManagerInstance() {
+async function getTimerManagerInstance() {
   const { TimerManager } = require('./TimerManager')
 
   if (!timerManager) {
     const queueInstance = getQueue()
     timerManager = new TimerManager(queueInstance)
+
+    // Es vital esperar a que se rehidrate antes de empezar a programar nuevos
+    await timerManager.rehydrate()
   }
 
   return timerManager

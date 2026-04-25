@@ -5,181 +5,176 @@ class TimerManager {
   constructor(queue) {
     this.queue = queue
     this.timers = new Map()
-    this.timerConfigs = new Map()
-    this.kingdomTimerKeys = new Map()
   }
 
   async scheduleScanKingdom(kingdom, options = {}) {
-    const { intervalMs = 60000 * 3, shouldSaveObjects } = options
-
+    const { intervalMs = 180000, shouldSaveObjects } = options
     const timerKey = `kingdom:${kingdom}`
 
-    const repeatOptions = {
-      every: intervalMs
-    }
-
-    const jobData = {
+    return this.scheduleCustom(`kingdom:${kingdom}`, intervalMs, JOB_TYPES.SCAN_KINGDOM, {
       kingdom,
-      shouldSaveObjects,
-      intervalMs
-    }
-
-    const job = await this.queue.add(JOB_TYPES.SCAN_KINGDOM, jobData, {
-      priority: PRIORITY.LOW,
-      repeat: repeatOptions,
-      jobId: `timer:${timerKey}`
+      shouldSaveObjects
     })
-
-    this.timers.set(timerKey, {
-      repeatJobKey: job.repeatJobKey,
-      jobType: JOB_TYPES.SCAN_KINGDOM
-    })
-
-    this.timerConfigs.set(timerKey, {
-      kingdom,
-      shouldSaveObjects,
-
-      intervalMs,
-      startedAt: Date.now()
-    })
-
-    if (!this.kingdomTimerKeys.has(kingdom)) {
-      this.kingdomTimerKeys.set(kingdom, [])
-    }
-    this.kingdomTimerKeys.get(kingdom).push(timerKey)
-
-    console.log(
-      `[Timer] Scheduled ${JOB_TYPES.SEND_PACKET} for kingdom ${kingdom} tiles ${tilesKey} every ${intervalMs}ms`
-    )
-
-    return job
   }
 
   async scheduleCustom(name, intervalMs, jobType, jobData, options = {}) {
-    const timerKey = `custom:${name}`
+    const timerKey = name.includes(':') ? name : `custom:${name}`
 
-    await this.stopNamedTimer(name)
+    await this.stopByKey(timerKey) // Evita duplicados
 
-    const repeatOptions = {
-      every: intervalMs
-    }
+    const repeat = { every: intervalMs }
 
-    const job = await this.queue.add(
-      jobType,
-      { ...jobData, customTimerName: name },
-      {
-        priority: options.priority || PRIORITY.IDLE,
-        repeat: repeatOptions,
-        jobId: `timer:${timerKey}`
-      }
-    )
-
-    this.timers.set(timerKey, {
-      repeatJobKey: job.repeatJobKey,
-      jobType
+    await this.queue.add(jobType, jobData, {
+      ...options,
+      repeat,
+      jobId: timerKey
     })
 
-    this.timerConfigs.set(timerKey, {
-      name,
-      intervalMs,
-      jobType,
-      startedAt: Date.now()
-    })
-
-    console.log(`[Timer] Scheduled custom timer "${name}" every ${intervalMs}ms`)
-
-    return job
-  }
-
-  async stopScan(kingdom) {
-    const timerKeys = this.kingdomTimerKeys.get(kingdom) || []
-    let stopped = false
-
-    for (const timerKey of timerKeys) {
-      const result = await this.stopByKey(timerKey)
-      if (result) stopped = true
-    }
-
-    this.kingdomTimerKeys.delete(kingdom)
-
-    return stopped
-  }
-
-  async stopNamedTimer(name) {
-    const timerKey = `custom:${name}`
-    return this.stopByKey(timerKey)
+    this.timers.set(timerKey, { jobName: jobType, repeat, data: jobData })
+    console.log(`[Timer] Scheduled: ${timerKey}`)
   }
 
   async stopByKey(timerKey) {
     const timer = this.timers.get(timerKey)
+    if (!timer) return false
 
-    if (timer) {
-      const config = this.timerConfigs.get(timerKey)
-      const kingdom = config?.kingdom
-
-      try {
-        if (timer.repeatJobKey) {
-          await this.queue.removeRepeatableByKey(timer.repeatJobKey)
-          console.log(`[Timer] Removed repeatable job with key: ${timer.repeatJobKey}`)
-        }
-      } catch (error) {
-        console.error(`[Timer] Error removing timer ${timerKey}:`, error.message)
-      }
-
-      this.timers.delete(timerKey)
-      this.timerConfigs.delete(timerKey)
-
-      if (kingdom) {
-        const keys = this.kingdomTimerKeys.get(kingdom)
-        if (keys) {
-          const idx = keys.indexOf(timerKey)
-          if (idx > -1) keys.splice(idx, 1)
-          if (keys.length === 0) this.kingdomTimerKeys.delete(kingdom)
-        }
-      }
-
-      return true
+    try {
+      // Borrado exacto en BullMQ
+      await this.queue.removeRepeatable(timer.jobName, timer.repeat, timerKey)
+    } catch (e) {
+      console.error(`[Timer] Error in Redis for ${timerKey}:`, e.message)
     }
 
-    return false
+    this.timers.delete(timerKey)
+    return true
   }
 
   async stopAll() {
     const keys = Array.from(this.timers.keys())
-    for (const key of keys) {
-      await this.stopByKey(key)
-    }
-    console.log('[Timer] Stopped all timers')
+    await Promise.all(keys.map(key => this.stopByKey(key)))
+
+    // Limpieza de seguridad para jobs que no estén en el Map local
+    const redisJobs = await this.queue.getRepeatableJobs()
+    await Promise.all(redisJobs.map(j => this.queue.removeRepeatableByKey(j.key)))
+
+    this.timers.clear()
   }
 
+  async purgeEverything() {
+    await this.stopAll() // Primero detenemos los cronómetros
+
+    // Borra el historial de jobs terminados, fallidos y en espera
+    await Promise.all([
+      this.queue.clean(0, 1000, 'completed'),
+      this.queue.clean(0, 1000, 'failed'),
+      this.queue.drain() // Vacía jobs que estén esperando ejecución ahora mismo
+    ])
+
+    console.log('[Timer] Cola purgada completamente.')
+  }
+
+  // Helpers rápidos
   isRunning(kingdom) {
-    const timerKeys = this.kingdomTimerKeys.get(kingdom) || []
-    return timerKeys.length > 0
+    return this.timers.has(`kingdom:${kingdom}`)
+  }
+  stopScan(kingdom) {
+    return this.stopByKey(`kingdom:${kingdom}`)
   }
 
-  getConfigs(kingdom) {
-    const timerKeys = this.kingdomTimerKeys.get(kingdom) || []
-    return timerKeys.map(key => this.timerConfigs.get(key)).filter(Boolean)
-  }
+  async getNextRunTimes() {
+    // 1. Obtenemos todos los cronómetros activos directamente de Redis
+    const repeatableJobs = await this.queue.getRepeatableJobs()
 
-  getActiveTimers() {
-    const result = []
-    for (const [key, config] of this.timerConfigs.entries()) {
-      result.push({ key, ...config })
-    }
-    return result
-  }
+    const schedule = repeatableJobs.map(job => {
+      // Intentamos buscar datos extra en nuestro Map local usando el jobId (que es job.id)
+      const localData = this.timers.get(job.id)
 
-  getNextRunTime(kingdom) {
-    const configs = this.getConfigs(kingdom)
-    if (!configs || configs.length === 0) return null
-
-    const nextTimes = configs.map(config => {
-      const elapsed = Date.now() - config.startedAt
-      return config.startedAt + Math.ceil(elapsed / config.intervalMs) * config.intervalMs
+      return {
+        key: job.id,
+        jobName: job.name,
+        nextRunAt: new Date(job.next).toLocaleString(), // Formato legible
+        nextRunTimestamp: job.next,
+        remainingMs: job.next - Date.now(),
+        interval: job.every,
+        data: localData?.data || {} // Datos que guardamos originalmente
+      }
     })
 
-    return Math.min(...nextTimes)
+    // Ordenamos por el que se ejecutará más pronto
+    return schedule.sort((a, b) => a.nextRunTimestamp - b.nextRunTimestamp)
+  }
+
+  async getNextScanForKingdom(kingdom) {
+    const timerKey = `kingdom:${kingdom}`
+    const allJobs = await this.queue.getRepeatableJobs()
+
+    const job = allJobs.find(j => j.id === timerKey)
+
+    if (!job) return null
+
+    return {
+      kingdom,
+      nextRun: new Date(job.next),
+      secondsLeft: Math.round((job.next - Date.now()) / 1000)
+    }
+  }
+
+  async getHealthReport() {
+    const jobs = await this.queue.getRepeatableJobs()
+    const now = Date.now()
+
+    return jobs.map(job => {
+      const isOverdue = now > job.next // Esto indicaría que el worker está bloqueado o lento
+      return {
+        id: job.id,
+        name: job.name,
+        interval: job.every,
+        nextRunIn: `${Math.round((job.next - now) / 1000)}s`,
+        status: isOverdue ? 'Lags detected' : 'Healthy'
+      }
+    })
+  }
+
+  async getActiveTimers() {
+    // 1. Obtenemos todos los cronómetros registrados en Redis
+    const repeatableJobs = await this.queue.getRepeatableJobs()
+
+    return repeatableJobs.map(job => {
+      // 2. Intentamos recuperar los datos originales guardados en nuestro Map
+      const localInfo = this.timers.get(job.id)
+      console.log('getActiveTimers', { job, localInfo })
+
+      return {
+        id: job.id, // Ej: "kingdom:123" o "custom:mi-tarea"
+        name: job.name, // El JOB_TYPES (ej: SCAN_KINGDOM)
+        interval: job.every, // Cada cuántos ms se ejecuta
+        nextRunAt: new Date(job.next).toLocaleString(), // Próxima ejecución legible
+        data: localInfo?.data || {}, // Los datos que le pasaste al programarlo
+        key: job.key // La llave interna de BullMQ (por si quieres borrarla)
+      }
+    })
+  }
+
+  async rehydrate() {
+    console.log('[Timer] Sincronizando timers con Redis...')
+
+    // 1. Obtener todos los trabajos repetibles actuales de la base de datos
+    const repeatableJobs = await this.queue.getRepeatableJobs()
+
+    for (const job of repeatableJobs) {
+      // 2. Reconstruimos el Map local
+      // BullMQ guarda la configuración de repetición en el objeto job
+      this.timers.set(job.id, {
+        jobName: job.name,
+        repeat: { every: job.every },
+        // Intentamos recuperar los datos del job si es posible
+        // Nota: getRepeatableJobs no siempre trae los 'data' originales,
+        // pero sí las opciones necesarias para detenerlos (removeRepeatable).
+        data: {}
+      })
+    }
+
+    console.log(`[Timer] Sincronización completada. ${this.timers.size} timers recuperados.`)
   }
 }
 

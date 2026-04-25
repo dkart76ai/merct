@@ -4,13 +4,13 @@ console.log(styleText('green', 'This is green!'))
 
 const { Piscina } = require('piscina')
 const path = require('path')
-
+const { kingdomUrls } = require('../lib/kingdomUrls.js')
 const {
   getRequestHeader,
   multiDecodeMsgPack2,
   encodeMsgPack2MultiFragments,
   scanPacket312
-} = require('../messagePack.js')
+} = require('../lib/messagePack.js')
 const staticIdDB = require('../staticId.js')
 const { getRedis } = require('../lib/redis')
 const { saveObjects } = require('../lib/database')
@@ -51,7 +51,7 @@ const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
   return result
 }
 
-const processPacket = async ({ request, response, shouldSaveObjects }) => {
+const processPacket = async ({ request, response }) => {
   if (!request || !response) throw new Error('No  data provided')
 
   try {
@@ -62,7 +62,7 @@ const processPacket = async ({ request, response, shouldSaveObjects }) => {
     // const opCode = getFirstValue(decodedResponse)
     const { opCode, userId, token } = getRequestHeader(request)
     // console.log('processpacket', opCode, userId, token)
-
+    // console.log(styleText('green', 'opcode ' + opCode))
     // let tileIds = []
     // if (opCode === 312) {
     //   tileIds = decodedRequest[1]
@@ -76,61 +76,7 @@ const processPacket = async ({ request, response, shouldSaveObjects }) => {
     }
 
     if (opCode === 312) {
-      console.log(styleText('red', 'This is not green!'))
-      console.log(styleText('green', 'opcode', opCode))
-      const { players42, objects12 } = scanPacket312(response)
-      console.log('scanPacket312: players42:', players42.length)
-      console.log('scanPacket312: objects12:', objects12.length)
-
-      // console.log(
-      //   styleText('green'),
-      //   players42
-      //     .slice(0, 5)
-      //     .map(
-      //       player =>
-      //         `${player.sourceKingdom}:${player.sourceX}:${player.sourceY} lvl:${player.level} shield = ${String(player.isShieldActive)}`
-      //     )
-      // )
-
-      // objects12.slice(0, 5).forEach(o => {
-      //   const data = staticIdDB.getStaticIdData(o.staticId)
-      //   console.log(
-      //     `scanPacket312: found ${objects12.length} objects12: `,
-
-      //     `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, lvl:${data?.level}-${data?.name || 'unknown'} level:${o.level}`
-      //   )
-      // })
-
-      objects12.forEach(o => {
-        const data = staticIdDB.getStaticIdData(o.staticId)
-
-        // NOTE : dont delete static id updater
-        if (!data.level) {
-          staticIdDB.addOrUpdateStaticId(sub.staticId, {
-            level: o.level
-          })
-        }
-        // END NOTE
-
-        if (!data?.name || !data?.level) {
-          console.log(
-            `scanPacket312: found ${objects12.length} objects12: `,
-
-            `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, lvl:${data?.level}-${data?.name || 'unknown'} level:${o.level}`
-          )
-        }
-      })
-
-      if (shouldSaveObjects) {
-        const result = saveObjects(objects12)
-        console.log(
-          `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
-        )
-      }
-
-      return {
-        success: true
-      }
+      extractDataFrom312(response)
     }
   } catch (e) {
     return { success: false, error: e.message }
@@ -172,7 +118,49 @@ function buildPacket22Payload(tokenBigInt, token) {
   return packetData
 }
 
-async function scanKingdom(kingdom, shouldSaveObjects) {
+async function extractDataFrom312(response, shouldSaveObjects = false) {
+  console.log(styleText('red', 'This is not green!'))
+
+  const { players42, objects12 } = scanPacket312(response)
+  console.log('scanPacket312: players42:', players42.length)
+  console.log('scanPacket312: objects12:', objects12.length)
+
+  objects12.forEach(o => {
+    const dbEntry = staticIdDB.getStaticIdData(o.staticId)
+
+    const isComplete =
+      dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level != null && dbEntry.level >= 0
+
+    // NOTE : dont delete static id updater
+    if (!isComplete) {
+      staticIdDB.addOrUpdateStaticId(o.staticId, {
+        level: o.level
+      })
+
+      console.log(
+        `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, lvl:${dbEntry?.level}-${dbEntry?.name || 'unknown'} level:${o.level}`
+      )
+    }
+    // END NOTE
+  })
+
+  if (shouldSaveObjects) {
+    const result = saveObjects(objects12)
+    console.log(
+      `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
+    )
+  }
+
+  return {
+    success: true,
+    players42,
+    objects12
+  }
+}
+
+async function scanKingdom({ kingdom, shouldSaveObjects }) {
+  console.log('task, scankingdom', { kingdom, shouldSaveObjects })
+
   const redisClient = getRedis()
 
   const _token1 = await redisClient.get('myPlayerId:BigInt')
@@ -246,6 +234,8 @@ async function scanKingdom(kingdom, shouldSaveObjects) {
 
     const tilesArray = generateArrays(9, 2396, 50, 12)
 
+    let objects = 0
+    let players = 0
     for (const tiles of tilesArray) {
       const packetData312 = buildPacket312Payload(tiles, token1, token2)
 
@@ -268,15 +258,19 @@ async function scanKingdom(kingdom, shouldSaveObjects) {
       const buffer312 = await response312.arrayBuffer()
       const bytes312 = new Uint8Array(buffer312)
 
-      const payload = {
-        request: encoded312,
-        response: bytes312,
-        shouldSaveObjects
-      }
-      const result = await processPacket(payload)
+      // const payload = {
+      //   request: encoded312,
+      //   response: bytes312,
+      //   shouldSaveObjects
+      // }
+      const result = await extractDataFrom312(bytes312, shouldSaveObjects)
+
+      objects += result.objects12?.length || 0
+      players += result.players42?.length || 0
     }
 
-    console.log(`[ScanKingdom] Success  `)
+    console.log(`[ScanKingdom] Success objects ${objects}, players ${players} `)
+    return { success: true, objects, players }
   } catch (error) {
     console.error(`[ScanKingdom] Error:`, error.message)
   }

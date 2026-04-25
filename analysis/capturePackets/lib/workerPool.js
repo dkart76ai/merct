@@ -63,20 +63,24 @@ async function processPacket({ request, response, shouldSaveObjects = false }) {
   }
 }
 
-async function scanKingdom({ kingdom, shouldSaveObjects = false }) {
-  if (!request || !response) throw new Error('No data provided')
+async function scanKingdom(kingdom, shouldSaveObjects = false) {
+  if (!kingdom) throw new Error('[Worker Pool] No kingdom provided')
 
   const p = getPool()
   if (!p || !USE_WORKERS) {
+    console.log('worker pool, no workers, using sync scankingdom')
     scanKingdomSync({ kingdom, shouldSaveObjects })
     return { success: false, error: 'Workers disabled' }
   }
 
   try {
+    console.log('worker pool, calling scankingdom on threads')
     const result = await p.run({ kingdom, shouldSaveObjects }, { name: 'scanKingdom' })
+    console.log('worker pool, result after scankingdom called', result)
     if (!result.success) throw new Error(result.error)
     return result
   } catch (e) {
+    console.log('worker pool, error in scankingdom', e.message)
     return { success: false, error: e.message }
   }
 }

@@ -3,14 +3,14 @@ const path = require('path')
 const fs = require('fs')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
-const { kingdomUrls } = require('./kingdomUrls.js')
+const { kingdomUrls } = require('./lib/kingdomUrls.js')
 const {
   multiDecodeMsgPack2,
   encodeMsgPack2MultiFragments,
   getRequestHeader,
   getMsgPack2ndBlockRequest,
   scanPacket312
-} = require('./messagePack.js')
+} = require('./lib/messagePack.js')
 const { createStream } = require('rotating-file-stream')
 const msgpack = require('@msgpack/msgpack')
 const {
@@ -62,6 +62,7 @@ const config = {
 /***SENDBIRD KEY CONSTANTS FOR GAME */
 const DEFAULT_KINGDOM = 'CONFIG:DEFAULT_KINGDOM'
 const ACTIVE_CHAT_CHANNEL = 'CONFIG:ACTIVE_CHAT_CHANNEL'
+const SCAN_OTHER_KINGDOMS_KEY = 'TIMERS:SCAN_OTHER_KINGDOMS_KEY'
 
 // const SAVE_DIR = path.join(__dirname, 'captures')
 // const SAVE_DIR2 = path.join(__dirname, 'packetSender')
@@ -171,7 +172,7 @@ function saveTrafficPair(url, reqBuffer, resBuffer, opCode) {
 // }
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 4000
 
 app.use(express.json({ limit: '50mb' }))
 app.use(express.static(path.join(__dirname, 'public')))
@@ -216,7 +217,8 @@ async function handleScanKingdom(req, res) {
   }
 
   res.json({
-    success: true
+    success: true,
+    message: `kingdom ${kingdom} scanned`
   })
 }
 
@@ -230,9 +232,8 @@ async function handleStartTimer(req, res) {
 
   console.log(`[API] startTimer - kingdom: ${kingdom}, interval: ${interval}ms`)
 
-  const timerManager = getTimerManager()
+  const timerManager = await getTimerManager()
 
-  timerManager.stopScan(kingdom)
   //crea un queue, periodico, para llamar a  scanKingdom con worker_threads
   timerManager.scheduleScanKingdom(kingdom, {
     intervalMs: parseInt(interval),
@@ -251,11 +252,130 @@ async function handleStopTimer(req, res) {
     return res.json({ success: false, error: 'no default kingdom is set' })
   }
 
-  const timerManager = getTimerManager()
+  const timerManager = await getTimerManager()
 
   timerManager.stopScan(kingdom)
   res.json({ success: true, message: `Stopped timers for ${kingdom} kingdom` })
 }
+
+// Scan for other kingdoms timer
+app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
+  const { interval = 60000, kingdoms } = req.body
+  console.log('kingdom', req.body)
+
+  if (!kingdoms || kingdoms.trim() === '') {
+    return res.json({ success: false, error: 'enter kingdom' })
+  }
+
+  const kingdomList = kingdoms
+    .split(',')
+    .map(k => parseInt(k.trim()))
+    .filter(k => kingdomUrls[k])
+
+  if (kingdomList.length === 0) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  await redisClient.set(SCAN_OTHER_KINGDOMS_KEY, kingdoms)
+
+  const timerManager = await getTimerManager()
+
+  try {
+    for (const kingdom of kingdomList) {
+      const payload = {
+        kingdom,
+        shouldSaveObjects: false
+      }
+      const timerKey = `kingdom-scanner-${kingdom}`
+      await timerManager.scheduleCustom(
+        timerKey,
+        parseInt(interval),
+        JOB_TYPES.SCAN_KINGDOM,
+        payload,
+        {
+          priority: PRIORITY.NORMAL
+        }
+      )
+    }
+    res.json({
+      success: true,
+      message: `kingdom ${kingdoms} scanner started every ${interval}ms`,
+      interval
+    })
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+})
+
+app.post('/api/timer/stop-scan-other-kingdoms', async (req, res) => {
+  const kingdoms = await redisClient.get(SCAN_OTHER_KINGDOMS_KEY)
+  if (!kingdoms) {
+    return res.json({ success: false, error: 'no kingdoms, already stoped' })
+  }
+
+  const timerManager = await getTimerManager()
+
+  const kingdomList = kingdoms
+    .split(',')
+    .map(k => parseInt(k.trim()))
+    .filter(k => kingdomUrls[k])
+
+  if (kingdomList.length === 0) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  try {
+    for (const kingdom of kingdomList) {
+      const timerKey = `kingdom-scanner-${kingdom}`
+      await timerManager.stopScan(timerKey)
+    }
+
+    await redisClient.del(SCAN_OTHER_KINGDOMS_KEY)
+    res.json({ success: true, message: `${kingdoms} Kingdoms scanner stopped` })
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+})
+
+// Manual find and queue notification
+async function handleScanOtherKingdom(req, res) {
+  // manual scan any kingdoms, use worker_threads, no jobs
+  const { kingdoms } = req.body
+
+  console.log('kingsomd', req.body)
+  console.log('dsdf', typeof kingdoms)
+  if (!kingdoms || kingdoms.trim() === '') {
+    return res.json({ success: false, error: 'enter kingdom' })
+  }
+  console.log(`[API] scan other Kingdom request - kingdoms: ${kingdoms} `)
+
+  const kingdomList = kingdoms
+    .split(',')
+    .map(k => parseInt(k.trim()))
+    .filter(k => kingdomUrls[k])
+
+  if (kingdomList.length === 0) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  try {
+    for (const kingdom of kingdomList) {
+      await scanKingdom(kingdom, false /* dont save objects */)
+    }
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+
+  res.json({
+    success: true,
+    message: `kingdom ${kingdoms} scanned`
+  })
+}
+
+app.post('/api/scan-other-kingdoms-now', handleScanOtherKingdom)
 
 function extractChatStaticIds(message) {
   if (!message || typeof message !== 'string') return
@@ -380,7 +500,7 @@ function setupPacketCaptureListener() {
     const _kingdom = url.split('rubens-realm')[1]
     // const kingdom = parseInt(_kingdom)
 
-    gameLoaded = true //update here, just in case login failed
+    gameLoaded = true //update here, got packets, so we are in-game
 
     try {
       const status = response.status()
@@ -482,8 +602,6 @@ async function browserLoadUrlAndLogin() {
     // En lugar de un console.log inmediato, espera a que algo cambie (ej. desaparezca el input)
     await loginInput.waitFor({ state: 'hidden', timeout: 5000 })
     console.log('Login exitoso')
-
-    gameLoaded = true
   } catch (error) {
     console.error('Error durante el proceso de login:', error)
   }
@@ -496,7 +614,7 @@ app.get('/api/gameChatChannels', async (req, res) => {
     const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
 
     if (result.success) {
-      console.log('chat channels ', result?.channels[0]._url)
+      console.log('chat channels ', result?.channels.length)
     } else {
       console.log('chat channel', result?.error)
     }
@@ -624,9 +742,10 @@ app.get('/api/jobs/:jobId', async (req, res) => {
   }
 })
 
-app.get('/api/timers', (req, res) => {
-  const timerManager = getTimerManager()
-  const active = timerManager.getActiveTimers()
+app.get('/api/timers', async (req, res) => {
+  const timerManager = await getTimerManager()
+
+  const active = await timerManager.getActiveTimers()
   res.json({ success: true, timers: active })
 })
 
@@ -646,119 +765,6 @@ app.get('/api/timers', (req, res) => {
 
 //   res.json({ success: true, ...result, notified: result.objects.length > 0 })
 // })
-
-// Scan for other kingdoms timer
-app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
-  const { interval = 60000, kingdoms } = req.body
-  console.log('kingdom', req.body)
-
-  if (!kingdoms || kingdoms.trim() === '') {
-    return res.json({ success: false, error: 'enter kingdom' })
-  }
-
-  const kingdomList = kingdoms
-    .split(',')
-    .map(k => parseInt(k.trim()))
-    .filter(k => kingdomUrls[k])
-
-  if (kingdomList.length === 0) {
-    return res.json({ success: false, error: 'no valid kingdoms' })
-  }
-
-  const timerManager = getTimerManager()
-
-  try {
-    for (const kingdom of kingdomList) {
-      const payload = {
-        kingdom
-      }
-      const timerKey = `kingdom-scanner-${kingdom}`
-      await timerManager.scheduleCustom(
-        timerKey,
-        parseInt(interval),
-        JOB_TYPES.SCAN_KINGDOM,
-        payload,
-        {
-          priority: PRIORITY.NORMAL
-        }
-      )
-    }
-    res.json({
-      success: true,
-      message: `other kingdom scanner started every ${interval}ms`,
-      interval
-    })
-  } catch (error) {
-    console.log('error', error.message)
-    return res.json({ success: false, error: error.message })
-  }
-})
-
-app.post('/api/timer/stop-scan-other-kingdoms', async (req, res) => {
-  const { kingdoms = '' } = req.body
-  if (!kingdoms || kingdoms.trim() === '') {
-    return res.json({ success: false, error: 'enter kingdom' })
-  }
-
-  const kingdomList = kingdoms
-    .split(',')
-    .map(k => parseInt(k.trim()))
-    .filter(k => kingdomUrls[k])
-
-  if (kingdomList.length === 0) {
-    return res.json({ success: false, error: 'no valid kingdoms' })
-  }
-
-  const timerManager = getTimerManager()
-
-  try {
-    for (const kingdom of kingdomList) {
-      const timerKey = `kingdom-scanner-${kingdom}`
-      await timerManager.stopNamedTimer(timerKey)
-    }
-    res.json({ success: true, message: `${kingdoms} Kingdoms scanner stopped` })
-  } catch (error) {
-    console.log('error', error.message)
-    return res.json({ success: false, error: error.message })
-  }
-})
-
-// Manual find and queue notification
-async function handleScanOtherKingdom(req, res) {
-  // manual scan any kingdoms, use worker_threads, no jobs
-  const { kingdoms } = req.body
-
-  console.log('kingsomd', req.body)
-  console.log('dsdf', typeof kingdoms)
-  if (!kingdoms || kingdoms.trim() === '') {
-    return res.json({ success: false, error: 'enter kingdom' })
-  }
-  console.log(`[API] scan other Kingdom request - kingdoms: ${kingdoms} `)
-
-  const kingdomList = kingdoms
-    .split(',')
-    .map(k => parseInt(k.trim()))
-    .filter(k => kingdomUrls[k])
-
-  if (kingdomList.length === 0) {
-    return res.json({ success: false, error: 'no valid kingdoms' })
-  }
-
-  try {
-    for (const kingdom of kingdomList) {
-      await scanKingdom(kingdom, false /* dont save objects */)
-    }
-  } catch (error) {
-    console.log('error', error.message)
-    return res.json({ success: false, error: error.message })
-  }
-
-  res.json({
-    success: true
-  })
-}
-
-app.post('/api/scan-other-kingdoms-now', handleScanOtherKingdom)
 
 // async (req, res) => {
 // const { kingdoms } = req.body
