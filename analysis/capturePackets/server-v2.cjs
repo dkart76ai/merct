@@ -30,10 +30,10 @@ const {
   JOB_TYPES,
   PRIORITY
 } = require('./jobs/index.js')
-const { getPool, processPacket, scanKingdom } = require('./lib/workerPool')
+const { getPool, processPacket, scanKingdom } = require('./lib/workerPool.js')
 
-const staticIdRedis = require('./lib/staticIdRedis')
-const { setChatPage, sendMessage, notifyDiscord } = require('./jobs/chatSender')
+const staticIdRedis = require('./lib/staticIdRedis.js')
+const { setChatPage, getChatPage, sendMessage, notifyDiscord } = require('./jobs/chatSender.js')
 const {
   scanKingdomHandler,
   // extractObjectsHandler,
@@ -41,7 +41,7 @@ const {
   findObjectsHandler,
   notificationHandler
   // processPacketHandler
-} = require('./jobs/handlers')
+} = require('./jobs/handlers/index.js')
 
 const {
   initDb,
@@ -53,6 +53,7 @@ const {
 } = require('./lib/database.js')
 const { getRedis } = require('./lib/redis.js')
 loadEnvFile()
+const CHAT_CHANNEL_URL = process.env.CHAT_CHANNEL_URL || ''
 
 const config = {
   accountUser: process.env.CHAT_ACCOUNT_USER,
@@ -181,6 +182,9 @@ let browser = null
 let context = null
 let page = null
 let gameLoaded = false
+let websocketHooked = false
+let captureHooked = false
+let sendBirdHooked = false
 // let captures = []
 // let captureIndex = 0
 let capturingEnabled = false
@@ -406,6 +410,7 @@ async function extractChatStaticIds(message) {
 
 function setupWebsocketListener() {
   if (!page) return
+  if (websocketHooked) return
 
   page.on('websocket', async ws => {
     console.log(`[${new Date().toLocaleTimeString()}] WebSocket opened: ${ws.url()}`)
@@ -427,6 +432,8 @@ function setupWebsocketListener() {
       console.log(`[${new Date().toLocaleTimeString()}] WebSocket closed`)
     })
   })
+
+  websocketHooked = true
 }
 
 async function getGameChatChannels() {
@@ -458,6 +465,8 @@ async function getGameChatChannels() {
 
 async function patchSendbird() {
   if (!page) return
+  if (sendBirdHooked) return
+
   // Patch Triumph.framework.js to expose SendBirdHelper globally
   await page.route('**/Triumph.framework.js', async route => {
     try {
@@ -467,6 +476,16 @@ async function patchSendbird() {
         'var SendBirdHelper = {',
         'var SendBirdHelper = window.SendBirdHelper = {'
       )
+
+      body = body.replace(
+        'SendBirdHelper.callDataHandler("OnMessageReceived", data)',
+        `SendBirdHelper.callDataHandler("OnMessageReceived", data);
+         if (typeof window.onCommandFound === 'function') {
+           window.onCommandFound(data)
+         }
+           `
+      )
+      console.log('bodytriump', body)
       await route.fulfill({ response, body })
       console.log(`  🔧 Triumph.framework.js patched`)
     } catch (e) {
@@ -474,10 +493,42 @@ async function patchSendbird() {
       await route.continue()
     }
   })
+
+  // 1. Exponer función para que el Worker de BullMQ pueda enviar mensajes
+  // await page.exposeFunction('sendChatMessage', async (channelUrl, message, data) => {
+  // codigo contenido, ejm page.evaluate(...)
+  // })
+
+  // eso crea un window.sendChatMessage(channelUrl, message, data) encapsula codigo contenido
+  // pa que quede mejor organizado
+  //luego en otra parte, para acceder al objeto window y al metodo sendChatMessage
+  //await globalPage.sendChatMessage(url,'msg',{a:1})
+  const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
+  const validChannels = [activeChatChannel, CHAT_CHANNEL_URL].filter(Boolean)
+
+  // await page.addInitScript(channels => {
+  //   console.log('valid channels setted', channels)
+  //   window.BOT_VALID_CHANNELS = channels
+  // }, validChannels)
+
+  // Escuchar cuando el script inyectado detecta un @find
+  await page.exposeFunction('onCommandFound', ({ channel, message }) => {
+    // const [, amount, objectType, level] = message.split(' ')
+    console.log('bot message', channel, message)
+
+    // if (!validChannels.includes(channel.url)) return
+
+    // if (message.message?.startsWith('@find')) {
+    //   // findQueue.add('FIND_OBJECT', { ...data, amount, objectType, level })
+    // }
+  })
+
+  sendBirdHooked = true
 }
 
 function setupPacketCaptureListener() {
   if (!page) return
+  if (captureHooked) return
 
   page.on('response', async response => {
     const url = response.url()
@@ -531,6 +582,8 @@ function setupPacketCaptureListener() {
       console.error('Capture error:', e.message)
     }
   })
+
+  captureHooked = true
 }
 
 async function browserInitialize() {
@@ -615,11 +668,27 @@ app.get('/api/gameChatChannels', async (req, res) => {
   }
 })
 
+async function updateValidChannels(newChannel) {
+  if (!page) return
+
+  const newChannels = [newChannel, CHAT_CHANNEL_URL].filter(Boolean)
+
+  // Inyectamos el nuevo valor directamente en la memoria del navegador
+  await page.evaluate(channels => {
+    if (window.BOT_VALID_CHANNELS) {
+      window.BOT_VALID_CHANNELS = channels
+      console.log('Canales de bot actualizados:', channels)
+    }
+  }, newChannels)
+}
+
 app.post('/api/gameChatChannels', async (req, res) => {
   try {
     const { channel } = req.body
     console.log('setting chat channel', channel)
     await redisClient.set(ACTIVE_CHAT_CHANNEL, channel)
+
+    updateValidChannels(channel)
 
     res.json({ success: true, message: `chat channel set to ${channel}`, channel })
   } catch (error) {
@@ -649,19 +718,6 @@ app.post('/api/scanKingdom', handleScanKingdom)
 app.post('/api/timer/start', handleStartTimer)
 
 app.post('/api/timer/stop', handleStopTimer)
-
-app.post('/api/browser/stop', async (req, res) => {
-  try {
-    if (browser) {
-      await browser.close()
-      browser = null
-      page = null
-    }
-    res.json({ success: true })
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message })
-  }
-})
 
 // Health check endpoint for Docker
 
@@ -793,7 +849,7 @@ app.post('/api/browser/start', async (req, res) => {
     await browserInitialize()
 
     setupWebsocketListener()
-    patchSendbird()
+    await patchSendbird()
 
     setupPacketCaptureListener()
 
@@ -832,6 +888,9 @@ app.post('/api/browser/stop', async (req, res) => {
       browser = null
       page = null
       context = null
+      websocketHooked = false
+      captureHooked = false
+      sendBirdHooked = false
     }
     res.json({ success: true })
   } catch (error) {

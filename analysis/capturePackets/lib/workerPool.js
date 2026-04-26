@@ -39,10 +39,17 @@ function getPool() {
           console.log('Mensaje recibido del worker:', msg)
           // Aquí verás: { coords: { k: o.kingdom, x: o.x, y: o.y }, staticId: o.staticId }
           if (msg.cmd === 'merc') {
+            //creae a merc queue pool for mercs into game chat
             sendMessage('', msg.coords, msg.staticId)
+
+            // send directly to discord, no queue needed
             notifyDiscord('', msg.coords)
           } else if (msg.cmd === 'sendmsg') {
-            sendMessage(msg.reason, msg.coords, msg.staticId)
+            // cant spam, error too many messages
+            // must set a job
+            // that sends msg every 5 minutes or so
+            // create  a queue pool, where to extract messages to send
+            // sendMessage(msg.reason, msg.coords, msg.staticId)
           }
         })
         console.log(`[Worker Pool] Initialized with ${WORKER_POOL_SIZE} threads`)

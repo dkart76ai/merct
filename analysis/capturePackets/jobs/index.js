@@ -138,7 +138,7 @@ async function startWorker(handlers) {
     },
     {
       connection,
-      concurrency: 5,
+      concurrency: 5, // process 5 jobs at same time
       limiter: {
         max: 10,
         duration: 1000

@@ -4,8 +4,8 @@
   "description": "Browser packet capture with Playwright and BullMQ job processing",
   "main": "server-v2.js",
   "scripts": {
-    "start": "node --max-old-space-size=8192 server-v2.js",
-    "dev": "node --max-old-space-size=8192 server-v2.js",
+    "start": "node --max-old-space-size=8192 server-v2.cjs",
+    "dev": "node --max-old-space-size=8192 server-v2.cjs",
     "old": "node --max-old-space-size=8192 server.js"
   },
   "dependencies": {

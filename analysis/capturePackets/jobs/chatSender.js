@@ -97,22 +97,39 @@ async function sendMessage(msg = '', coord = null, staticId = 400) {
           return { success: false, error: 'SendBirdHelper not ready', state }
         }
         console.log('dentro chat channel', channelUrl)
+
+        // //TODO: testing hide channel :D
+        // var foundIndex = window.SendBirdHelper.channelsList.findIndex(function (ch, index, array) {
+        //   return channelUrl == ch.url
+        // })
+        // if (foundIndex != -1) {
+        //   window.SendBirdHelper.channelsList.splice(foundIndex, 1)
+        // }
+
         // find channel in existing list or fetch it
         let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
         if (!channel) {
+          console.log('fetching channel from SB', channelUrl)
           channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
         }
-        const msg = await channel.sendUserMessage({
-          message,
-          customType: 'user',
-          data
-        })
-        console.log('message sent')
-        return { success: true, messageId: msg.messageId }
-      } catch (e) {
-        console.error(`[chat-sender] Discord sendmessage failed:`, error.message)
 
-        return { success: false, error: e.message }
+        if (channel) {
+          channel.markAsRead(null)
+          await channel.sendUserMessage({
+            message,
+            customType: 'user',
+            data
+          })
+
+          console.log('message sent')
+        } else {
+          console.log('no channel found, maybe is hidden ^_^')
+        }
+        return { success: true }
+      } catch (err) {
+        console.error(`[chat-sender] Sendmessage failed:`, err.message)
+
+        return { success: false, error: err.message }
       }
     },
     { channelUrl: chatChannel, data, message }
