@@ -134,7 +134,21 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
         `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, lvl:${dbEntry?.level}-${dbEntry?.name || 'unknown'} level:${o.level}`
       )
 
-      parentPort.postMessage({ coords: { k: o.kingdom, x: o.x, y: o.y }, staticId: o.staticId })
+      parentPort.postMessage({
+        cmd: 'sendmsg',
+        reason: 'missing data',
+        coords: { k: o.kingdom, x: o.x, y: o.y },
+        staticId: o.staticId
+      })
+    }
+
+    if (o.staticId === 400) {
+      parentPort.postMessage({
+        cmd: 'merc',
+        reason: '',
+        coords: { k: o.kingdom, x: o.x, y: o.y },
+        staticId: o.staticId
+      })
     }
     // END NOTE
   })

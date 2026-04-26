@@ -4,7 +4,7 @@ const {
   processPacket: processPacketSync,
   scanKingdom: scanKingdomSync
 } = require('../workers/tasks')
-const { sendMessage } = require('../jobs/chatSender')
+const { sendMessage, notifyDiscord } = require('../jobs/chatSender')
 // Toggle for fallback
 const USE_WORKERS = process.env.USE_WORKERS !== 'false'
 const WORKER_POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 8
@@ -38,7 +38,12 @@ function getPool() {
         pool.on('message', msg => {
           console.log('Mensaje recibido del worker:', msg)
           // Aquí verás: { coords: { k: o.kingdom, x: o.x, y: o.y }, staticId: o.staticId }
-          sendMessage('', msg.coords, msg.staticId, false)
+          if (msg.cmd === 'merc') {
+            sendMessage('', msg.coords, msg.staticId)
+            notifyDiscord('', msg.coords)
+          } else if (msg.cmd === 'sendmsg') {
+            sendMessage(msg.reason, msg.coords, msg.staticId)
+          }
         })
         console.log(`[Worker Pool] Initialized with ${WORKER_POOL_SIZE} threads`)
       } catch (e) {

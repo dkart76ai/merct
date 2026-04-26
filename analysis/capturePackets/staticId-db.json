@@ -373,7 +373,7 @@
   },
   "96": {
     "staticId": 96,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 12
   },
@@ -679,7 +679,7 @@
   },
   "1458": {
     "staticId": 1458,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 9
   },
@@ -703,7 +703,7 @@
   },
   "1462": {
     "staticId": 1462,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 12
   },
@@ -775,7 +775,7 @@
   },
   "1474": {
     "staticId": 1474,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 17
   },
@@ -793,7 +793,7 @@
   },
   "1477": {
     "staticId": 1477,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 18
   },
@@ -943,13 +943,13 @@
   },
   "1502": {
     "staticId": 1502,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 24
   },
   "1503": {
     "staticId": 1503,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 24
   },
@@ -1033,7 +1033,7 @@
   },
   "1517": {
     "staticId": 1517,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 27
   },
@@ -1279,7 +1279,7 @@
   },
   "1558": {
     "staticId": 1558,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 35
   },
@@ -1321,7 +1321,7 @@
   },
   "1595": {
     "staticId": 1595,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 6
   },
@@ -1597,7 +1597,7 @@
   },
   "1641": {
     "staticId": 1641,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 24
   },
@@ -1837,7 +1837,7 @@
   },
   "1681": {
     "staticId": 1681,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 32
   },
@@ -1885,7 +1885,7 @@
   },
   "1689": {
     "staticId": 1689,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 33
   },
@@ -2167,7 +2167,7 @@
   },
   "1858": {
     "staticId": 1858,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 24
   },
@@ -2503,7 +2503,7 @@
   },
   "2105": {
     "staticId": 2105,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 5
   },
@@ -2545,7 +2545,7 @@
   },
   "2137": {
     "staticId": 2137,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 5
   },
@@ -3061,7 +3061,7 @@
   },
   "2533": {
     "staticId": 2533,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 25
   },
@@ -3163,7 +3163,7 @@
   },
   "2635": {
     "staticId": 2635,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 30
   },
@@ -3439,7 +3439,7 @@
   },
   "2815": {
     "staticId": 2815,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 39
   },
@@ -3583,7 +3583,7 @@
   },
   "2839": {
     "staticId": 2839,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 45
   },
@@ -3877,7 +3877,7 @@
   },
   "3511": {
     "staticId": 3511,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 30
   },
@@ -4003,7 +4003,7 @@
   },
   "150229": {
     "staticId": 150229,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 29
   },
