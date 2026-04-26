@@ -735,22 +735,22 @@ app.get('/api/timers', async (req, res) => {
   res.json({ success: true, timers: active })
 })
 
-// app.post('/api/objects/find-and-notify', async (req, res) => {
-//   const { staticId, level, amount = 10, notificationConfig } = req.body
+app.post('/api/objects/find-and-notify', async (req, res) => {
+  const { staticId, level, amount = 10, notificationConfig } = req.body
 
-//   const result = findObjects({ staticId, level, amount })
+  const result = findObjects({ staticId, level, amount })
 
-//   if (result.objects.length > 0) {
-//     await addJob(JOB_TYPES.NOTIFICATION, {
-//       type: 'objects-found',
-//       priority: PRIORITY.LOW,
-//       objects: result.objects,
-//       searchCriteria: { staticId, level, amount }
-//     })
-//   }
+  if (result.objects.length > 0) {
+    await addJob(JOB_TYPES.NOTIFICATION, {
+      type: 'objects-found',
+      priority: PRIORITY.LOW,
+      objects: result.objects,
+      searchCriteria: { staticId, level, amount }
+    })
+  }
 
-//   res.json({ success: true, ...result, notified: result.objects.length > 0 })
-// })
+  res.json({ success: true, ...result, notified: result.objects.length > 0 })
+})
 
 // async (req, res) => {
 // const { kingdoms } = req.body
@@ -860,7 +860,7 @@ async function main() {
   await ensureSaveDir()
   initDb()
   await staticIdRedis.init()
-  //startCleanup()
+  startCleanup()
 
   // console.log('staticid', Object.keys(staticIdDB))
   // console.log(
