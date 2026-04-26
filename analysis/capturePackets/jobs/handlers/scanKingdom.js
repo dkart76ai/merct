@@ -1,6 +1,3 @@
-const { addJob, JOB_TYPES, PRIORITY } = require('../index')
-const { getRedis } = require('../../lib/redis.js')
-const { kingdomUrls } = require('../../lib/kingdomUrls.js')
 const { scanKingdom } = require('../../lib/workerPool.js')
 
 async function scanKingdomHandler(payload) {

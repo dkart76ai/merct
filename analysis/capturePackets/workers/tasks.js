@@ -1,7 +1,7 @@
 const { styleText } = require('node:util')
 
 console.log(styleText('green', 'This is green!'))
-
+const { parentPort } = require('worker_threads')
 const { Piscina } = require('piscina')
 const path = require('path')
 const { kingdomUrls } = require('../lib/kingdomUrls.js')
@@ -11,7 +11,7 @@ const {
   encodeMsgPack2MultiFragments,
   scanPacket312
 } = require('../lib/messagePack.js')
-const staticIdDB = require('../staticId.js')
+const staticIdRedis = require('../lib/staticIdRedis')
 const { getRedis } = require('../lib/redis')
 const { saveObjects } = require('../lib/database')
 
@@ -20,13 +20,6 @@ const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
 //---------------------------------
 // Task handlers for Piscina
 //---------------------------------
-staticIdDB.loadStaticDb()
-// console.log('staticid', Object.keys(staticIdDB))
-// console.log(
-//   'test staticid getter',
-//   staticIdDB.getStaticIdData(1531),
-//   'Escuadrón común de elfos lvl30'
-// )
 
 const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
   const allNumbers = []
@@ -125,21 +118,23 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   console.log('scanPacket312: players42:', players42.length)
   console.log('scanPacket312: objects12:', objects12.length)
 
-  objects12.forEach(o => {
-    const dbEntry = staticIdDB.getStaticIdData(o.staticId)
+  objects12.forEach(async o => {
+    const dbEntry = await staticIdRedis.getStaticIdData(o.staticId)
 
     const isComplete =
       dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level != null && dbEntry.level >= 0
 
     // NOTE : dont delete static id updater
     if (!isComplete) {
-      staticIdDB.addOrUpdateStaticId(o.staticId, {
+      await staticIdRedis.addOrUpdateStaticId(o.staticId, {
         level: o.level
       })
 
       console.log(
         `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, lvl:${dbEntry?.level}-${dbEntry?.name || 'unknown'} level:${o.level}`
       )
+
+      parentPort.postMessage({ coords: { k: o.kingdom, x: o.x, y: o.y }, staticId: o.staticId })
     }
     // END NOTE
   })

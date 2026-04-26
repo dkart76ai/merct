@@ -4,7 +4,10 @@ loadEnvFile()
 let globalPage = null
 const channelUrl = process.env.CHAT_CHANNEL_URL || ''
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK || ''
-const staticIdDB = require('../staticId.js')
+const staticIdRedis = require('../lib/staticIdRedis')
+const { getRedis } = require('../lib/redis.js')
+
+const ACTIVE_CHAT_CHANNEL = 'CONFIG:ACTIVE_CHAT_CHANNEL'
 
 console.log('[ChatSender] Initialized', DISCORD_WEBHOOK, channelUrl)
 
@@ -26,8 +29,8 @@ async function notifyDiscord(msg = '', coord = null) {
   try {
     let message = msg
     if (coord) {
-      const dbEntry = staticIdDB.getStaticIdData(staticId)
-      message = `K:${coord.k} X:${coord.x} Y:${coord.y} ${dbEntry.name || ''} (${msg})`
+      const dbEntry = await staticIdRedis.getStaticIdData(coord.staticId)
+      message = `K:${coord.k} X:${coord.x} Y:${coord.y} ${dbEntry?.name || ''} (${msg})`
     }
     await fetch(DISCORD_WEBHOOK, {
       method: 'POST',
@@ -42,18 +45,26 @@ async function notifyDiscord(msg = '', coord = null) {
 }
 
 async function sendMessage(msg = '', coord = null, staticId = 400) {
-  if (!channelUrl) {
-    console.log('[ChatSender] No channelUrl configured')
+  const redisClient = getRedis()
+  const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
+  if (!activeChatChannel && !channelUrl) {
+    console.log('[ChatSender] No active chat channel')
     return
   }
 
-  const page = getChatPage()
-  if (!page) return
+  const chatChannel = activeChatChannel || channelUrl
+
+  let page = getChatPage()
+
+  if (!page) {
+    console.log('no page')
+    return
+  }
 
   let data = ''
   let message = msg
   if (!!coord) {
-    const dbEntry = staticIdDB.getStaticIdData(staticId)
+    const dbEntry = await staticIdRedis.getStaticIdData(staticId)
 
     data = JSON.stringify({
       subs: {
@@ -77,6 +88,7 @@ async function sendMessage(msg = '', coord = null, staticId = 400) {
       try {
         // use game's own SendBirdHelper — no new connection needed
         if (!window.SendBirdHelper?.sb) {
+          console.log('no sendbird')
           return { success: false, error: 'SendBirdHelper not ready' }
         }
         const state = window.SendBirdHelper?.sb.connectionState
@@ -84,7 +96,7 @@ async function sendMessage(msg = '', coord = null, staticId = 400) {
           console.log('chat not connected')
           return { success: false, error: 'SendBirdHelper not ready', state }
         }
-
+        console.log('dentro chat channel', channelUrl)
         // find channel in existing list or fetch it
         let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
         if (!channel) {
@@ -95,6 +107,7 @@ async function sendMessage(msg = '', coord = null, staticId = 400) {
           customType: 'user',
           data
         })
+        console.log('message sent')
         return { success: true, messageId: msg.messageId }
       } catch (e) {
         console.error(`[chat-sender] Discord sendmessage failed:`, error.message)
@@ -102,7 +115,7 @@ async function sendMessage(msg = '', coord = null, staticId = 400) {
         return { success: false, error: e.message }
       }
     },
-    { channelUrl: config.channelUrl, data, message }
+    { channelUrl: chatChannel, data, message }
   )
 }
 

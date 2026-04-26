@@ -32,7 +32,7 @@ const {
 } = require('./jobs/index.js')
 const { getPool, processPacket, scanKingdom } = require('./lib/workerPool')
 
-const staticIdDB = require('./staticId.js')
+const staticIdRedis = require('./lib/staticIdRedis')
 const { setChatPage, sendMessage, notifyDiscord } = require('./jobs/chatSender')
 const {
   scanKingdomHandler,
@@ -184,7 +184,6 @@ let gameLoaded = false
 // let captures = []
 // let captureIndex = 0
 let capturingEnabled = false
-let unknownStaticIds = new Map() // staticId -> { coords: Set of "k,x,y" }
 const redisClient = getRedis()
 
 async function ensureSaveDir() {
@@ -377,7 +376,7 @@ async function handleScanOtherKingdom(req, res) {
 
 app.post('/api/scan-other-kingdoms-now', handleScanOtherKingdom)
 
-function extractChatStaticIds(message) {
+async function extractChatStaticIds(message) {
   if (!message || typeof message !== 'string') return
   if (!message.startsWith('MESG')) return
 
@@ -392,23 +391,10 @@ function extractChatStaticIds(message) {
         for (const key in data.subs) {
           const sub = data.subs[key]
           if (sub.staticId && sub.entryType) {
-            staticIdDB.addOrUpdateStaticId(sub.staticId, {
+            await staticIdRedis.addOrUpdateStaticId(sub.staticId, {
               entryType: sub.entryType,
               name: sub.name || null
             })
-
-            const unknown = unknownStaticIds.get(String(sub.staticId))
-
-            const isComplete =
-              unknown &&
-              unknown.name &&
-              unknown.entryType &&
-              unknown.level != null &&
-              unknown.level >= 0
-
-            if (isComplete) {
-              unknownStaticIds.delete(sub.staticId)
-            }
           }
         }
       }
@@ -873,7 +859,7 @@ async function main() {
 
   await ensureSaveDir()
   initDb()
-  staticIdDB.loadStaticDb()
+  await staticIdRedis.init()
   //startCleanup()
 
   // console.log('staticid', Object.keys(staticIdDB))
@@ -916,6 +902,8 @@ async function main() {
 
   process.on('SIGINT', async () => {
     console.log('\n[Main] Shutting down...')
+    await staticIdRedis.dump()
+    await staticIdRedis.close()
     await stopWorker()
     await cleanOldJobs()
     console.log('[Main] Cleaning Redis...')
@@ -927,6 +915,8 @@ async function main() {
 
   process.on('SIGTERM', async () => {
     console.log('\n[Main] Shutting down...')
+    await staticIdRedis.dump()
+    await staticIdRedis.close()
     await stopWorker()
     await cleanOldJobs()
     console.log('[Main] Cleaning Redis...')
