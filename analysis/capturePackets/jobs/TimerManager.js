@@ -77,18 +77,20 @@ class TimerManager {
   isRunning(kingdom) {
     return this.timers.has(`kingdom:${kingdom}`)
   }
+
   stopScan(kingdom) {
     return this.stopByKey(`kingdom:${kingdom}`)
   }
 
+  async stopByKeyFull(key) {
+    return this.stopByKey(key)
+  }
+
   async getNextRunTimes() {
     // 1. Obtenemos todos los cronómetros activos directamente de Redis
-    const repeatableJobs = await this.queue.getRepeatableJobs()
+    const repeatableJobs = await this.queue.getJobSchedulers()
 
     const schedule = repeatableJobs.map(job => {
-      // Intentamos buscar datos extra en nuestro Map local usando el jobId (que es job.id)
-      const localData = this.timers.get(job.id)
-
       return {
         key: job.id,
         jobName: job.name,
@@ -96,7 +98,7 @@ class TimerManager {
         nextRunTimestamp: job.next,
         remainingMs: job.next - Date.now(),
         interval: job.every,
-        data: localData?.data || {} // Datos que guardamos originalmente
+        data: job.data || {} // Datos que guardamos originalmente
       }
     })
 
@@ -106,7 +108,7 @@ class TimerManager {
 
   async getNextScanForKingdom(kingdom) {
     const timerKey = `kingdom:${kingdom}`
-    const allJobs = await this.queue.getRepeatableJobs()
+    const allJobs = await this.queue.getJobSchedulers()
 
     const job = allJobs.find(j => j.id === timerKey)
 
@@ -120,7 +122,7 @@ class TimerManager {
   }
 
   async getHealthReport() {
-    const jobs = await this.queue.getRepeatableJobs()
+    const jobs = await this.queue.getJobSchedulers()
     const now = Date.now()
 
     return jobs.map(job => {
@@ -137,20 +139,17 @@ class TimerManager {
 
   async getActiveTimers() {
     // 1. Obtenemos todos los cronómetros registrados en Redis
-    const repeatableJobs = await this.queue.getRepeatableJobs()
+    const repeatableJobs = await this.queue.getJobSchedulers()
 
     return repeatableJobs.map(job => {
-      // 2. Intentamos recuperar los datos originales guardados en nuestro Map
-      const localInfo = this.timers.get(job.id)
-      console.log('getActiveTimers', { job, localInfo })
-
       return {
         id: job.id, // Ej: "kingdom:123" o "custom:mi-tarea"
         name: job.name, // El JOB_TYPES (ej: SCAN_KINGDOM)
-        interval: job.every, // Cada cuántos ms se ejecuta
+        interval: s.cron || job.every, // Cada cuántos ms se ejecuta
         nextRunAt: new Date(job.next).toLocaleString(), // Próxima ejecución legible
-        data: localInfo?.data || {}, // Los datos que le pasaste al programarlo
-        key: job.key // La llave interna de BullMQ (por si quieres borrarla)
+        data: s.data || {}, // Los datos que le pasaste al programarlo
+        key: job.key, // La llave interna de BullMQ (por si quieres borrarla)
+        retries: job.opts?.attempds || 1
       }
     })
   }
@@ -159,7 +158,7 @@ class TimerManager {
     console.log('[Timer] Sincronizando timers con Redis...')
 
     // 1. Obtener todos los trabajos repetibles actuales de la base de datos
-    const repeatableJobs = await this.queue.getRepeatableJobs()
+    const repeatableJobs = await this.queue.getJobSchedulers()
 
     for (const job of repeatableJobs) {
       // 2. Reconstruimos el Map local
@@ -167,10 +166,7 @@ class TimerManager {
       this.timers.set(job.id, {
         jobName: job.name,
         repeat: { every: job.every },
-        // Intentamos recuperar los datos del job si es posible
-        // Nota: getRepeatableJobs no siempre trae los 'data' originales,
-        // pero sí las opciones necesarias para detenerlos (removeRepeatable).
-        data: {}
+        data: job.data
       })
     }
 

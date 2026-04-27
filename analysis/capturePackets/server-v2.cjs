@@ -263,7 +263,7 @@ async function handleStopTimer(req, res) {
 
 // Scan for other kingdoms timer
 app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
-  const { interval = 60000, kingdoms } = req.body
+  const { interval = 60000, kingdoms, key } = req.body
   console.log('kingdom', req.body)
 
   if (!kingdoms || kingdoms.trim() === '') {
@@ -279,7 +279,7 @@ app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
     return res.json({ success: false, error: 'no valid kingdoms' })
   }
 
-  await redisClient.set(SCAN_OTHER_KINGDOMS_KEY, kingdoms)
+  await redisClient.set(SCAN_OTHER_KINGDOMS_KEY + key, kingdoms)
 
   const timerManager = await getTimerManager()
 
@@ -312,7 +312,8 @@ app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
 })
 
 app.post('/api/timer/stop-scan-other-kingdoms', async (req, res) => {
-  const kingdoms = await redisClient.get(SCAN_OTHER_KINGDOMS_KEY)
+  const { key } = req.body
+  const kingdoms = await redisClient.get(SCAN_OTHER_KINGDOMS_KEY + key)
   if (!kingdoms) {
     return res.json({ success: false, error: 'no kingdoms, already stoped' })
   }
@@ -330,8 +331,8 @@ app.post('/api/timer/stop-scan-other-kingdoms', async (req, res) => {
 
   try {
     for (const kingdom of kingdomList) {
-      const timerKey = `kingdom-scanner-${kingdom}`
-      await timerManager.stopScan(timerKey)
+      const timerKey = `custom:kingdom-scanner-${kingdom}`
+      await timerManager.stopByKey(timerKey)
     }
 
     await redisClient.del(SCAN_OTHER_KINGDOMS_KEY)

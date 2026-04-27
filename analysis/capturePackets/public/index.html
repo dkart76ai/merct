@@ -274,6 +274,26 @@
       </div>
     </div>
 
+    <div class="panel">
+      <div class="controls" style="padding: 15px">
+        <input type="text" id="otherKingdoms2" placeholder="147,142,143" style="width: 250px" />
+
+        <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
+        <button id="btnScanOtherKingdomsNow2">Scan Now</button>
+        <div style="margin-left: 32px">
+          <span class="section-title">Interval (ms):</span>
+          <input
+            type="number"
+            id="timerIntervalOtherKingdoms2"
+            value="60000"
+            style="width: 100px"
+          />
+        </div>
+        <button id="btnScanOtherKingdomStart2">Start Timer</button>
+        <button id="btnScanOtherKingdomStop2" class="danger">Stop Timer</button>
+      </div>
+    </div>
+
     <!-- Active Timers -->
     <div class="panel">
       <div class="panel-header">Active Timers</div>
@@ -583,6 +603,20 @@
           log('Error: ' + data.error)
         }
       })
+      document.getElementById('btnScanOtherKingdomsNow2').addEventListener('click', async () => {
+        const otherKingdoms = document.getElementById('otherKingdoms2').value
+        const res = await fetch(API + '/scan-other-kingdoms-now', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kingdoms: otherKingdoms })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
 
       document.getElementById('btnScanOtherKingdomStart').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms').value
@@ -591,7 +625,23 @@
         const res = await fetch(API + '/timer/scan-other-kingdoms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ interval, kingdoms: otherKingdoms })
+          body: JSON.stringify({ interval, kingdoms: otherKingdoms, key: '1' })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+      document.getElementById('btnScanOtherKingdomStart2').addEventListener('click', async () => {
+        const otherKingdoms = document.getElementById('otherKingdoms2').value
+        const interval =
+          parseInt(document.getElementById('timerIntervalOtherKingdoms2').value) || 60000
+        const res = await fetch(API + '/timer/scan-other-kingdoms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ interval, kingdoms: otherKingdoms, key: '2' })
         })
         const data = await res.json()
         if (data.success) {
@@ -603,7 +653,23 @@
 
       document.getElementById('btnScanOtherKingdomStop').addEventListener('click', async () => {
         const res = await fetch(API + '/timer/stop-scan-other-kingdoms', {
-          method: 'POST'
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: '1' })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
+      document.getElementById('btnScanOtherKingdomStop2').addEventListener('click', async () => {
+        const res = await fetch(API + '/timer/stop-scan-other-kingdoms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: '2' })
         })
         const data = await res.json()
         if (data.success) {

@@ -2,12 +2,12 @@
   "4": {
     "staticId": 4,
     "entryType": "user",
-    "name": "Ottoman Empire",
+    "name": "GoldShark ROU",
     "level": null
   },
   "10": {
     "staticId": 10,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 1
   },
@@ -19,19 +19,19 @@
   },
   "12": {
     "staticId": 12,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 3
   },
   "13": {
     "staticId": 13,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 4
   },
   "14": {
     "staticId": 14,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
@@ -49,7 +49,7 @@
   },
   "17": {
     "staticId": 17,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 8
   },
@@ -67,7 +67,7 @@
   },
   "20": {
     "staticId": 20,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 11
   },
@@ -85,13 +85,13 @@
   },
   "23": {
     "staticId": 23,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 14
   },
   "24": {
     "staticId": 24,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -109,7 +109,7 @@
   },
   "27": {
     "staticId": 27,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 18
   },
@@ -133,13 +133,13 @@
   },
   "31": {
     "staticId": 31,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 22
   },
   "32": {
     "staticId": 32,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
@@ -151,7 +151,7 @@
   },
   "34": {
     "staticId": 34,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -211,7 +211,7 @@
   },
   "69": {
     "staticId": 69,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
@@ -229,7 +229,7 @@
   },
   "72": {
     "staticId": 72,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 13
   },
@@ -241,13 +241,13 @@
   },
   "74": {
     "staticId": 74,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "75": {
     "staticId": 75,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 16
   },
@@ -271,13 +271,13 @@
   },
   "79": {
     "staticId": 79,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "80": {
     "staticId": 80,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
@@ -289,19 +289,19 @@
   },
   "82": {
     "staticId": 82,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "83": {
     "staticId": 83,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "84": {
     "staticId": 84,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -313,7 +313,7 @@
   },
   "86": {
     "staticId": 86,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 2
   },
@@ -337,7 +337,7 @@
   },
   "90": {
     "staticId": 90,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 6
   },
@@ -349,7 +349,7 @@
   },
   "92": {
     "staticId": 92,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 8
   },
@@ -361,19 +361,19 @@
   },
   "94": {
     "staticId": 94,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "95": {
     "staticId": 95,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 11
   },
   "96": {
     "staticId": 96,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 12
   },
@@ -391,7 +391,7 @@
   },
   "99": {
     "staticId": 99,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -439,25 +439,25 @@
   },
   "107": {
     "staticId": 107,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "108": {
     "staticId": 108,
-    "entryType": "tile",
-    "name": "Jungla",
+    "entryType": null,
+    "name": null,
     "level": 24
   },
   "109": {
     "staticId": 109,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "110": {
     "staticId": 110,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 1
   },
@@ -481,19 +481,19 @@
   },
   "114": {
     "staticId": 114,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "115": {
     "staticId": 115,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 6
   },
   "116": {
     "staticId": 116,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 7
   },
@@ -511,7 +511,7 @@
   },
   "119": {
     "staticId": 119,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
@@ -535,25 +535,25 @@
   },
   "123": {
     "staticId": 123,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 14
   },
   "124": {
     "staticId": 124,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "125": {
     "staticId": 125,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 16
   },
   "126": {
     "staticId": 126,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 17
   },
@@ -577,19 +577,19 @@
   },
   "130": {
     "staticId": 130,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
   "131": {
     "staticId": 131,
-    "entryType": "poi",
-    "name": "Cantera",
+    "entryType": null,
+    "name": null,
     "level": 22
   },
   "132": {
     "staticId": 132,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
@@ -601,8 +601,8 @@
   },
   "134": {
     "staticId": 134,
-    "entryType": "poi",
-    "name": "Cantera",
+    "entryType": null,
+    "name": null,
     "level": 25
   },
   "199": {
@@ -625,361 +625,361 @@
   },
   "211": {
     "staticId": 211,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "400": {
     "staticId": 400,
-    "entryType": null,
+    "entryType": "poi",
     "name": null,
     "level": 10
   },
   "1450": {
     "staticId": 1450,
-    "entryType": "poi",
-    "name": "Escuadrón común de muertos vivientes",
+    "entryType": null,
+    "name": null,
     "level": 1
   },
   "1451": {
     "staticId": 1451,
-    "entryType": "poi",
-    "name": "Escuadrón común de elfos",
+    "entryType": null,
+    "name": null,
     "level": 2
   },
   "1452": {
     "staticId": 1452,
-    "entryType": "poi",
-    "name": "Escuadrón común de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 3
   },
   "1453": {
     "staticId": 1453,
-    "entryType": "poi",
-    "name": "Escuadrón común de bárbaros",
+    "entryType": null,
+    "name": null,
     "level": 4
   },
   "1454": {
     "staticId": 1454,
-    "entryType": "poi",
-    "name": "Escuadrón común infernal",
+    "entryType": null,
+    "name": null,
     "level": 5
   },
   "1455": {
     "staticId": 1455,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 6
   },
   "1456": {
     "staticId": 1456,
-    "entryType": "poi",
-    "name": "Escuadrón común de elfos",
+    "entryType": null,
+    "name": null,
     "level": 7
   },
   "1457": {
     "staticId": 1457,
-    "entryType": "poi",
-    "name": "Escuadrón común de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 8
   },
   "1458": {
     "staticId": 1458,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 9
   },
   "1459": {
     "staticId": 1459,
-    "entryType": "poi",
-    "name": "Escuadrón común infernal",
+    "entryType": null,
+    "name": null,
     "level": 10
   },
   "1460": {
     "staticId": 1460,
-    "entryType": "poi",
-    "name": "Escuadrón común de muertos vivientes",
+    "entryType": null,
+    "name": null,
     "level": 11
   },
   "1461": {
     "staticId": 1461,
-    "entryType": "poi",
-    "name": "Escuadrón común de elfos",
+    "entryType": null,
+    "name": null,
     "level": 11
   },
   "1462": {
     "staticId": 1462,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 12
   },
   "1463": {
     "staticId": 1463,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 12
   },
   "1464": {
     "staticId": 1464,
-    "entryType": "poi",
-    "name": "Escuadrón común infernal",
+    "entryType": null,
+    "name": null,
     "level": 13
   },
   "1465": {
     "staticId": 1465,
-    "entryType": "poi",
-    "name": "Escuadrón común de muertos vivientes",
+    "entryType": null,
+    "name": null,
     "level": 13
   },
   "1466": {
     "staticId": 1466,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 14
   },
   "1467": {
     "staticId": 1467,
-    "entryType": "poi",
-    "name": "Escuadrón común de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 14
   },
   "1468": {
     "staticId": 1468,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "1469": {
     "staticId": 1469,
-    "entryType": "poi",
-    "name": "Escuadrón común infernal",
+    "entryType": null,
+    "name": null,
     "level": 15
   },
   "1470": {
     "staticId": 1470,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 16
   },
   "1471": {
     "staticId": 1471,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 16
   },
   "1472": {
     "staticId": 1472,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 16
   },
   "1473": {
     "staticId": 1473,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 17
   },
   "1474": {
     "staticId": 1474,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 17
   },
   "1475": {
     "staticId": 1475,
-    "entryType": "poi",
-    "name": "Escuadrón común de muertos vivientes",
+    "entryType": null,
+    "name": null,
     "level": 17
   },
   "1476": {
     "staticId": 1476,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 18
   },
   "1477": {
     "staticId": 1477,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 18
   },
   "1478": {
     "staticId": 1478,
-    "entryType": "poi",
-    "name": "Escuadrón común de bárbaros",
+    "entryType": null,
+    "name": null,
     "level": 18
   },
   "1479": {
     "staticId": 1479,
-    "entryType": "poi",
-    "name": "Escuadrón común infernal",
+    "entryType": null,
+    "name": null,
     "level": 19
   },
   "1480": {
     "staticId": 1480,
-    "entryType": "poi",
-    "name": "Escuadrón común de muertos vivientes",
+    "entryType": null,
+    "name": null,
     "level": 19
   },
   "1481": {
     "staticId": 1481,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 19
   },
   "1482": {
     "staticId": 1482,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "1483": {
     "staticId": 1483,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "1484": {
     "staticId": 1484,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "1485": {
     "staticId": 1485,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
   "1486": {
     "staticId": 1486,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
   "1487": {
     "staticId": 1487,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
   "1488": {
     "staticId": 1488,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
   "1489": {
     "staticId": 1489,
-    "entryType": "poi",
-    "name": "Escuadrón común infernal",
+    "entryType": null,
+    "name": null,
     "level": 21
   },
   "1490": {
     "staticId": 1490,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 22
   },
   "1491": {
     "staticId": 1491,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 22
   },
   "1492": {
     "staticId": 1492,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 22
   },
   "1493": {
     "staticId": 1493,
-    "entryType": "poi",
-    "name": "Escuadrón común de bárbaros",
+    "entryType": null,
+    "name": null,
     "level": 22
   },
   "1494": {
     "staticId": 1494,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 22
   },
   "1495": {
     "staticId": 1495,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "1496": {
     "staticId": 1496,
-    "entryType": "poi",
-    "name": "Escuadrón común de elfos",
+    "entryType": null,
+    "name": null,
     "level": 23
   },
   "1497": {
     "staticId": 1497,
-    "entryType": "poi",
-    "name": "Escuadrón común de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 23
   },
   "1498": {
     "staticId": 1498,
-    "entryType": "poi",
-    "name": "Escuadrón común de bárbaros",
+    "entryType": null,
+    "name": null,
     "level": 23
   },
   "1499": {
     "staticId": 1499,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "1500": {
     "staticId": 1500,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1501": {
     "staticId": 1501,
-    "entryType": "poi",
-    "name": "Escuadrón común de elfos",
+    "entryType": null,
+    "name": null,
     "level": 24
   },
   "1502": {
     "staticId": 1502,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1503": {
     "staticId": 1503,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1504": {
     "staticId": 1504,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1505": {
     "staticId": 1505,
-    "entryType": "poi",
-    "name": "Escuadrón común de muertos vivientes",
+    "entryType": null,
+    "name": null,
     "level": 25
   },
   "1506": {
     "staticId": 1506,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "1507": {
     "staticId": 1507,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -991,19 +991,19 @@
   },
   "1509": {
     "staticId": 1509,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "1510": {
     "staticId": 1510,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
   "1511": {
     "staticId": 1511,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
@@ -1015,475 +1015,475 @@
   },
   "1513": {
     "staticId": 1513,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
   "1514": {
     "staticId": 1514,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
   "1515": {
     "staticId": 1515,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1516": {
     "staticId": 1516,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1517": {
     "staticId": 1517,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1518": {
     "staticId": 1518,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1519": {
     "staticId": 1519,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1520": {
     "staticId": 1520,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 28
   },
   "1521": {
     "staticId": 1521,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 28
   },
   "1522": {
     "staticId": 1522,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 28
   },
   "1523": {
     "staticId": 1523,
-    "entryType": "poi",
-    "name": "Escuadrón común de bárbaros",
+    "entryType": null,
+    "name": null,
     "level": 28
   },
   "1524": {
     "staticId": 1524,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 28
   },
   "1525": {
     "staticId": 1525,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1526": {
     "staticId": 1526,
-    "entryType": "poi",
-    "name": "Escuadrón común de elfos",
+    "entryType": null,
+    "name": null,
     "level": 29
   },
   "1527": {
     "staticId": 1527,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1528": {
     "staticId": 1528,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1529": {
     "staticId": 1529,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1530": {
     "staticId": 1530,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "1531": {
     "staticId": 1531,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "1532": {
     "staticId": 1532,
-    "entryType": "poi",
-    "name": "Escuadrón común de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 30
   },
   "1533": {
     "staticId": 1533,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "1534": {
     "staticId": 1534,
-    "entryType": "poi",
-    "name": "Escuadrón común infernal",
+    "entryType": null,
+    "name": null,
     "level": 30
   },
   "1535": {
     "staticId": 1535,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
   "1536": {
     "staticId": 1536,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
   "1537": {
     "staticId": 1537,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
   "1538": {
     "staticId": 1538,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
   "1539": {
     "staticId": 1539,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
   "1540": {
     "staticId": 1540,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1541": {
     "staticId": 1541,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1542": {
     "staticId": 1542,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1543": {
     "staticId": 1543,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1544": {
     "staticId": 1544,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1545": {
     "staticId": 1545,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1546": {
     "staticId": 1546,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1547": {
     "staticId": 1547,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1548": {
     "staticId": 1548,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1549": {
     "staticId": 1549,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1550": {
     "staticId": 1550,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1551": {
     "staticId": 1551,
-    "entryType": "poi",
-    "name": "Escuadrón común de elfos",
+    "entryType": null,
+    "name": null,
     "level": 34
   },
   "1552": {
     "staticId": 1552,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1553": {
     "staticId": 1553,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1554": {
     "staticId": 1554,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1555": {
     "staticId": 1555,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1556": {
     "staticId": 1556,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1557": {
     "staticId": 1557,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1558": {
     "staticId": 1558,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1559": {
     "staticId": 1559,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1590": {
     "staticId": 1590,
-    "entryType": "poi",
-    "name": "Escuadrón raro de muertos vivientes",
+    "entryType": null,
+    "name": null,
     "level": 1
   },
   "1591": {
     "staticId": 1591,
-    "entryType": "poi",
-    "name": "Escuadrón raro de elfos",
+    "entryType": null,
+    "name": null,
     "level": 2
   },
   "1592": {
     "staticId": 1592,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 3
   },
   "1593": {
     "staticId": 1593,
-    "entryType": "poi",
-    "name": "Escuadrón raro de bárbaros",
+    "entryType": null,
+    "name": null,
     "level": 4
   },
   "1594": {
     "staticId": 1594,
-    "entryType": "poi",
-    "name": "Escuadrón raro infernal",
+    "entryType": null,
+    "name": null,
     "level": 5
   },
   "1595": {
     "staticId": 1595,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 6
   },
   "1596": {
     "staticId": 1596,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 7
   },
   "1597": {
     "staticId": 1597,
-    "entryType": "poi",
-    "name": "Escuadrón raro de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 8
   },
   "1598": {
     "staticId": 1598,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 9
   },
   "1599": {
     "staticId": 1599,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "1600": {
     "staticId": 1600,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 11
   },
   "1601": {
     "staticId": 1601,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 11
   },
   "1602": {
     "staticId": 1602,
-    "entryType": "poi",
-    "name": "Escuadrón raro de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 12
   },
   "1603": {
     "staticId": 1603,
-    "entryType": "poi",
-    "name": "Escuadrón raro de bárbaros",
+    "entryType": null,
+    "name": null,
     "level": 12
   },
   "1604": {
     "staticId": 1604,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 13
   },
   "1605": {
     "staticId": 1605,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 13
   },
   "1606": {
     "staticId": 1606,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 14
   },
   "1607": {
     "staticId": 1607,
-    "entryType": "poi",
-    "name": "Escuadrón raro de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 14
   },
   "1608": {
     "staticId": 1608,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "1609": {
     "staticId": 1609,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "1610": {
     "staticId": 1610,
-    "entryType": "poi",
-    "name": "Escuadrón raro de muertos vivientes",
+    "entryType": null,
+    "name": null,
     "level": 16
   },
   "1611": {
     "staticId": 1611,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 16
   },
   "1612": {
     "staticId": 1612,
-    "entryType": "poi",
-    "name": "Escuadrón raro de los malditos",
+    "entryType": null,
+    "name": null,
     "level": 16
   },
   "1613": {
     "staticId": 1613,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 17
   },
   "1614": {
     "staticId": 1614,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 17
   },
   "1615": {
     "staticId": 1615,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 17
   },
   "1616": {
     "staticId": 1616,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 18
   },
   "1617": {
     "staticId": 1617,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 18
   },
   "1618": {
     "staticId": 1618,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 18
   },
   "1619": {
     "staticId": 1619,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 19
   },
   "1620": {
     "staticId": 1620,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 19
   },
   "1621": {
     "staticId": 1621,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 19
   },
@@ -1495,13 +1495,13 @@
   },
   "1623": {
     "staticId": 1623,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "1624": {
     "staticId": 1624,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
@@ -1513,19 +1513,19 @@
   },
   "1626": {
     "staticId": 1626,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
   "1627": {
     "staticId": 1627,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
   "1628": {
     "staticId": 1628,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 21
   },
@@ -1537,7 +1537,7 @@
   },
   "1630": {
     "staticId": 1630,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 22
   },
@@ -1561,97 +1561,97 @@
   },
   "1634": {
     "staticId": 1634,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 22
   },
   "1635": {
     "staticId": 1635,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "1636": {
     "staticId": 1636,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "1637": {
     "staticId": 1637,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "1638": {
     "staticId": 1638,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "1639": {
     "staticId": 1639,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 23
   },
   "1640": {
     "staticId": 1640,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1641": {
     "staticId": 1641,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1642": {
     "staticId": 1642,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1643": {
     "staticId": 1643,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1644": {
     "staticId": 1644,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
   "1645": {
     "staticId": 1645,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "1646": {
     "staticId": 1646,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "1647": {
     "staticId": 1647,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "1648": {
     "staticId": 1648,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "1649": {
     "staticId": 1649,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -1663,19 +1663,19 @@
   },
   "1651": {
     "staticId": 1651,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
   "1652": {
     "staticId": 1652,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
   "1653": {
     "staticId": 1653,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
@@ -1687,31 +1687,31 @@
   },
   "1655": {
     "staticId": 1655,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1656": {
     "staticId": 1656,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1657": {
     "staticId": 1657,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1658": {
     "staticId": 1658,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
   "1659": {
     "staticId": 1659,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 27
   },
@@ -1723,97 +1723,97 @@
   },
   "1661": {
     "staticId": 1661,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 28
   },
   "1662": {
     "staticId": 1662,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 28
   },
   "1663": {
     "staticId": 1663,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 28
   },
   "1664": {
     "staticId": 1664,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 28
   },
   "1665": {
     "staticId": 1665,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1666": {
     "staticId": 1666,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1667": {
     "staticId": 1667,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1668": {
     "staticId": 1668,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1669": {
     "staticId": 1669,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 29
   },
   "1670": {
     "staticId": 1670,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "1671": {
     "staticId": 1671,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "1672": {
     "staticId": 1672,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "1673": {
     "staticId": 1673,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "1674": {
     "staticId": 1674,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "1675": {
     "staticId": 1675,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
   "1676": {
     "staticId": 1676,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
@@ -1825,133 +1825,133 @@
   },
   "1678": {
     "staticId": 1678,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
   "1679": {
     "staticId": 1679,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 31
   },
   "1680": {
     "staticId": 1680,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1681": {
     "staticId": 1681,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1682": {
     "staticId": 1682,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1683": {
     "staticId": 1683,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1684": {
     "staticId": 1684,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 32
   },
   "1685": {
     "staticId": 1685,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1686": {
     "staticId": 1686,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1687": {
     "staticId": 1687,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1688": {
     "staticId": 1688,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1689": {
     "staticId": 1689,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
   "1690": {
     "staticId": 1690,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1691": {
     "staticId": 1691,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1692": {
     "staticId": 1692,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1693": {
     "staticId": 1693,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1694": {
     "staticId": 1694,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 34
   },
   "1695": {
     "staticId": 1695,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1696": {
     "staticId": 1696,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1697": {
     "staticId": 1697,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1698": {
     "staticId": 1698,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "1699": {
     "staticId": 1699,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
@@ -2017,7 +2017,7 @@
   },
   "1760": {
     "staticId": 1760,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
@@ -2095,7 +2095,7 @@
   },
   "1773": {
     "staticId": 1773,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
@@ -2137,13 +2137,13 @@
   },
   "1811": {
     "staticId": 1811,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "1812": {
     "staticId": 1812,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -2155,25 +2155,25 @@
   },
   "1814": {
     "staticId": 1814,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "1815": {
     "staticId": 1815,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "1816": {
     "staticId": 1816,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "1817": {
     "staticId": 1817,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
@@ -2215,7 +2215,7 @@
   },
   "1856": {
     "staticId": 1856,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 22
   },
@@ -2227,7 +2227,7 @@
   },
   "1858": {
     "staticId": 1858,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
@@ -2239,7 +2239,7 @@
   },
   "1860": {
     "staticId": 1860,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 26
   },
@@ -2305,7 +2305,7 @@
   },
   "1871": {
     "staticId": 1871,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
@@ -2314,6 +2314,12 @@
     "entryType": null,
     "name": null,
     "level": 38
+  },
+  "1873": {
+    "staticId": 1873,
+    "entryType": null,
+    "name": null,
+    "level": 39
   },
   "1874": {
     "staticId": 1874,
@@ -2371,7 +2377,7 @@
   },
   "1953": {
     "staticId": 1953,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 19
   },
@@ -2455,7 +2461,7 @@
   },
   "1967": {
     "staticId": 1967,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 33
   },
@@ -2485,7 +2491,7 @@
   },
   "1972": {
     "staticId": 1972,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
@@ -2533,7 +2539,7 @@
   },
   "2050": {
     "staticId": 2050,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 16
   },
@@ -2545,7 +2551,7 @@
   },
   "2052": {
     "staticId": 2052,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 18
   },
@@ -2581,7 +2587,7 @@
   },
   "2058": {
     "staticId": 2058,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 24
   },
@@ -2683,7 +2689,7 @@
   },
   "2075": {
     "staticId": 2075,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 41
   },
@@ -2713,73 +2719,73 @@
   },
   "2101": {
     "staticId": 2101,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2102": {
     "staticId": 2102,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2103": {
     "staticId": 2103,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2104": {
     "staticId": 2104,
-    "entryType": "poi",
-    "name": "Cripta",
+    "entryType": null,
+    "name": null,
     "level": 5
   },
   "2105": {
     "staticId": 2105,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2106": {
     "staticId": 2106,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2107": {
     "staticId": 2107,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2108": {
     "staticId": 2108,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2109": {
     "staticId": 2109,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2110": {
     "staticId": 2110,
-    "entryType": "poi",
-    "name": "Cripta",
+    "entryType": null,
+    "name": null,
     "level": 5
   },
   "2111": {
     "staticId": 2111,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
   "2137": {
     "staticId": 2137,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 5
   },
@@ -2791,127 +2797,127 @@
   },
   "2202": {
     "staticId": 2202,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2203": {
     "staticId": 2203,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2204": {
     "staticId": 2204,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2205": {
     "staticId": 2205,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2206": {
     "staticId": 2206,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2207": {
     "staticId": 2207,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2208": {
     "staticId": 2208,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2209": {
     "staticId": 2209,
-    "entryType": "poi",
-    "name": "Cripta",
+    "entryType": null,
+    "name": null,
     "level": 10
   },
   "2210": {
     "staticId": 2210,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2211": {
     "staticId": 2211,
-    "entryType": "poi",
-    "name": "Cripta",
+    "entryType": null,
+    "name": null,
     "level": 10
   },
   "2237": {
     "staticId": 2237,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "2301": {
     "staticId": 2301,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2302": {
     "staticId": 2302,
-    "entryType": "poi",
-    "name": "Cripta",
+    "entryType": null,
+    "name": null,
     "level": 15
   },
   "2303": {
     "staticId": 2303,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2304": {
     "staticId": 2304,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2305": {
     "staticId": 2305,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2306": {
     "staticId": 2306,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2307": {
     "staticId": 2307,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2308": {
     "staticId": 2308,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2309": {
     "staticId": 2309,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2310": {
     "staticId": 2310,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -2947,7 +2953,7 @@
   },
   "2327": {
     "staticId": 2327,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -2965,13 +2971,13 @@
   },
   "2330": {
     "staticId": 2330,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2331": {
     "staticId": 2331,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -2983,7 +2989,7 @@
   },
   "2333": {
     "staticId": 2333,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -2995,7 +3001,7 @@
   },
   "2335": {
     "staticId": 2335,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -3007,19 +3013,19 @@
   },
   "2337": {
     "staticId": 2337,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "2401": {
     "staticId": 2401,
-    "entryType": "poi",
-    "name": "Cripta",
+    "entryType": null,
+    "name": null,
     "level": 20
   },
   "2402": {
     "staticId": 2402,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
@@ -3031,7 +3037,7 @@
   },
   "2404": {
     "staticId": 2404,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
@@ -3043,7 +3049,7 @@
   },
   "2406": {
     "staticId": 2406,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
@@ -3055,31 +3061,31 @@
   },
   "2408": {
     "staticId": 2408,
-    "entryType": "poi",
-    "name": "Cripta",
+    "entryType": null,
+    "name": null,
     "level": 20
   },
   "2409": {
     "staticId": 2409,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "2410": {
     "staticId": 2410,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "2411": {
     "staticId": 2411,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "2423": {
     "staticId": 2423,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
@@ -3097,7 +3103,7 @@
   },
   "2426": {
     "staticId": 2426,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
@@ -3109,7 +3115,7 @@
   },
   "2428": {
     "staticId": 2428,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
@@ -3145,19 +3151,19 @@
   },
   "2434": {
     "staticId": 2434,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "2435": {
     "staticId": 2435,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "2436": {
     "staticId": 2436,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
@@ -3169,19 +3175,19 @@
   },
   "2501": {
     "staticId": 2501,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "2502": {
     "staticId": 2502,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "2503": {
     "staticId": 2503,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -3199,13 +3205,13 @@
   },
   "2506": {
     "staticId": 2506,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "2507": {
     "staticId": 2507,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -3229,7 +3235,7 @@
   },
   "2511": {
     "staticId": 2511,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -3241,7 +3247,7 @@
   },
   "2524": {
     "staticId": 2524,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -3253,7 +3259,7 @@
   },
   "2526": {
     "staticId": 2526,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -3265,13 +3271,13 @@
   },
   "2528": {
     "staticId": 2528,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "2529": {
     "staticId": 2529,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -3289,13 +3295,13 @@
   },
   "2532": {
     "staticId": 2532,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "2533": {
     "staticId": 2533,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
@@ -3307,14 +3313,14 @@
   },
   "2535": {
     "staticId": 2535,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "2536": {
     "staticId": 2536,
-    "entryType": "poi",
-    "name": "Cripta épica",
+    "entryType": null,
+    "name": null,
     "level": 25
   },
   "2537": {
@@ -3337,7 +3343,7 @@
   },
   "2625": {
     "staticId": 2625,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
@@ -3367,7 +3373,7 @@
   },
   "2630": {
     "staticId": 2630,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
@@ -3379,13 +3385,13 @@
   },
   "2632": {
     "staticId": 2632,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "2633": {
     "staticId": 2633,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
@@ -3397,25 +3403,25 @@
   },
   "2635": {
     "staticId": 2635,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "2636": {
     "staticId": 2636,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "2723": {
     "staticId": 2723,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "2724": {
     "staticId": 2724,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
@@ -3427,25 +3433,25 @@
   },
   "2726": {
     "staticId": 2726,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "2727": {
     "staticId": 2727,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "2728": {
     "staticId": 2728,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "2729": {
     "staticId": 2729,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
@@ -3469,13 +3475,13 @@
   },
   "2733": {
     "staticId": 2733,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "2734": {
     "staticId": 2734,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
@@ -3487,7 +3493,7 @@
   },
   "2736": {
     "staticId": 2736,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
@@ -3511,13 +3517,13 @@
   },
   "2743": {
     "staticId": 2743,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "2744": {
     "staticId": 2744,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
@@ -3547,13 +3553,13 @@
   },
   "2749": {
     "staticId": 2749,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "2750": {
     "staticId": 2750,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
@@ -3577,379 +3583,379 @@
   },
   "2754": {
     "staticId": 2754,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 35
   },
   "2800": {
     "staticId": 2800,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 36
   },
   "2801": {
     "staticId": 2801,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 36
   },
   "2802": {
     "staticId": 2802,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 36
   },
   "2803": {
     "staticId": 2803,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 36
   },
   "2804": {
     "staticId": 2804,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
   "2805": {
     "staticId": 2805,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
   "2806": {
     "staticId": 2806,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
   "2807": {
     "staticId": 2807,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
   "2808": {
     "staticId": 2808,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
   "2809": {
     "staticId": 2809,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
   "2810": {
     "staticId": 2810,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
   "2811": {
     "staticId": 2811,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
   "2812": {
     "staticId": 2812,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
   "2813": {
     "staticId": 2813,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
   "2814": {
     "staticId": 2814,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
   "2815": {
     "staticId": 2815,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
   "2816": {
     "staticId": 2816,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 40
   },
   "2817": {
     "staticId": 2817,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 40
   },
   "2818": {
     "staticId": 2818,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 40
   },
   "2819": {
     "staticId": 2819,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 40
   },
   "2820": {
     "staticId": 2820,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 41
   },
   "2821": {
     "staticId": 2821,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 41
   },
   "2822": {
     "staticId": 2822,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 41
   },
   "2823": {
     "staticId": 2823,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 41
   },
   "2824": {
     "staticId": 2824,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 42
   },
   "2825": {
     "staticId": 2825,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 42
   },
   "2826": {
     "staticId": 2826,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 42
   },
   "2827": {
     "staticId": 2827,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 42
   },
   "2828": {
     "staticId": 2828,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 43
   },
   "2829": {
     "staticId": 2829,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 43
   },
   "2830": {
     "staticId": 2830,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 43
   },
   "2831": {
     "staticId": 2831,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 43
   },
   "2832": {
     "staticId": 2832,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 44
   },
   "2833": {
     "staticId": 2833,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 44
   },
   "2834": {
     "staticId": 2834,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 44
   },
   "2835": {
     "staticId": 2835,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 44
   },
   "2836": {
     "staticId": 2836,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 45
   },
   "2837": {
     "staticId": 2837,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 45
   },
   "2838": {
     "staticId": 2838,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 45
   },
   "2839": {
     "staticId": 2839,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 45
   },
   "2900": {
     "staticId": 2900,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 36
   },
   "2901": {
     "staticId": 2901,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 36
   },
   "2902": {
     "staticId": 2902,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 36
   },
   "2903": {
     "staticId": 2903,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 36
   },
   "2904": {
     "staticId": 2904,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
   "2905": {
     "staticId": 2905,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
   "2906": {
     "staticId": 2906,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
   "2907": {
     "staticId": 2907,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 37
   },
   "2908": {
     "staticId": 2908,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
   "2909": {
     "staticId": 2909,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
   "2910": {
     "staticId": 2910,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
   "2911": {
     "staticId": 2911,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 38
   },
   "2912": {
     "staticId": 2912,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
   "2913": {
     "staticId": 2913,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
   "2914": {
     "staticId": 2914,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
   "2915": {
     "staticId": 2915,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 39
   },
   "2916": {
     "staticId": 2916,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 40
   },
   "2917": {
     "staticId": 2917,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 40
   },
   "2918": {
     "staticId": 2918,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 40
   },
   "2919": {
     "staticId": 2919,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 40
   },
   "2920": {
     "staticId": 2920,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 41
   },
   "2921": {
     "staticId": 2921,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 41
   },
@@ -3961,13 +3967,13 @@
   },
   "2923": {
     "staticId": 2923,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 41
   },
   "2924": {
     "staticId": 2924,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 42
   },
@@ -3985,7 +3991,7 @@
   },
   "2927": {
     "staticId": 2927,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 42
   },
@@ -4003,7 +4009,7 @@
   },
   "2930": {
     "staticId": 2930,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 43
   },
@@ -4015,284 +4021,794 @@
   },
   "2932": {
     "staticId": 2932,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 44
   },
   "2933": {
     "staticId": 2933,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 44
   },
   "2934": {
     "staticId": 2934,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 44
   },
   "2935": {
     "staticId": 2935,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 44
   },
   "2936": {
     "staticId": 2936,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 45
   },
   "2937": {
     "staticId": 2937,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 45
   },
   "2938": {
     "staticId": 2938,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 45
   },
   "2939": {
     "staticId": 2939,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 45
   },
   "3201": {
     "staticId": 3201,
-    "entryType": "poi",
-    "name": "Cripta rara",
+    "entryType": null,
+    "name": null,
     "level": 10
   },
   "3202": {
     "staticId": 3202,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 10
   },
   "3301": {
     "staticId": 3301,
-    "entryType": "poi",
-    "name": "Cripta rara",
+    "entryType": null,
+    "name": null,
     "level": 15
   },
   "3302": {
     "staticId": 3302,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 15
   },
   "3401": {
     "staticId": 3401,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 20
   },
   "3402": {
     "staticId": 3402,
-    "entryType": "poi",
-    "name": "Cripta rara",
+    "entryType": null,
+    "name": null,
     "level": 20
   },
   "3501": {
     "staticId": 3501,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "3502": {
     "staticId": 3502,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 25
   },
   "3511": {
     "staticId": 3511,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
   "3512": {
     "staticId": 3512,
-    "entryType": "poi",
+    "entryType": null,
     "name": null,
     "level": 30
   },
-  "6091": {
-    "staticId": 6091,
+  "6000": {
+    "staticId": 6000,
     "entryType": null,
     "name": null,
-    "level": 92
+    "level": 1
   },
-  "6162": {
-    "staticId": 6162,
+  "6001": {
+    "staticId": 6001,
     "entryType": null,
     "name": null,
-    "level": 163
+    "level": 2
   },
-  "50000": {
-    "staticId": 50000,
-    "entryType": "poi",
-    "name": "Arena",
-    "level": 5
-  },
-  "50001": {
-    "staticId": 50001,
-    "entryType": "poi",
-    "name": null,
-    "level": 5
-  },
-  "150205": {
-    "staticId": 150205,
+  "6005": {
+    "staticId": 6005,
     "entryType": null,
     "name": null,
-    "level": 5
+    "level": 6
   },
-  "150209": {
-    "staticId": 150209,
+  "6011": {
+    "staticId": 6011,
     "entryType": null,
     "name": null,
-    "level": 9
+    "level": 12
   },
-  "150210": {
-    "staticId": 150210,
-    "entryType": null,
-    "name": null,
-    "level": 10
-  },
-  "150214": {
-    "staticId": 150214,
-    "entryType": null,
-    "name": null,
-    "level": 14
-  },
-  "150215": {
-    "staticId": 150215,
-    "entryType": null,
-    "name": null,
-    "level": 15
-  },
-  "150216": {
-    "staticId": 150216,
-    "entryType": null,
-    "name": null,
-    "level": 16
-  },
-  "150217": {
-    "staticId": 150217,
-    "entryType": null,
-    "name": null,
-    "level": 17
-  },
-  "150218": {
-    "staticId": 150218,
-    "entryType": null,
-    "name": null,
-    "level": 18
-  },
-  "150219": {
-    "staticId": 150219,
-    "entryType": null,
-    "name": null,
-    "level": 19
-  },
-  "150220": {
-    "staticId": 150220,
+  "6019": {
+    "staticId": 6019,
     "entryType": null,
     "name": null,
     "level": 20
   },
-  "150221": {
-    "staticId": 150221,
-    "entryType": null,
-    "name": null,
-    "level": 21
-  },
-  "150222": {
-    "staticId": 150222,
-    "entryType": null,
-    "name": null,
-    "level": 22
-  },
-  "150223": {
-    "staticId": 150223,
-    "entryType": null,
-    "name": null,
-    "level": 23
-  },
-  "150224": {
-    "staticId": 150224,
-    "entryType": null,
-    "name": null,
-    "level": 24
-  },
-  "150225": {
-    "staticId": 150225,
-    "entryType": null,
-    "name": null,
-    "level": 25
-  },
-  "150226": {
-    "staticId": 150226,
+  "6025": {
+    "staticId": 6025,
     "entryType": null,
     "name": null,
     "level": 26
   },
-  "150227": {
-    "staticId": 150227,
+  "6027": {
+    "staticId": 6027,
     "entryType": null,
     "name": null,
-    "level": 27
+    "level": 28
   },
-  "150229": {
-    "staticId": 150229,
-    "entryType": "poi",
+  "6028": {
+    "staticId": 6028,
+    "entryType": null,
     "name": null,
     "level": 29
   },
-  "150230": {
-    "staticId": 150230,
+  "6029": {
+    "staticId": 6029,
     "entryType": null,
     "name": null,
     "level": 30
   },
-  "150231": {
-    "staticId": 150231,
+  "6030": {
+    "staticId": 6030,
     "entryType": null,
     "name": null,
     "level": 31
   },
-  "150233": {
-    "staticId": 150233,
+  "6031": {
+    "staticId": 6031,
+    "entryType": null,
+    "name": null,
+    "level": 32
+  },
+  "6032": {
+    "staticId": 6032,
     "entryType": null,
     "name": null,
     "level": 33
   },
-  "150234": {
-    "staticId": 150234,
+  "6034": {
+    "staticId": 6034,
     "entryType": null,
     "name": null,
-    "level": 34
+    "level": 35
   },
-  "150239": {
-    "staticId": 150239,
+  "6035": {
+    "staticId": 6035,
+    "entryType": null,
+    "name": null,
+    "level": 36
+  },
+  "6036": {
+    "staticId": 6036,
+    "entryType": null,
+    "name": null,
+    "level": 37
+  },
+  "6037": {
+    "staticId": 6037,
+    "entryType": null,
+    "name": null,
+    "level": 38
+  },
+  "6038": {
+    "staticId": 6038,
     "entryType": null,
     "name": null,
     "level": 39
   },
-  "150244": {
-    "staticId": 150244,
+  "6039": {
+    "staticId": 6039,
     "entryType": null,
     "name": null,
-    "level": 44
+    "level": 40
   },
-  "170109": {
-    "staticId": 170109,
+  "6040": {
+    "staticId": 6040,
+    "entryType": null,
+    "name": null,
+    "level": 41
+  },
+  "6041": {
+    "staticId": 6041,
+    "entryType": null,
+    "name": null,
+    "level": 42
+  },
+  "6042": {
+    "staticId": 6042,
+    "entryType": null,
+    "name": null,
+    "level": 43
+  },
+  "6044": {
+    "staticId": 6044,
+    "entryType": null,
+    "name": null,
+    "level": 45
+  },
+  "6045": {
+    "staticId": 6045,
+    "entryType": null,
+    "name": null,
+    "level": 46
+  },
+  "6046": {
+    "staticId": 6046,
+    "entryType": null,
+    "name": null,
+    "level": 47
+  },
+  "6047": {
+    "staticId": 6047,
+    "entryType": null,
+    "name": null,
+    "level": 48
+  },
+  "6048": {
+    "staticId": 6048,
+    "entryType": null,
+    "name": null,
+    "level": 49
+  },
+  "6049": {
+    "staticId": 6049,
     "entryType": null,
     "name": null,
     "level": 50
+  },
+  "6050": {
+    "staticId": 6050,
+    "entryType": null,
+    "name": null,
+    "level": 51
+  },
+  "6051": {
+    "staticId": 6051,
+    "entryType": null,
+    "name": null,
+    "level": 52
+  },
+  "6052": {
+    "staticId": 6052,
+    "entryType": null,
+    "name": null,
+    "level": 53
+  },
+  "6053": {
+    "staticId": 6053,
+    "entryType": null,
+    "name": null,
+    "level": 54
+  },
+  "6054": {
+    "staticId": 6054,
+    "entryType": null,
+    "name": null,
+    "level": 55
+  },
+  "6055": {
+    "staticId": 6055,
+    "entryType": null,
+    "name": null,
+    "level": 56
+  },
+  "6056": {
+    "staticId": 6056,
+    "entryType": null,
+    "name": null,
+    "level": 57
+  },
+  "6058": {
+    "staticId": 6058,
+    "entryType": null,
+    "name": null,
+    "level": 59
+  },
+  "6059": {
+    "staticId": 6059,
+    "entryType": null,
+    "name": null,
+    "level": 60
+  },
+  "6060": {
+    "staticId": 6060,
+    "entryType": null,
+    "name": null,
+    "level": 61
+  },
+  "6062": {
+    "staticId": 6062,
+    "entryType": null,
+    "name": null,
+    "level": 63
+  },
+  "6064": {
+    "staticId": 6064,
+    "entryType": null,
+    "name": null,
+    "level": 65
+  },
+  "6065": {
+    "staticId": 6065,
+    "entryType": null,
+    "name": null,
+    "level": 66
+  },
+  "6066": {
+    "staticId": 6066,
+    "entryType": null,
+    "name": null,
+    "level": 67
+  },
+  "6067": {
+    "staticId": 6067,
+    "entryType": null,
+    "name": null,
+    "level": 68
+  },
+  "6068": {
+    "staticId": 6068,
+    "entryType": null,
+    "name": null,
+    "level": 69
+  },
+  "6071": {
+    "staticId": 6071,
+    "entryType": null,
+    "name": null,
+    "level": 72
+  },
+  "6073": {
+    "staticId": 6073,
+    "entryType": null,
+    "name": null,
+    "level": 74
+  },
+  "6074": {
+    "staticId": 6074,
+    "entryType": null,
+    "name": null,
+    "level": 75
+  },
+  "6075": {
+    "staticId": 6075,
+    "entryType": null,
+    "name": null,
+    "level": 76
+  },
+  "6076": {
+    "staticId": 6076,
+    "entryType": null,
+    "name": null,
+    "level": 77
+  },
+  "6077": {
+    "staticId": 6077,
+    "entryType": null,
+    "name": null,
+    "level": 78
+  },
+  "6078": {
+    "staticId": 6078,
+    "entryType": null,
+    "name": null,
+    "level": 79
+  },
+  "6081": {
+    "staticId": 6081,
+    "entryType": null,
+    "name": null,
+    "level": 82
+  },
+  "6082": {
+    "staticId": 6082,
+    "entryType": null,
+    "name": null,
+    "level": 83
+  },
+  "6085": {
+    "staticId": 6085,
+    "entryType": null,
+    "name": null,
+    "level": 86
+  },
+  "6087": {
+    "staticId": 6087,
+    "entryType": null,
+    "name": null,
+    "level": 88
+  },
+  "6088": {
+    "staticId": 6088,
+    "entryType": null,
+    "name": null,
+    "level": 89
+  },
+  "6089": {
+    "staticId": 6089,
+    "entryType": null,
+    "name": null,
+    "level": 90
+  },
+  "6090": {
+    "staticId": 6090,
+    "entryType": null,
+    "name": null,
+    "level": 91
+  },
+  "6092": {
+    "staticId": 6092,
+    "entryType": null,
+    "name": null,
+    "level": 93
+  },
+  "6093": {
+    "staticId": 6093,
+    "entryType": null,
+    "name": null,
+    "level": 94
+  },
+  "6094": {
+    "staticId": 6094,
+    "entryType": null,
+    "name": null,
+    "level": 95
+  },
+  "6095": {
+    "staticId": 6095,
+    "entryType": null,
+    "name": null,
+    "level": 96
+  },
+  "6096": {
+    "staticId": 6096,
+    "entryType": null,
+    "name": null,
+    "level": 97
+  },
+  "6098": {
+    "staticId": 6098,
+    "entryType": null,
+    "name": null,
+    "level": 99
+  },
+  "6100": {
+    "staticId": 6100,
+    "entryType": null,
+    "name": null,
+    "level": 101
+  },
+  "6103": {
+    "staticId": 6103,
+    "entryType": null,
+    "name": null,
+    "level": 104
+  },
+  "6104": {
+    "staticId": 6104,
+    "entryType": null,
+    "name": null,
+    "level": 105
+  },
+  "6105": {
+    "staticId": 6105,
+    "entryType": null,
+    "name": null,
+    "level": 106
+  },
+  "6106": {
+    "staticId": 6106,
+    "entryType": null,
+    "name": null,
+    "level": 107
+  },
+  "6109": {
+    "staticId": 6109,
+    "entryType": null,
+    "name": null,
+    "level": 110
+  },
+  "6110": {
+    "staticId": 6110,
+    "entryType": null,
+    "name": null,
+    "level": 111
+  },
+  "6114": {
+    "staticId": 6114,
+    "entryType": null,
+    "name": null,
+    "level": 115
+  },
+  "6119": {
+    "staticId": 6119,
+    "entryType": null,
+    "name": null,
+    "level": 120
+  },
+  "6124": {
+    "staticId": 6124,
+    "entryType": null,
+    "name": null,
+    "level": 125
+  },
+  "6125": {
+    "staticId": 6125,
+    "entryType": null,
+    "name": null,
+    "level": 126
+  },
+  "6126": {
+    "staticId": 6126,
+    "entryType": null,
+    "name": null,
+    "level": 127
+  },
+  "6130": {
+    "staticId": 6130,
+    "entryType": null,
+    "name": null,
+    "level": 131
+  },
+  "6131": {
+    "staticId": 6131,
+    "entryType": null,
+    "name": null,
+    "level": 132
+  },
+  "6141": {
+    "staticId": 6141,
+    "entryType": null,
+    "name": null,
+    "level": 142
+  },
+  "6142": {
+    "staticId": 6142,
+    "entryType": null,
+    "name": null,
+    "level": 143
+  },
+  "6143": {
+    "staticId": 6143,
+    "entryType": null,
+    "name": null,
+    "level": 144
+  },
+  "6144": {
+    "staticId": 6144,
+    "entryType": null,
+    "name": null,
+    "level": 145
+  },
+  "6148": {
+    "staticId": 6148,
+    "entryType": null,
+    "name": null,
+    "level": 149
+  },
+  "6154": {
+    "staticId": 6154,
+    "entryType": null,
+    "name": null,
+    "level": 155
+  },
+  "6155": {
+    "staticId": 6155,
+    "entryType": null,
+    "name": null,
+    "level": 156
+  },
+  "6157": {
+    "staticId": 6157,
+    "entryType": null,
+    "name": null,
+    "level": 158
+  },
+  "6163": {
+    "staticId": 6163,
+    "entryType": null,
+    "name": null,
+    "level": 164
+  },
+  "6164": {
+    "staticId": 6164,
+    "entryType": null,
+    "name": null,
+    "level": 165
+  },
+  "6165": {
+    "staticId": 6165,
+    "entryType": null,
+    "name": null,
+    "level": 166
+  },
+  "6168": {
+    "staticId": 6168,
+    "entryType": null,
+    "name": null,
+    "level": 169
+  },
+  "6169": {
+    "staticId": 6169,
+    "entryType": null,
+    "name": null,
+    "level": 170
+  },
+  "6170": {
+    "staticId": 6170,
+    "entryType": null,
+    "name": null,
+    "level": 171
+  },
+  "6172": {
+    "staticId": 6172,
+    "entryType": null,
+    "name": null,
+    "level": 173
+  },
+  "6173": {
+    "staticId": 6173,
+    "entryType": null,
+    "name": null,
+    "level": 174
+  },
+  "6174": {
+    "staticId": 6174,
+    "entryType": null,
+    "name": null,
+    "level": 175
+  },
+  "6175": {
+    "staticId": 6175,
+    "entryType": null,
+    "name": null,
+    "level": 176
+  },
+  "6176": {
+    "staticId": 6176,
+    "entryType": null,
+    "name": null,
+    "level": 177
+  },
+  "6177": {
+    "staticId": 6177,
+    "entryType": null,
+    "name": null,
+    "level": 178
+  },
+  "6179": {
+    "staticId": 6179,
+    "entryType": null,
+    "name": null,
+    "level": 180
+  },
+  "6180": {
+    "staticId": 6180,
+    "entryType": null,
+    "name": null,
+    "level": 181
+  },
+  "6186": {
+    "staticId": 6186,
+    "entryType": null,
+    "name": null,
+    "level": 187
+  },
+  "6188": {
+    "staticId": 6188,
+    "entryType": null,
+    "name": null,
+    "level": 189
+  },
+  "6189": {
+    "staticId": 6189,
+    "entryType": null,
+    "name": null,
+    "level": 190
+  },
+  "6199": {
+    "staticId": 6199,
+    "entryType": null,
+    "name": null,
+    "level": 200
+  },
+  "6200": {
+    "staticId": 6200,
+    "entryType": null,
+    "name": null,
+    "level": 201
+  },
+  "6207": {
+    "staticId": 6207,
+    "entryType": null,
+    "name": null,
+    "level": 208
+  },
+  "6208": {
+    "staticId": 6208,
+    "entryType": null,
+    "name": null,
+    "level": 209
+  },
+  "6209": {
+    "staticId": 6209,
+    "entryType": null,
+    "name": null,
+    "level": 210
+  },
+  "6210": {
+    "staticId": 6210,
+    "entryType": null,
+    "name": null,
+    "level": 211
+  },
+  "6211": {
+    "staticId": 6211,
+    "entryType": null,
+    "name": null,
+    "level": 212
+  },
+  "6215": {
+    "staticId": 6215,
+    "entryType": null,
+    "name": null,
+    "level": 216
+  },
+  "6249": {
+    "staticId": 6249,
+    "entryType": null,
+    "name": null,
+    "level": 250
+  },
+  "50000": {
+    "staticId": 50000,
+    "entryType": null,
+    "name": null,
+    "level": 5
+  },
+  "50001": {
+    "staticId": 50001,
+    "entryType": null,
+    "name": null,
+    "level": 5
+  },
+  "133335": {
+    "staticId": 133335,
+    "entryType": null,
+    "name": null,
+    "level": 0
   }
 }
