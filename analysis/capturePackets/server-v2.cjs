@@ -425,16 +425,17 @@ function setupWebsocketListener() {
             const channelUrl = msgData.channel_url
             const channelType = msgData.channel_type
             const message = msgData.message
-            if (msgData.data) {
-              extractChatStaticIds(msgData.data)
-            }
+            // if (msgData.data) {
+            //   extractChatStaticIds(msgData.data)
+            // }
             const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
             const validChannels = [activeChatChannel, CHAT_CHANNEL_URL].filter(Boolean)
             if (validChannels.includes(channelUrl)) {
               // message from chat channel registered
               console.log(`📨 Chat message from ${channelUrl}: ${message}`)
               if (message.startsWith('@find')) {
-                const [command, amount, objectType, level] = message.split(' ')
+                const commandLine = message.split(' ').filter(Boolean)
+                const [command, amount, objName, level] = commandLine
               }
             }
           } catch (e) {

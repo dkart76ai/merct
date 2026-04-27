@@ -1,0 +1,5107 @@
+Id,Name,Tier
+1,Field Camp,1
+2,Player's City,1
+4,Portal,1
+5,,1
+6,,1
+7,,1
+8,Village,1
+9,Village,1
+10,Village,1
+11,Village,2
+12,Village,3
+13,Village,4
+14,Village,5
+15,Village,6
+16,Village,7
+17,Village,8
+18,Village,9
+19,Village,10
+20,Village,11
+21,Village,12
+22,Village,13
+23,Village,14
+24,Village,15
+25,Village,16
+26,Village,17
+27,Village,18
+28,Village,19
+29,Village,20
+30,Village,21
+31,Village,22
+32,Village,23
+33,Village,24
+34,Village,25
+35,Farmer's House,1
+36,Farmer's House,2
+37,Farmer's House,3
+38,Farmer's House,4
+39,Farmer's House,5
+40,Farmer's House,6
+41,Farmer's House,7
+42,Farmer's House,8
+43,Farmer's House,9
+44,Farmer's House,10
+45,Farmer's House,11
+46,Farmer's House,12
+47,Farmer's House,13
+48,Farmer's House,14
+49,Farmer's House,15
+50,Farmer's House,16
+51,Farmer's House,17
+52,Farmer's House,18
+53,Farmer's House,19
+54,Farmer's House,20
+55,Farmer's House,21
+56,Farmer's House,22
+57,Farmer's House,23
+58,Farmer's House,24
+59,Farmer's House,25
+60,Sawmill,1
+61,Sawmill,2
+62,Sawmill,3
+63,Sawmill,4
+64,Sawmill,5
+65,Sawmill,6
+66,Sawmill,7
+67,Sawmill,8
+68,Sawmill,9
+69,Sawmill,10
+70,Sawmill,11
+71,Sawmill,12
+72,Sawmill,13
+73,Sawmill,14
+74,Sawmill,15
+75,Sawmill,16
+76,Sawmill,17
+77,Sawmill,18
+78,Sawmill,19
+79,Sawmill,20
+80,Sawmill,21
+81,Sawmill,22
+82,Sawmill,23
+83,Sawmill,24
+84,Sawmill,25
+85,Mine,1
+86,Mine,2
+87,Mine,3
+88,Mine,4
+89,Mine,5
+90,Mine,6
+91,Mine,7
+92,Mine,8
+93,Mine,9
+94,Mine,10
+95,Mine,11
+96,Mine,12
+97,Mine,13
+98,Mine,14
+99,Mine,15
+100,Mine,16
+101,Mine,17
+102,Mine,18
+103,Mine,19
+104,Mine,20
+105,Mine,21
+106,Mine,22
+107,Mine,23
+108,Mine,24
+109,Mine,25
+110,Quarry,1
+111,Quarry,2
+112,Quarry,3
+113,Quarry,4
+114,Quarry,5
+115,Quarry,6
+116,Quarry,7
+117,Quarry,8
+118,Quarry,9
+119,Quarry,10
+120,Quarry,11
+121,Quarry,12
+122,Quarry,13
+123,Quarry,14
+124,Quarry,15
+125,Quarry,16
+126,Quarry,17
+127,Quarry,18
+128,Quarry,19
+129,Quarry,20
+130,Quarry,21
+131,Quarry,22
+132,Quarry,23
+133,Quarry,24
+134,Quarry,25
+140,Common Gold Mine,5
+141,Common Gold Mine,10
+142,Common Gold Mine,15
+143,Common Gold Mine,20
+144,Common Gold Mine,25
+145,Epic Gold Mine,25
+150,Conquest Arena,5
+151,Conquest Arena,10
+152,Conquest Arena,15
+153,Conquest Arena,20
+154,Conquest Arena,25
+160,Valor Arena,5
+161,Valor Arena,10
+162,Valor Arena,15
+163,Valor Arena,20
+164,Valor Arena,25
+170,Enemy City Nilawield,1
+171,Enemy City Gokus,1
+172,Enemy City Gojar,1
+173,Enemy City Follador,1
+174,Enemy City Kelerus,1
+175,Enemy City Tugore,1
+176,Enemy City Fergas,1
+177,Enemy City Whitebreaker,1
+178,Enemy City Daigor,1
+179,Enemy City Darkhammer,1
+180,Enemy City Mightshaper,1
+181,Enemy City Sador,1
+182,Enemy City Vizshura,1
+183,Enemy City Danara,1
+184,Enemy City Gazius,1
+185,Enemy City Beameena,1
+186,Enemy City Kigajin,1
+187,Enemy City Delarius,1
+188,Enemy City Akinoramar,1
+189,Enemy City Flamewood,1
+190,Village,1
+199,Dragon Mound,5
+200,Dragon Mound,10
+201,Dragon Mound,15
+202,Dragon Mound,20
+203,Golden Mountain,5
+204,Golden Mountain,10
+205,Golden Mountain,15
+206,Golden Mountain,20
+207,Golden Mountain,25
+208,Wellspring Ruins,15
+209,Wellspring Ruins,20
+210,Wellspring Ruins,5
+211,Wellspring Ruins,10
+212,Wellspring Ruins,25
+222,Quarry,25
+250,Rare Cursed squad,16
+251,Common Elf squad,2
+252,Common Barbarian squad,24
+300,Village,33
+301,Village,33
+302,Village,33
+303,Village,33
+304,Village,33
+305,Village,33
+306,Village,33
+307,Village,33
+308,Village,33
+309,Village,33
+400,Mercenary Exchange,10
+500,Village,1
+501,Village,5
+502,Village,5
+503,Village,5
+504,Village,5
+505,Village,5
+506,Village,10
+507,Village,10
+508,Village,10
+509,Village,10
+510,Village,10
+511,Village,15
+512,Village,15
+513,Village,15
+514,Village,15
+515,Village,15
+516,Village,20
+517,Village,20
+518,Village,20
+519,Village,20
+520,Village,20
+521,Village,25
+522,Village,25
+523,Village,25
+524,Village,25
+525,Village,25
+526,Farmer's House,5
+527,Farmer's House,5
+528,Farmer's House,5
+529,Farmer's House,5
+530,Farmer's House,5
+531,Farmer's House,10
+532,Farmer's House,10
+533,Farmer's House,10
+534,Farmer's House,10
+535,Farmer's House,10
+536,Farmer's House,15
+537,Farmer's House,15
+538,Farmer's House,15
+539,Farmer's House,15
+540,Farmer's House,15
+541,Farmer's House,20
+542,Farmer's House,20
+543,Farmer's House,20
+544,Farmer's House,20
+545,Farmer's House,20
+546,Farmer's House,25
+547,Farmer's House,25
+548,Farmer's House,25
+549,Farmer's House,25
+550,Farmer's House,25
+551,Sawmill,5
+552,Sawmill,5
+553,Sawmill,5
+554,Sawmill,5
+555,Sawmill,5
+556,Sawmill,10
+557,Sawmill,10
+558,Sawmill,10
+559,Sawmill,10
+560,Sawmill,10
+561,Sawmill,15
+562,Sawmill,15
+563,Sawmill,15
+564,Sawmill,15
+565,Sawmill,15
+566,Sawmill,20
+567,Sawmill,20
+568,Sawmill,20
+569,Sawmill,20
+570,Sawmill,20
+571,Sawmill,25
+572,Sawmill,25
+573,Sawmill,25
+574,Sawmill,25
+575,Sawmill,25
+576,Mine,5
+577,Mine,5
+578,Mine,5
+579,Mine,5
+580,Mine,5
+581,Mine,10
+582,Mine,10
+583,Mine,10
+584,Mine,10
+585,Mine,10
+586,Mine,15
+587,Mine,15
+588,Mine,15
+589,Mine,15
+590,Mine,15
+591,Mine,20
+592,Mine,20
+593,Mine,20
+594,Mine,20
+595,Mine,20
+596,Mine,25
+597,Mine,25
+598,Mine,25
+599,Mine,25
+600,Mine,25
+601,Quarry,5
+602,Quarry,5
+603,Quarry,5
+604,Quarry,5
+605,Quarry,5
+606,Quarry,10
+607,Quarry,10
+608,Quarry,10
+609,Quarry,10
+610,Quarry,10
+611,Quarry,15
+612,Quarry,15
+613,Quarry,15
+614,Quarry,15
+615,Quarry,15
+616,Quarry,20
+617,Quarry,20
+618,Quarry,20
+619,Quarry,20
+620,Quarry,20
+621,Quarry,25
+622,Quarry,25
+623,Quarry,25
+624,Quarry,25
+625,Quarry,25
+626,Training Camp,1
+627,Training Camp,1
+628,Village,30
+629,Village,35
+630,Farmer's House,30
+631,Farmer's House,35
+632,Sawmill,30
+633,Sawmill,35
+634,Mine,30
+635,Mine,35
+636,Quarry,30
+637,Quarry,35
+650,Gold Mines,5
+651,Gold Mines,10
+652,Gold Mines,15
+653,Gold Mines,20
+654,Gold Mines,25
+655,Gold Mines,30
+656,Gold Mines,35
+700,Village,40
+701,Village,45
+710,Farmer's House,40
+711,Farmer's House,45
+720,Sawmill,40
+721,Sawmill,45
+730,Mine,40
+731,Mine,45
+740,Quarry,40
+741,Quarry,45
+750,Gold Mines,40
+751,Gold Mines,45
+800,Spring of Life,10
+801,Spring of Life,15
+802,Spring of Life,20
+803,Spring of Life,25
+804,Spring of Life,30
+805,Spring of Life,35
+806,Spring of Life,40
+807,Spring of Life,45
+808,Spring of Life,10
+809,Spring of Life,15
+810,Spring of Life,20
+811,Spring of Life,25
+812,Spring of Life,30
+813,Spring of Life,35
+814,Spring of Life,40
+815,Spring of Life,45
+816,Spring of Life,10
+817,Spring of Life,15
+818,Spring of Life,20
+819,Spring of Life,25
+820,Spring of Life,30
+821,Spring of Life,35
+822,Spring of Life,40
+823,Spring of Life,45
+824,Spring of Life,10
+825,Spring of Life,15
+826,Spring of Life,20
+827,Spring of Life,25
+828,Spring of Life,30
+829,Spring of Life,35
+830,Spring of Life,40
+831,Spring of Life,45
+832,Spring of Life,10
+833,Spring of Life,15
+834,Spring of Life,20
+835,Spring of Life,25
+836,Spring of Life,30
+837,Spring of Life,35
+838,Spring of Life,40
+839,Spring of Life,45
+840,Spring of Life,10
+841,Spring of Life,15
+842,Spring of Life,20
+843,Spring of Life,25
+844,Spring of Life,30
+845,Spring of Life,35
+846,Spring of Life,40
+847,Spring of Life,45
+848,Spring of Life,10
+849,Spring of Life,15
+850,Spring of Life,20
+851,Spring of Life,25
+852,Spring of Life,30
+853,Spring of Life,35
+854,Spring of Life,40
+855,Spring of Life,45
+856,Spring of Life,10
+857,Spring of Life,15
+858,Spring of Life,20
+859,Spring of Life,25
+860,Spring of Life,30
+861,Spring of Life,35
+862,Spring of Life,40
+863,Spring of Life,45
+864,Spring of Life,10
+865,Spring of Life,15
+866,Spring of Life,20
+867,Spring of Life,25
+868,Spring of Life,30
+869,Spring of Life,35
+870,Spring of Life,40
+871,Spring of Life,45
+872,Spring of Life,10
+873,Spring of Life,15
+874,Spring of Life,20
+875,Spring of Life,25
+876,Spring of Life,30
+877,Spring of Life,35
+878,Spring of Life,40
+879,Spring of Life,45
+880,Spring of Life,10
+881,Spring of Life,15
+882,Spring of Life,20
+883,Spring of Life,25
+884,Spring of Life,30
+885,Spring of Life,35
+886,Spring of Life,40
+887,Spring of Life,45
+888,Spring of Life,10
+889,Spring of Life,15
+890,Spring of Life,20
+891,Spring of Life,25
+892,Spring of Life,30
+893,Spring of Life,35
+894,Spring of Life,40
+895,Spring of Life,45
+990,Common Elf squad,30
+991,Common Elf squad,31
+992,Common Elf squad,32
+993,Common Elf squad,33
+994,Common Elf squad,34
+995,Common Elf squad,35
+996,Common Elf squad,36
+997,Common Elf squad,37
+998,Common Elf squad,38
+999,Common Elf squad,39
+1001,Common Inferno squad,3
+1002,Common Barbarian squad,4
+1003,Common Cursed squad,5
+1004,Common Inferno squad,8
+1005,Common Cursed squad,9
+1006,Common Barbarian squad,10
+1007,Common Cursed squad,11
+1008,Common Barbarian squad,12
+1009,Common Inferno squad,13
+1010,Common Cursed squad,14
+1011,Common Barbarian squad,15
+1012,Common Cursed squad,16
+1013,Common Inferno squad,17
+1014,Common Barbarian squad,18
+1015,Common Inferno squad,19
+1016,Common Cursed squad,20
+1017,Common Barbarian squad,21
+1018,Common Inferno squad,22
+1019,Common Barbarian squad,23
+1021,Common Cursed squad,24
+1022,Common Inferno squad,25
+1023,Common Elf squad,1
+1024,Common Undead squad,2
+1025,Common Inferno squad,6
+1026,Common Barbarian squad,7
+1027,Common Elf squad,8
+1028,Common Undead squad,9
+1029,Common Elf squad,10
+1030,Common Undead squad,12
+1031,Common Elf squad,14
+1032,Common Undead squad,16
+1033,Common Elf squad,18
+1034,Common Undead squad,20
+1035,Common Elf squad,21
+1036,Common Undead squad,23
+1037,Common Elf squad,24
+1038,Common Undead squad,25
+1039,Common Elf squad,4
+1040,Common Undead squad,5
+1041,Common Elf squad,15
+1101,Heroic Cursed squad,10
+1102,Heroic Inferno squad,11
+1103,Heroic Barbarian squad,12
+1104,Heroic Inferno squad,13
+1105,Heroic Cursed squad,14
+1106,Heroic Inferno squad,15
+1107,Heroic Inferno squad,16
+1108,Heroic Barbarian squad,17
+1109,Heroic Cursed squad,18
+1110,Heroic Inferno squad,19
+1111,Heroic Barbarian squad,20
+1112,Heroic Cursed squad,21
+1113,Heroic Inferno squad,22
+1114,Heroic Barbarian squad,23
+1115,Heroic Cursed squad,24
+1116,Heroic Inferno squad,25
+1117,Heroic Elf squad,10
+1118,Heroic Undead squad,11
+1119,Heroic Elf squad,14
+1120,Heroic Undead squad,15
+1121,Heroic Elf squad,17
+1122,Heroic Undead squad,19
+1123,Heroic Elf squad,18
+1124,Heroic Undead squad,24
+1125,Heroic Elf squad,22
+1126,Heroic Elf squad,25
+1201,Legendary Barbarian squad,15
+1202,Legendary Cursed squad,16
+1203,Legendary Inferno squad,17
+1204,Legendary Barbarian squad,18
+1205,Legendary Cursed squad,19
+1206,Legendary Inferno squad,20
+1207,Legendary Barbarian squad,21
+1208,Legendary Cursed squad,22
+1209,Legendary Inferno squad,23
+1210,Legendary Inferno squad,24
+1211,Legendary Inferno squad,25
+1212,Legendary Elf squad,15
+1213,Legendary Undead squad,16
+1214,Legendary Elf squad,18
+1215,Legendary Undead squad,20
+1216,Legendary Elf squad,21
+1217,Legendary Undead squad,23
+1300,Rare Elf squad,1
+1301,Rare Undead squad,2
+1302,Rare Barbarian squad,3
+1303,Rare Cursed squad,4
+1304,Rare Inferno squad,5
+1305,Rare Elf squad,6
+1306,Rare Undead squad,7
+1307,Rare Barbarian squad,8
+1308,Rare Cursed squad,9
+1309,Rare Inferno squad,10
+1310,Rare Elf squad,11
+1311,Rare Undead squad,12
+1312,Rare Barbarian squad,13
+1313,Rare Cursed squad,14
+1314,Rare Inferno squad,15
+1315,Rare Elf squad,16
+1316,Rare Undead squad,17
+1317,Rare Barbarian squad,18
+1318,Rare Cursed squad,19
+1319,Rare Inferno squad,20
+1320,Rare Barbarian squad,21
+1321,Rare Undead squad,22
+1322,Rare Elf squad,23
+1323,Rare Cursed squad,24
+1324,Rare Inferno squad,25
+1325,Common Barbarian squad,1
+1326,Rare Undead squad,2
+1327,Rare Undead squad,25
+1406,Epic Cursed squad,40
+1407,Epic Inferno squad,41
+1408,Epic Barbarian squad,42
+1409,Epic Elf squad,43
+1410,Epic Undead squad,44
+1411,Epic Barbarian squad,45
+1412,Epic Elf squad,46
+1413,Epic Undead squad,47
+1414,Epic Inferno squad,48
+1415,Epic Cursed squad,49
+1416,Epic Barbarian squad,50
+1417,Epic Inferno squad,20
+1418,Epic Elf squad,21
+1419,Epic Cursed squad,21
+1420,Epic Barbarian squad,22
+1421,Epic Elf squad,22
+1422,Epic Undead squad,23
+1423,Epic Barbarian squad,23
+1424,Epic Inferno squad,24
+1425,Epic Undead squad,24
+1426,Epic Cursed squad,25
+1427,Epic Inferno squad,25
+1428,Epic Inferno squad,20
+1450,Common Undead squad,1
+1451,Common Elf squad,2
+1452,Common Cursed squad,3
+1453,Common Barbarian squad,4
+1454,Common Inferno squad,5
+1455,Common Undead squad,6
+1456,Common Elf squad,7
+1457,Common Cursed squad,8
+1458,Common Barbarian squad,9
+1459,Common Inferno squad,10
+1460,Common Undead squad,11
+1461,Common Elf squad,11
+1462,Common Cursed squad,12
+1463,Common Barbarian squad,12
+1464,Common Inferno squad,13
+1465,Common Undead squad,13
+1466,Common Elf squad,14
+1467,Common Cursed squad,14
+1468,Common Barbarian squad,15
+1469,Common Inferno squad,15
+1470,Common Undead squad,16
+1471,Common Elf squad,16
+1472,Common Cursed squad,16
+1473,Common Barbarian squad,17
+1474,Common Inferno squad,17
+1475,Common Undead squad,17
+1476,Common Elf squad,18
+1477,Common Cursed squad,18
+1478,Common Barbarian squad,18
+1479,Common Inferno squad,19
+1480,Common Undead squad,19
+1481,Common Elf squad,19
+1482,Common Cursed squad,20
+1483,Common Barbarian squad,20
+1484,Common Inferno squad,20
+1485,Common Undead squad,21
+1486,Common Elf squad,21
+1487,Common Cursed squad,21
+1488,Common Barbarian squad,21
+1489,Common Inferno squad,21
+1490,Common Undead squad,22
+1491,Common Elf squad,22
+1492,Common Cursed squad,22
+1493,Common Barbarian squad,22
+1494,Common Inferno squad,22
+1495,Common Undead squad,23
+1496,Common Elf squad,23
+1497,Common Cursed squad,23
+1498,Common Barbarian squad,23
+1499,Common Inferno squad,23
+1500,Common Undead squad,24
+1501,Common Elf squad,24
+1502,Common Cursed squad,24
+1503,Common Barbarian squad,24
+1504,Common Inferno squad,24
+1505,Common Undead squad,25
+1506,Common Elf squad,25
+1507,Common Cursed squad,25
+1508,Common Barbarian squad,25
+1509,Common Inferno squad,25
+1510,Common Undead squad,26
+1511,Common Elf squad,26
+1512,Common Cursed squad,26
+1513,Common Barbarian squad,26
+1514,Common Inferno squad,26
+1515,Common Undead squad,27
+1516,Common Elf squad,27
+1517,Common Cursed squad,27
+1518,Common Barbarian squad,27
+1519,Common Inferno squad,27
+1520,Common Undead squad,28
+1521,Common Elf squad,28
+1522,Common Cursed squad,28
+1523,Common Barbarian squad,28
+1524,Common Inferno squad,28
+1525,Common Undead squad,29
+1526,Common Elf squad,29
+1527,Common Cursed squad,29
+1528,Common Barbarian squad,29
+1529,Common Inferno squad,29
+1530,Common Undead squad,30
+1531,Common Elf squad,30
+1532,Common Cursed squad,30
+1533,Common Barbarian squad,30
+1534,Common Inferno squad,30
+1535,Common Undead squad,31
+1536,Common Elf squad,31
+1537,Common Cursed squad,31
+1538,Common Barbarian squad,31
+1539,Common Inferno squad,31
+1540,Common Undead squad,32
+1541,Common Elf squad,32
+1542,Common Cursed squad,32
+1543,Common Barbarian squad,32
+1544,Common Inferno squad,32
+1545,Common Undead squad,33
+1546,Common Elf squad,33
+1547,Common Cursed squad,33
+1548,Common Barbarian squad,33
+1549,Common Inferno squad,33
+1550,Common Undead squad,34
+1551,Common Elf squad,34
+1552,Common Cursed squad,34
+1553,Common Barbarian squad,34
+1554,Common Inferno squad,34
+1555,Common Undead squad,35
+1556,Common Elf squad,35
+1557,Common Cursed squad,35
+1558,Common Barbarian squad,35
+1559,Common Inferno squad,35
+1590,Rare Undead squad,1
+1591,Rare Elf squad,2
+1592,Rare Cursed squad,3
+1593,Rare Barbarian squad,4
+1594,Rare Inferno squad,5
+1595,Rare Undead squad,6
+1596,Rare Elf squad,7
+1597,Rare Cursed squad,8
+1598,Rare Barbarian squad,9
+1599,Rare Inferno squad,10
+1600,Rare Undead squad,11
+1601,Rare Elf squad,11
+1602,Rare Cursed squad,12
+1603,Rare Barbarian squad,12
+1604,Rare Inferno squad,13
+1605,Rare Undead squad,13
+1606,Rare Elf squad,14
+1607,Rare Cursed squad,14
+1608,Rare Barbarian squad,15
+1609,Rare Inferno squad,15
+1610,Rare Undead squad,16
+1611,Rare Elf squad,16
+1612,Rare Cursed squad,16
+1613,Rare Barbarian squad,17
+1614,Rare Inferno squad,17
+1615,Rare Undead squad,17
+1616,Rare Elf squad,18
+1617,Rare Cursed squad,18
+1618,Rare Barbarian squad,18
+1619,Rare Inferno squad,19
+1620,Rare Undead squad,19
+1621,Rare Elf squad,19
+1622,Rare Cursed squad,20
+1623,Rare Barbarian squad,20
+1624,Rare Inferno squad,20
+1625,Rare Undead squad,21
+1626,Rare Elf squad,21
+1627,Rare Cursed squad,21
+1628,Rare Barbarian squad,21
+1629,Rare Inferno squad,21
+1630,Rare Undead squad,22
+1631,Rare Elf squad,22
+1632,Rare Cursed squad,22
+1633,Rare Barbarian squad,22
+1634,Rare Inferno squad,22
+1635,Rare Undead squad,23
+1636,Rare Elf squad,23
+1637,Rare Cursed squad,23
+1638,Rare Barbarian squad,23
+1639,Rare Inferno squad,23
+1640,Rare Undead squad,24
+1641,Rare Elf squad,24
+1642,Rare Cursed squad,24
+1643,Rare Barbarian squad,24
+1644,Rare Inferno squad,24
+1645,Rare Undead squad,25
+1646,Rare Elf squad,25
+1647,Rare Cursed squad,25
+1648,Rare Barbarian squad,25
+1649,Rare Inferno squad,25
+1650,Rare Undead squad,26
+1651,Rare Elf squad,26
+1652,Rare Cursed squad,26
+1653,Rare Barbarian squad,26
+1654,Rare Inferno squad,26
+1655,Rare Undead squad,27
+1656,Rare Elf squad,27
+1657,Rare Cursed squad,27
+1658,Rare Barbarian squad,27
+1659,Rare Inferno squad,27
+1660,Rare Undead squad,28
+1661,Rare Elf squad,28
+1662,Rare Cursed squad,28
+1663,Rare Barbarian squad,28
+1664,Rare Inferno squad,28
+1665,Rare Undead squad,29
+1666,Rare Elf squad,29
+1667,Rare Cursed squad,29
+1668,Rare Barbarian squad,29
+1669,Rare Inferno squad,29
+1670,Rare Undead squad,30
+1671,Rare Elf squad,30
+1672,Rare Cursed squad,30
+1673,Rare Barbarian squad,30
+1674,Rare Inferno squad,30
+1675,Rare Undead squad,31
+1676,Rare Elf squad,31
+1677,Rare Cursed squad,31
+1678,Rare Barbarian squad,31
+1679,Rare Inferno squad,31
+1680,Rare Undead squad,32
+1681,Rare Elf squad,32
+1682,Rare Cursed squad,32
+1683,Rare Barbarian squad,32
+1684,Rare Inferno squad,32
+1685,Rare Undead squad,33
+1686,Rare Elf squad,33
+1687,Rare Cursed squad,33
+1688,Rare Barbarian squad,33
+1689,Rare Inferno squad,33
+1690,Rare Undead squad,34
+1691,Rare Elf squad,34
+1692,Rare Cursed squad,34
+1693,Rare Barbarian squad,34
+1694,Rare Inferno squad,34
+1695,Rare Undead squad,35
+1696,Rare Elf squad,35
+1697,Rare Cursed squad,35
+1698,Rare Barbarian squad,35
+1699,Rare Inferno squad,35
+1750,Heroic Undead squad,16
+1751,Heroic Elf squad,17
+1752,Heroic Cursed squad,18
+1753,Heroic Barbarian squad,19
+1754,Heroic Inferno squad,20
+1755,Heroic Undead squad,21
+1756,Heroic Elf squad,22
+1757,Heroic Cursed squad,23
+1758,Heroic Barbarian squad,24
+1759,Heroic Inferno squad,25
+1760,Heroic Undead squad,26
+1761,Heroic Elf squad,27
+1762,Heroic Cursed squad,28
+1763,Heroic Barbarian squad,29
+1764,Heroic Inferno squad,30
+1765,Heroic Undead squad,31
+1766,Heroic Elf squad,32
+1767,Heroic Cursed squad,33
+1768,Heroic Barbarian squad,34
+1769,Heroic Inferno squad,35
+1770,Heroic Undead squad,36
+1771,Heroic Elf squad,37
+1772,Heroic Cursed squad,38
+1773,Heroic Barbarian squad,39
+1774,Heroic Inferno squad,40
+1775,Heroic Undead squad,41
+1776,Heroic Elf squad,42
+1777,Heroic Cursed squad,43
+1778,Heroic Barbarian squad,44
+1779,Heroic Inferno squad,45
+1798,Elven Citadel,10
+1799,Elven Citadel,15
+1800,Elven Citadel,20
+1801,Cursed Citadel,20
+1802,Cursed Citadel,21
+1803,Cursed Citadel,22
+1804,Cursed Citadel,23
+1805,Cursed Citadel,24
+1806,Elven Citadel,25
+1807,Cursed Citadel,25
+1808,Barbarian Citadel,25
+1809,Inferno Citadel,15
+1810,,35
+1811,Elven Citadel,10
+1812,Elven Citadel,15
+1813,Elven Citadel,20
+1814,Cursed Citadel,20
+1815,Elven Citadel,25
+1816,Cursed Citadel,25
+1817,Elven Citadel,30
+1850,Heroic Undead squad,16
+1851,Heroic Elf squad,17
+1852,Heroic Cursed squad,18
+1853,Heroic Barbarian squad,19
+1854,Heroic Inferno squad,20
+1855,Heroic Undead squad,21
+1856,Heroic Elf squad,22
+1857,Heroic Cursed squad,23
+1858,Heroic Barbarian squad,24
+1859,Heroic Inferno squad,25
+1860,Heroic Undead squad,26
+1861,Heroic Elf squad,27
+1862,Heroic Cursed squad,28
+1863,Heroic Barbarian squad,29
+1864,Heroic Inferno squad,30
+1865,Heroic Undead squad,31
+1866,Heroic Elf squad,32
+1867,Heroic Cursed squad,33
+1868,Heroic Barbarian squad,34
+1869,Heroic Inferno squad,35
+1870,Heroic Undead squad,36
+1871,Heroic Elf squad,37
+1872,Heroic Cursed squad,38
+1873,Heroic Barbarian squad,39
+1874,Heroic Inferno squad,40
+1875,Heroic Undead squad,41
+1876,Heroic Elf squad,42
+1877,Heroic Cursed squad,43
+1878,Heroic Barbarian squad,44
+1879,Heroic Inferno squad,45
+1901,Ancestral home,1
+1902,Bandit camp,2
+1903,Old laboratory,6
+1904,Cave,7
+1950,Heroic Undead squad,16
+1951,Heroic Elf squad,17
+1952,Heroic Cursed squad,18
+1953,Heroic Barbarian squad,19
+1954,Heroic Inferno squad,20
+1955,Heroic Undead squad,21
+1956,Heroic Elf squad,22
+1957,Heroic Cursed squad,23
+1958,Heroic Barbarian squad,24
+1959,Heroic Inferno squad,25
+1960,Heroic Undead squad,26
+1961,Heroic Elf squad,27
+1962,Heroic Cursed squad,28
+1963,Heroic Barbarian squad,29
+1964,Heroic Inferno squad,30
+1965,Heroic Undead squad,31
+1966,Heroic Elf squad,32
+1967,Heroic Cursed squad,33
+1968,Heroic Barbarian squad,34
+1969,Heroic Inferno squad,35
+1970,Heroic Undead squad,36
+1971,Heroic Elf squad,37
+1972,Heroic Cursed squad,38
+1973,Heroic Barbarian squad,39
+1974,Heroic Inferno squad,40
+1975,Heroic Undead squad,41
+1976,Heroic Elf squad,42
+1977,Heroic Cursed squad,43
+1978,Heroic Barbarian squad,44
+1979,Heroic Inferno squad,45
+2050,Heroic Undead squad,16
+2051,Heroic Elf squad,17
+2052,Heroic Cursed squad,18
+2053,Heroic Barbarian squad,19
+2054,Heroic Inferno squad,20
+2055,Heroic Undead squad,21
+2056,Heroic Elf squad,22
+2057,Heroic Cursed squad,23
+2058,Heroic Barbarian squad,24
+2059,Heroic Inferno squad,25
+2060,Heroic Undead squad,26
+2061,Heroic Elf squad,27
+2062,Heroic Cursed squad,28
+2063,Heroic Barbarian squad,29
+2064,Heroic Inferno squad,30
+2065,Heroic Undead squad,31
+2066,Heroic Elf squad,32
+2067,Heroic Cursed squad,33
+2068,Heroic Barbarian squad,34
+2069,Heroic Inferno squad,35
+2070,Heroic Undead squad,36
+2071,Heroic Elf squad,37
+2072,Heroic Cursed squad,38
+2073,Heroic Barbarian squad,39
+2074,Heroic Inferno squad,40
+2075,Heroic Undead squad,41
+2076,Heroic Elf squad,42
+2077,Heroic Cursed squad,43
+2078,Heroic Barbarian squad,44
+2079,Heroic Inferno squad,45
+2101,Crypt,5
+2102,Crypt,5
+2103,Crypt,5
+2104,Crypt,5
+2105,Crypt,5
+2106,Crypt,5
+2107,Crypt,5
+2108,Crypt,5
+2109,Crypt,5
+2110,Crypt,5
+2111,Crypt,5
+2112,Crypt,5
+2113,Crypt,5
+2119,Crypt,5
+2120,Crypt,5
+2121,Crypt,5
+2122,Crypt,5
+2137,Crypt,5
+2201,Crypt,10
+2202,Crypt,10
+2203,Crypt,10
+2204,Crypt,10
+2205,Crypt,10
+2206,Crypt,10
+2207,Crypt,10
+2208,Crypt,10
+2209,Crypt,10
+2210,Crypt,10
+2211,Crypt,10
+2212,Crypt,10
+2213,Crypt,10
+2219,Crypt,10
+2220,Crypt,10
+2221,Crypt,10
+2222,Crypt,10
+2237,Crypt,10
+2301,Crypt,15
+2302,Crypt,15
+2303,Crypt,15
+2304,Crypt,15
+2305,Crypt,15
+2306,Crypt,15
+2307,Crypt,15
+2308,Crypt,15
+2309,Crypt,15
+2310,Crypt,15
+2311,Crypt,15
+2312,Crypt,15
+2313,Crypt,15
+2319,Crypt,15
+2320,Crypt,15
+2321,Crypt,15
+2322,Crypt,15
+2323,Epic Crypt,15
+2324,Epic Crypt,15
+2325,Epic Crypt,15
+2326,Epic Crypt,15
+2327,Epic Crypt,15
+2328,Epic Crypt,15
+2329,Epic Crypt,15
+2330,Epic Crypt,15
+2331,Epic Crypt,15
+2332,Epic Crypt,15
+2333,Epic Crypt,15
+2334,Epic Crypt,15
+2335,Epic Crypt,15
+2336,Epic Crypt,15
+2337,Crypt,15
+2401,Crypt,20
+2402,Crypt,20
+2403,Crypt,20
+2404,Crypt,20
+2405,Crypt,20
+2406,Crypt,20
+2407,Crypt,20
+2408,Crypt,20
+2409,Crypt,20
+2410,Crypt,20
+2411,Crypt,20
+2412,Crypt,20
+2413,Crypt,20
+2414,Crypt,20
+2415,Crypt,20
+2416,Crypt,20
+2417,Crypt,20
+2418,Crypt,20
+2419,Crypt,20
+2420,Crypt,20
+2421,Crypt,20
+2422,Crypt,20
+2423,Epic Crypt,20
+2424,Epic Crypt,20
+2425,Epic Crypt,20
+2426,Epic Crypt,20
+2427,Epic Crypt,20
+2428,Epic Crypt,20
+2429,Epic Crypt,20
+2430,Epic Crypt,20
+2431,Epic Crypt,20
+2432,Epic Crypt,20
+2433,Epic Crypt,20
+2434,Epic Crypt,20
+2435,Epic Crypt,20
+2436,Epic Crypt,20
+2437,Crypt,20
+2501,Crypt,25
+2502,Crypt,25
+2503,Crypt,25
+2504,Crypt,25
+2505,Crypt,25
+2506,Crypt,25
+2507,Crypt,25
+2508,Crypt,25
+2509,Crypt,25
+2510,Crypt,25
+2511,Crypt,25
+2512,Crypt,25
+2513,Crypt,25
+2514,Crypt,25
+2515,Crypt,25
+2516,Crypt,25
+2517,Crypt,25
+2518,Crypt,25
+2519,Crypt,25
+2520,Crypt,25
+2521,Crypt,25
+2522,Crypt,25
+2523,Epic Crypt,25
+2524,Epic Crypt,25
+2525,Epic Crypt,25
+2526,Epic Crypt,25
+2527,Epic Crypt,25
+2528,Epic Crypt,25
+2529,Epic Crypt,25
+2530,Epic Crypt,25
+2531,Epic Crypt,25
+2532,Epic Crypt,25
+2533,Epic Crypt,25
+2534,Epic Crypt,25
+2535,Epic Crypt,25
+2536,Epic Crypt,25
+2537,Crypt,25
+2538,Crypt,25
+2539,Crypt,25
+2540,Crypt,25
+2623,Epic Crypt,30
+2624,Epic Crypt,30
+2625,Epic Crypt,30
+2626,Epic Crypt,30
+2627,Epic Crypt,30
+2628,Epic Crypt,30
+2629,Epic Crypt,30
+2630,Epic Crypt,30
+2631,Epic Crypt,30
+2632,Epic Crypt,30
+2633,Epic Crypt,30
+2634,Epic Crypt,30
+2635,Epic Crypt,30
+2636,Epic Crypt,30
+2637,Rare Crypt,30
+2723,Epic Crypt,35
+2724,Epic Crypt,35
+2725,Epic Crypt,35
+2726,Epic Crypt,35
+2727,Epic Crypt,35
+2728,Epic Crypt,35
+2729,Epic Crypt,35
+2730,Epic Crypt,35
+2731,Epic Crypt,35
+2732,Epic Crypt,35
+2733,Epic Crypt,35
+2734,Epic Crypt,35
+2735,Epic Crypt,35
+2736,Epic Crypt,35
+2737,Epic Crypt,35
+2740,Epic Crypt,15
+2741,Epic Crypt,20
+2742,Epic Crypt,25
+2743,Epic Crypt,30
+2744,Epic Crypt,35
+2745,Epic Crypt,15
+2746,Epic Crypt,20
+2747,Epic Crypt,25
+2748,Epic Crypt,30
+2749,Epic Crypt,35
+2750,Epic Crypt,15
+2751,Epic Crypt,20
+2752,Epic Crypt,25
+2753,Epic Crypt,30
+2754,Epic Crypt,35
+2755,"Can be obtained by completing personal goals in the Clash of Kingdoms tournament, and also by purchasing it in the bank.",35
+2756,Can be obtained in the Jörmungandr's Invasion event,35
+2757,Can be obtained in the Fenrir's Invasion event,35
+2758,Can be purchased during the special sale,35
+2800,Common Undead squad,36
+2801,Common Elf squad,36
+2802,Common Cursed squad,36
+2803,Common Barbarian squad,36
+2804,Common Inferno squad,37
+2805,Common Undead squad,37
+2806,Common Elf squad,37
+2807,Common Cursed squad,37
+2808,Common Barbarian squad,38
+2809,Common Inferno squad,38
+2810,Common Undead squad,38
+2811,Common Elf squad,38
+2812,Common Cursed squad,39
+2813,Common Barbarian squad,39
+2814,Common Inferno squad,39
+2815,Common Undead squad,39
+2816,Common Elf squad,40
+2817,Common Cursed squad,40
+2818,Common Barbarian squad,40
+2819,Common Inferno squad,40
+2820,Common Undead squad,41
+2821,Common Elf squad,41
+2822,Common Cursed squad,41
+2823,Common Barbarian squad,41
+2824,Common Inferno squad,42
+2825,Common Undead squad,42
+2826,Common Elf squad,42
+2827,Common Cursed squad,42
+2828,Common Barbarian squad,43
+2829,Common Inferno squad,43
+2830,Common Undead squad,43
+2831,Common Elf squad,43
+2832,Common Cursed squad,44
+2833,Common Barbarian squad,44
+2834,Common Inferno squad,44
+2835,Common Undead squad,44
+2836,Common Elf squad,45
+2837,Common Cursed squad,45
+2838,Common Barbarian squad,45
+2839,Common Inferno squad,45
+2900,Rare Undead squad,36
+2901,Rare Elf squad,36
+2902,Rare Cursed squad,36
+2903,Rare Barbarian squad,36
+2904,Rare Inferno squad,37
+2905,Rare Undead squad,37
+2906,Rare Elf squad,37
+2907,Rare Cursed squad,37
+2908,Rare Barbarian squad,38
+2909,Rare Inferno squad,38
+2910,Rare Undead squad,38
+2911,Rare Elf squad,38
+2912,Rare Cursed squad,39
+2913,Rare Barbarian squad,39
+2914,Rare Inferno squad,39
+2915,Rare Undead squad,39
+2916,Rare Elf squad,40
+2917,Rare Cursed squad,40
+2918,Rare Barbarian squad,40
+2919,Rare Inferno squad,40
+2920,Rare Undead squad,41
+2921,Rare Elf squad,41
+2922,Rare Cursed squad,41
+2923,Rare Barbarian squad,41
+2924,Rare Inferno squad,42
+2925,Rare Undead squad,42
+2926,Rare Elf squad,42
+2927,Rare Cursed squad,42
+2928,Rare Barbarian squad,43
+2929,Rare Inferno squad,43
+2930,Rare Undead squad,43
+2931,Rare Elf squad,43
+2932,Rare Cursed squad,44
+2933,Rare Barbarian squad,44
+2934,Rare Inferno squad,44
+2935,Rare Undead squad,44
+2936,Rare Elf squad,45
+2937,Rare Cursed squad,45
+2938,Rare Barbarian squad,45
+2939,Rare Inferno squad,45
+3101,Rare Crypt,5
+3102,Rare Crypt,5
+3201,Rare Crypt,10
+3202,Rare Crypt,10
+3301,Rare Crypt,15
+3302,Rare Crypt,15
+3401,Rare Crypt,20
+3402,Rare Crypt,20
+3501,Rare Crypt,25
+3502,Rare Crypt,25
+3511,Rare Crypt,30
+3512,Rare Crypt,30
+3600,Abandoned Crypt,5
+3601,Abandoned Crypt,10
+3602,Abandoned Crypt,15
+3603,Abandoned Crypt,20
+3604,Abandoned Crypt,25
+3610,Abandoned Crypt,5
+3611,Abandoned Crypt,10
+3612,Abandoned Crypt,15
+3613,Abandoned Crypt,20
+3614,Abandoned Crypt,25
+3620,Abandoned Crypt,5
+3621,Abandoned Crypt,10
+3622,Abandoned Crypt,15
+3623,Abandoned Crypt,20
+3624,Abandoned Crypt,25
+4000,Epic Undead squad,50
+4001,Epic Werebeast Cave,50
+4002,Epic Inferno squad,50
+4003,Shadow City,50
+4004,Epic Pumpkin squad,50
+4005,Epic Pumpkin squad,50
+4006,Epic Frozen squad,50
+4007,Epic Inferno squad,50
+4008,Epic Unholy squad,50
+4009,Epic Yokai squad,50
+4010,Arachne's Swarm Epic squad,50
+4011,Epic Jörmungandr squad,50
+4012,Epic Fenrir squad,50
+4020,Epic Fallen King squad,50
+4100,Epic Undead squad,50
+4102,Epic Inferno squad,50
+4103,Shadow City,50
+4107,Epic Inferno squad,50
+4110,Arachne's Swarm Epic squad,50
+4111,Epic Jörmungandr squad,50
+4112,Epic Fenrir squad,50
+4200,Bloomfang,50
+4201,Forest Hermit,50
+4202,Vineweaver,50
+4300,Doomtree,50
+5001,Сommon Pumpkin squad,1
+5002,Сommon Pumpkin squad,2
+5003,Сommon Pumpkin squad,3
+5004,Сommon Pumpkin squad,4
+5005,Сommon Pumpkin squad,5
+5006,Сommon Pumpkin squad,6
+5007,Сommon Pumpkin squad,7
+5008,Сommon Pumpkin squad,8
+5009,Сommon Pumpkin squad,9
+5010,Сommon Pumpkin squad,10
+5011,Сommon Pumpkin squad,11
+5012,Сommon Pumpkin squad,12
+5013,Сommon Pumpkin squad,13
+5014,Сommon Pumpkin squad,14
+5015,Сommon Pumpkin squad,15
+5016,Сommon Pumpkin squad,16
+5017,Сommon Pumpkin squad,17
+5018,Сommon Pumpkin squad,18
+5019,Сommon Pumpkin squad,19
+5020,Сommon Pumpkin squad,20
+5021,Сommon Pumpkin squad,21
+5022,Сommon Pumpkin squad,22
+5023,Сommon Pumpkin squad,23
+5024,Сommon Pumpkin squad,24
+5025,Сommon Pumpkin squad,25
+5026,Сommon Pumpkin squad,26
+5027,Сommon Pumpkin squad,27
+5028,Сommon Pumpkin squad,28
+5029,Сommon Pumpkin squad,29
+5030,Сommon Pumpkin squad,30
+5031,Сommon Pumpkin squad,31
+5032,Сommon Pumpkin squad,32
+5033,Сommon Pumpkin squad,33
+5034,Сommon Pumpkin squad,34
+5035,Сommon Pumpkin squad,35
+5036,Сommon Pumpkin squad,36
+5037,Сommon Pumpkin squad,37
+5038,Сommon Pumpkin squad,38
+5039,Сommon Pumpkin squad,39
+5040,Сommon Pumpkin squad,40
+5041,Сommon Pumpkin squad,41
+5042,Сommon Pumpkin squad,42
+5043,Сommon Pumpkin squad,43
+5044,Сommon Pumpkin squad,44
+5045,Сommon Pumpkin squad,45
+5101,Rare Pumpkin squad,1
+5102,Rare Pumpkin squad,2
+5103,Rare Pumpkin squad,3
+5104,Rare Pumpkin squad,4
+5105,Rare Pumpkin squad,5
+5106,Rare Pumpkin squad,6
+5107,Rare Pumpkin squad,7
+5108,Rare Pumpkin squad,8
+5109,Rare Pumpkin squad,9
+5110,Rare Pumpkin squad,10
+5111,Rare Pumpkin squad,11
+5112,Rare Pumpkin squad,12
+5113,Rare Pumpkin squad,13
+5114,Rare Pumpkin squad,14
+5115,Rare Pumpkin squad,15
+5116,Rare Pumpkin squad,16
+5117,Rare Pumpkin squad,17
+5118,Rare Pumpkin squad,18
+5119,Rare Pumpkin squad,19
+5120,Rare Pumpkin squad,20
+5121,Rare Pumpkin squad,21
+5122,Rare Pumpkin squad,22
+5123,Rare Pumpkin squad,23
+5124,Rare Pumpkin squad,24
+5125,Rare Pumpkin squad,25
+5126,Rare Pumpkin squad,26
+5127,Rare Pumpkin squad,27
+5128,Rare Pumpkin squad,28
+5129,Rare Pumpkin squad,29
+5130,Rare Pumpkin squad,30
+5131,Rare Pumpkin squad,31
+5132,Rare Pumpkin squad,32
+5133,Rare Pumpkin squad,33
+5134,Rare Pumpkin squad,34
+5135,Rare Pumpkin squad,35
+5136,Rare Pumpkin squad,36
+5137,Rare Pumpkin squad,37
+5138,Rare Pumpkin squad,38
+5139,Rare Pumpkin squad,39
+5140,Rare Pumpkin squad,40
+5141,Rare Pumpkin squad,41
+5142,Rare Pumpkin squad,42
+5143,Rare Pumpkin squad,43
+5144,Rare Pumpkin squad,44
+5145,Rare Pumpkin squad,45
+5201,Common Frozen squad,1
+5202,Common Frozen squad,2
+5203,Common Frozen squad,3
+5204,Common Frozen squad,4
+5205,Common Frozen squad,5
+5206,Common Frozen squad,6
+5207,Common Frozen squad,7
+5208,Common Frozen squad,8
+5209,Common Frozen squad,9
+5210,Common Frozen squad,10
+5211,Common Frozen squad,11
+5212,Common Frozen squad,12
+5213,Common Frozen squad,13
+5214,Common Frozen squad,14
+5215,Common Frozen squad,15
+5216,Common Frozen squad,16
+5217,Common Frozen squad,17
+5218,Common Frozen squad,18
+5219,Common Frozen squad,19
+5220,Common Frozen squad,20
+5221,Common Frozen squad,21
+5222,Common Frozen squad,22
+5223,Common Frozen squad,23
+5224,Common Frozen squad,24
+5225,Common Frozen squad,25
+5226,Common Frozen squad,26
+5227,Common Frozen squad,27
+5228,Common Frozen squad,28
+5229,Common Frozen squad,29
+5230,Common Frozen squad,30
+5231,Common Frozen squad,31
+5232,Common Frozen squad,32
+5233,Common Frozen squad,33
+5234,Common Frozen squad,34
+5235,Common Frozen squad,35
+5236,Common Frozen squad,36
+5237,Common Frozen squad,37
+5238,Common Frozen squad,38
+5239,Common Frozen squad,39
+5240,Common Frozen squad,40
+5241,Common Frozen squad,41
+5242,Common Frozen squad,42
+5243,Common Frozen squad,43
+5244,Common Frozen squad,44
+5245,Common Frozen squad,45
+5301,Rare Frozen squad,1
+5302,Rare Frozen squad,2
+5303,Rare Frozen squad,3
+5304,Rare Frozen squad,4
+5305,Rare Frozen squad,5
+5306,Rare Frozen squad,6
+5307,Rare Frozen squad,7
+5308,Rare Frozen squad,8
+5309,Rare Frozen squad,9
+5310,Rare Frozen squad,10
+5311,Rare Frozen squad,11
+5312,Rare Frozen squad,12
+5313,Rare Frozen squad,13
+5314,Rare Frozen squad,14
+5315,Rare Frozen squad,15
+5316,Rare Frozen squad,16
+5317,Rare Frozen squad,17
+5318,Rare Frozen squad,18
+5319,Rare Frozen squad,19
+5320,Rare Frozen squad,20
+5321,Rare Frozen squad,21
+5322,Rare Frozen squad,22
+5323,Rare Frozen squad,23
+5324,Rare Frozen squad,24
+5325,Rare Frozen squad,25
+5326,Rare Frozen squad,26
+5327,Rare Frozen squad,27
+5328,Rare Frozen squad,28
+5329,Rare Frozen squad,29
+5330,Rare Frozen squad,30
+5331,Rare Frozen squad,31
+5332,Rare Frozen squad,32
+5333,Rare Frozen squad,33
+5334,Rare Frozen squad,34
+5335,Rare Frozen squad,35
+5336,Rare Frozen squad,36
+5337,Rare Frozen squad,37
+5338,Rare Frozen squad,38
+5339,Rare Frozen squad,39
+5340,Rare Frozen squad,40
+5341,Rare Frozen squad,41
+5342,Rare Frozen squad,42
+5343,Rare Frozen squad,43
+5344,Rare Frozen squad,44
+5345,Rare Frozen squad,45
+5401,Common Werebeast squad,1
+5402,Common Werebeast squad,2
+5403,Common Werebeast squad,3
+5404,Common Werebeast squad,4
+5405,Common Werebeast squad,5
+5406,Common Werebeast squad,6
+5407,Common Werebeast squad,7
+5408,Common Werebeast squad,8
+5409,Common Werebeast squad,9
+5410,Common Werebeast squad,10
+5411,Common Werebeast squad,11
+5412,Common Werebeast squad,12
+5413,Common Werebeast squad,13
+5414,Common Werebeast squad,14
+5415,Common Werebeast squad,15
+5416,Common Werebeast squad,16
+5417,Common Werebeast squad,17
+5418,Common Werebeast squad,18
+5419,Common Werebeast squad,19
+5420,Common Werebeast squad,20
+5421,Common Werebeast squad,21
+5422,Common Werebeast squad,22
+5423,Common Werebeast squad,23
+5424,Common Werebeast squad,24
+5425,Common Werebeast squad,25
+5426,Common Werebeast squad,26
+5427,Common Werebeast squad,27
+5428,Common Werebeast squad,28
+5429,Common Werebeast squad,29
+5430,Common Werebeast squad,30
+5431,Common Werebeast squad,31
+5432,Common Werebeast squad,32
+5433,Common Werebeast squad,33
+5434,Common Werebeast squad,34
+5435,Common Werebeast squad,35
+5436,Common Werebeast squad,36
+5437,Common Werebeast squad,37
+5438,Common Werebeast squad,38
+5439,Common Werebeast squad,39
+5440,Common Werebeast squad,40
+5441,Common Werebeast squad,41
+5442,Common Werebeast squad,42
+5443,Common Werebeast squad,43
+5444,Common Werebeast squad,44
+5445,Common Werebeast squad,45
+5501,Rare Werebeast squad,1
+5502,Rare Werebeast squad,2
+5503,Rare Werebeast squad,3
+5504,Rare Werebeast squad,4
+5505,Rare Werebeast squad,5
+5506,Rare Werebeast squad,6
+5507,Rare Werebeast squad,7
+5508,Rare Werebeast squad,8
+5509,Rare Werebeast squad,9
+5510,Rare Werebeast squad,10
+5511,Rare Werebeast squad,11
+5512,Rare Werebeast squad,12
+5513,Rare Werebeast squad,13
+5514,Rare Werebeast squad,14
+5515,Rare Werebeast squad,15
+5516,Rare Werebeast squad,16
+5517,Rare Werebeast squad,17
+5518,Rare Werebeast squad,18
+5519,Rare Werebeast squad,19
+5520,Rare Werebeast squad,20
+5521,Rare Werebeast squad,21
+5522,Rare Werebeast squad,22
+5523,Rare Werebeast squad,23
+5524,Rare Werebeast squad,24
+5525,Rare Werebeast squad,25
+5526,Rare Werebeast squad,26
+5527,Rare Werebeast squad,27
+5528,Rare Werebeast squad,28
+5529,Rare Werebeast squad,29
+5530,Rare Werebeast squad,30
+5531,Rare Werebeast squad,31
+5532,Rare Werebeast squad,32
+5533,Rare Werebeast squad,33
+5534,Rare Werebeast squad,34
+5535,Rare Werebeast squad,35
+5536,Rare Werebeast squad,36
+5537,Rare Werebeast squad,37
+5538,Rare Werebeast squad,38
+5539,Rare Werebeast squad,39
+5540,Rare Werebeast squad,40
+5541,Rare Werebeast squad,41
+5542,Rare Werebeast squad,42
+5543,Rare Werebeast squad,43
+5544,Rare Werebeast squad,44
+5545,Rare Werebeast squad,45
+5601,Сommon Mummy squad,1
+5602,Сommon Mummy squad,2
+5603,Сommon Mummy squad,3
+5604,Сommon Mummy squad,4
+5605,Сommon Mummy squad,5
+5606,Сommon Mummy squad,6
+5607,Сommon Mummy squad,7
+5608,Сommon Mummy squad,8
+5609,Сommon Mummy squad,9
+5610,Сommon Mummy squad,10
+5611,Сommon Mummy squad,11
+5612,Сommon Mummy squad,12
+5613,Сommon Mummy squad,13
+5614,Сommon Mummy squad,14
+5615,Сommon Mummy squad,15
+5616,Сommon Mummy squad,16
+5617,Сommon Mummy squad,17
+5618,Сommon Mummy squad,18
+5619,Сommon Mummy squad,19
+5620,Сommon Mummy squad,20
+5621,Сommon Mummy squad,21
+5622,Сommon Mummy squad,22
+5623,Сommon Mummy squad,23
+5624,Сommon Mummy squad,24
+5625,Сommon Mummy squad,25
+5626,Сommon Mummy squad,26
+5627,Сommon Mummy squad,27
+5628,Сommon Mummy squad,28
+5629,Сommon Mummy squad,29
+5630,Сommon Mummy squad,30
+5631,Сommon Mummy squad,31
+5632,Сommon Mummy squad,32
+5633,Сommon Mummy squad,33
+5634,Сommon Mummy squad,34
+5635,Сommon Mummy squad,35
+5636,Сommon Mummy squad,36
+5637,Сommon Mummy squad,37
+5638,Сommon Mummy squad,38
+5639,Сommon Mummy squad,39
+5640,Сommon Mummy squad,40
+5641,Сommon Mummy squad,41
+5642,Сommon Mummy squad,42
+5643,Сommon Mummy squad,43
+5644,Сommon Mummy squad,44
+5645,Сommon Mummy squad,45
+5701,Rare Mummy squad,1
+5702,Rare Mummy squad,2
+5703,Rare Mummy squad,3
+5704,Rare Mummy squad,4
+5705,Rare Mummy squad,5
+5706,Rare Mummy squad,6
+5707,Rare Mummy squad,7
+5708,Rare Mummy squad,8
+5709,Rare Mummy squad,9
+5710,Rare Mummy squad,10
+5711,Rare Mummy squad,11
+5712,Rare Mummy squad,12
+5713,Rare Mummy squad,13
+5714,Rare Mummy squad,14
+5715,Rare Mummy squad,15
+5716,Rare Mummy squad,16
+5717,Rare Mummy squad,17
+5718,Rare Mummy squad,18
+5719,Rare Mummy squad,19
+5720,Rare Mummy squad,20
+5721,Rare Mummy squad,21
+5722,Rare Mummy squad,22
+5723,Rare Mummy squad,23
+5724,Rare Mummy squad,24
+5725,Rare Mummy squad,25
+5726,Rare Mummy squad,26
+5727,Rare Mummy squad,27
+5728,Rare Mummy squad,28
+5729,Rare Mummy squad,29
+5730,Rare Mummy squad,30
+5731,Rare Mummy squad,31
+5732,Rare Mummy squad,32
+5733,Rare Mummy squad,33
+5734,Rare Mummy squad,34
+5735,Rare Mummy squad,35
+5736,Rare Mummy squad,36
+5737,Rare Mummy squad,37
+5738,Rare Mummy squad,38
+5739,Rare Mummy squad,39
+5740,Rare Mummy squad,40
+5741,Rare Mummy squad,41
+5742,Rare Mummy squad,42
+5743,Rare Mummy squad,43
+5744,Rare Mummy squad,44
+5745,Rare Mummy squad,45
+5801,Common Unholy squad,1
+5802,Common Unholy squad,2
+5803,Common Unholy squad,3
+5804,Common Unholy squad,4
+5805,Common Unholy squad,5
+5806,Common Unholy squad,6
+5807,Common Unholy squad,7
+5808,Common Unholy squad,8
+5809,Common Unholy squad,9
+5810,Common Unholy squad,10
+5811,Common Unholy squad,11
+5812,Common Unholy squad,12
+5813,Common Unholy squad,13
+5814,Common Unholy squad,14
+5815,Common Unholy squad,15
+5816,Common Unholy squad,16
+5817,Common Unholy squad,17
+5818,Common Unholy squad,18
+5819,Common Unholy squad,19
+5820,Common Unholy squad,20
+5821,Common Unholy squad,21
+5822,Common Unholy squad,22
+5823,Common Unholy squad,23
+5824,Common Unholy squad,24
+5825,Common Unholy squad,25
+5826,Common Unholy squad,26
+5827,Common Unholy squad,27
+5828,Common Unholy squad,28
+5829,Common Unholy squad,29
+5830,Common Unholy squad,30
+5831,Common Unholy squad,31
+5832,Common Unholy squad,32
+5833,Common Unholy squad,33
+5834,Common Unholy squad,34
+5835,Common Unholy squad,35
+5836,Common Unholy squad,36
+5837,Common Unholy squad,37
+5838,Common Unholy squad,38
+5839,Common Unholy squad,39
+5840,Common Unholy squad,40
+5841,Common Unholy squad,41
+5842,Common Unholy squad,42
+5843,Common Unholy squad,43
+5844,Common Unholy squad,44
+5845,Common Unholy squad,45
+5901,Rare Unholy squad,1
+5902,Rare Unholy squad,2
+5903,Rare Unholy squad,3
+5904,Rare Unholy squad,4
+5905,Rare Unholy squad,5
+5906,Rare Unholy squad,6
+5907,Rare Unholy squad,7
+5908,Rare Unholy squad,8
+5909,Rare Unholy squad,9
+5910,Rare Unholy squad,10
+5911,Rare Unholy squad,11
+5912,Rare Unholy squad,12
+5913,Rare Unholy squad,13
+5914,Rare Unholy squad,14
+5915,Rare Unholy squad,15
+5916,Rare Unholy squad,16
+5917,Rare Unholy squad,17
+5918,Rare Unholy squad,18
+5919,Rare Unholy squad,19
+5920,Rare Unholy squad,20
+5921,Rare Unholy squad,21
+5922,Rare Unholy squad,22
+5923,Rare Unholy squad,23
+5924,Rare Unholy squad,24
+5925,Rare Unholy squad,25
+5926,Rare Unholy squad,26
+5927,Rare Unholy squad,27
+5928,Rare Unholy squad,28
+5929,Rare Unholy squad,29
+5930,Rare Unholy squad,30
+5931,Rare Unholy squad,31
+5932,Rare Unholy squad,32
+5933,Rare Unholy squad,33
+5934,Rare Unholy squad,34
+5935,Rare Unholy squad,35
+5936,Rare Unholy squad,36
+5937,Rare Unholy squad,37
+5938,Rare Unholy squad,38
+5939,Rare Unholy squad,39
+5940,Rare Unholy squad,40
+5941,Rare Unholy squad,41
+5942,Rare Unholy squad,42
+5943,Rare Unholy squad,43
+5944,Rare Unholy squad,44
+5945,Rare Unholy squad,45
+6000,Epic Ancient squad,1
+6001,Epic Ancient squad,2
+6002,Epic Ancient squad,3
+6003,Epic Ancient squad,4
+6004,Epic Ancient squad,5
+6005,Epic Ancient squad,6
+6006,Epic Ancient squad,7
+6007,Epic Ancient squad,8
+6008,Epic Ancient squad,9
+6009,Epic Ancient squad,10
+6010,Epic Ancient squad,11
+6011,Epic Ancient squad,12
+6012,Epic Ancient squad,13
+6013,Epic Ancient squad,14
+6014,Epic Ancient squad,15
+6015,Epic Ancient squad,16
+6016,Epic Ancient squad,17
+6017,Epic Ancient squad,18
+6018,Epic Ancient squad,19
+6019,Epic Ancient squad,20
+6020,Epic Ancient squad,21
+6021,Epic Ancient squad,22
+6022,Epic Ancient squad,23
+6023,Epic Ancient squad,24
+6024,Epic Ancient squad,25
+6025,Epic Ancient squad,26
+6026,Epic Ancient squad,27
+6027,Epic Ancient squad,28
+6028,Epic Ancient squad,29
+6029,Epic Ancient squad,30
+6030,Epic Ancient squad,31
+6031,Epic Ancient squad,32
+6032,Epic Ancient squad,33
+6033,Epic Ancient squad,34
+6034,Epic Ancient squad,35
+6035,Epic Ancient squad,36
+6036,Epic Ancient squad,37
+6037,Epic Ancient squad,38
+6038,Epic Ancient squad,39
+6039,Epic Ancient squad,40
+6040,Epic Ancient squad,41
+6041,Epic Ancient squad,42
+6042,Epic Ancient squad,43
+6043,Epic Ancient squad,44
+6044,Epic Ancient squad,45
+6045,Epic Ancient squad,46
+6046,Epic Ancient squad,47
+6047,Epic Ancient squad,48
+6048,Epic Ancient squad,49
+6049,Epic Ancient squad,50
+6050,Epic Ancient squad,51
+6051,Epic Ancient squad,52
+6052,Epic Ancient squad,53
+6053,Epic Ancient squad,54
+6054,Epic Ancient squad,55
+6055,Epic Ancient squad,56
+6056,Epic Ancient squad,57
+6057,Epic Ancient squad,58
+6058,Epic Ancient squad,59
+6059,Epic Ancient squad,60
+6060,Epic Ancient squad,61
+6061,Epic Ancient squad,62
+6062,Epic Ancient squad,63
+6063,Epic Ancient squad,64
+6064,Epic Ancient squad,65
+6065,Epic Ancient squad,66
+6066,Epic Ancient squad,67
+6067,Epic Ancient squad,68
+6068,Epic Ancient squad,69
+6069,Epic Ancient squad,70
+6070,Epic Ancient squad,71
+6071,Epic Ancient squad,72
+6072,Epic Ancient squad,73
+6073,Epic Ancient squad,74
+6074,Epic Ancient squad,75
+6075,Epic Ancient squad,76
+6076,Epic Ancient squad,77
+6077,Epic Ancient squad,78
+6078,Epic Ancient squad,79
+6079,Epic Ancient squad,80
+6080,Epic Ancient squad,81
+6081,Epic Ancient squad,82
+6082,Epic Ancient squad,83
+6083,Epic Ancient squad,84
+6084,Epic Ancient squad,85
+6085,Epic Ancient squad,86
+6086,Epic Ancient squad,87
+6087,Epic Ancient squad,88
+6088,Epic Ancient squad,89
+6089,Epic Ancient squad,90
+6090,Epic Ancient squad,91
+6091,Epic Ancient squad,92
+6092,Epic Ancient squad,93
+6093,Epic Ancient squad,94
+6094,Epic Ancient squad,95
+6095,Epic Ancient squad,96
+6096,Epic Ancient squad,97
+6097,Epic Ancient squad,98
+6098,Epic Ancient squad,99
+6099,Epic Ancient squad,100
+6100,Epic Ancient squad,101
+6101,Epic Ancient squad,102
+6102,Epic Ancient squad,103
+6103,Epic Ancient squad,104
+6104,Epic Ancient squad,105
+6105,Epic Ancient squad,106
+6106,Epic Ancient squad,107
+6107,Epic Ancient squad,108
+6108,Epic Ancient squad,109
+6109,Epic Ancient squad,110
+6110,Epic Ancient squad,111
+6111,Epic Ancient squad,112
+6112,Epic Ancient squad,113
+6113,Epic Ancient squad,114
+6114,Epic Ancient squad,115
+6115,Epic Ancient squad,116
+6116,Epic Ancient squad,117
+6117,Epic Ancient squad,118
+6118,Epic Ancient squad,119
+6119,Epic Ancient squad,120
+6120,Epic Ancient squad,121
+6121,Epic Ancient squad,122
+6122,Epic Ancient squad,123
+6123,Epic Ancient squad,124
+6124,Epic Ancient squad,125
+6125,Epic Ancient squad,126
+6126,Epic Ancient squad,127
+6127,Epic Ancient squad,128
+6128,Epic Ancient squad,129
+6129,Epic Ancient squad,130
+6130,Epic Ancient squad,131
+6131,Epic Ancient squad,132
+6132,Epic Ancient squad,133
+6133,Epic Ancient squad,134
+6134,Epic Ancient squad,135
+6135,Epic Ancient squad,136
+6136,Epic Ancient squad,137
+6137,Epic Ancient squad,138
+6138,Epic Ancient squad,139
+6139,Epic Ancient squad,140
+6140,Epic Ancient squad,141
+6141,Epic Ancient squad,142
+6142,Epic Ancient squad,143
+6143,Epic Ancient squad,144
+6144,Epic Ancient squad,145
+6145,Epic Ancient squad,146
+6146,Epic Ancient squad,147
+6147,Epic Ancient squad,148
+6148,Epic Ancient squad,149
+6149,Epic Ancient squad,150
+6150,Epic Ancient squad,151
+6151,Epic Ancient squad,152
+6152,Epic Ancient squad,153
+6153,Epic Ancient squad,154
+6154,Epic Ancient squad,155
+6155,Epic Ancient squad,156
+6156,Epic Ancient squad,157
+6157,Epic Ancient squad,158
+6158,Epic Ancient squad,159
+6159,Epic Ancient squad,160
+6160,Epic Ancient squad,161
+6161,Epic Ancient squad,162
+6162,Epic Ancient squad,163
+6163,Epic Ancient squad,164
+6164,Epic Ancient squad,165
+6165,Epic Ancient squad,166
+6166,Epic Ancient squad,167
+6167,Epic Ancient squad,168
+6168,Epic Ancient squad,169
+6169,Epic Ancient squad,170
+6170,Epic Ancient squad,171
+6171,Epic Ancient squad,172
+6172,Epic Ancient squad,173
+6173,Epic Ancient squad,174
+6174,Epic Ancient squad,175
+6175,Epic Ancient squad,176
+6176,Epic Ancient squad,177
+6177,Epic Ancient squad,178
+6178,Epic Ancient squad,179
+6179,Epic Ancient squad,180
+6180,Epic Ancient squad,181
+6181,Epic Ancient squad,182
+6182,Epic Ancient squad,183
+6183,Epic Ancient squad,184
+6184,Epic Ancient squad,185
+6185,Epic Ancient squad,186
+6186,Epic Ancient squad,187
+6187,Epic Ancient squad,188
+6188,Epic Ancient squad,189
+6189,Epic Ancient squad,190
+6190,Epic Ancient squad,191
+6191,Epic Ancient squad,192
+6192,Epic Ancient squad,193
+6193,Epic Ancient squad,194
+6194,Epic Ancient squad,195
+6195,Epic Ancient squad,196
+6196,Epic Ancient squad,197
+6197,Epic Ancient squad,198
+6198,Epic Ancient squad,199
+6199,Epic Ancient squad,200
+6200,Epic Ancient squad,201
+6201,Epic Ancient squad,202
+6202,Epic Ancient squad,203
+6203,Epic Ancient squad,204
+6204,Epic Ancient squad,205
+6205,Epic Ancient squad,206
+6206,Epic Ancient squad,207
+6207,Epic Ancient squad,208
+6208,Epic Ancient squad,209
+6209,Epic Ancient squad,210
+6210,Epic Ancient squad,211
+6211,Epic Ancient squad,212
+6212,Epic Ancient squad,213
+6213,Epic Ancient squad,214
+6214,Epic Ancient squad,215
+6215,Epic Ancient squad,216
+6216,Epic Ancient squad,217
+6217,Epic Ancient squad,218
+6218,Epic Ancient squad,219
+6219,Epic Ancient squad,220
+6220,Epic Ancient squad,221
+6221,Epic Ancient squad,222
+6222,Epic Ancient squad,223
+6223,Epic Ancient squad,224
+6224,Epic Ancient squad,225
+6225,Epic Ancient squad,226
+6226,Epic Ancient squad,227
+6227,Epic Ancient squad,228
+6228,Epic Ancient squad,229
+6229,Epic Ancient squad,230
+6230,Epic Ancient squad,231
+6231,Epic Ancient squad,232
+6232,Epic Ancient squad,233
+6233,Epic Ancient squad,234
+6234,Epic Ancient squad,235
+6235,Epic Ancient squad,236
+6236,Epic Ancient squad,237
+6237,Epic Ancient squad,238
+6238,Epic Ancient squad,239
+6239,Epic Ancient squad,240
+6240,Epic Ancient squad,241
+6241,Epic Ancient squad,242
+6242,Epic Ancient squad,243
+6243,Epic Ancient squad,244
+6244,Epic Ancient squad,245
+6245,Epic Ancient squad,246
+6246,Epic Ancient squad,247
+6247,Epic Ancient squad,248
+6248,Epic Ancient squad,249
+6249,Epic Ancient squad,250
+7000,Epic Ancient squad,1
+7001,Epic Ancient squad,2
+7002,Epic Ancient squad,3
+7003,Epic Ancient squad,4
+7004,Epic Ancient squad,5
+7005,Epic Ancient squad,6
+7006,Epic Ancient squad,7
+7007,Epic Ancient squad,8
+7008,Epic Ancient squad,9
+7009,Epic Ancient squad,10
+7010,Epic Ancient squad,11
+7011,Epic Ancient squad,12
+7012,Epic Ancient squad,13
+7013,Epic Ancient squad,14
+7014,Epic Ancient squad,15
+7015,Epic Ancient squad,16
+7016,Epic Ancient squad,17
+7017,Epic Ancient squad,18
+7018,Epic Ancient squad,19
+7019,Epic Ancient squad,20
+7020,Epic Ancient squad,21
+7021,Epic Ancient squad,22
+7022,Epic Ancient squad,23
+7023,Epic Ancient squad,24
+7024,Epic Ancient squad,25
+7025,Epic Ancient squad,26
+7026,Epic Ancient squad,27
+7027,Epic Ancient squad,28
+7028,Epic Ancient squad,29
+7029,Epic Ancient squad,30
+7030,Epic Ancient squad,31
+7031,Epic Ancient squad,32
+7032,Epic Ancient squad,33
+7033,Epic Ancient squad,34
+7034,Epic Ancient squad,35
+7035,Epic Ancient squad,36
+7036,Epic Ancient squad,37
+7037,Epic Ancient squad,38
+7038,Epic Ancient squad,39
+7039,Epic Ancient squad,40
+7040,Epic Ancient squad,41
+7041,Epic Ancient squad,42
+7042,Epic Ancient squad,43
+7043,Epic Ancient squad,44
+7044,Epic Ancient squad,45
+7045,Epic Ancient squad,46
+7046,Epic Ancient squad,47
+7047,Epic Ancient squad,48
+7048,Epic Ancient squad,49
+7049,Epic Ancient squad,50
+7050,Epic Ancient squad,51
+7051,Epic Ancient squad,52
+7052,Epic Ancient squad,53
+7053,Epic Ancient squad,54
+7054,Epic Ancient squad,55
+7055,Epic Ancient squad,56
+7056,Epic Ancient squad,57
+7057,Epic Ancient squad,58
+7058,Epic Ancient squad,59
+7059,Epic Ancient squad,60
+7060,Epic Ancient squad,61
+7061,Epic Ancient squad,62
+7062,Epic Ancient squad,63
+7063,Epic Ancient squad,64
+7064,Epic Ancient squad,65
+7065,Epic Ancient squad,66
+7066,Epic Ancient squad,67
+7067,Epic Ancient squad,68
+7068,Epic Ancient squad,69
+7069,Epic Ancient squad,70
+7070,Epic Ancient squad,71
+7071,Epic Ancient squad,72
+7072,Epic Ancient squad,73
+7073,Epic Ancient squad,74
+7074,Epic Ancient squad,75
+7075,Epic Ancient squad,76
+7076,Epic Ancient squad,77
+7077,Epic Ancient squad,78
+7078,Epic Ancient squad,79
+7079,Epic Ancient squad,80
+7080,Epic Ancient squad,81
+7081,Epic Ancient squad,82
+7082,Epic Ancient squad,83
+7083,Epic Ancient squad,84
+7084,Epic Ancient squad,85
+7085,Epic Ancient squad,86
+7086,Epic Ancient squad,87
+7087,Epic Ancient squad,88
+7088,Epic Ancient squad,89
+7089,Epic Ancient squad,90
+7090,Epic Ancient squad,91
+7091,Epic Ancient squad,92
+7092,Epic Ancient squad,93
+7093,Epic Ancient squad,94
+7094,Epic Ancient squad,95
+7095,Epic Ancient squad,96
+7096,Epic Ancient squad,97
+7097,Epic Ancient squad,98
+7098,Epic Ancient squad,99
+7099,Epic Ancient squad,100
+7100,Epic Ancient squad,101
+7101,Epic Ancient squad,102
+7102,Epic Ancient squad,103
+7103,Epic Ancient squad,104
+7104,Epic Ancient squad,105
+7105,Epic Ancient squad,106
+7106,Epic Ancient squad,107
+7107,Epic Ancient squad,108
+7108,Epic Ancient squad,109
+7109,Epic Ancient squad,110
+7110,Epic Ancient squad,111
+7111,Epic Ancient squad,112
+7112,Epic Ancient squad,113
+7113,Epic Ancient squad,114
+7114,Epic Ancient squad,115
+7115,Epic Ancient squad,116
+7116,Epic Ancient squad,117
+7117,Epic Ancient squad,118
+7118,Epic Ancient squad,119
+7119,Epic Ancient squad,120
+7120,Epic Ancient squad,121
+7121,Epic Ancient squad,122
+7122,Epic Ancient squad,123
+7123,Epic Ancient squad,124
+7124,Epic Ancient squad,125
+7125,Epic Ancient squad,126
+7126,Epic Ancient squad,127
+7127,Epic Ancient squad,128
+7128,Epic Ancient squad,129
+7129,Epic Ancient squad,130
+7130,Epic Ancient squad,131
+7131,Epic Ancient squad,132
+7132,Epic Ancient squad,133
+7133,Epic Ancient squad,134
+7134,Epic Ancient squad,135
+7135,Epic Ancient squad,136
+7136,Epic Ancient squad,137
+7137,Epic Ancient squad,138
+7138,Epic Ancient squad,139
+7139,Epic Ancient squad,140
+7140,Epic Ancient squad,141
+7141,Epic Ancient squad,142
+7142,Epic Ancient squad,143
+7143,Epic Ancient squad,144
+7144,Epic Ancient squad,145
+7145,Epic Ancient squad,146
+7146,Epic Ancient squad,147
+7147,Epic Ancient squad,148
+7148,Epic Ancient squad,149
+7149,Epic Ancient squad,150
+7150,Epic Ancient squad,151
+7151,Epic Ancient squad,152
+7152,Epic Ancient squad,153
+7153,Epic Ancient squad,154
+7154,Epic Ancient squad,155
+7155,Epic Ancient squad,156
+7156,Epic Ancient squad,157
+7157,Epic Ancient squad,158
+7158,Epic Ancient squad,159
+7159,Epic Ancient squad,160
+7160,Epic Ancient squad,161
+7161,Epic Ancient squad,162
+7162,Epic Ancient squad,163
+7163,Epic Ancient squad,164
+7164,Epic Ancient squad,165
+7165,Epic Ancient squad,166
+7166,Epic Ancient squad,167
+7167,Epic Ancient squad,168
+7168,Epic Ancient squad,169
+7169,Epic Ancient squad,170
+7170,Epic Ancient squad,171
+7171,Epic Ancient squad,172
+7172,Epic Ancient squad,173
+7173,Epic Ancient squad,174
+7174,Epic Ancient squad,175
+7175,Epic Ancient squad,176
+7176,Epic Ancient squad,177
+7177,Epic Ancient squad,178
+7178,Epic Ancient squad,179
+7179,Epic Ancient squad,180
+7180,Epic Ancient squad,181
+7181,Epic Ancient squad,182
+7182,Epic Ancient squad,183
+7183,Epic Ancient squad,184
+7184,Epic Ancient squad,185
+7185,Epic Ancient squad,186
+7186,Epic Ancient squad,187
+7187,Epic Ancient squad,188
+7188,Epic Ancient squad,189
+7189,Epic Ancient squad,190
+7190,Epic Ancient squad,191
+7191,Epic Ancient squad,192
+7192,Epic Ancient squad,193
+7193,Epic Ancient squad,194
+7194,Epic Ancient squad,195
+7195,Epic Ancient squad,196
+7196,Epic Ancient squad,197
+7197,Epic Ancient squad,198
+7198,Epic Ancient squad,199
+7199,Epic Ancient squad,200
+7200,Epic Ancient squad,201
+7201,Epic Ancient squad,202
+7202,Epic Ancient squad,203
+7203,Epic Ancient squad,204
+7204,Epic Ancient squad,205
+7205,Epic Ancient squad,206
+7206,Epic Ancient squad,207
+7207,Epic Ancient squad,208
+7208,Epic Ancient squad,209
+7209,Epic Ancient squad,210
+7210,Epic Ancient squad,211
+7211,Epic Ancient squad,212
+7212,Epic Ancient squad,213
+7213,Epic Ancient squad,214
+7214,Epic Ancient squad,215
+7215,Epic Ancient squad,216
+7216,Epic Ancient squad,217
+7217,Epic Ancient squad,218
+7218,Epic Ancient squad,219
+7219,Epic Ancient squad,220
+7220,Epic Ancient squad,221
+7221,Epic Ancient squad,222
+7222,Epic Ancient squad,223
+7223,Epic Ancient squad,224
+7224,Epic Ancient squad,225
+7225,Epic Ancient squad,226
+7226,Epic Ancient squad,227
+7227,Epic Ancient squad,228
+7228,Epic Ancient squad,229
+7229,Epic Ancient squad,230
+7230,Epic Ancient squad,231
+7231,Epic Ancient squad,232
+7232,Epic Ancient squad,233
+7233,Epic Ancient squad,234
+7234,Epic Ancient squad,235
+7235,Epic Ancient squad,236
+7236,Epic Ancient squad,237
+7237,Epic Ancient squad,238
+7238,Epic Ancient squad,239
+7239,Epic Ancient squad,240
+7240,Epic Ancient squad,241
+7241,Epic Ancient squad,242
+7242,Epic Ancient squad,243
+7243,Epic Ancient squad,244
+7244,Epic Ancient squad,245
+7245,Epic Ancient squad,246
+7246,Epic Ancient squad,247
+7247,Epic Ancient squad,248
+7248,Epic Ancient squad,249
+7249,Epic Ancient squad,250
+9001,Kingdom Throne,35
+9002,Kingdom Throne,35
+9003,Kingdom Throne,35
+9004,Kingdom Throne,35
+9005,Kingdom Throne,35
+9006,Kingdom Throne,35
+9007,Kingdom Throne,35
+9008,Kingdom Throne,35
+9009,Kingdom Throne,35
+9010,Kingdom Throne,35
+9011,Kingdom Throne,35
+9012,Kingdom Throne,35
+9013,Kingdom Throne,35
+9014,Kingdom Throne,35
+9015,Kingdom Throne,35
+9016,Kingdom Throne,35
+9017,Kingdom Throne,35
+9018,Kingdom Throne,35
+9019,Kingdom Throne,35
+9020,Kingdom Throne,35
+9021,Kingdom Throne,35
+9022,Kingdom Throne,35
+9023,Kingdom Throne,35
+9024,Kingdom Throne,35
+9025,Kingdom Throne,35
+9026,Kingdom Throne,35
+9027,Kingdom Throne,35
+9028,Kingdom Throne,35
+9029,Kingdom Throne,35
+9030,Kingdom Throne,35
+9031,Kingdom Throne,35
+9032,Kingdom Throne,35
+9033,Kingdom Throne,35
+9034,Kingdom Throne,35
+9035,Kingdom Throne,35
+9036,Kingdom Throne,35
+9037,Kingdom Throne,35
+9038,Kingdom Throne,35
+9039,Kingdom Throne,35
+9040,Kingdom Throne,35
+9041,Kingdom Throne,35
+9042,Kingdom Throne,35
+9043,Kingdom Throne,35
+9044,Kingdom Throne,35
+9045,Kingdom Throne,35
+9046,Kingdom Throne,35
+9047,Kingdom Throne,35
+9048,Kingdom Throne,35
+9049,Kingdom Throne,35
+9050,Kingdom Throne,35
+9051,Kingdom Throne,35
+9052,Kingdom Throne,35
+9053,Kingdom Throne,35
+9054,Kingdom Throne,35
+9055,Kingdom Throne,35
+9056,Kingdom Throne,35
+9057,Kingdom Throne,35
+9058,Kingdom Throne,35
+9059,Kingdom Throne,35
+9060,Kingdom Throne,35
+9061,Kingdom Throne,35
+9062,Kingdom Throne,35
+9063,Kingdom Throne,35
+9064,Kingdom Throne,35
+9065,Kingdom Throne,35
+9066,Kingdom Throne,35
+9067,Kingdom Throne,35
+9068,Kingdom Throne,35
+9069,Kingdom Throne,35
+9070,Kingdom Throne,35
+9071,Kingdom Throne,35
+9072,Kingdom Throne,35
+9073,Kingdom Throne,35
+9074,Kingdom Throne,35
+9075,Kingdom Throne,35
+9076,Kingdom Throne,35
+9077,Kingdom Throne,35
+9078,Kingdom Throne,35
+9079,Kingdom Throne,35
+9080,Kingdom Throne,35
+9081,Kingdom Throne,35
+9082,Kingdom Throne,35
+9083,Kingdom Throne,35
+9084,Kingdom Throne,35
+9085,Kingdom Throne,35
+9086,Kingdom Throne,35
+9087,Kingdom Throne,35
+9088,Kingdom Throne,35
+9089,Kingdom Throne,35
+9090,Kingdom Throne,35
+9091,Kingdom Throne,35
+9092,Kingdom Throne,35
+9093,Kingdom Throne,35
+9094,Kingdom Throne,35
+9095,Kingdom Throne,35
+9096,Kingdom Throne,35
+9097,Kingdom Throne,35
+9098,Kingdom Throne,35
+9100,Village,1
+9200,Village,1
+9300,Kingdom Throne,35
+9301,Kingdom Throne,35
+9302,Kingdom Throne,35
+9303,Kingdom Throne,35
+9304,Kingdom Throne,35
+9305,Kingdom Throne,35
+9306,Kingdom Throne,35
+9307,Kingdom Throne,35
+9308,Kingdom Throne,35
+9309,Kingdom Throne,35
+9310,Kingdom Throne,35
+9311,Kingdom Throne,35
+9312,Kingdom Throne,35
+9313,Kingdom Throne,35
+9314,Kingdom Throne,35
+9315,Kingdom Throne,35
+9316,Kingdom Throne,35
+9317,Kingdom Throne,35
+9318,Kingdom Throne,35
+9319,Kingdom Throne,35
+9320,Kingdom Throne,35
+9321,Kingdom Throne,35
+9322,Kingdom Throne,35
+9323,Kingdom Throne,35
+9324,Kingdom Throne,35
+9325,Kingdom Throne,35
+9326,Kingdom Throne,35
+9327,Kingdom Throne,35
+9328,Kingdom Throne,35
+9329,Kingdom Throne,35
+9330,Kingdom Throne,35
+9331,Kingdom Throne,35
+9332,Kingdom Throne,35
+9333,Kingdom Throne,35
+9334,Kingdom Throne,35
+9335,Kingdom Throne,35
+9336,Kingdom Throne,35
+9337,Kingdom Throne,35
+9338,Kingdom Throne,35
+9339,Kingdom Throne,35
+9340,Kingdom Throne,35
+9341,Kingdom Throne,35
+9342,Kingdom Throne,35
+9343,Kingdom Throne,35
+9344,Kingdom Throne,35
+9345,Kingdom Throne,35
+9346,Kingdom Throne,35
+9347,Kingdom Throne,35
+9348,Kingdom Throne,35
+9349,Kingdom Throne,35
+9350,Kingdom Throne,35
+9351,Kingdom Throne,35
+9352,Kingdom Throne,35
+9353,Kingdom Throne,35
+9354,Kingdom Throne,35
+9355,Kingdom Throne,35
+9356,Kingdom Throne,35
+9357,Kingdom Throne,35
+9358,Kingdom Throne,35
+9359,Kingdom Throne,35
+9360,Kingdom Throne,35
+9361,Kingdom Throne,35
+9362,Kingdom Throne,35
+9363,Kingdom Throne,35
+9364,Kingdom Throne,35
+9365,Kingdom Throne,35
+9366,Kingdom Throne,35
+9367,Kingdom Throne,35
+9368,Kingdom Throne,35
+9369,Kingdom Throne,35
+9370,Kingdom Throne,35
+9371,Kingdom Throne,35
+9372,Kingdom Throne,35
+9373,Kingdom Throne,35
+9374,Kingdom Throne,35
+9375,Kingdom Throne,35
+9376,Kingdom Throne,35
+9377,Kingdom Throne,35
+9378,Kingdom Throne,35
+9379,Kingdom Throne,35
+9380,Kingdom Throne,35
+9381,Kingdom Throne,35
+9382,Kingdom Throne,35
+9383,Kingdom Throne,35
+9384,Kingdom Throne,35
+9385,Kingdom Throne,35
+9386,Kingdom Throne,35
+9387,Kingdom Throne,35
+9388,Kingdom Throne,35
+9389,Kingdom Throne,35
+9390,Kingdom Throne,35
+9391,Kingdom Throne,35
+9392,Kingdom Throne,35
+9393,Kingdom Throne,35
+9394,Kingdom Throne,35
+9395,Kingdom Throne,35
+9396,Kingdom Throne,35
+9397,Kingdom Throne,35
+9398,Kingdom Throne,35
+9399,Kingdom Throne,35
+9400,Kingdom Throne,35
+9401,Kingdom Throne,35
+9402,Kingdom Throne,35
+9403,Kingdom Throne,35
+9404,Kingdom Throne,35
+9405,Kingdom Throne,35
+9406,Kingdom Throne,35
+9407,Kingdom Throne,35
+9408,Kingdom Throne,35
+9409,Kingdom Throne,35
+9410,Kingdom Throne,35
+9411,Kingdom Throne,35
+9412,Kingdom Throne,35
+9413,Kingdom Throne,35
+9414,Kingdom Throne,35
+9415,Kingdom Throne,35
+9416,Kingdom Throne,35
+9417,Kingdom Throne,35
+9418,Kingdom Throne,35
+9419,Kingdom Throne,35
+9420,Kingdom Throne,35
+9421,Kingdom Throne,35
+9422,Kingdom Throne,35
+9423,Kingdom Throne,35
+9424,Kingdom Throne,35
+9425,Kingdom Throne,35
+9426,Kingdom Throne,35
+9427,Kingdom Throne,35
+9428,Kingdom Throne,35
+9429,Kingdom Throne,35
+9430,Kingdom Throne,35
+9431,Kingdom Throne,35
+9432,Kingdom Throne,35
+9433,Kingdom Throne,35
+9434,Kingdom Throne,35
+9435,Kingdom Throne,35
+9436,Kingdom Throne,35
+9437,Kingdom Throne,35
+9438,Kingdom Throne,35
+9439,Kingdom Throne,35
+9440,Kingdom Throne,35
+9441,Kingdom Throne,35
+9442,Kingdom Throne,35
+9443,Kingdom Throne,35
+9444,Kingdom Throne,35
+9445,Kingdom Throne,35
+9446,Kingdom Throne,35
+9447,Kingdom Throne,35
+9448,Kingdom Throne,35
+9449,Kingdom Throne,35
+9450,Kingdom Throne,35
+9451,Kingdom Throne,35
+9452,Kingdom Throne,35
+9453,Kingdom Throne,35
+9454,Kingdom Throne,35
+9455,Kingdom Throne,35
+9456,Kingdom Throne,35
+9457,Kingdom Throne,35
+9458,Kingdom Throne,35
+9459,Kingdom Throne,35
+9460,Kingdom Throne,35
+9461,Kingdom Throne,35
+9462,Kingdom Throne,35
+9463,Kingdom Throne,35
+9464,Kingdom Throne,35
+9465,Kingdom Throne,35
+9466,Kingdom Throne,35
+9467,Kingdom Throne,35
+9468,Kingdom Throne,35
+9469,Kingdom Throne,35
+9470,Kingdom Throne,35
+9471,Kingdom Throne,35
+9472,Kingdom Throne,35
+9473,Kingdom Throne,35
+9474,Kingdom Throne,35
+9475,Kingdom Throne,35
+9476,Kingdom Throne,35
+9477,Kingdom Throne,35
+9478,Kingdom Throne,35
+9479,Kingdom Throne,35
+9480,Kingdom Throne,35
+9481,Kingdom Throne,35
+9482,Kingdom Throne,35
+9483,Kingdom Throne,35
+9484,Kingdom Throne,35
+9485,Kingdom Throne,35
+9486,Kingdom Throne,35
+9487,Kingdom Throne,35
+9488,Kingdom Throne,35
+9489,Kingdom Throne,35
+9490,Kingdom Throne,35
+9491,Kingdom Throne,35
+9492,Kingdom Throne,35
+9493,Kingdom Throne,35
+9494,Kingdom Throne,35
+9495,Kingdom Throne,35
+9496,Kingdom Throne,35
+9497,Kingdom Throne,35
+9498,Kingdom Throne,35
+9499,Kingdom Throne,35
+9500,Kingdom Throne,35
+9501,Kingdom Throne,35
+9502,Kingdom Throne,35
+9503,Kingdom Throne,35
+9504,Kingdom Throne,35
+9505,Kingdom Throne,35
+9506,Kingdom Throne,35
+9507,Kingdom Throne,35
+9508,Kingdom Throne,35
+9509,Kingdom Throne,35
+9510,Kingdom Throne,35
+9511,Kingdom Throne,35
+9512,Kingdom Throne,35
+9513,Kingdom Throne,35
+9514,Kingdom Throne,35
+9515,Kingdom Throne,35
+9516,Kingdom Throne,35
+9517,Kingdom Throne,35
+9518,Kingdom Throne,35
+9519,Kingdom Throne,35
+9520,Kingdom Throne,35
+9521,Kingdom Throne,35
+9522,Kingdom Throne,35
+9523,Kingdom Throne,35
+9524,Kingdom Throne,35
+9525,Kingdom Throne,35
+9526,Kingdom Throne,35
+9527,Kingdom Throne,35
+9528,Kingdom Throne,35
+9529,Kingdom Throne,35
+9530,Kingdom Throne,35
+9531,Kingdom Throne,35
+9532,Kingdom Throne,35
+9533,Kingdom Throne,35
+9534,Kingdom Throne,35
+9535,Kingdom Throne,35
+9536,Kingdom Throne,35
+9537,Kingdom Throne,35
+9538,Kingdom Throne,35
+9539,Kingdom Throne,35
+9540,Kingdom Throne,35
+9541,Kingdom Throne,35
+9542,Kingdom Throne,35
+9543,Kingdom Throne,35
+9544,Kingdom Throne,35
+9545,Kingdom Throne,35
+9546,Kingdom Throne,35
+9547,Kingdom Throne,35
+9548,Kingdom Throne,35
+9549,Kingdom Throne,35
+9550,Kingdom Throne,35
+9551,Kingdom Throne,35
+10000,Clan Altar,1
+10001,Clan Capital,1
+10002,Clan Fort,1
+10003,Clan University,1
+10004,Clan Timber Harvesting,1
+10005,Clan Foundry,1
+10006,Clan Masons,1
+10007,Clan Temple,1
+11000,Common Elf squad,7
+12001,Test Crypt,5
+12002,Test Crypt,10
+12003,Test Crypt,15
+12004,Test Crypt,20
+12005,Test Crypt,25
+12011,Test Crypt,5
+12012,Test Crypt,10
+12013,Test Crypt,15
+12014,Test Crypt,20
+12015,Test Crypt,25
+12016,Test Sawmill,1
+12017,Test Sawmill,2
+12018,Test Sawmill,3
+12019,Test Sawmill,4
+12020,Test Sawmill,5
+12021,Test Sawmill,6
+12022,Test Sawmill,7
+12023,Test Sawmill,8
+12024,Test Sawmill,9
+12025,Test Sawmill,10
+12026,Test Sawmill,11
+12027,Test Sawmill,12
+12028,Test Sawmill,13
+12029,Test Sawmill,14
+12030,Test Sawmill,15
+12031,Test Sawmill,16
+12032,Test Sawmill,17
+12033,Test Sawmill,18
+12034,Test Sawmill,19
+12035,Test Sawmill,20
+12036,Test Sawmill,21
+12037,Test Sawmill,22
+12038,Test Sawmill,23
+12039,Test Sawmill,24
+12040,Test Sawmill,25
+12041,Test Gold Mine,5
+12042,Test Gold Mine,10
+12043,Test Gold Mine,15
+12044,Test Gold Mine,20
+12045,Test Gold Mine,25
+12345,Common Barbarian squad,1
+15000,Test Crypt,5
+15001,Test Crypt,10
+15002,Test Crypt,15
+15003,Test Crypt,20
+15004,Test Crypt,25
+15010,Test Crypt,5
+15011,Test Crypt,10
+15012,Test Crypt,15
+15013,Test Crypt,20
+15014,Test Crypt,25
+40001,Village,1
+40002,Village,2
+40003,Village,3
+40004,Village,4
+40005,Village,5
+40006,Village,6
+40007,Village,7
+40008,Village,8
+40009,Village,9
+40010,Village,10
+40011,Village,11
+40012,Village,12
+40013,Village,13
+40014,Village,14
+40015,Village,15
+40016,Village,16
+40017,Village,17
+40018,Village,18
+40019,Village,19
+40020,Village,20
+40021,Village,21
+40022,Village,22
+40023,Village,23
+40024,Village,24
+40025,Village,25
+40026,Farmer's House,1
+40027,Farmer's House,2
+40028,Farmer's House,3
+40029,Farmer's House,4
+40030,Farmer's House,5
+40031,Farmer's House,6
+40032,Farmer's House,7
+40033,Farmer's House,8
+40034,Farmer's House,9
+40035,Farmer's House,10
+40036,Farmer's House,11
+40037,Farmer's House,12
+40038,Farmer's House,13
+40039,Farmer's House,14
+40040,Farmer's House,15
+40041,Farmer's House,16
+40042,Farmer's House,17
+40043,Farmer's House,18
+40044,Farmer's House,19
+40045,Farmer's House,20
+40046,Farmer's House,21
+40047,Farmer's House,22
+40048,Farmer's House,23
+40049,Farmer's House,24
+40050,Farmer's House,25
+40051,Sawmill,1
+40052,Sawmill,2
+40053,Sawmill,3
+40054,Sawmill,4
+40055,Sawmill,5
+40056,Sawmill,6
+40057,Sawmill,7
+40058,Sawmill,8
+40059,Sawmill,9
+40060,Sawmill,10
+40061,Sawmill,11
+40062,Sawmill,12
+40063,Sawmill,13
+40064,Sawmill,14
+40065,Sawmill,15
+40066,Sawmill,16
+40067,Sawmill,17
+40068,Sawmill,18
+40069,Sawmill,19
+40070,Sawmill,20
+40071,Sawmill,21
+40072,Sawmill,22
+40073,Sawmill,23
+40074,Sawmill,24
+40075,Sawmill,25
+40076,Mine,1
+40077,Mine,2
+40078,Mine,3
+40079,Mine,4
+40080,Mine,5
+40081,Mine,6
+40082,Mine,7
+40083,Mine,8
+40084,Mine,9
+40085,Mine,10
+40086,Mine,11
+40087,Mine,12
+40088,Mine,13
+40089,Mine,14
+40090,Mine,15
+40091,Mine,16
+40092,Mine,17
+40093,Mine,18
+40094,Mine,19
+40095,Mine,20
+40096,Mine,21
+40097,Mine,22
+40098,Mine,23
+40099,Mine,24
+40100,Mine,25
+40101,Quarry,1
+40102,Quarry,2
+40103,Quarry,3
+40104,Quarry,4
+40105,Quarry,5
+40106,Quarry,6
+40107,Quarry,7
+40108,Quarry,8
+40109,Quarry,9
+40110,Quarry,10
+40111,Quarry,11
+40112,Quarry,12
+40113,Quarry,13
+40114,Quarry,14
+40115,Quarry,15
+40116,Quarry,16
+40117,Quarry,17
+40118,Quarry,18
+40119,Quarry,19
+40120,Quarry,20
+40121,Quarry,21
+40122,Quarry,22
+40123,Quarry,23
+40124,Quarry,24
+40125,Quarry,25
+40126,Test Gold Mine,5
+40127,Test Gold Mine,10
+40128,Test Gold Mine,15
+40129,Test Gold Mine,20
+40130,Test Gold Mine,25
+40131,Wellspring Ruins,5
+40132,Wellspring Ruins,10
+40133,Wellspring Ruins,15
+40134,Wellspring Ruins,20
+40135,Wellspring Ruins,25
+40136,Common Elf squad,1
+40137,Common Elf squad,2
+40138,Common Elf squad,3
+40139,Common Elf squad,4
+40140,Common Elf squad,5
+40141,Common Elf squad,6
+40142,Common Elf squad,7
+40143,Common Elf squad,8
+40144,Common Elf squad,9
+40145,Common Elf squad,10
+40146,Common Elf squad,11
+40147,Common Elf squad,11
+40148,Common Elf squad,12
+40149,Common Elf squad,12
+40150,Common Elf squad,13
+40151,Common Elf squad,13
+40152,Common Elf squad,14
+40153,Common Elf squad,14
+40154,Common Elf squad,15
+40155,Common Elf squad,15
+40156,Common Elf squad,16
+40157,Common Elf squad,16
+40158,Common Elf squad,16
+40159,Common Elf squad,17
+40160,Common Elf squad,17
+40161,Common Elf squad,17
+40162,Common Elf squad,18
+40163,Common Elf squad,18
+40164,Common Elf squad,18
+40165,Common Elf squad,19
+40166,Common Elf squad,19
+40167,Common Elf squad,19
+40168,Common Elf squad,20
+40169,Common Elf squad,20
+40170,Common Elf squad,20
+40171,Common Elf squad,21
+40172,Common Elf squad,21
+40173,Common Elf squad,21
+40174,Common Elf squad,21
+40175,Common Elf squad,21
+40176,Common Elf squad,22
+40177,Common Elf squad,22
+40178,Common Elf squad,22
+40179,Common Elf squad,22
+40180,Common Elf squad,22
+40181,Common Elf squad,23
+40182,Common Elf squad,23
+40183,Common Elf squad,23
+40184,Common Elf squad,23
+40185,Common Elf squad,23
+40186,Common Elf squad,24
+40187,Common Elf squad,24
+40188,Common Elf squad,24
+40189,Common Elf squad,24
+40190,Common Elf squad,24
+40191,Common Elf squad,25
+40192,Common Elf squad,25
+40193,Common Elf squad,25
+40194,Common Elf squad,25
+40195,Common Elf squad,25
+40196,Common Elf squad,26
+40197,Common Elf squad,26
+40198,Common Elf squad,26
+40199,Common Elf squad,26
+40200,Common Elf squad,26
+40201,Common Elf squad,27
+40202,Common Elf squad,27
+40203,Common Elf squad,27
+40204,Common Elf squad,27
+40205,Common Elf squad,27
+40206,Common Elf squad,28
+40207,Common Elf squad,28
+40208,Common Elf squad,28
+40209,Common Elf squad,28
+40210,Common Elf squad,28
+40211,Common Elf squad,29
+40212,Common Elf squad,29
+40213,Common Elf squad,29
+40214,Common Elf squad,29
+40215,Common Elf squad,29
+40216,Common Elf squad,30
+40217,Common Elf squad,30
+40218,Common Elf squad,30
+40219,Common Elf squad,30
+40220,Common Elf squad,30
+40221,Common Elf squad,31
+40222,Common Elf squad,31
+40223,Common Elf squad,31
+40224,Common Elf squad,31
+40225,Common Elf squad,31
+40226,Common Elf squad,32
+40227,Common Elf squad,32
+40228,Common Elf squad,32
+40229,Common Elf squad,32
+40230,Common Elf squad,32
+40231,Common Elf squad,33
+40232,Common Elf squad,33
+40233,Common Elf squad,33
+40234,Common Elf squad,33
+40235,Common Elf squad,33
+40236,Common Elf squad,34
+40237,Common Elf squad,34
+40238,Common Elf squad,34
+40239,Common Elf squad,34
+40240,Common Elf squad,34
+40241,Common Elf squad,35
+40242,Common Elf squad,35
+40243,Common Elf squad,35
+40244,Common Elf squad,35
+40245,Common Elf squad,35
+40246,Common Elf squad,1
+40247,Common Elf squad,2
+40248,Common Elf squad,3
+40249,Common Elf squad,4
+40250,Common Elf squad,5
+40251,Common Elf squad,6
+40252,Common Elf squad,7
+40253,Common Elf squad,8
+40254,Common Elf squad,9
+40255,Common Elf squad,10
+40256,Common Elf squad,11
+40257,Common Elf squad,11
+40258,Common Elf squad,12
+40259,Common Elf squad,12
+40260,Common Elf squad,13
+40261,Common Elf squad,13
+40262,Common Elf squad,14
+40263,Common Elf squad,14
+40264,Common Elf squad,15
+40265,Common Elf squad,15
+40266,Common Elf squad,16
+40267,Common Elf squad,16
+40268,Common Elf squad,16
+40269,Common Elf squad,17
+40270,Common Elf squad,17
+40271,Common Elf squad,17
+40272,Common Elf squad,18
+40273,Common Elf squad,18
+40274,Common Elf squad,18
+40275,Common Elf squad,19
+40276,Common Elf squad,19
+40277,Common Elf squad,19
+40278,Common Elf squad,20
+40279,Common Elf squad,20
+40280,Common Elf squad,20
+40281,Common Elf squad,21
+40282,Common Elf squad,21
+40283,Common Elf squad,21
+40284,Common Elf squad,21
+40285,Common Elf squad,21
+40286,Common Elf squad,22
+40287,Common Elf squad,22
+40288,Common Elf squad,22
+40289,Common Elf squad,22
+40290,Common Elf squad,22
+40291,Common Elf squad,23
+40292,Common Elf squad,23
+40293,Common Elf squad,23
+40294,Common Elf squad,23
+40295,Common Elf squad,23
+40296,Common Elf squad,24
+40297,Common Elf squad,24
+40298,Common Elf squad,24
+40299,Common Elf squad,24
+40300,Common Elf squad,24
+40301,Common Elf squad,25
+40302,Common Elf squad,25
+40303,Common Elf squad,25
+40304,Common Elf squad,25
+40305,Common Elf squad,25
+40306,Common Elf squad,26
+40307,Common Elf squad,26
+40308,Common Elf squad,26
+40309,Common Elf squad,26
+40310,Common Elf squad,26
+40311,Common Elf squad,27
+40312,Common Elf squad,27
+40313,Common Elf squad,27
+40314,Common Elf squad,27
+40315,Common Elf squad,27
+40316,Common Elf squad,28
+40317,Common Elf squad,28
+40318,Common Elf squad,28
+40319,Common Elf squad,28
+40320,Common Elf squad,28
+40321,Common Elf squad,29
+40322,Common Elf squad,29
+40323,Common Elf squad,29
+40324,Common Elf squad,29
+40325,Common Elf squad,29
+40326,Common Elf squad,30
+40327,Common Elf squad,30
+40328,Common Elf squad,30
+40329,Common Elf squad,30
+40330,Common Elf squad,30
+40331,Common Elf squad,31
+40332,Common Elf squad,31
+40333,Common Elf squad,31
+40334,Common Elf squad,31
+40335,Common Elf squad,31
+40336,Common Elf squad,32
+40337,Common Elf squad,32
+40338,Common Elf squad,32
+40339,Common Elf squad,32
+40340,Common Elf squad,32
+40341,Common Elf squad,33
+40342,Common Elf squad,33
+40343,Common Elf squad,33
+40344,Common Elf squad,33
+40345,Common Elf squad,33
+40346,Common Elf squad,34
+40347,Common Elf squad,34
+40348,Common Elf squad,34
+40349,Common Elf squad,34
+40350,Common Elf squad,34
+40351,Common Elf squad,35
+40352,Common Elf squad,35
+40353,Common Elf squad,35
+40354,Common Elf squad,35
+40355,Common Elf squad,35
+40356,Wellspring Ruins,1
+40357,Wellspring Ruins,2
+40358,Wellspring Ruins,3
+40359,Wellspring Ruins,4
+40360,Wellspring Ruins,5
+40361,Wellspring Ruins,6
+40362,Wellspring Ruins,7
+40363,Wellspring Ruins,8
+40364,Wellspring Ruins,9
+40365,Wellspring Ruins,10
+40366,Wellspring Ruins,11
+40367,Wellspring Ruins,12
+40368,Wellspring Ruins,13
+40369,Wellspring Ruins,14
+40370,Wellspring Ruins,15
+40371,Common Elf squad,16
+40372,Common Elf squad,17
+40373,Common Elf squad,18
+40374,Common Elf squad,19
+40375,Common Elf squad,20
+40376,Common Elf squad,21
+40377,Common Elf squad,22
+40378,Common Elf squad,23
+40379,Common Elf squad,24
+40380,Common Elf squad,25
+40381,Common Elf squad,26
+40382,Common Elf squad,27
+40383,Common Elf squad,28
+40384,Common Elf squad,29
+40385,Common Elf squad,30
+40386,Common Elf squad,31
+40387,Common Elf squad,32
+40388,Common Elf squad,33
+40389,Common Elf squad,34
+40390,Common Elf squad,35
+40391,Crypt,5
+40392,Crypt,5
+40393,Crypt,5
+40394,Crypt,5
+40395,Crypt,5
+40396,Crypt,5
+40397,Crypt,5
+40398,Crypt,5
+40399,Crypt,5
+40400,Crypt,5
+40401,Crypt,5
+40402,Crypt,10
+40403,Crypt,10
+40404,Crypt,10
+40405,Crypt,10
+40406,Crypt,10
+40407,Crypt,10
+40408,Crypt,10
+40409,Crypt,10
+40410,Crypt,10
+40411,Crypt,10
+40412,Crypt,10
+40413,Crypt,15
+40414,Crypt,15
+40415,Crypt,15
+40416,Crypt,15
+40417,Crypt,15
+40418,Crypt,15
+40419,Crypt,15
+40420,Crypt,15
+40421,Crypt,15
+40422,Crypt,15
+40423,Crypt,15
+40424,Crypt,20
+40425,Crypt,20
+40426,Crypt,20
+40427,Crypt,20
+40428,Crypt,20
+40429,Crypt,20
+40430,Crypt,20
+40431,Crypt,20
+40432,Crypt,20
+40433,Crypt,20
+40434,Crypt,20
+40435,Crypt,25
+40436,Crypt,25
+40437,Crypt,25
+40438,Crypt,25
+40439,Crypt,25
+40440,Crypt,25
+40441,Crypt,25
+40442,Crypt,25
+40443,Crypt,25
+40444,Crypt,25
+40445,Crypt,25
+40446,Village,10
+40447,Village,15
+40448,Village,20
+40449,Village,25
+40450,Village,20
+40451,Village,25
+40452,Crypt,15
+40453,Crypt,15
+40454,Crypt,15
+40455,Crypt,15
+40456,Crypt,15
+40457,Crypt,15
+40458,Crypt,15
+40459,Crypt,15
+40460,Crypt,15
+40461,Crypt,15
+40462,Crypt,15
+40463,Crypt,15
+40464,Crypt,15
+40465,Crypt,15
+40466,Crypt,20
+40467,Crypt,20
+40468,Crypt,20
+40469,Crypt,20
+40470,Crypt,20
+40471,Crypt,20
+40472,Crypt,20
+40473,Crypt,20
+40474,Crypt,20
+40475,Crypt,20
+40476,Crypt,20
+40477,Crypt,20
+40478,Crypt,20
+40479,Crypt,20
+40480,Crypt,25
+40481,Crypt,25
+40482,Crypt,25
+40483,Crypt,25
+40484,Crypt,25
+40485,Crypt,25
+40486,Crypt,25
+40487,Crypt,25
+40488,Crypt,25
+40489,Crypt,25
+40490,Crypt,25
+40491,Crypt,25
+40492,Crypt,25
+40493,Crypt,25
+40494,Test Crypt,5
+40495,Test Crypt,10
+40496,Test Crypt,15
+40497,Test Crypt,20
+40498,Test Crypt,25
+41001,Treasure Hunt Crypt,5
+41002,Treasure Hunt Crypt,10
+41003,Treasure Hunt Crypt,15
+41004,Treasure Hunt Crypt,20
+41005,Treasure Hunt Crypt,25
+41101,Rare Treasure Hunt Crypt,10
+41102,Rare Treasure Hunt Crypt,15
+41103,Rare Treasure Hunt Crypt,20
+41104,Rare Treasure Hunt Crypt,25
+41105,Rare Treasure Hunt Crypt,30
+41201,Epic Treasure Hunt Crypt,15
+41202,Epic Treasure Hunt Crypt,20
+41203,Epic Treasure Hunt Crypt,25
+41204,Epic Treasure Hunt Crypt,30
+41205,Epic Treasure Hunt Crypt,35
+41300,Treasure Hunt Crypt,5
+41301,Treasure Hunt Crypt,5
+50000,Arena,5
+50001,Arena,5
+50010,Arena,5
+50011,Arena,5
+50100,Arena,5
+50101,Oak of Plenty Arena,5
+50102,Sakura of Plenty Arena,5
+60000,Arena,5
+60001,Common Elf squad,5
+60002,Common Elf squad,5
+60003,Common Elf squad,10
+60004,Common Elf squad,15
+60005,Common Elf squad,15
+60011,,1
+60012,,5
+60013,,1
+60014,,1
+60021,,2
+60022,,5
+60023,,2
+60024,,2
+60031,,3
+60032,,3
+60033,,5
+60034,,3
+60041,,5
+60042,,4
+60043,,4
+60044,,4
+60051,,6
+60052,,5
+60053,,5
+60054,,6
+60061,,8
+60062,,5
+60063,,5
+60064,,8
+60071,,5
+60072,,10
+60073,,7
+60074,,10
+60081,,8
+60082,,5
+60083,,11
+60084,,11
+60091,,9
+60092,,5
+60093,,12
+60094,,12
+60101,,13
+60102,,10
+60103,,5
+60104,,13
+60111,,14
+60112,,11
+60113,,5
+60114,,14
+60121,,12
+60122,,5
+60123,,15
+60124,,15
+62011,,6
+62013,,6
+62014,,6
+62021,,7
+62024,,7
+62031,,8
+62034,,8
+62042,,9
+62044,,9
+62051,,10
+62054,,10
+62061,,11
+62064,,11
+62072,,12
+62074,,12
+62083,,13
+62084,,13
+62093,,14
+62094,,14
+62101,,15
+62104,,15
+62111,,16
+62114,,16
+62123,,17
+62124,,17
+63011,,8
+63013,,8
+63014,,8
+63021,,9
+63024,,9
+63031,,10
+63034,,10
+63042,,11
+63044,,11
+63051,,12
+63054,,12
+63061,,13
+63064,,13
+63072,,14
+63074,,14
+63083,,15
+63084,,15
+63093,,16
+63094,,16
+63101,,17
+63104,,17
+63111,,18
+63114,,18
+63123,,19
+63124,,19
+64011,,13
+64013,,13
+64014,,13
+64021,,14
+64024,,14
+64031,,15
+64034,,15
+64042,,16
+64044,,16
+64051,,17
+64054,,17
+64061,,18
+64064,,18
+64072,,19
+64074,,19
+64083,,20
+64084,,20
+64093,,21
+64094,,21
+64101,,22
+64104,,22
+64111,,23
+64114,,23
+64123,,24
+64124,,24
+65011,,18
+65013,,18
+65014,,18
+65021,,19
+65024,,19
+65031,,20
+65034,,20
+65042,,21
+65044,,21
+65051,,22
+65054,,22
+65061,,23
+65064,,23
+65072,,24
+65074,,24
+65083,,25
+65084,,25
+65093,,26
+65094,,26
+65101,,27
+65104,,27
+65111,,28
+65114,,28
+65123,,29
+65124,,29
+66011,,23
+66013,,23
+66014,,23
+66021,,24
+66024,,24
+66031,,25
+66034,,25
+66042,,26
+66044,,26
+66051,,27
+66054,,27
+66061,,28
+66064,,28
+66072,,29
+66074,,29
+66083,,30
+66084,,30
+66093,,31
+66094,,31
+66101,,32
+66104,,32
+66111,,33
+66114,,33
+66123,,34
+66124,,34
+67011,,27
+67013,,27
+67014,,27
+67021,,28
+67024,,28
+67031,,29
+67034,,29
+67042,,30
+67044,,30
+67051,,31
+67054,,31
+67061,,32
+67064,,32
+67072,,33
+67074,,33
+67083,,34
+67084,,34
+67093,,35
+67094,,35
+67101,,36
+67104,,36
+67111,,37
+67114,,37
+67123,,38
+67124,,38
+74000,Rotwood Queen,5
+74001,Rotwood Queen,6
+74002,Rotwood Queen,7
+74003,Rotwood Queen,8
+74004,Rotwood Queen,9
+74005,Rotwood Queen,10
+74006,Rotwood Queen,11
+74007,Rotwood Queen,12
+74008,Rotwood Queen,13
+74009,Rotwood Queen,14
+74010,Rotwood Queen,15
+74011,Rotwood Queen,16
+74012,Rotwood Queen,17
+74013,Rotwood Queen,18
+74014,Rotwood Queen,19
+74015,Rotwood Queen,20
+74016,Rotwood Queen,21
+74017,Rotwood Queen,22
+74018,Rotwood Queen,23
+74019,Rotwood Queen,24
+74020,Rotwood Queen,25
+74021,Rotwood Queen,26
+74022,Rotwood Queen,27
+74023,Rotwood Queen,28
+74024,Rotwood Queen,29
+74025,Rotwood Queen,30
+74026,Rotwood Queen,31
+74027,Rotwood Queen,32
+74028,Rotwood Queen,33
+74029,Rotwood Queen,34
+74030,Rotwood Queen,35
+74031,Rotwood Queen,36
+74032,Rotwood Queen,37
+74033,Rotwood Queen,38
+74034,Rotwood Queen,39
+74035,Rotwood Queen,40
+74036,Rotwood Queen,41
+74037,Rotwood Queen,42
+74038,Rotwood Queen,43
+74039,Rotwood Queen,44
+74040,Rotwood Queen,45
+74200,Spawn of Corruption,1
+74201,Spawn of Corruption,2
+74202,Spawn of Corruption,3
+74203,Spawn of Corruption,4
+74204,Spawn of Corruption,5
+74205,Spawn of Corruption,6
+74206,Spawn of Corruption,7
+74207,Spawn of Corruption,8
+74208,Spawn of Corruption,9
+74209,Spawn of Corruption,10
+74210,Spawn of Corruption,11
+74211,Spawn of Corruption,12
+74212,Spawn of Corruption,13
+74213,Spawn of Corruption,14
+74214,Spawn of Corruption,15
+74215,Spawn of Corruption,16
+74216,Spawn of Corruption,17
+74217,Spawn of Corruption,18
+74218,Spawn of Corruption,19
+74219,Spawn of Corruption,20
+74220,Spawn of Corruption,21
+74221,Spawn of Corruption,22
+74222,Spawn of Corruption,23
+74223,Spawn of Corruption,24
+74224,Spawn of Corruption,25
+74225,Spawn of Corruption,26
+74226,Spawn of Corruption,27
+74227,Spawn of Corruption,28
+74228,Spawn of Corruption,29
+74229,Spawn of Corruption,30
+74230,Spawn of Corruption,31
+74231,Spawn of Corruption,32
+74232,Spawn of Corruption,33
+74233,Spawn of Corruption,34
+74234,Spawn of Corruption,35
+74235,Spawn of Corruption,36
+74236,Spawn of Corruption,37
+74237,Spawn of Corruption,38
+74238,Spawn of Corruption,39
+74239,Spawn of Corruption,40
+74240,Spawn of Corruption,41
+74241,Spawn of Corruption,42
+74242,Spawn of Corruption,43
+74243,Spawn of Corruption,44
+74244,Spawn of Corruption,45
+74300,Grove Elder,1
+74301,Grove Elder,2
+74302,Grove Elder,3
+74303,Grove Elder,4
+74304,Grove Elder,5
+74305,Grove Elder,6
+74306,Grove Elder,7
+74307,Grove Elder,8
+74308,Grove Elder,9
+74309,Grove Elder,10
+74310,Grove Elder,11
+74311,Grove Elder,12
+74312,Grove Elder,13
+74313,Grove Elder,14
+74314,Grove Elder,15
+74315,Grove Elder,16
+74316,Grove Elder,17
+74317,Grove Elder,18
+74318,Grove Elder,19
+74319,Grove Elder,20
+74320,Grove Elder,21
+74321,Grove Elder,22
+74322,Grove Elder,23
+74323,Grove Elder,24
+74324,Grove Elder,25
+74325,Grove Elder,26
+74326,Grove Elder,27
+74327,Grove Elder,28
+74328,Grove Elder,29
+74329,Grove Elder,30
+74330,Grove Elder,31
+74331,Grove Elder,32
+74332,Grove Elder,33
+74333,Grove Elder,34
+74334,Grove Elder,35
+74335,Grove Elder,36
+74336,Grove Elder,37
+74337,Grove Elder,38
+74338,Grove Elder,39
+74339,Grove Elder,40
+74340,Grove Elder,41
+74341,Grove Elder,42
+74342,Grove Elder,43
+74343,Grove Elder,44
+74344,Grove Elder,45
+75000,Exiles' Grove,1
+75001,Exiles' Grove,1
+75002,Exiles' Grove,1
+75003,Exiles' Grove,1
+75004,Exiles' Grove,1
+75005,Exiles' Grove,1
+75006,Exiles' Grove,1
+75007,Exiles' Grove,1
+75008,Exiles' Grove,1
+75009,Exiles' Grove,1
+75010,Exiles' Grove,2
+75011,Exiles' Grove,2
+75012,Exiles' Grove,2
+75013,Exiles' Grove,2
+75014,Exiles' Grove,2
+75015,Exiles' Grove,2
+75016,Exiles' Grove,2
+75017,Exiles' Grove,2
+75018,Exiles' Grove,2
+75019,Exiles' Grove,2
+75020,Exiles' Grove,3
+75021,Exiles' Grove,3
+75022,Exiles' Grove,3
+75023,Exiles' Grove,3
+75024,Exiles' Grove,3
+75025,Exiles' Grove,3
+75026,Exiles' Grove,3
+75027,Exiles' Grove,3
+75028,Exiles' Grove,3
+75029,Exiles' Grove,3
+75030,Exiles' Grove,4
+75031,Exiles' Grove,4
+75032,Exiles' Grove,4
+75033,Exiles' Grove,4
+75034,Exiles' Grove,4
+75035,Exiles' Grove,4
+75036,Exiles' Grove,4
+75037,Exiles' Grove,4
+75038,Exiles' Grove,4
+75039,Exiles' Grove,4
+75040,Exiles' Grove,5
+75041,Exiles' Grove,5
+75042,Exiles' Grove,5
+75043,Exiles' Grove,5
+75044,Exiles' Grove,5
+75045,Exiles' Grove,5
+75046,Exiles' Grove,5
+75047,Exiles' Grove,5
+75048,Exiles' Grove,5
+75049,Exiles' Grove,5
+75050,Exiles' Grove,6
+75051,Exiles' Grove,6
+75052,Exiles' Grove,6
+75053,Exiles' Grove,6
+75054,Exiles' Grove,6
+75055,Exiles' Grove,6
+75056,Exiles' Grove,6
+75057,Exiles' Grove,6
+75058,Exiles' Grove,6
+75059,Exiles' Grove,6
+75060,Exiles' Grove,7
+75061,Exiles' Grove,7
+75062,Exiles' Grove,7
+75063,Exiles' Grove,7
+75064,Exiles' Grove,7
+75065,Exiles' Grove,7
+75066,Exiles' Grove,7
+75067,Exiles' Grove,7
+75068,Exiles' Grove,7
+75069,Exiles' Grove,7
+75070,Exiles' Grove,8
+75071,Exiles' Grove,8
+75072,Exiles' Grove,8
+75073,Exiles' Grove,8
+75074,Exiles' Grove,8
+75075,Exiles' Grove,8
+75076,Exiles' Grove,8
+75077,Exiles' Grove,8
+75078,Exiles' Grove,8
+75079,Exiles' Grove,8
+75080,Exiles' Grove,9
+75081,Exiles' Grove,9
+75082,Exiles' Grove,9
+75083,Exiles' Grove,9
+75084,Exiles' Grove,9
+75085,Exiles' Grove,9
+75086,Exiles' Grove,9
+75087,Exiles' Grove,9
+75088,Exiles' Grove,9
+75089,Exiles' Grove,9
+75090,Exiles' Grove,10
+75091,Exiles' Grove,10
+75092,Exiles' Grove,10
+75093,Exiles' Grove,10
+75094,Exiles' Grove,10
+75095,Exiles' Grove,10
+75096,Exiles' Grove,10
+75097,Exiles' Grove,10
+75098,Exiles' Grove,10
+75099,Exiles' Grove,10
+75100,Exiles' Grove,11
+75101,Exiles' Grove,11
+75102,Exiles' Grove,11
+75103,Exiles' Grove,11
+75104,Exiles' Grove,11
+75105,Exiles' Grove,11
+75106,Exiles' Grove,11
+75107,Exiles' Grove,11
+75108,Exiles' Grove,11
+75109,Exiles' Grove,11
+75110,Exiles' Grove,12
+75111,Exiles' Grove,12
+75112,Exiles' Grove,12
+75113,Exiles' Grove,12
+75114,Exiles' Grove,12
+75115,Exiles' Grove,12
+75116,Exiles' Grove,12
+75117,Exiles' Grove,12
+75118,Exiles' Grove,12
+75119,Exiles' Grove,12
+75120,Exiles' Grove,13
+75121,Exiles' Grove,13
+75122,Exiles' Grove,13
+75123,Exiles' Grove,13
+75124,Exiles' Grove,13
+75125,Exiles' Grove,13
+75126,Exiles' Grove,13
+75127,Exiles' Grove,13
+75128,Exiles' Grove,13
+75129,Exiles' Grove,13
+75130,Exiles' Grove,14
+75131,Exiles' Grove,14
+75132,Exiles' Grove,14
+75133,Exiles' Grove,14
+75134,Exiles' Grove,14
+75135,Exiles' Grove,14
+75136,Exiles' Grove,14
+75137,Exiles' Grove,14
+75138,Exiles' Grove,14
+75139,Exiles' Grove,14
+75140,Exiles' Grove,15
+75141,Exiles' Grove,15
+75142,Exiles' Grove,15
+75143,Exiles' Grove,15
+75144,Exiles' Grove,15
+75145,Exiles' Grove,15
+75146,Exiles' Grove,15
+75147,Exiles' Grove,15
+75148,Exiles' Grove,15
+75149,Exiles' Grove,15
+75150,Exiles' Grove,16
+75151,Exiles' Grove,16
+75152,Exiles' Grove,16
+75153,Exiles' Grove,16
+75154,Exiles' Grove,16
+75155,Exiles' Grove,16
+75156,Exiles' Grove,16
+75157,Exiles' Grove,16
+75158,Exiles' Grove,16
+75159,Exiles' Grove,16
+75160,Exiles' Grove,17
+75161,Exiles' Grove,17
+75162,Exiles' Grove,17
+75163,Exiles' Grove,17
+75164,Exiles' Grove,17
+75165,Exiles' Grove,17
+75166,Exiles' Grove,17
+75167,Exiles' Grove,17
+75168,Exiles' Grove,17
+75169,Exiles' Grove,17
+75170,Exiles' Grove,18
+75171,Exiles' Grove,18
+75172,Exiles' Grove,18
+75173,Exiles' Grove,18
+75174,Exiles' Grove,18
+75175,Exiles' Grove,18
+75176,Exiles' Grove,18
+75177,Exiles' Grove,18
+75178,Exiles' Grove,18
+75179,Exiles' Grove,18
+75180,Exiles' Grove,19
+75181,Exiles' Grove,19
+75182,Exiles' Grove,19
+75183,Exiles' Grove,19
+75184,Exiles' Grove,19
+75185,Exiles' Grove,19
+75186,Exiles' Grove,19
+75187,Exiles' Grove,19
+75188,Exiles' Grove,19
+75189,Exiles' Grove,19
+75190,Exiles' Grove,20
+75191,Exiles' Grove,20
+75192,Exiles' Grove,20
+75193,Exiles' Grove,20
+75194,Exiles' Grove,20
+75195,Exiles' Grove,20
+75196,Exiles' Grove,20
+75197,Exiles' Grove,20
+75198,Exiles' Grove,20
+75199,Exiles' Grove,20
+75200,Exiles' Grove,21
+75201,Exiles' Grove,21
+75202,Exiles' Grove,21
+75203,Exiles' Grove,21
+75204,Exiles' Grove,21
+75205,Exiles' Grove,21
+75206,Exiles' Grove,21
+75207,Exiles' Grove,21
+75208,Exiles' Grove,21
+75209,Exiles' Grove,21
+75210,Exiles' Grove,22
+75211,Exiles' Grove,22
+75212,Exiles' Grove,22
+75213,Exiles' Grove,22
+75214,Exiles' Grove,22
+75215,Exiles' Grove,22
+75216,Exiles' Grove,22
+75217,Exiles' Grove,22
+75218,Exiles' Grove,22
+75219,Exiles' Grove,22
+75220,Exiles' Grove,23
+75221,Exiles' Grove,23
+75222,Exiles' Grove,23
+75223,Exiles' Grove,23
+75224,Exiles' Grove,23
+75225,Exiles' Grove,23
+75226,Exiles' Grove,23
+75227,Exiles' Grove,23
+75228,Exiles' Grove,23
+75229,Exiles' Grove,23
+75230,Exiles' Grove,24
+75231,Exiles' Grove,24
+75232,Exiles' Grove,24
+75233,Exiles' Grove,24
+75234,Exiles' Grove,24
+75235,Exiles' Grove,24
+75236,Exiles' Grove,24
+75237,Exiles' Grove,24
+75238,Exiles' Grove,24
+75239,Exiles' Grove,24
+75240,Exiles' Grove,25
+75241,Exiles' Grove,25
+75242,Exiles' Grove,25
+75243,Exiles' Grove,25
+75244,Exiles' Grove,25
+75245,Exiles' Grove,25
+75246,Exiles' Grove,25
+75247,Exiles' Grove,25
+75248,Exiles' Grove,25
+75249,Exiles' Grove,25
+75250,Exiles' Grove,26
+75251,Exiles' Grove,26
+75252,Exiles' Grove,26
+75253,Exiles' Grove,26
+75254,Exiles' Grove,26
+75255,Exiles' Grove,26
+75256,Exiles' Grove,26
+75257,Exiles' Grove,26
+75258,Exiles' Grove,26
+75259,Exiles' Grove,26
+75260,Exiles' Grove,27
+75261,Exiles' Grove,27
+75262,Exiles' Grove,27
+75263,Exiles' Grove,27
+75264,Exiles' Grove,27
+75265,Exiles' Grove,27
+75266,Exiles' Grove,27
+75267,Exiles' Grove,27
+75268,Exiles' Grove,27
+75269,Exiles' Grove,27
+75270,Exiles' Grove,28
+75271,Exiles' Grove,28
+75272,Exiles' Grove,28
+75273,Exiles' Grove,28
+75274,Exiles' Grove,28
+75275,Exiles' Grove,28
+75276,Exiles' Grove,28
+75277,Exiles' Grove,28
+75278,Exiles' Grove,28
+75279,Exiles' Grove,28
+75280,Exiles' Grove,29
+75281,Exiles' Grove,29
+75282,Exiles' Grove,29
+75283,Exiles' Grove,29
+75284,Exiles' Grove,29
+75285,Exiles' Grove,29
+75286,Exiles' Grove,29
+75287,Exiles' Grove,29
+75288,Exiles' Grove,29
+75289,Exiles' Grove,29
+75290,Exiles' Grove,30
+75291,Exiles' Grove,30
+75292,Exiles' Grove,30
+75293,Exiles' Grove,30
+75294,Exiles' Grove,30
+75295,Exiles' Grove,30
+75296,Exiles' Grove,30
+75297,Exiles' Grove,30
+75298,Exiles' Grove,30
+75299,Exiles' Grove,30
+75300,Exiles' Grove,31
+75301,Exiles' Grove,31
+75302,Exiles' Grove,31
+75303,Exiles' Grove,31
+75304,Exiles' Grove,31
+75305,Exiles' Grove,31
+75306,Exiles' Grove,31
+75307,Exiles' Grove,31
+75308,Exiles' Grove,31
+75309,Exiles' Grove,31
+75310,Exiles' Grove,32
+75311,Exiles' Grove,32
+75312,Exiles' Grove,32
+75313,Exiles' Grove,32
+75314,Exiles' Grove,32
+75315,Exiles' Grove,32
+75316,Exiles' Grove,32
+75317,Exiles' Grove,32
+75318,Exiles' Grove,32
+75319,Exiles' Grove,32
+75320,Exiles' Grove,33
+75321,Exiles' Grove,33
+75322,Exiles' Grove,33
+75323,Exiles' Grove,33
+75324,Exiles' Grove,33
+75325,Exiles' Grove,33
+75326,Exiles' Grove,33
+75327,Exiles' Grove,33
+75328,Exiles' Grove,33
+75329,Exiles' Grove,33
+75330,Exiles' Grove,34
+75331,Exiles' Grove,34
+75332,Exiles' Grove,34
+75333,Exiles' Grove,34
+75334,Exiles' Grove,34
+75335,Exiles' Grove,34
+75336,Exiles' Grove,34
+75337,Exiles' Grove,34
+75338,Exiles' Grove,34
+75339,Exiles' Grove,34
+75340,Exiles' Grove,35
+75341,Exiles' Grove,35
+75342,Exiles' Grove,35
+75343,Exiles' Grove,35
+75344,Exiles' Grove,35
+75345,Exiles' Grove,35
+75346,Exiles' Grove,35
+75347,Exiles' Grove,35
+75348,Exiles' Grove,35
+75349,Exiles' Grove,35
+75350,Exiles' Grove,36
+75351,Exiles' Grove,36
+75352,Exiles' Grove,36
+75353,Exiles' Grove,36
+75354,Exiles' Grove,36
+75355,Exiles' Grove,36
+75356,Exiles' Grove,36
+75357,Exiles' Grove,36
+75358,Exiles' Grove,36
+75359,Exiles' Grove,36
+75360,Exiles' Grove,37
+75361,Exiles' Grove,37
+75362,Exiles' Grove,37
+75363,Exiles' Grove,37
+75364,Exiles' Grove,37
+75365,Exiles' Grove,37
+75366,Exiles' Grove,37
+75367,Exiles' Grove,37
+75368,Exiles' Grove,37
+75369,Exiles' Grove,37
+75370,Exiles' Grove,38
+75371,Exiles' Grove,38
+75372,Exiles' Grove,38
+75373,Exiles' Grove,38
+75374,Exiles' Grove,38
+75375,Exiles' Grove,38
+75376,Exiles' Grove,38
+75377,Exiles' Grove,38
+75378,Exiles' Grove,38
+75379,Exiles' Grove,38
+75380,Exiles' Grove,39
+75381,Exiles' Grove,39
+75382,Exiles' Grove,39
+75383,Exiles' Grove,39
+75384,Exiles' Grove,39
+75385,Exiles' Grove,39
+75386,Exiles' Grove,39
+75387,Exiles' Grove,39
+75388,Exiles' Grove,39
+75389,Exiles' Grove,39
+75390,Exiles' Grove,40
+75391,Exiles' Grove,40
+75392,Exiles' Grove,40
+75393,Exiles' Grove,40
+75394,Exiles' Grove,40
+75395,Exiles' Grove,40
+75396,Exiles' Grove,40
+75397,Exiles' Grove,40
+75398,Exiles' Grove,40
+75399,Exiles' Grove,40
+75400,Exiles' Grove,41
+75401,Exiles' Grove,41
+75402,Exiles' Grove,41
+75403,Exiles' Grove,41
+75404,Exiles' Grove,41
+75405,Exiles' Grove,41
+75406,Exiles' Grove,41
+75407,Exiles' Grove,41
+75408,Exiles' Grove,41
+75409,Exiles' Grove,41
+75410,Exiles' Grove,42
+75411,Exiles' Grove,42
+75412,Exiles' Grove,42
+75413,Exiles' Grove,42
+75414,Exiles' Grove,42
+75415,Exiles' Grove,42
+75416,Exiles' Grove,42
+75417,Exiles' Grove,42
+75418,Exiles' Grove,42
+75419,Exiles' Grove,42
+75420,Exiles' Grove,43
+75421,Exiles' Grove,43
+75422,Exiles' Grove,43
+75423,Exiles' Grove,43
+75424,Exiles' Grove,43
+75425,Exiles' Grove,43
+75426,Exiles' Grove,43
+75427,Exiles' Grove,43
+75428,Exiles' Grove,43
+75429,Exiles' Grove,43
+75430,Exiles' Grove,44
+75431,Exiles' Grove,44
+75432,Exiles' Grove,44
+75433,Exiles' Grove,44
+75434,Exiles' Grove,44
+75435,Exiles' Grove,44
+75436,Exiles' Grove,44
+75437,Exiles' Grove,44
+75438,Exiles' Grove,44
+75439,Exiles' Grove,44
+75440,Exiles' Grove,45
+75441,Exiles' Grove,45
+75442,Exiles' Grove,45
+75443,Exiles' Grove,45
+75444,Exiles' Grove,45
+75445,Exiles' Grove,45
+75446,Exiles' Grove,45
+75447,Exiles' Grove,45
+75448,Exiles' Grove,45
+75449,Exiles' Grove,45
+75450,Exiles' Grove,1
+75451,Exiles' Grove,2
+75452,Exiles' Grove,3
+75453,Exiles' Grove,4
+75454,Exiles' Grove,5
+75455,Exiles' Grove,6
+75456,Exiles' Grove,7
+75457,Exiles' Grove,8
+75458,Exiles' Grove,9
+75459,Exiles' Grove,10
+75460,Exiles' Grove,11
+75461,Exiles' Grove,12
+75462,Exiles' Grove,13
+75463,Exiles' Grove,14
+75464,Exiles' Grove,15
+75465,Exiles' Grove,16
+75466,Exiles' Grove,17
+75467,Exiles' Grove,18
+75468,Exiles' Grove,19
+75469,Exiles' Grove,20
+75470,Exiles' Grove,21
+75471,Exiles' Grove,22
+75472,Exiles' Grove,23
+75473,Exiles' Grove,24
+75474,Exiles' Grove,25
+75475,Exiles' Grove,26
+75476,Exiles' Grove,27
+75477,Exiles' Grove,28
+75478,Exiles' Grove,29
+75479,Exiles' Grove,30
+75480,Exiles' Grove,31
+75481,Exiles' Grove,32
+75482,Exiles' Grove,33
+75483,Exiles' Grove,34
+75484,Exiles' Grove,35
+75485,Exiles' Grove,36
+75486,Exiles' Grove,37
+75487,Exiles' Grove,38
+75488,Exiles' Grove,39
+75489,Exiles' Grove,40
+75490,Exiles' Grove,41
+75491,Exiles' Grove,42
+75492,Exiles' Grove,43
+75493,Exiles' Grove,44
+75494,Exiles' Grove,45
+110004,Common Cursed squad,8
+110005,Common Cursed squad,8
+110006,Common Cursed squad,8
+110007,Common Cursed squad,8
+110008,Common Cursed squad,8
+110009,Common Cursed squad,8
+110010,Common Cursed squad,8
+110011,Common Cursed squad,8
+110012,Common Cursed squad,8
+110013,Common Cursed squad,8
+110014,Common Cursed squad,8
+110015,Common Cursed squad,8
+110016,Common Cursed squad,8
+110017,Common Cursed squad,8
+110018,Common Cursed squad,8
+110019,Common Cursed squad,8
+110020,Common Cursed squad,8
+110021,Common Cursed squad,8
+110022,Common Cursed squad,8
+110023,Common Cursed squad,8
+110024,Common Cursed squad,8
+110025,Common Cursed squad,8
+110026,Common Cursed squad,8
+110027,Common Cursed squad,8
+110028,Common Cursed squad,8
+110029,Common Cursed squad,8
+110030,Common Cursed squad,8
+110031,Common Cursed squad,8
+110032,Common Cursed squad,8
+110033,Common Cursed squad,8
+110034,Common Cursed squad,8
+110035,Common Cursed squad,8
+110036,Common Cursed squad,8
+110037,Common Cursed squad,8
+110038,Common Cursed squad,8
+110039,Common Cursed squad,8
+110040,Common Cursed squad,8
+110041,Common Cursed squad,8
+110042,Common Cursed squad,8
+110043,Common Cursed squad,8
+110044,Common Cursed squad,8
+110045,Common Cursed squad,8
+110046,Common Cursed squad,8
+110047,Common Cursed squad,8
+110048,Common Cursed squad,8
+110049,Common Cursed squad,8
+110050,Common Cursed squad,8
+110051,Common Cursed squad,8
+110052,Common Cursed squad,8
+110053,Common Cursed squad,8
+110054,Common Cursed squad,8
+110055,Common Cursed squad,8
+110056,Common Cursed squad,8
+110057,Common Cursed squad,8
+110058,Common Cursed squad,8
+110059,Common Cursed squad,8
+110060,Common Cursed squad,8
+110061,Common Cursed squad,8
+110062,Common Cursed squad,8
+110063,Common Cursed squad,8
+110064,Common Cursed squad,8
+110065,Common Cursed squad,8
+110066,Common Cursed squad,8
+110067,Common Cursed squad,8
+110068,Common Cursed squad,8
+110069,Common Cursed squad,8
+110070,Common Cursed squad,8
+110071,Common Cursed squad,8
+110072,Common Cursed squad,8
+110073,Common Cursed squad,8
+110074,Common Cursed squad,8
+110075,Common Cursed squad,8
+110076,Common Cursed squad,8
+110077,Common Cursed squad,8
+110078,Common Cursed squad,8
+110079,Common Cursed squad,8
+110080,Common Cursed squad,8
+110081,Common Cursed squad,8
+110082,Common Cursed squad,8
+110083,Common Cursed squad,8
+110084,Common Cursed squad,8
+110085,Common Cursed squad,8
+110086,Common Cursed squad,8
+110087,Common Cursed squad,8
+110088,Common Cursed squad,8
+110089,Common Cursed squad,8
+110090,Common Cursed squad,8
+110091,Common Cursed squad,8
+110092,Common Cursed squad,8
+110093,Common Cursed squad,8
+110094,Common Cursed squad,8
+110095,Common Cursed squad,8
+110096,Common Cursed squad,8
+110097,Common Cursed squad,8
+110098,Common Cursed squad,8
+110099,Common Cursed squad,8
+110100,Common Cursed squad,8
+110101,Common Cursed squad,8
+110102,Common Cursed squad,8
+110103,Common Cursed squad,8
+110104,Common Cursed squad,8
+110105,Common Cursed squad,8
+110106,Common Cursed squad,8
+110107,Common Cursed squad,8
+110108,Common Cursed squad,8
+110109,Common Cursed squad,8
+110110,Common Cursed squad,8
+110111,Common Cursed squad,8
+110112,Common Cursed squad,8
+110113,Common Cursed squad,8
+110114,Common Cursed squad,8
+110115,Common Cursed squad,8
+110116,Common Cursed squad,8
+110117,Common Cursed squad,8
+110118,Common Cursed squad,8
+110119,Common Cursed squad,8
+110120,Common Cursed squad,8
+110121,Common Cursed squad,8
+110122,Common Cursed squad,8
+110123,Common Cursed squad,8
+110124,Common Cursed squad,8
+110125,Common Cursed squad,8
+110126,Common Cursed squad,8
+110127,Common Cursed squad,8
+110128,Common Cursed squad,8
+110129,Common Cursed squad,8
+110130,Common Cursed squad,8
+110131,Common Cursed squad,8
+110132,Common Cursed squad,8
+110133,Common Cursed squad,8
+110134,Common Cursed squad,8
+110135,Common Cursed squad,8
+110136,Common Cursed squad,8
+110137,Common Cursed squad,8
+110138,Common Cursed squad,8
+110139,Common Cursed squad,8
+110140,Common Cursed squad,8
+110141,Common Cursed squad,8
+110142,Common Cursed squad,8
+110143,Common Cursed squad,8
+110144,Common Cursed squad,8
+110145,Common Cursed squad,8
+110146,Common Cursed squad,8
+110147,Common Cursed squad,8
+110148,Common Cursed squad,8
+110149,Common Cursed squad,8
+110150,Common Cursed squad,8
+110151,Common Cursed squad,8
+110152,Common Cursed squad,8
+110153,Common Cursed squad,8
+110154,Common Cursed squad,8
+110155,Common Cursed squad,8
+110156,Common Cursed squad,8
+110157,Common Cursed squad,8
+110158,Common Cursed squad,8
+110159,Common Cursed squad,8
+110160,Common Cursed squad,8
+110161,Common Cursed squad,8
+110162,Common Cursed squad,8
+110163,Common Cursed squad,8
+110164,Common Cursed squad,8
+110165,Common Cursed squad,8
+110166,Common Cursed squad,8
+110167,Common Cursed squad,8
+110168,Common Cursed squad,8
+110169,Common Cursed squad,8
+110170,Common Cursed squad,8
+110171,Common Cursed squad,8
+110172,Common Cursed squad,8
+110173,Common Cursed squad,8
+110174,Common Cursed squad,8
+110175,Common Cursed squad,8
+110176,Common Cursed squad,8
+110177,Common Cursed squad,8
+110178,Common Cursed squad,8
+110179,Common Cursed squad,8
+110180,Common Cursed squad,8
+110181,Common Cursed squad,8
+110182,Common Cursed squad,8
+110183,Common Cursed squad,8
+110184,Common Cursed squad,8
+110185,Common Cursed squad,8
+110186,Common Cursed squad,8
+110187,Common Cursed squad,8
+110188,Common Cursed squad,8
+110189,Common Cursed squad,8
+110190,Common Cursed squad,8
+110191,Common Cursed squad,8
+110192,Common Cursed squad,8
+110193,Common Cursed squad,8
+110194,Common Cursed squad,8
+110195,Common Cursed squad,8
+110196,Common Cursed squad,8
+110197,Common Cursed squad,8
+110198,Common Cursed squad,8
+110199,Common Cursed squad,8
+110200,Common Cursed squad,8
+110201,Common Cursed squad,8
+110202,Common Cursed squad,8
+110203,Common Cursed squad,8
+110204,Common Cursed squad,8
+110205,Common Cursed squad,8
+110206,Common Cursed squad,8
+110207,Common Cursed squad,8
+110208,Common Cursed squad,8
+110209,Common Cursed squad,8
+110210,Common Cursed squad,8
+110211,Common Cursed squad,8
+110212,Common Cursed squad,8
+110213,Common Cursed squad,8
+110214,Common Cursed squad,8
+110215,Common Cursed squad,8
+110216,Common Cursed squad,8
+110217,Common Cursed squad,8
+110218,Common Cursed squad,8
+110219,Common Cursed squad,8
+110221,Common Cursed squad,8
+110223,Common Cursed squad,8
+110225,Common Cursed squad,8
+110227,Common Cursed squad,8
+110268,Common Cursed squad,8
+110269,Common Cursed squad,8
+110270,Common Cursed squad,8
+110271,Common Cursed squad,8
+110300,Common Cursed squad,8
+110301,Common Cursed squad,8
+110302,Common Cursed squad,8
+110303,Common Cursed squad,8
+115000,Common Cursed squad,8
+115001,Common Cursed squad,8
+115002,Common Cursed squad,8
+115003,Common Cursed squad,8
+115004,Common Cursed squad,8
+115005,Common Cursed squad,8
+115006,Common Cursed squad,8
+115007,Common Cursed squad,8
+115008,Common Cursed squad,8
+115009,Common Cursed squad,8
+115010,Common Cursed squad,8
+115011,Common Cursed squad,8
+115012,Common Cursed squad,8
+115013,Common Cursed squad,8
+115014,Common Cursed squad,8
+115015,Common Cursed squad,8
+115016,Common Cursed squad,8
+115017,Common Cursed squad,8
+115018,Common Cursed squad,8
+115019,Common Cursed squad,8
+115020,Common Cursed squad,8
+115021,Common Cursed squad,8
+115022,Common Cursed squad,8
+115023,Common Cursed squad,8
+115024,Common Cursed squad,8
+115025,Common Cursed squad,8
+115026,Common Cursed squad,8
+115027,Common Cursed squad,8
+115028,Common Cursed squad,8
+115029,Common Cursed squad,8
+115030,Common Cursed squad,8
+115031,Common Cursed squad,8
+115032,Common Cursed squad,8
+115033,Common Cursed squad,8
+115034,Common Cursed squad,8
+115035,Common Cursed squad,8
+115036,Common Cursed squad,8
+115037,Common Cursed squad,8
+115038,Common Cursed squad,8
+115039,Common Cursed squad,8
+115264,Common Cursed squad,8
+115265,Common Cursed squad,8
+115266,Common Cursed squad,8
+115267,Common Cursed squad,8
+115268,Common Cursed squad,8
+115269,Common Cursed squad,8
+120000,Crypt,4
+120001,Crypt,9
+120002,Crypt,14
+133333,Snowman,0
+133334,Carrot Monster,0
+133335,Mimic Chest,0
+133336,Nisse,0
+133337,Pumpkin,0
+140000,Wonder of the World,35
+140001,Dark Obelisk,35
+140002,Dark Obelisk,35
+140003,Dark Obelisk,35
+140004,Dark Obelisk,35
+140005,Wonder of the World,35
+140006,Wonder of the World,35
+140007,Wonder of the World,35
+140008,Wonder of the World,35
+140009,Wonder of the World,35
+140010,Wonder of the World,35
+140011,Wonder of the World,35
+140012,Phantasm,1
+140013,Wonder of the World,35
+140014,Wonder of the World,35
+140015,Wonder of the World,35
+140016,Wonder of the World,35
+140017,Wonder of the World,35
+140018,Wonder of the World,35
+140019,Wonder of the World,35
+140020,Wonder of the World,35
+140021,Wonder of the World,35
+140022,Wonder of the World,35
+140023,Wonder of the World,35
+140024,Wonder of the World,35
+140025,Wonder of the World,35
+140026,Wonder of the World,35
+140027,Wonder of the World,35
+140028,Wonder of the World,35
+140029,Wonder of the World,35
+140030,Wonder of the World,35
+140031,Wonder of the World,35
+140032,Wonder of the World,35
+140033,Wonder of the World,35
+140034,Wonder of the World,35
+140035,Wonder of the World,35
+140036,Wonder of the World,35
+140037,Wonder of the World,35
+140038,Wonder of the World,35
+140039,Wonder of the World,35
+140040,Wonder of the World,35
+140041,Wonder of the World,35
+140042,Wonder of the World,35
+140043,Wonder of the World,35
+140044,Wonder of the World,35
+140045,Wonder of the World,35
+140046,Wonder of the World,35
+140047,Wonder of the World,35
+140048,Wonder of the World,35
+140049,Wonder of the World,35
+140050,Wonder of the World,35
+140051,Wonder of the World,35
+140052,Wonder of the World,35
+140053,Wonder of the World,35
+140054,Wonder of the World,35
+140055,Wonder of the World,35
+140056,Wonder of the World,35
+140057,Wonder of the World,35
+140058,Wonder of the World,35
+140059,Wonder of the World,35
+140060,Wonder of the World,35
+140061,Wonder of the World,35
+140062,Wonder of the World,35
+140063,Wonder of the World,35
+140064,Wonder of the World,35
+140065,Wonder of the World,35
+140066,Wonder of the World,35
+140067,Wonder of the World,35
+140068,Wonder of the World,35
+140069,Wonder of the World,35
+140070,Wonder of the World,35
+140071,Wonder of the World,35
+140072,Wonder of the World,35
+140073,Wonder of the World,35
+140074,Wonder of the World,35
+140075,Wonder of the World,35
+140076,Wonder of the World,35
+140077,Wonder of the World,35
+140078,Wonder of the World,35
+140079,Wonder of the World,35
+140080,Wonder of the World,35
+140081,Wonder of the World,35
+140082,Wonder of the World,35
+140083,Wonder of the World,35
+140084,Wonder of the World,35
+140085,Wonder of the World,35
+140086,Wonder of the World,35
+140087,Wonder of the World,35
+140088,Wonder of the World,35
+140089,Wonder of the World,35
+140090,Wonder of the World,35
+140091,Wonder of the World,35
+140092,Wonder of the World,35
+140093,Wonder of the World,35
+140094,Wonder of the World,35
+140095,Wonder of the World,35
+140096,Wonder of the World,35
+140097,Wonder of the World,35
+140098,Wonder of the World,35
+140099,Wonder of the World,35
+140100,Wonder of the World,35
+140101,Wonder of the World,35
+140102,Wonder of the World,35
+140103,Wonder of the World,35
+140104,Wonder of the World,35
+140105,Wonder of the World,35
+140106,Wonder of the World,35
+140107,Wonder of the World,35
+140108,Wonder of the World,35
+140109,Wonder of the World,35
+140110,Wonder of the World,35
+140111,Wonder of the World,35
+140112,Wonder of the World,35
+140113,Wonder of the World,35
+140114,Wonder of the World,35
+140115,Wonder of the World,35
+140116,Wonder of the World,35
+140117,Wonder of the World,35
+140118,Wonder of the World,35
+140119,Wonder of the World,35
+140120,Wonder of the World,35
+140121,Wonder of the World,35
+140122,Wonder of the World,35
+140123,Wonder of the World,35
+140124,Wonder of the World,35
+140125,Wonder of the World,35
+140126,Wonder of the World,35
+140127,Wonder of the World,35
+140128,Wonder of the World,35
+140129,Wonder of the World,35
+140130,Wonder of the World,35
+140131,Wonder of the World,35
+140132,Wonder of the World,35
+140133,Wonder of the World,35
+140134,Wonder of the World,35
+140135,Wonder of the World,35
+140136,Wonder of the World,35
+140137,Wonder of the World,35
+140138,Wonder of the World,35
+140139,Wonder of the World,35
+140140,Wonder of the World,35
+140141,Wonder of the World,35
+140142,Wonder of the World,35
+140143,Wonder of the World,35
+140144,Wonder of the World,35
+140145,Wonder of the World,35
+140146,Wonder of the World,35
+140147,Wonder of the World,35
+140148,Wonder of the World,35
+140149,Wonder of the World,35
+140150,Wonder of the World,35
+140151,Wonder of the World,35
+140152,Wonder of the World,35
+140153,Wonder of the World,35
+140154,Wonder of the World,35
+140155,Wonder of the World,35
+140156,Wonder of the World,35
+140157,Wonder of the World,35
+140158,Wonder of the World,35
+140159,Wonder of the World,35
+140160,Wonder of the World,35
+140161,Wonder of the World,35
+140162,Wonder of the World,35
+140163,Wonder of the World,35
+140164,Wonder of the World,35
+140165,Wonder of the World,35
+140166,Wonder of the World,35
+140167,Wonder of the World,35
+140168,Wonder of the World,35
+140169,Wonder of the World,35
+140170,Wonder of the World,35
+140171,Wonder of the World,35
+140172,Wonder of the World,35
+140173,Wonder of the World,35
+140174,Wonder of the World,35
+140175,Wonder of the World,35
+140176,Wonder of the World,35
+140177,Wonder of the World,35
+140178,Wonder of the World,35
+140179,Wonder of the World,35
+140180,Wonder of the World,35
+140181,Wonder of the World,35
+140182,Wonder of the World,35
+140183,Wonder of the World,35
+140184,Wonder of the World,35
+140185,Wonder of the World,35
+140186,Wonder of the World,35
+140187,Wonder of the World,35
+140188,Wonder of the World,35
+140189,Wonder of the World,35
+140190,Wonder of the World,35
+140191,Wonder of the World,35
+140192,Wonder of the World,35
+140193,Wonder of the World,35
+140194,Wonder of the World,35
+140195,Wonder of the World,35
+140196,Wonder of the World,35
+140197,Wonder of the World,35
+140198,Wonder of the World,35
+140199,Wonder of the World,35
+140200,Wonder of the World,35
+140201,Wonder of the World,35
+140202,Wonder of the World,35
+140203,Wonder of the World,35
+140204,Wonder of the World,35
+140205,Wonder of the World,35
+140206,Wonder of the World,35
+140207,Wonder of the World,35
+140208,Wonder of the World,35
+140209,Wonder of the World,35
+140210,Wonder of the World,35
+140211,Wonder of the World,35
+140212,Wonder of the World,35
+140213,Wonder of the World,35
+140214,Wonder of the World,35
+140215,Wonder of the World,35
+140216,Wonder of the World,35
+140217,Wonder of the World,35
+140218,Wonder of the World,35
+140219,Wonder of the World,35
+140220,Wonder of the World,35
+140221,Wonder of the World,35
+140222,Wonder of the World,35
+140223,Wonder of the World,35
+140224,Wonder of the World,35
+140225,Wonder of the World,35
+140226,Wonder of the World,35
+140227,Wonder of the World,35
+140228,Wonder of the World,35
+140229,Wonder of the World,35
+140230,Wonder of the World,35
+140231,Wonder of the World,35
+140232,Wonder of the World,35
+140233,Wonder of the World,35
+140234,Wonder of the World,35
+140235,Wonder of the World,35
+140236,Wonder of the World,35
+140237,Wonder of the World,35
+140238,Wonder of the World,35
+140239,Wonder of the World,35
+140240,Wonder of the World,35
+140241,Wonder of the World,35
+140242,Wonder of the World,35
+140243,Wonder of the World,35
+140244,Wonder of the World,35
+140245,Wonder of the World,35
+140246,Wonder of the World,35
+140247,Wonder of the World,35
+140248,Wonder of the World,35
+140249,Wonder of the World,35
+140250,Wonder of the World,35
+140251,Wonder of the World,35
+140252,Wonder of the World,35
+140253,Wonder of the World,35
+140254,Wonder of the World,35
+140255,Wonder of the World,35
+140256,Wonder of the World,35
+140257,Wonder of the World,35
+140258,Wonder of the World,35
+140259,Wonder of the World,35
+140260,Wonder of the World,35
+140261,Wonder of the World,35
+140262,Wonder of the World,35
+140263,Wonder of the World,35
+140264,Wonder of the World,35
+140265,Wonder of the World,35
+140266,Wonder of the World,35
+140267,Wonder of the World,35
+140268,Wonder of the World,35
+140269,Wonder of the World,35
+140270,Wonder of the World,35
+140271,Wonder of the World,35
+140272,Wonder of the World,35
+140273,Wonder of the World,35
+140274,Wonder of the World,35
+140275,Wonder of the World,35
+140276,Wonder of the World,35
+140277,Wonder of the World,35
+140278,Wonder of the World,35
+140279,Wonder of the World,35
+140280,Wonder of the World,35
+140281,Wonder of the World,35
+140282,Wonder of the World,35
+140283,Wonder of the World,35
+140284,Wonder of the World,35
+140285,Wonder of the World,35
+140286,Wonder of the World,35
+140287,Wonder of the World,35
+140288,Wonder of the World,35
+140289,Wonder of the World,35
+140290,Wonder of the World,35
+140291,Wonder of the World,35
+140292,Wonder of the World,35
+140293,Wonder of the World,35
+140294,Wonder of the World,35
+140295,Wonder of the World,35
+140296,Wonder of the World,35
+140297,Wonder of the World,35
+140298,Wonder of the World,35
+140299,Wonder of the World,35
+140300,Wonder of the World,35
+140301,Wonder of the World,35
+140302,Wonder of the World,35
+140303,Wonder of the World,35
+140304,Wonder of the World,35
+140305,Wonder of the World,35
+140306,Wonder of the World,35
+140307,Wonder of the World,35
+140308,Wonder of the World,35
+140309,Wonder of the World,35
+140310,Wonder of the World,35
+140311,Wonder of the World,35
+140312,Wonder of the World,35
+140313,Wonder of the World,35
+140314,Wonder of the World,35
+140315,Wonder of the World,35
+140316,Wonder of the World,35
+140317,Wonder of the World,35
+140318,Wonder of the World,35
+140319,Wonder of the World,35
+140320,Wonder of the World,35
+140321,Wonder of the World,35
+140322,Wonder of the World,35
+140323,Wonder of the World,35
+140324,Wonder of the World,35
+140325,Wonder of the World,35
+140326,Wonder of the World,35
+140327,Wonder of the World,35
+140328,Wonder of the World,35
+140329,Wonder of the World,35
+140330,Wonder of the World,35
+140331,Wonder of the World,35
+140332,Wonder of the World,35
+140333,Wonder of the World,35
+140334,Wonder of the World,35
+140335,Wonder of the World,35
+140336,Wonder of the World,35
+140337,Wonder of the World,35
+140338,Wonder of the World,35
+140339,Wonder of the World,35
+140340,Wonder of the World,35
+140341,Wonder of the World,35
+140342,Wonder of the World,35
+140343,Wonder of the World,35
+140344,Wonder of the World,35
+140345,Wonder of the World,35
+140346,Wonder of the World,35
+140347,Wonder of the World,35
+140348,Wonder of the World,35
+140349,Wonder of the World,35
+140350,Wonder of the World,35
+140351,Wonder of the World,35
+140352,Wonder of the World,35
+140353,Wonder of the World,35
+140354,Wonder of the World,35
+140355,Wonder of the World,35
+140356,Wonder of the World,35
+140357,Wonder of the World,35
+140358,Wonder of the World,35
+140359,Wonder of the World,35
+140360,Wonder of the World,35
+140361,Wonder of the World,35
+140362,Wonder of the World,35
+140363,Wonder of the World,35
+140364,Wonder of the World,35
+140365,Wonder of the World,35
+140366,Wonder of the World,35
+140367,Wonder of the World,35
+140368,Wonder of the World,35
+140369,Wonder of the World,35
+140370,Wonder of the World,35
+140371,Wonder of the World,35
+140372,Wonder of the World,35
+140373,Wonder of the World,35
+140374,Wonder of the World,35
+140375,Wonder of the World,35
+140376,Wonder of the World,35
+140377,Wonder of the World,35
+140378,Wonder of the World,35
+140379,Wonder of the World,35
+140380,Wonder of the World,35
+150001,Common Yokai squad,1
+150002,Common Yokai squad,2
+150003,Common Yokai squad,3
+150004,Common Yokai squad,4
+150005,Common Yokai squad,5
+150006,Common Yokai squad,6
+150007,Common Yokai squad,7
+150008,Common Yokai squad,8
+150009,Common Yokai squad,9
+150010,Common Yokai squad,10
+150011,Common Yokai squad,11
+150012,Common Yokai squad,12
+150013,Common Yokai squad,13
+150014,Common Yokai squad,14
+150015,Common Yokai squad,15
+150016,Common Yokai squad,16
+150017,Common Yokai squad,17
+150018,Common Yokai squad,18
+150019,Common Yokai squad,19
+150020,Common Yokai squad,20
+150021,Common Yokai squad,21
+150022,Common Yokai squad,22
+150023,Common Yokai squad,23
+150024,Common Yokai squad,24
+150025,Common Yokai squad,25
+150026,Common Yokai squad,26
+150027,Common Yokai squad,27
+150028,Common Yokai squad,28
+150029,Common Yokai squad,29
+150030,Common Yokai squad,30
+150031,Common Yokai squad,31
+150032,Common Yokai squad,32
+150033,Common Yokai squad,33
+150034,Common Yokai squad,34
+150035,Common Yokai squad,35
+150036,Common Yokai squad,36
+150037,Common Yokai squad,37
+150038,Common Yokai squad,38
+150039,Common Yokai squad,39
+150040,Common Yokai squad,40
+150041,Common Yokai squad,41
+150042,Common Yokai squad,42
+150043,Common Yokai squad,43
+150044,Common Yokai squad,44
+150045,Common Yokai squad,45
+150101,Rare Yokai squad,1
+150102,Rare Yokai squad,2
+150103,Rare Yokai squad,3
+150104,Rare Yokai squad,4
+150105,Rare Yokai squad,5
+150106,Rare Yokai squad,6
+150107,Rare Yokai squad,7
+150108,Rare Yokai squad,8
+150109,Rare Yokai squad,9
+150110,Rare Yokai squad,10
+150111,Rare Yokai squad,11
+150112,Rare Yokai squad,12
+150113,Rare Yokai squad,13
+150114,Rare Yokai squad,14
+150115,Rare Yokai squad,15
+150116,Rare Yokai squad,16
+150117,Rare Yokai squad,17
+150118,Rare Yokai squad,18
+150119,Rare Yokai squad,19
+150120,Rare Yokai squad,20
+150121,Rare Yokai squad,21
+150122,Rare Yokai squad,22
+150123,Rare Yokai squad,23
+150124,Rare Yokai squad,24
+150125,Rare Yokai squad,25
+150126,Rare Yokai squad,26
+150127,Rare Yokai squad,27
+150128,Rare Yokai squad,28
+150129,Rare Yokai squad,29
+150130,Rare Yokai squad,30
+150131,Rare Yokai squad,31
+150132,Rare Yokai squad,32
+150133,Rare Yokai squad,33
+150134,Rare Yokai squad,34
+150135,Rare Yokai squad,35
+150136,Rare Yokai squad,36
+150137,Rare Yokai squad,37
+150138,Rare Yokai squad,38
+150139,Rare Yokai squad,39
+150140,Rare Yokai squad,40
+150141,Rare Yokai squad,41
+150142,Rare Yokai squad,42
+150143,Rare Yokai squad,43
+150144,Rare Yokai squad,44
+150145,Rare Yokai squad,45
+150201,Vault of the Ancients,1
+150202,Vault of the Ancients,2
+150203,Vault of the Ancients,3
+150204,Vault of the Ancients,4
+150205,Vault of the Ancients,5
+150206,Vault of the Ancients,6
+150207,Vault of the Ancients,7
+150208,Vault of the Ancients,8
+150209,Vault of the Ancients,9
+150210,Vault of the Ancients,10
+150211,Vault of the Ancients,11
+150212,Vault of the Ancients,12
+150213,Vault of the Ancients,13
+150214,Vault of the Ancients,14
+150215,Vault of the Ancients,15
+150216,Vault of the Ancients,16
+150217,Vault of the Ancients,17
+150218,Vault of the Ancients,18
+150219,Vault of the Ancients,19
+150220,Vault of the Ancients,20
+150221,Vault of the Ancients,21
+150222,Vault of the Ancients,22
+150223,Vault of the Ancients,23
+150224,Vault of the Ancients,24
+150225,Vault of the Ancients,25
+150226,Vault of the Ancients,26
+150227,Vault of the Ancients,27
+150228,Vault of the Ancients,28
+150229,Vault of the Ancients,29
+150230,Vault of the Ancients,30
+150231,Vault of the Ancients,31
+150232,Vault of the Ancients,32
+150233,Vault of the Ancients,33
+150234,Vault of the Ancients,34
+150235,Vault of the Ancients,35
+150236,Vault of the Ancients,36
+150237,Vault of the Ancients,37
+150238,Vault of the Ancients,38
+150239,Vault of the Ancients,39
+150240,Vault of the Ancients,40
+150241,Vault of the Ancients,41
+150242,Vault of the Ancients,42
+150243,Vault of the Ancients,43
+150244,Vault of the Ancients,44
+150245,Vault of the Ancients,45
+150305,Vault of the Ancients,5
+150306,Vault of the Ancients,6
+150307,Vault of the Ancients,7
+150308,Vault of the Ancients,8
+150309,Vault of the Ancients,9
+150310,Vault of the Ancients,10
+150311,Vault of the Ancients,11
+150312,Vault of the Ancients,12
+150313,Vault of the Ancients,13
+150314,Vault of the Ancients,14
+150315,Vault of the Ancients,15
+150316,Vault of the Ancients,16
+150317,Vault of the Ancients,17
+150318,Vault of the Ancients,18
+150319,Vault of the Ancients,19
+150320,Vault of the Ancients,20
+150321,Vault of the Ancients,21
+150322,Vault of the Ancients,22
+150323,Vault of the Ancients,23
+150324,Vault of the Ancients,24
+150325,Vault of the Ancients,25
+150326,Vault of the Ancients,26
+150327,Vault of the Ancients,27
+150328,Vault of the Ancients,28
+150329,Vault of the Ancients,29
+150330,Vault of the Ancients,30
+150331,Vault of the Ancients,31
+150332,Vault of the Ancients,32
+150333,Vault of the Ancients,33
+150334,Vault of the Ancients,34
+150335,Vault of the Ancients,35
+150336,Vault of the Ancients,36
+150337,Vault of the Ancients,37
+150338,Vault of the Ancients,38
+150339,Vault of the Ancients,39
+150340,Vault of the Ancients,40
+150341,Vault of the Ancients,41
+150342,Vault of the Ancients,42
+150343,Vault of the Ancients,43
+150344,Vault of the Ancients,44
+150345,Vault of the Ancients,45
+151000,Abyss Guardian,5
+152000,Common Runic squad,20
+152001,Common Runic squad,21
+152002,Common Runic squad,22
+152003,Common Runic squad,23
+152004,Common Runic squad,24
+152005,Common Runic squad,25
+152006,Common Runic squad,26
+152007,Common Runic squad,27
+152008,Common Runic squad,28
+152009,Common Runic squad,29
+152010,Common Runic squad,30
+152011,Common Runic squad,31
+152012,Common Runic squad,32
+152013,Common Runic squad,33
+152014,Common Runic squad,34
+152015,Common Runic squad,35
+152016,Common Runic squad,36
+152017,Common Runic squad,37
+152018,Common Runic squad,38
+152019,Common Runic squad,39
+152020,Common Runic squad,40
+152021,Common Runic squad,41
+152022,Common Runic squad,42
+152023,Common Runic squad,43
+152024,Common Runic squad,44
+152025,Common Runic squad,45
+152100,Raid Runic squad,20
+152101,Raid Runic squad,21
+152102,Raid Runic squad,22
+152103,Raid Runic squad,23
+152104,Raid Runic squad,24
+152105,Raid Runic squad,25
+152106,Raid Runic squad,26
+152107,Raid Runic squad,27
+152108,Raid Runic squad,28
+152109,Raid Runic squad,29
+152110,Raid Runic squad,30
+152111,Raid Runic squad,31
+152112,Raid Runic squad,32
+152113,Raid Runic squad,33
+152114,Raid Runic squad,34
+152115,Raid Runic squad,35
+152116,Raid Runic squad,36
+152117,Raid Runic squad,37
+152118,Raid Runic squad,38
+152119,Raid Runic squad,39
+152120,Raid Runic squad,40
+152121,Raid Runic squad,41
+152122,Raid Runic squad,42
+152123,Raid Runic squad,43
+152124,Raid Runic squad,44
+152125,Raid Runic squad,45
+162000,Common Runic squad,20
+162001,Common Runic squad,21
+162002,Common Runic squad,22
+162003,Common Runic squad,23
+162004,Common Runic squad,24
+162005,Common Runic squad,25
+162006,Common Runic squad,26
+162007,Common Runic squad,27
+162008,Common Runic squad,28
+162009,Common Runic squad,29
+162010,Common Runic squad,30
+162011,Common Runic squad,31
+162012,Common Runic squad,32
+162013,Common Runic squad,33
+162014,Common Runic squad,34
+162015,Common Runic squad,35
+162016,Common Runic squad,36
+162017,Common Runic squad,37
+162018,Common Runic squad,38
+162019,Common Runic squad,39
+162020,Common Runic squad,40
+162021,Common Runic squad,41
+162022,Common Runic squad,42
+162023,Common Runic squad,43
+162024,Common Runic squad,44
+162025,Common Runic squad,45
+162100,Raid Runic squad,20
+162101,Raid Runic squad,21
+162102,Raid Runic squad,22
+162103,Raid Runic squad,23
+162104,Raid Runic squad,24
+162105,Raid Runic squad,25
+162106,Raid Runic squad,26
+162107,Raid Runic squad,27
+162108,Raid Runic squad,28
+162109,Raid Runic squad,29
+162110,Raid Runic squad,30
+162111,Raid Runic squad,31
+162112,Raid Runic squad,32
+162113,Raid Runic squad,33
+162114,Raid Runic squad,34
+162115,Raid Runic squad,35
+162116,Raid Runic squad,36
+162117,Raid Runic squad,37
+162118,Raid Runic squad,38
+162119,Raid Runic squad,39
+162120,Raid Runic squad,40
+162121,Raid Runic squad,41
+162122,Raid Runic squad,42
+162123,Raid Runic squad,43
+162124,Raid Runic squad,44
+162125,Raid Runic squad,45
+170001,Lava Fountain,10
+170002,Lava Fountain,15
+170003,Lava Fountain,20
+170004,Lava Fountain,25
+170005,Lava Fountain,30
+170006,Lava Fountain,35
+170007,Lava Fountain,40
+170008,Lava Fountain,45
+170101,Tartaros Crypt,10
+170102,Tartaros Crypt,15
+170103,Tartaros Crypt,20
+170104,Tartaros Crypt,25
+170105,Tartaros Crypt,30
+170106,Tartaros Crypt,35
+170107,Chimera,50
+170108,Basilisk,50
+170109,Briareus,50
+171000,Olympus Portal,1
+171001,Fire Salamander squad,1
+171002,Fire Salamander squad,2
+171003,Fire Salamander squad,3
+171004,Fire Salamander squad,4
+171005,Fire Salamander squad,5
+171006,Fire Salamander squad,6
+171007,Fire Salamander squad,7
+171008,Fire Salamander squad,8
+171009,Fire Salamander squad,9
+171010,Fire Salamander squad,10
+171011,Fire Salamander squad,11
+171012,Fire Salamander squad,12
+171013,Fire Salamander squad,13
+171014,Fire Salamander squad,14
+171015,Fire Salamander squad,15
+171016,Fire Salamander squad,16
+171017,Fire Salamander squad,17
+171018,Fire Salamander squad,18
+171019,Fire Salamander squad,19
+171020,Fire Salamander squad,20
+171021,Fire Salamander squad,21
+171022,Fire Salamander squad,22
+171023,Fire Salamander squad,23
+171024,Fire Salamander squad,24
+171025,Fire Salamander squad,25
+171026,Fire Salamander squad,26
+171027,Fire Salamander squad,27
+171028,Fire Salamander squad,28
+171029,Fire Salamander squad,29
+171030,Fire Salamander squad,30
+171031,Fire Salamander squad,31
+171032,Fire Salamander squad,32
+171033,Fire Salamander squad,33
+171034,Fire Salamander squad,34
+171035,Fire Salamander squad,35
+171036,Fire Salamander squad,36
+171037,Fire Salamander squad,37
+171038,Fire Salamander squad,38
+171039,Fire Salamander squad,39
+171040,Fire Salamander squad,40
+171041,Fire Salamander squad,41
+171042,Fire Salamander squad,42
+171043,Fire Salamander squad,43
+171044,Fire Salamander squad,44
+171045,Fire Salamander squad,45
+180000,,0
+180001,Epic Arcanomancer squad,50
+181040,Epic Plague squad,50
+181050,Epic Plague squad,50
+181055,Epic Plague squad,50
+181060,Epic Plague squad,50
+181065,Epic Plague squad,50
+181070,Epic Plague squad,50
+181075,Epic Plague squad,50
+181080,Epic Plague squad,50
+181085,Epic Plague squad,50
+181090,Epic Plague squad,50
+181100,Epic Plague squad,50
+181105,Epic Plague squad,50
+182040,Raid Fear squad,50
+182050,Raid Fear squad,50
+182055,Raid Fear squad,50
+182060,Raid Fear squad,50
+182065,Raid Fear squad,50
+182070,Raid Fear squad,50
+182075,Raid Fear squad,50
+182080,Raid Fear squad,50
+182085,Raid Fear squad,50
+182090,Raid Fear squad,50
+182100,Raid Fear squad,50
+182105,Raid Fear squad,50
+183040,Epic Greed squad,50
+183050,Epic Greed squad,50
+183055,Epic Greed squad,50
+183060,Epic Greed squad,50
+183065,Epic Greed squad,50
+183070,Epic Greed squad,50
+183075,Epic Greed squad,50
+183080,Epic Greed squad,50
+183085,Epic Greed squad,50
+183090,Epic Greed squad,50
+183100,Epic Greed squad,50
+183105,Epic Greed squad,50
+184040,Epic Pyre squad,50
+184050,Epic Pyre squad,50
+184055,Epic Pyre squad,50
+184060,Epic Pyre squad,50
+184065,Epic Pyre squad,50
+184070,Epic Pyre squad,50
+184075,Epic Pyre squad,50
+184080,Epic Pyre squad,50
+184085,Epic Pyre squad,50
+184090,Epic Pyre squad,50
+184100,Epic Pyre squad,50
+184105,Epic Pyre squad,50
+185040,Epic Famine squad,50
+185050,Epic Famine squad,50
+185055,Epic Famine squad,50
+185060,Epic Famine squad,50
+185065,Epic Famine squad,50
+185070,Epic Famine squad,50
+185075,Epic Famine squad,50
+185080,Epic Famine squad,50
+185085,Epic Famine squad,50
+185090,Epic Famine squad,50
+185100,Epic Famine squad,50
+185105,Epic Famine squad,50
+186040,Epic Insanity squad,50
+186050,Epic Insanity squad,50
+186055,Epic Insanity squad,50
+186060,Epic Insanity squad,50
+186065,Epic Insanity squad,50
+186070,Epic Insanity squad,50
+186075,Epic Insanity squad,50
+186080,Epic Insanity squad,50
+186085,Epic Insanity squad,50
+186090,Epic Insanity squad,50
+186100,Epic Insanity squad,50
+186105,Epic Insanity squad,50
+187040,Epic Death squad,50
+187050,Epic Death squad,50
+187055,Epic Death squad,50
+187060,Epic Death squad,50
+187065,Epic Death squad,50
+187070,Epic Death squad,50
+187075,Epic Death squad,50
+187080,Epic Death squad,50
+187085,Epic Death squad,50
+187090,Epic Death squad,50
+187100,Epic Death squad,50
+187105,Epic Death squad,50
+200000,,1
+200001,,1
+888000,Taotie,50
+888001,Niu Mo,50
+888002,Yogwai,0
+889000,Gnawtooth,50
+889001,Lord Slime,50
+8888000,Shuten Doji,50
+8888001,Kasambo,50
+8889000,Baron Candlemourn,50
+8889001,Jack Reaper,50
+8890000,"Argrimor, the Ice Colossus",50
+8890001,Frozen Queen,50

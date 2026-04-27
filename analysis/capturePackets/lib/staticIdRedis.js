@@ -33,8 +33,8 @@ async function init() {
       const pipeline = r.pipeline()
       for (const [id, entry] of Object.entries(data)) {
         const cleanEntry = {}
-        if (entry.staticId !== undefined) cleanEntry.staticId = entry.staticId.toString()
-        if (entry.entryType !== undefined) cleanEntry.entryType = entry.entryType
+        // if (entry.staticId !== undefined) cleanEntry.staticId = entry.staticId.toString()
+        // if (entry.entryType !== undefined) cleanEntry.entryType = entry.entryType
         if (entry.name !== undefined) cleanEntry.name = entry.name
         if (entry.level !== undefined) cleanEntry.level = entry.level?.toString() || ''
 
@@ -57,8 +57,8 @@ async function getStaticIdData(staticId) {
   const data = await r.hgetall(`${PREFIX}${staticId}`)
   if (!data || Object.keys(data).length === 0) return null
   return {
-    staticId: parseInt(data.staticId || staticId),
-    entryType: data.entryType || null,
+    // staticId: parseInt(data.staticId || staticId),
+    // entryType: data.entryType || null,
     name: data.name || null,
     level: data.level != null && data.level !== '' ? parseInt(data.level) : null
   }
@@ -70,7 +70,7 @@ async function addOrUpdateStaticId(staticId, data) {
   const exists = await r.exists(key)
 
   const updates = {}
-  if (data.entryType !== undefined && data.entryType !== null) updates.entryType = data.entryType
+  // if (data.entryType !== undefined && data.entryType !== null) updates.entryType = data.entryType
   if (data.name !== undefined && data.name !== null) updates.name = data.name
   if (data.level !== undefined && data.level !== null) updates.level = data.level.toString()
 
@@ -85,8 +85,8 @@ async function addOrUpdateStaticId(staticId, data) {
     } else {
       await r.hset(key, updates)
       await r.sadd(INDEX_KEY, staticId.toString())
-      const entryType = updates.entryType || data.entryType || 'unknown'
-      console.log(`[StaticIdRedis] New staticId: ${staticId} (${entryType})`)
+      // const entryType = updates.entryType || data.entryType || 'unknown'
+      console.log(`[StaticIdRedis] New staticId: ${staticId}`)
     }
   }
 }
@@ -110,8 +110,8 @@ async function getStaticIdValues() {
     .map(([err, data], i) => {
       if (err || !data || Object.keys(data).length === 0) return null
       return {
-        staticId: parseInt(ids[i]),
-        entryType: data.entryType || null,
+        // staticId: parseInt(ids[i]),
+        // entryType: data.entryType || null,
         name: data.name || null,
         level: data.level != null && data.level !== '' ? parseInt(data.level) : null
       }
@@ -142,8 +142,8 @@ async function dump() {
     if (err || !fields || Object.keys(fields).length === 0) continue
 
     data[ids[i]] = {
-      staticId: parseInt(ids[i]),
-      entryType: fields.entryType || null,
+      // staticId: parseInt(ids[i]),
+      // entryType: fields.entryType || null,
       name: fields.name || null,
       level: fields.level != null && fields.level !== '' ? parseInt(fields.level) : null
     }
