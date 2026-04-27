@@ -200,7 +200,12 @@
 
     <div class="panel">
       <div>
-        <input type="text" style="width: 100px" id="defaultKingdom" />
+        <input
+          type="text"
+          style="width: 100px"
+          id="defaultKingdom"
+          onchange="saveValue(this.value, 'defaultKingdom')"
+        />
         <button type="button" id="btnSetDefaultKingdom">Set default kingdom</button>
       </div>
       <div>
@@ -261,7 +266,13 @@
     <div class="panel">
       <div class="panel-header">Other Kingdoms Scanner</div>
       <div class="controls" style="padding: 15px">
-        <input type="text" id="otherKingdoms" placeholder="147,142,143" style="width: 250px" />
+        <input
+          type="text"
+          id="otherKingdoms"
+          onchange="saveValue(this.value, 'otherKingdoms')"
+          placeholder="147,142,143"
+          style="width: 250px"
+        />
 
         <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
         <button id="btnScanOtherKingdomsNow">Scan Now</button>
@@ -276,7 +287,13 @@
 
     <div class="panel">
       <div class="controls" style="padding: 15px">
-        <input type="text" id="otherKingdoms2" placeholder="147,142,143" style="width: 250px" />
+        <input
+          type="text"
+          id="otherKingdoms2"
+          onchange="saveValue(this.value, 'otherKingdoms2')"
+          placeholder="147,142,143"
+          style="width: 250px"
+        />
 
         <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
         <button id="btnScanOtherKingdomsNow2">Scan Now</button>
@@ -503,7 +520,30 @@
           log('Error: ' + data.error)
         }
       })
+
       //set default kingom
+      function saveValue(val, key) {
+        localStorage.setItem(key, val)
+      }
+
+      window.onload = function () {
+        const defaultKingdom = localStorage.getItem('defaultKingdom')
+        if (defaultKingdom) {
+          document.getElementById('defaultKingdom').value = defaultKingdom
+        }
+
+        const otherKingdoms = localStorage.getItem('otherKingdoms')
+        if (otherKingdoms) {
+          document.getElementById('otherKingdoms').value = otherKingdoms
+        }
+
+        const otherKingdoms2 = localStorage.getItem('otherKingdoms2')
+        if (otherKingdoms2) {
+          document.getElementById('otherKingdoms2').value = otherKingdoms2
+        }
+      }
+      // document.getElementById('defaultKingdom').addEventListener('change',()=>{
+      // })
       document.getElementById('btnSetDefaultKingdom').addEventListener('click', async () => {
         const kingdom = document.getElementById('defaultKingdom').value
         console.log('front kingdom val', kingdom)
