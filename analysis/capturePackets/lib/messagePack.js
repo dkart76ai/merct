@@ -1,13 +1,20 @@
 const { styleText } = require('node:util')
-
+const path = require('path')
 const { MsgPackTurboDecoder, MsgPackLazyDecoder, MsgPackTurboEncoder } = require('message-pack')
-
+const { createStream } = require('rotating-file-stream')
 // class MsgPackGame extends MsgPackLazyDecoder {
 
 // }
 // Capture error: MsgPackLazyDecoder is not a constructor
 
 let decoder = null
+// const LOGS_DIR = path.join(__dirname, 'logs')
+// const logStream = createStream('static400.bin', {
+//   size: '2M', // Rota cada 10MB para que sean fáciles de descargar
+//   interval: '5m', // O cada día
+//   path: LOGS_DIR
+// })
+// let counter = 0
 
 function getDecoder(buffer) {
   if (decoder) {
@@ -522,26 +529,30 @@ function _extractObj42Data(decoder) {
   decoder.readArrayHeader()
 
   // [0] ID de objeto (Está en un array de 1)
-  decoder.readArrayHeader()
+  decoder.readArrayHeader() // ["1189748226882n"]
   const objectId = decoder.decode()
 
   //[1]
   decoder.skip() // salta el [0]
+  //  decoder.readArrayHeader()
+  // const coso1 = decoder.decode()
 
   // [2] otro ID (Está en un array de 1)
-  decoder.readArrayHeader()
+  decoder.readArrayHeader() //["1189706126942n"]
   const unknownId1 = decoder.decode()
 
   // [3] staticId
-  const staticId = decoder.decode()
+  const staticId = decoder.decode() //2
 
   // [4] clan ID de objeto (Está en un array de 1)
-  decoder.readArrayHeader()
+  decoder.readArrayHeader() // ["1206885810227n"],
   const clanId = decoder.decode()
 
   // [5] al [6] No nos interesan (0, 325636)
   decoder.skip() // salta el 0
   decoder.skip() // salta el 325636
+  // const coso5 = decoder.decode()
+  // const coso6 = decoder.decode()
 
   // [7] kingdom
   const kingdom = decoder.decode() //277
@@ -552,6 +563,11 @@ function _extractObj42Data(decoder) {
   decoder.skip()
   decoder.skip()
   decoder.skip()
+  // const coso8 = decoder.decode()
+  // const coso9 = decoder.decode()
+  // const coso10 = decoder.decode()
+  // const coso11= decoder.decode()
+  // const coso12 = decoder.decode()
 
   // [13] level
   const level = decoder.decode() //29
@@ -560,6 +576,9 @@ function _extractObj42Data(decoder) {
   decoder.skip()
   decoder.skip()
   decoder.skip()
+  // const coso14 = decoder.decode()
+  // const coso15 = decoder.decode()
+  // const coso16 = decoder.decode()
 
   // [17] Posición [kingdom, x, y]
   decoder.readArrayHeader()
@@ -641,6 +660,17 @@ function scanPacket312(buffer) {
     decoder.off = startOfEntry + 1
   }
 
+  // temp code to save packet if staticid 400 in it
+  // to check if there are a way to know what % remain/progress it have
+  // const shouldSave = results.objects12.some(obj => obj.staticId === 400)
+  // const separator = new Int8Array(10)
+  // separator.fill(11)
+
+  // if (shouldSave && counter < 20) {
+  //   logStream.write(decoder.buf)
+  //   logStream.write(separator)
+  //   counter++
+  // }
   return results
 }
 

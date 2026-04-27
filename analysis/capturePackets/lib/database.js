@@ -26,6 +26,7 @@ function initDb() {
       kingdom INTEGER,
       x INTEGER,
       y INTEGER,
+      timestamp INTEGER,
       firstSeenAt INTEGER,
       lastSeenAt INTEGER,
       seenCount INTEGER DEFAULT 1,
@@ -91,8 +92,8 @@ function saveObject(obj) {
     database
       .prepare(
         `
-      INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y, firstSeenAt, lastSeenAt, seenCount, warning, data)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
+      INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y,timestamp, firstSeenAt, lastSeenAt, seenCount, warning, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
     `
       )
       .run(
@@ -103,6 +104,7 @@ function saveObject(obj) {
         obj.kingdom,
         obj.x,
         obj.y,
+        obj.timestamp,
         now,
         now,
         JSON.stringify(obj)
@@ -124,8 +126,8 @@ function saveObjects(objects) {
   console.log('[DB] Saving object, db:', DB_FILE)
   const database = getDb()
   const insert = database.prepare(`
-    INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y, firstSeenAt, lastSeenAt, seenCount, warning, data)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
+    INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y, timestamp, firstSeenAt, lastSeenAt, seenCount, warning, data)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
   `)
 
   const update = database.prepare(`
@@ -159,6 +161,7 @@ function saveObjects(objects) {
           obj.kingdom,
           obj.x,
           obj.y,
+          obj.timestamp,
           now,
           now,
           JSON.stringify(obj)

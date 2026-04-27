@@ -60,29 +60,44 @@ class TimerManager {
 
       // En la nueva API, solo necesitas el ID del scheduler
       await this.queue.removeJobScheduler(timerKey)
+      this.timers.delete(timerKey)
       console.log(`[Timer] Stopped: ${timerKey}`)
     } catch (e) {
       console.error(`[Timer] Error in Redis for ${timerKey}:`, e.message)
     }
 
-    this.timers.delete(timerKey)
     return true
   }
 
   //updated
   async stopAll() {
-    // 1. Detener los programadores conocidos en el Map local
-    const keys = Array.from(this.timers.keys())
-    await Promise.all(keys.map(key => this.stopByKey(key)))
-
-    // 2. Limpieza de seguridad para schedulers en Redis (incluso los no registrados localmente)
-    // getJobSchedulers devuelve la lista de programadores configurados
+    // 1. Obtener todos los schedulers configurados en la cola
     const schedulers = await this.queue.getJobSchedulers()
 
-    await Promise.all(schedulers.map(s => this.queue.removeJobScheduler(s.id)))
+    for (const scheduler of schedulers) {
+      // 2. Eliminar el programador usando su ID (el timerKey que definiste)
+      await this.queue.removeJobScheduler(scheduler.key)
 
-    this.timers.clear()
-    console.log('[Timer] All schedulers stopped and cleared.')
+      // 3. (Opcional) Limpiar tu mapa local de timers
+      this.timers.delete(scheduler.key)
+
+      console.log(`[Timer] Stopped Scheduler: ${scheduler.key}`)
+    }
+
+    // 4. Limpiar trabajos que ya fueron creados por el scheduler pero siguen en espera
+    // Los schedulers generan trabajos con IDs que suelen empezar con "repeat:"
+    const delayedJobs = await this.queue.getJobs(['delayed', 'waiting'])
+
+    for (const job of delayedJobs) {
+      if (job.id && job.id.includes('repeat:')) {
+        await job.remove()
+      }
+    }
+
+    // 2. ¡CRUCIAL! Eliminar los trabajos que ya están programados en Redis
+    // Esto limpia los trabajos en estado 'delayed' (esperando su turno)
+    // y 'waiting' (listos para ejecutarse)
+    await this.queue.drain(true)
   }
 
   //updated

@@ -387,10 +387,15 @@ async function extractChatStaticIds(msgData) {
       for (const key in data.subs) {
         const sub = data.subs[key]
         if (sub.staticId && sub.entryType) {
-          await staticIdRedis.addOrUpdateStaticId(sub.staticId, {
-            entryType: sub.entryType,
-            name: sub.name || null
-          })
+          const known = staticIdRedis.getStaticIdData(sub.staticId)
+
+          if (!known.entryType || !known.name) {
+            await staticIdRedis.addOrUpdateStaticId(sub.staticId, {
+              entryType: sub.entryType,
+              name: sub.name || null
+            })
+            console.log('updating ', sub.staticId, sub.name)
+          }
         }
       }
     }
@@ -786,6 +791,13 @@ app.get('/api/jobs/:jobId', async (req, res) => {
   }
 })
 
+app.post('/api/timer/stop-all', async (req, res) => {
+  const timerManager = await getTimerManager()
+
+  await timerManager.stopAll()
+  res.json({ success: true, message: 'All timers stopped' })
+})
+
 app.get('/api/timers', async (req, res) => {
   const timerManager = await getTimerManager()
 
@@ -794,9 +806,13 @@ app.get('/api/timers', async (req, res) => {
 })
 
 app.post('/api/objects/find-and-notify', async (req, res) => {
-  const { staticId, level, amount = 10, notificationConfig } = req.body
+  const { staticId, level, amount = 10 } = req.body
 
-  const result = findObjects({ staticId, level, amount })
+  const nStaticId = parseInt(staticId)
+  const nLevel = parseInt(level)
+  const nAmount = parseInt(amount)
+
+  const result = findObjects({ staticId: nStaticId, level: nLevel, amount: nAmount })
 
   if (result.objects.length > 0) {
     await addJob(JOB_TYPES.NOTIFICATION, {
@@ -805,9 +821,10 @@ app.post('/api/objects/find-and-notify', async (req, res) => {
       objects: result.objects,
       searchCriteria: { staticId, level, amount }
     })
+    res.json({ success: true, ...result, notified: result.objects.length > 0 })
+  } else {
+    res.json({ success: true, found: 0, notified: false })
   }
-
-  res.json({ success: true, ...result, notified: result.objects.length > 0 })
 })
 
 // async (req, res) => {
@@ -926,7 +943,7 @@ async function main() {
   // console.log('staticid', Object.keys(staticIdDB))
   // console.log(
   //   'test staticid getter',
-  //   staticIdDB.getStaticIdData(1531),
+  //   staticIdRedis.getStaticIdData(1531),
   //   'Escuadrón común de elfos lvl30'
   // )
 
