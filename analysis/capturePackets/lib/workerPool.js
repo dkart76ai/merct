@@ -36,7 +36,7 @@ function getPool() {
         })
 
         pool.on('message', msg => {
-          console.log('Mensaje recibido del worker:', msg)
+          // console.log('Mensaje recibido del worker:', msg)
           // Aquí verás: { coords: { k: o.kingdom, x: o.x, y: o.y }, staticId: o.staticId }
           if (msg.cmd === 'merc') {
             //creae a merc queue pool for mercs into game chat

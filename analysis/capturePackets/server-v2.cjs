@@ -289,7 +289,7 @@ app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
         kingdom,
         shouldSaveObjects: false
       }
-      const timerKey = `kingdom-scanner-${kingdom}`
+      const timerKey = `kingdom:${kingdom}`
       await timerManager.scheduleCustom(
         timerKey,
         parseInt(interval),
@@ -331,11 +331,11 @@ app.post('/api/timer/stop-scan-other-kingdoms', async (req, res) => {
 
   try {
     for (const kingdom of kingdomList) {
-      const timerKey = `custom:kingdom-scanner-${kingdom}`
+      const timerKey = `kingdom:${kingdom}`
       await timerManager.stopByKey(timerKey)
     }
 
-    await redisClient.del(SCAN_OTHER_KINGDOMS_KEY)
+    await redisClient.del(SCAN_OTHER_KINGDOMS_KEY + key)
     res.json({ success: true, message: `${kingdoms} Kingdoms scanner stopped` })
   } catch (error) {
     console.log('error', error.message)
@@ -349,7 +349,6 @@ async function handleScanOtherKingdom(req, res) {
   const { kingdoms } = req.body
 
   console.log('kingsomd', req.body)
-  console.log('dsdf', typeof kingdoms)
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
   }
@@ -381,26 +380,17 @@ async function handleScanOtherKingdom(req, res) {
 
 app.post('/api/scan-other-kingdoms-now', handleScanOtherKingdom)
 
-async function extractChatStaticIds(message) {
-  if (!message || typeof message !== 'string') return
-  if (!message.startsWith('MESG')) return
-
+async function extractChatStaticIds(msgData) {
   try {
-    const jsonMatch = message.match(/MESG(\{.*\})/)
-    if (!jsonMatch) return
-
-    const msgData = JSON.parse(jsonMatch[1])
-    if (msgData.data) {
-      const data = JSON.parse(msgData.data)
-      if (data.subs) {
-        for (const key in data.subs) {
-          const sub = data.subs[key]
-          if (sub.staticId && sub.entryType) {
-            await staticIdRedis.addOrUpdateStaticId(sub.staticId, {
-              entryType: sub.entryType,
-              name: sub.name || null
-            })
-          }
+    const data = JSON.parse(msgData)
+    if (data.subs) {
+      for (const key in data.subs) {
+        const sub = data.subs[key]
+        if (sub.staticId && sub.entryType) {
+          await staticIdRedis.addOrUpdateStaticId(sub.staticId, {
+            entryType: sub.entryType,
+            name: sub.name || null
+          })
         }
       }
     }
@@ -418,13 +408,33 @@ function setupWebsocketListener() {
 
     ws.on('framesent', data => {})
 
-    ws.on('framereceived', data => {
+    ws.on('framereceived', async data => {
       try {
         const text = data.payload.toString('utf8')
         if (text.startsWith('MESG')) {
-          // console.log(`[WS] MESG received: ${text.substring(0, 200)}...`)
-          extractChatStaticIds(text)
-          // if (autoSave) saveChatStaticIds()
+          try {
+            const jsonMatch = text.match(/MESG(\{.*\})/)
+            if (!jsonMatch) return
+
+            const msgData = JSON.parse(jsonMatch[1])
+            const channelUrl = msgData.channel_url
+            const channelType = msgData.channel_type
+            const message = msgData.message
+            if (msgData.data) {
+              extractChatStaticIds(msgData.data)
+            }
+            const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
+            const validChannels = [activeChatChannel, CHAT_CHANNEL_URL].filter(Boolean)
+            if (validChannels.includes(channelUrl)) {
+              // message from chat channel registered
+              console.log(`📨 Chat message from ${channelUrl}: ${message}`)
+              if (message.startsWith('@find')) {
+                const [command, amount, objectType, level] = message.split(' ')
+              }
+            }
+          } catch (e) {
+            console.error('[websocket] Error: parsing data', e.message)
+          }
         }
       } catch (e) {}
     })
@@ -478,15 +488,6 @@ async function patchSendbird() {
         'var SendBirdHelper = window.SendBirdHelper = {'
       )
 
-      body = body.replace(
-        'SendBirdHelper.callDataHandler("OnMessageReceived", data)',
-        `SendBirdHelper.callDataHandler("OnMessageReceived", data);
-         if (typeof window.onCommandFound === 'function') {
-           window.onCommandFound(data)
-         }
-           `
-      )
-      console.log('bodytriump', body)
       await route.fulfill({ response, body })
       console.log(`  🔧 Triumph.framework.js patched`)
     } catch (e) {
@@ -504,8 +505,8 @@ async function patchSendbird() {
   // pa que quede mejor organizado
   //luego en otra parte, para acceder al objeto window y al metodo sendChatMessage
   //await globalPage.sendChatMessage(url,'msg',{a:1})
-  const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
-  const validChannels = [activeChatChannel, CHAT_CHANNEL_URL].filter(Boolean)
+  // const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
+  // const validChannels = [activeChatChannel, CHAT_CHANNEL_URL].filter(Boolean)
 
   // await page.addInitScript(channels => {
   //   console.log('valid channels setted', channels)

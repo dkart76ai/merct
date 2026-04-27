@@ -17,30 +17,50 @@ class TimerManager {
     })
   }
 
+  //updated
   async scheduleCustom(name, intervalMs, jobType, jobData, options = {}) {
     const timerKey = name.includes(':') ? name : `custom:${name}`
 
-    await this.stopByKey(timerKey) // Evita duplicados
+    // await this.stopByKey(timerKey) // Evita duplicados
 
     const repeat = { every: intervalMs }
 
-    await this.queue.add(jobType, jobData, {
-      ...options,
-      repeat,
-      jobId: timerKey
-    })
+    // await this.queue.add(jobType, jobData, {
+    //   ...options,
+    //   repeat,
+    //   jobId: timerKey
+    // })
+
+    // upsertJobScheduler gestiona internamente la actualización sin duplicados.
+    // 1. ID del programador
+    // 2. Configuración de repetición
+    // 3. Plantilla del trabajo (nombre, datos y opciones)
+    await this.queue.upsertJobScheduler(
+      timerKey,
+      { every: intervalMs },
+      {
+        name: jobType,
+        data: jobData,
+        opts: options
+      }
+    )
 
     this.timers.set(timerKey, { jobName: jobType, repeat, data: jobData })
     console.log(`[Timer] Scheduled: ${timerKey}`)
   }
 
+  //updated
   async stopByKey(timerKey) {
     const timer = this.timers.get(timerKey)
     if (!timer) return false
 
     try {
       // Borrado exacto en BullMQ
-      await this.queue.removeRepeatable(timer.jobName, timer.repeat, timerKey)
+      // await this.queue.removeRepeatable(timer.jobName, timer.repeat, timerKey)
+
+      // En la nueva API, solo necesitas el ID del scheduler
+      await this.queue.removeJobScheduler(timerKey)
+      console.log(`[Timer] Stopped: ${timerKey}`)
     } catch (e) {
       console.error(`[Timer] Error in Redis for ${timerKey}:`, e.message)
     }
@@ -49,28 +69,40 @@ class TimerManager {
     return true
   }
 
+  //updated
   async stopAll() {
+    // 1. Detener los programadores conocidos en el Map local
     const keys = Array.from(this.timers.keys())
     await Promise.all(keys.map(key => this.stopByKey(key)))
 
-    // Limpieza de seguridad para jobs que no estén en el Map local
-    const redisJobs = await this.queue.getRepeatableJobs()
-    await Promise.all(redisJobs.map(j => this.queue.removeRepeatableByKey(j.key)))
+    // 2. Limpieza de seguridad para schedulers en Redis (incluso los no registrados localmente)
+    // getJobSchedulers devuelve la lista de programadores configurados
+    const schedulers = await this.queue.getJobSchedulers()
+
+    await Promise.all(schedulers.map(s => this.queue.removeJobScheduler(s.id)))
 
     this.timers.clear()
+    console.log('[Timer] All schedulers stopped and cleared.')
   }
 
+  //updated
   async purgeEverything() {
     await this.stopAll() // Primero detenemos los cronómetros
 
     // Borra el historial de jobs terminados, fallidos y en espera
     await Promise.all([
-      this.queue.clean(0, 1000, 'completed'),
-      this.queue.clean(0, 1000, 'failed'),
-      this.queue.drain() // Vacía jobs que estén esperando ejecución ahora mismo
+      this.queue.clean(0, 0, 'completed'),
+      this.queue.clean(0, 0, 'failed'),
+      this.queue.clean(0, 0, 'delayed'), // Importante: los schedulers suelen dejar el próximo job en 'delayed'
+      this.queue.drain(true) // Vacía jobs que estén esperando ejecución ahora mismo
     ])
 
-    console.log('[Timer] Cola purgada completamente.')
+    // 3. Limpieza de compatibilidad (Opcional pero recomendado una sola vez)
+    // Esto borra los jobs repetibles de la API antigua que pudieran seguir vivos
+    const oldRepeatables = await this.queue.getRepeatableJobs()
+    await Promise.all(oldRepeatables.map(job => this.queue.removeRepeatableByKey(job.key)))
+
+    console.log('[Timer] Cola purgada y sincronizada con el nuevo sistema.')
   }
 
   // Helpers rápidos
@@ -86,19 +118,24 @@ class TimerManager {
     return this.stopByKey(key)
   }
 
+  //updated
   async getNextRunTimes() {
-    // 1. Obtenemos todos los cronómetros activos directamente de Redis
-    const repeatableJobs = await this.queue.getJobSchedulers()
+    // 1. Obtenemos los programadores activos (Job Schedulers)
+    const schedulers = await this.queue.getJobSchedulers()
 
-    const schedule = repeatableJobs.map(job => {
+    const schedule = schedulers.map(scheduler => {
+      // BullMQ devuelve el timestamp de la próxima ejecución en 'next'
+      const nextRun = scheduler.next || 0
+
       return {
-        key: job.id,
-        jobName: job.name,
-        nextRunAt: new Date(job.next).toLocaleString(), // Formato legible
-        nextRunTimestamp: job.next,
-        remainingMs: job.next - Date.now(),
-        interval: job.every,
-        data: job.data || {} // Datos que guardamos originalmente
+        key: scheduler.id,
+        jobName: scheduler.name, // Nombre de la tarea (plantilla)
+        nextRunAt: nextRun ? new Date(nextRun).toLocaleString() : 'N/A',
+        nextRunTimestamp: nextRun,
+        remainingMs: nextRun ? Math.max(0, nextRun - Date.now()) : 0,
+        // Los schedulers pueden ser por intervalo (every) o cron (pattern)
+        interval: scheduler.every || scheduler.pattern,
+        data: scheduler.data || {}
       }
     })
 
@@ -106,50 +143,66 @@ class TimerManager {
     return schedule.sort((a, b) => a.nextRunTimestamp - b.nextRunTimestamp)
   }
 
+  //updated
   async getNextScanForKingdom(kingdom) {
     const timerKey = `kingdom:${kingdom}`
     const allJobs = await this.queue.getJobSchedulers()
 
     const job = allJobs.find(j => j.id === timerKey)
 
-    if (!job) return null
+    // Si no hay job o no tiene una próxima ejecución definida
+    if (!job || !job.next) return null
+
+    const nextRunDate = new Date(job.next)
+    const secondsLeft = Math.max(0, Math.round((job.next - Date.now()) / 1000))
 
     return {
       kingdom,
-      nextRun: new Date(job.next),
-      secondsLeft: Math.round((job.next - Date.now()) / 1000)
+      nextRun: nextRunDate,
+      secondsLeft: secondsLeft
     }
   }
 
+  //updated
   async getHealthReport() {
     const jobs = await this.queue.getJobSchedulers()
     const now = Date.now()
+    const TOLERANCE_MS = 5000 // 5 segundos de margen antes de marcarlo como "Lags detected"
 
     return jobs.map(job => {
-      const isOverdue = now > job.next // Esto indicaría que el worker está bloqueado o lento
+      const nextRun = job.next || 0
+      const diff = nextRun - now
+
+      // Si 'next' es menor que 'now' menos la tolerancia, el job debería haber arrancado ya.
+      const isOverdue = nextRun > 0 && now > nextRun + TOLERANCE_MS
+
       return {
         id: job.id,
         name: job.name,
-        interval: job.every,
-        nextRunIn: `${Math.round((job.next - now) / 1000)}s`,
-        status: isOverdue ? 'Lags detected' : 'Healthy'
+        interval: job.every || job.pattern, // Soporta ambos tipos de programación
+        nextRunIn: nextRun > 0 ? `${Math.round(diff / 1000)}s` : 'N/A',
+        status: isOverdue ? 'Lags detected' : 'Healthy',
+        // Añadimos el retraso exacto para debug
+        delay: isOverdue ? `${Math.round((now - nextRun) / 1000)}s` : '0s'
       }
     })
   }
 
   async getActiveTimers() {
-    // 1. Obtenemos todos los cronómetros registrados en Redis
+    // 1. Obtenemos los programadores activos (fuente de verdad en Redis)
     const repeatableJobs = await this.queue.getJobSchedulers()
+    // console.log('RAW DATA FROM REDIS:', JSON.stringify(repeatableJobs, null, 2))
 
     return repeatableJobs.map(job => {
+      // BullMQ guarda la configuración de tiempo en propiedades específicas
+      const frequency = job.every ? `${job.every}ms` : job.pattern
+
       return {
-        id: job.id, // Ej: "kingdom:123" o "custom:mi-tarea"
-        name: job.name, // El JOB_TYPES (ej: SCAN_KINGDOM)
-        interval: s.cron || job.every, // Cada cuántos ms se ejecuta
-        nextRunAt: new Date(job.next).toLocaleString(), // Próxima ejecución legible
-        data: s.data || {}, // Los datos que le pasaste al programarlo
-        key: job.key, // La llave interna de BullMQ (por si quieres borrarla)
-        retries: job.opts?.attempds || 1
+        key: job.key, // El ID único que asignaste (ej: "kingdom:123")
+        name: job.name, // El nombre de la tarea/plantilla
+        interval: frequency, // Valor legible de cada cuánto se ejecuta
+        nextRunAt: job.next ? new Date(job.next).toLocaleString() : 'Never',
+        data: job.template.data || {}
       }
     })
   }
@@ -157,15 +210,20 @@ class TimerManager {
   async rehydrate() {
     console.log('[Timer] Sincronizando timers con Redis...')
 
-    // 1. Obtener todos los trabajos repetibles actuales de la base de datos
-    const repeatableJobs = await this.queue.getJobSchedulers()
+    // 1. Obtener los programadores desde la fuente de verdad (Redis)
+    const schedulers = await this.queue.getJobSchedulers()
 
-    for (const job of repeatableJobs) {
-      // 2. Reconstruimos el Map local
-      // BullMQ guarda la configuración de repetición en el objeto job
+    // Limpiamos el mapa local antes de rehidratar para evitar residuos
+    this.timers.clear()
+
+    for (const job of schedulers) {
+      // 2. Reconstruimos el Map local con el formato correcto
+      // Determinamos si es un intervalo fijo o una expresión cron
+      const repeatConfig = job.every ? { every: job.every } : { pattern: job.pattern }
+
       this.timers.set(job.id, {
         jobName: job.name,
-        repeat: { every: job.every },
+        repeat: repeatConfig,
         data: job.data
       })
     }
