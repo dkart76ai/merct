@@ -34,13 +34,15 @@ services:
       start_period: 10s
 
   redis:
-    image: redis:7-alpine
+    # Cambiamos a redis-stack-server para tener RediSearch
+    image: redis/redis-stack-server:latest
     container_name: playwtb-redis
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
-    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction
+    # El comando cambia ligeramente para mantener tus políticas originales
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "noeviction"]
     restart: unless-stopped
     networks:
       - playwtb-network

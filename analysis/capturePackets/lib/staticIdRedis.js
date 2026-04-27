@@ -22,6 +22,34 @@ const DB_FILE = path.join(__dirname, '..', 'staticId-db.json')
 //   }
 //   return redis
 // }
+async function setupIndex() {
+  const r = getRedis()
+
+  try {
+    // Usamos .call para comandos de módulos externos
+    await r.call(
+      'FT.CREATE',
+      'idx:objetos',
+      'ON',
+      'HASH',
+      'PREFIX',
+      '1',
+      'obj:',
+      'SCHEMA',
+      'name',
+      'TEXT',
+      'level',
+      'NUMERIC'
+    )
+    console.log('Índice RediSearch creado.')
+  } catch (err) {
+    if (err.message.includes('Index already exists')) {
+      console.log('El índice ya existe.')
+    } else {
+      console.error('Error creando índice:', err)
+    }
+  }
+}
 
 async function init() {
   const r = getRedis()
@@ -117,6 +145,32 @@ async function getStaticIdValues() {
       }
     })
     .filter(Boolean)
+}
+
+async function searchByName(queryText) {
+  const r = getRedis()
+  // FT.SEARCH <índice> <consulta>
+  // La consulta "juan*" buscará cualquier nombre que empiece con juan
+  const results = await r.call('FT.SEARCH', 'idx:objetos', `${queryText}*`)
+
+  // ioredis devuelve un array plano: [total, docId1, [campo1, valor1, ...], docId2, ...]
+  return parseSearchResults(results)
+}
+
+// Función auxiliar para limpiar la respuesta de ioredis
+function parseSearchResults(raw) {
+  const [total, ...data] = raw
+  const docs = []
+  for (let i = 0; i < data.length; i += 2) {
+    const id = data[i]
+    const fields = data[i + 1]
+    const obj = { id }
+    for (let j = 0; j < fields.length; j += 2) {
+      obj[fields[j]] = fields[j + 1]
+    }
+    docs.push(obj)
+  }
+  return { total, docs }
 }
 
 async function dump() {
