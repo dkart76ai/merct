@@ -238,8 +238,8 @@ async function close() {
 }
 
 module.exports = {
+  getRedis, // Re-export from redis.js
   setupIndex,
-  getRedis,
   init,
   getStaticIdData,
   addOrUpdateStaticId,

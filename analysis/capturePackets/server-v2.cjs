@@ -964,21 +964,44 @@ app.post('/api/capturing/stop', async (req, res) => {
 async function main() {
   console.log('[Main] Starting server...')
 
-  await ensureSaveDir()
-  // initDb()
-  // await staticIdRedis.setupIndex()
-  // await staticIdRedis.init()
-  // startCleanup()
+  // Wait for Redis to be ready first
+  console.log('[Main] Waiting for Redis...')
+  try {
+    await staticIdRedis.getRedis().ping()
+    console.log('[Main] Redis connected')
+  } catch (e) {
+    console.error('[Main] Redis not available:', e.message)
+  }
 
-  // console.log('staticid', Object.keys(staticIdDB))
-  // console.log(
-  //   'test staticid getter',
-  //   staticIdRedis.getStaticIdData(1531),
-  //   'Escuadrón común de elfos lvl30'
-  // )
+  await ensureSaveDir()
+  initDb()
+
+  // Initialize Redis operations sequentially (only after Redis is ready)
+  try {
+    await staticIdRedis.setupIndex()
+    console.log('[Main] StaticId Redis index ready')
+  } catch (e) {
+    console.error('[Main] setupIndex error:', e.message)
+  }
+
+  try {
+    await staticIdRedis.init()
+    console.log('[Main] StaticId Redis data loaded')
+  } catch (e) {
+    console.error('[Main] init error:', e.message)
+  }
+
+  startCleanup()
+
+  // Test static ID lookup (non-blocking)
+  staticIdRedis.getStaticIdData(1531).then(data => {
+    console.log('[Main] StaticId lookup test:', data)
+  }).catch(e => {
+    console.error('[Main] StaticId lookup error:', e.message)
+  })
 
   // Initialize worker pool (non-blocking CPU tasks)
-  // getPool()
+  getPool()
 
   console.log('[Main] Starting BullMQ worker...')
 
