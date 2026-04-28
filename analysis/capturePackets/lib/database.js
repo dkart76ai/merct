@@ -22,6 +22,7 @@ function initDb() {
       key TEXT UNIQUE NOT NULL,
       objectId TEXT,
       staticId INTEGER,
+      name TEXT,
       level INTEGER,
       kingdom INTEGER,
       x INTEGER,
@@ -92,14 +93,15 @@ function saveObject(obj) {
     database
       .prepare(
         `
-      INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y,timestamp, firstSeenAt, lastSeenAt, seenCount, warning, data)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
+      INSERT INTO objects (key, objectId, staticId, name,level, kingdom, x, y,timestamp, firstSeenAt, lastSeenAt, seenCount, warning, data)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
     `
       )
       .run(
         key,
         obj.objectId?.toString() || null,
         obj.staticId,
+        obj.name,
         obj.level,
         obj.kingdom,
         obj.x,
@@ -112,7 +114,9 @@ function saveObject(obj) {
 
     // stats.totalSaved++
     // stats.lastSavedAt = now
-    console.log(`[DB] Saved new object: ${key}, staticId: ${obj.staticId}, level: ${obj.level}`)
+    console.log(
+      `[DB] Saved new object: ${key}, staticId: ${obj.staticId}, name: ${obj.name}, level: ${obj.level}`
+    )
     return { action: 'created', key }
   }
 }
@@ -126,8 +130,8 @@ function saveObjects(objects) {
   console.log('[DB] Saving object, db:', DB_FILE)
   const database = getDb()
   const insert = database.prepare(`
-    INSERT INTO objects (key, objectId, staticId, level, kingdom, x, y, timestamp, firstSeenAt, lastSeenAt, seenCount, warning, data)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
+    INSERT INTO objects (key, objectId, staticId, name, level, kingdom, x, y, timestamp, firstSeenAt, lastSeenAt, seenCount, warning, data)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)
   `)
 
   const update = database.prepare(`
@@ -157,6 +161,7 @@ function saveObjects(objects) {
           key,
           obj.objectId?.toString() || null,
           obj.staticId,
+          obj.name,
           obj.level,
           obj.kingdom,
           obj.x,
@@ -182,7 +187,7 @@ function saveObjects(objects) {
 }
 
 function findObjects(query) {
-  const { staticId, level, amount = 10, withWarning = false } = query
+  const { staticId, name, level, amount = 10 } = query
 
   const database = getDb()
   let sql = 'SELECT * FROM objects WHERE 1=1'
@@ -193,14 +198,14 @@ function findObjects(query) {
     params.push(staticId)
   }
 
+  if (name !== undefined) {
+    sql += ' AND name = ?'
+    params.push(name)
+  }
+
   if (level !== undefined) {
     sql += ' AND level = ?'
     params.push(level)
-  }
-
-  if (withWarning !== undefined) {
-    sql += ' AND warning = ?'
-    params.push(withWarning ? 1 : 0)
   }
 
   sql += ' ORDER BY lastSeenAt DESC LIMIT ?'
