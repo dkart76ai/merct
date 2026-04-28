@@ -63,8 +63,8 @@ async function init() {
         const cleanEntry = {}
         // if (entry.staticId !== undefined) cleanEntry.staticId = entry.staticId.toString()
         // if (entry.entryType !== undefined) cleanEntry.entryType = entry.entryType
-        if (entry.name !== undefined) cleanEntry.name = entry.name
-        if (entry.level !== undefined) cleanEntry.level = entry.level?.toString() || ''
+        cleanEntry.name = entry.name ?? ''
+        cleanEntry.level = (entry.level ?? 0).toString()
 
         pipeline.hset(`${PREFIX}${id}`, cleanEntry)
         pipeline.sadd(INDEX_KEY, id)
@@ -87,8 +87,8 @@ async function getStaticIdData(staticId) {
   return {
     // staticId: parseInt(data.staticId || staticId),
     // entryType: data.entryType || null,
-    name: data.name || null,
-    level: data.level != null && data.level !== '' ? parseInt(data.level) : null
+    name: data.name || '',
+    level: parseInt(data.level) || 0
   }
 }
 
@@ -140,8 +140,8 @@ async function getStaticIdValues() {
       return {
         // staticId: parseInt(ids[i]),
         // entryType: data.entryType || null,
-        name: data.name || null,
-        level: data.level != null && data.level !== '' ? parseInt(data.level) : null
+        name: data.name || '',
+        level: parseInt(data.level) || 0
       }
     })
     .filter(Boolean)
@@ -210,8 +210,8 @@ async function dump() {
     data[ids[i]] = {
       // staticId: parseInt(ids[i]),
       // entryType: fields.entryType || null,
-      name: fields.name || null,
-      level: fields.level != null && fields.level !== '' ? parseInt(fields.level) : null
+      name: fields.name || '',
+      level: parseInt(data.level) || 0
     }
     count++
   }
