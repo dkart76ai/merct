@@ -15,17 +15,13 @@ const { createStream } = require('rotating-file-stream')
 const msgpack = require('@msgpack/msgpack')
 const {
   addJob,
-  addCritical,
-  addHigh,
-  addNormal,
-  addLow,
-  addJobAndWait,
+
   getTimerManager,
-  startWorker,
-  stopWorker,
+  initializeWorkers,
+  stopWorkers,
   cleanOldJobs,
   getQueueStatus,
-  getJob,
+
   closeQueue,
   JOB_TYPES,
   PRIORITY
@@ -33,14 +29,12 @@ const {
 const { getPool, processPacket, scanKingdom } = require('./lib/workerPool.js')
 
 const staticIdRedis = require('./lib/staticIdRedis.js')
+const chatChannels = require('./lib/chatChannels.js')
 const { setChatPage, getChatPage, sendMessage, notifyDiscord } = require('./jobs/chatSender.js')
 const {
   scanKingdomHandler,
-  // extractObjectsHandler,
-  // saveObjectsHandler,
   findObjectsHandler,
   notificationHandler
-  // processPacketHandler
 } = require('./jobs/handlers/index.js')
 
 const {
@@ -204,29 +198,29 @@ async function ensureSaveDir() {
   }
 }
 
-async function extractChatStaticIds(msgData) {
-  try {
-    const data = JSON.parse(msgData)
-    if (data.subs) {
-      for (const key in data.subs) {
-        const sub = data.subs[key]
-        if (sub.staticId && sub.entryType) {
-          const known = staticIdRedis.getStaticIdData(sub.staticId)
+// async function extractChatStaticIds(msgData) {
+//   try {
+//     const data = JSON.parse(msgData)
+//     if (data.subs) {
+//       for (const key in data.subs) {
+//         const sub = data.subs[key]
+//         if (sub.staticId && sub.entryType) {
+//           const known = staticIdRedis.getStaticIdData(sub.staticId)
 
-          if (!known.entryType || !known.name) {
-            await staticIdRedis.addOrUpdateStaticId(sub.staticId, {
-              entryType: sub.entryType,
-              name: sub.name || null
-            })
-            console.log('updating ', sub.staticId, sub.name)
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.error('[extractChatStaticIds] Error: parsing data', e.message)
-  }
-}
+//           if (!known.entryType || !known.name) {
+//             await staticIdRedis.addOrUpdateStaticId(sub.staticId, {
+//               // entryType: sub.entryType,
+//               name: sub.name || null
+//             })
+//             console.log('updating ', sub.staticId, sub.name)
+//           }
+//         }
+//       }
+//     }
+//   } catch (e) {
+//     console.error('[extractChatStaticIds] Error: parsing data', e.message)
+//   }
+// }
 
 function setupWebsocketListener() {
   if (!page) return
@@ -375,6 +369,10 @@ async function patchSendbird() {
   //await globalPage.sendChatMessage(url,'msg',{a:1})
   // const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
   // const validChannels = [activeChatChannel, CHAT_CHANNEL_URL].filter(Boolean)
+
+  await page.addInitScript(() => {
+    window.log = console.log
+  })
 
   // await page.addInitScript(channels => {
   //   console.log('valid channels setted', channels)
@@ -783,34 +781,7 @@ app.get('/api/jobs/status', async (req, res) => {
   try {
     const status = await getQueueStatus()
 
-    res.json({ success: true, ...status })
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message })
-  }
-})
-
-app.get('/api/jobs/:jobId', async (req, res) => {
-  try {
-    const job = await getJob(req.params.jobId)
-    if (job) {
-      const state = await job.getState()
-      res.json({
-        success: true,
-        job: {
-          id: job.id,
-          name: job.name,
-          data: job.data,
-          state,
-          progress: job.progress,
-          attemptsMade: job.attemptsMade,
-          failedReason: job.failedReason,
-          finishedOn: job.finishedOn,
-          processedOn: job.processedOn
-        }
-      })
-    } else {
-      res.status(404).json({ success: false, error: 'Job not found' })
-    }
+    res.json({ success: true, status })
   } catch (error) {
     res.status(500).json({ success: false, error: error.message })
   }
@@ -946,6 +917,39 @@ app.post('/api/browser/stop', async (req, res) => {
   }
 })
 
+// Chat Channels API
+app.get('/api/channels', async (req, res) => {
+  try {
+    const channels = await chatChannels.getChannels()
+    res.json({ success: true, channels })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+app.post('/api/channels', async (req, res) => {
+  try {
+    const { name, channelUrl } = req.body
+    if (!name || !channelUrl) {
+      return res.status(400).json({ success: false, error: 'name and channelUrl required' })
+    }
+    const channels = await chatChannels.addChannel({ name, channelUrl })
+    res.json({ success: true, channels })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+app.delete('/api/channels/:index', async (req, res) => {
+  try {
+    const { index } = req.params
+    const channels = await chatChannels.removeChannel(index)
+    res.json({ success: true, channels })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
 app.post('/api/capturing/start', async (req, res) => {
   if (!browser || !page) {
     return res.status(400).json({ success: false, error: 'Browser not running' })
@@ -994,24 +998,28 @@ async function main() {
   startCleanup()
 
   // Test static ID lookup (non-blocking)
-  staticIdRedis.getStaticIdData(1531).then(data => {
-    console.log('[Main] StaticId lookup test:', data)
-  }).catch(e => {
-    console.error('[Main] StaticId lookup error:', e.message)
-  })
+  staticIdRedis
+    .getStaticIdData(1531)
+    .then(data => {
+      console.log('[Main] StaticId lookup test:', data)
+    })
+    .catch(e => {
+      console.error('[Main] StaticId lookup error:', e.message)
+    })
 
   // Initialize worker pool (non-blocking CPU tasks)
   getPool()
 
   console.log('[Main] Starting BullMQ worker...')
 
-  const handlers = {
-    [JOB_TYPES.SCAN_KINGDOM]: scanKingdomHandler,
-    [JOB_TYPES.FIND_OBJECTS]: findObjectsHandler,
-    [JOB_TYPES.NOTIFICATION]: notificationHandler
-  }
+  // const handlers = {
+  //   [JOB_TYPES.SCAN_KINGDOM]: scanKingdomHandler,
+  //   [JOB_TYPES.FIND_OBJECTS]: findObjectsHandler,
+  //   [JOB_TYPES.NOTIFICATION]: notificationHandler
+  // }
 
   // await startWorker(handlers)
+  initializeWorkers()
 
   const server = app.listen(PORT, () => {
     console.log(`[Main] Server running on http://localhost:${PORT}`)
@@ -1026,16 +1034,19 @@ async function main() {
     console.log('  POST /api/browser/start - Start browser')
     console.log('  POST /api/browser/stop - Stop browser')
     console.log('  POST /api/capturing/start - Start packet capture')
+    console.log('  GET  /api/channels - Get chat channels')
+    console.log('  POST /api/channels - Add chat channel')
+    console.log('  DELETE /api/channels/:index - Remove chat channel')
 
     // notifyDiscord('٩(̾●̮̮̃̾•̃̾)۶') //┌∩┐(◣_◢)┌∩┐
-    // sendMessage('٩(̾●̮̮̃̾•̃̾)۶') // ۜ\(סּںסּَ` )/ۜ
+    // sendMessage(CHAT_CHANNEL_URL,'٩(̾●̮̮̃̾•̃̾)۶') // ۜ\(סּںסּَ` )/ۜ
   })
 
   process.on('SIGINT', async () => {
     console.log('\n[Main] Shutting down...')
-    await staticIdRedis.dump()
-    await staticIdRedis.close()
-    await stopWorker()
+    // await staticIdRedis.dump()
+    //await staticIdRedis.close()
+    await stopWorkers()
     await cleanOldJobs()
     console.log('[Main] Cleaning Redis...')
     await closeQueue()
@@ -1046,9 +1057,9 @@ async function main() {
 
   process.on('SIGTERM', async () => {
     console.log('\n[Main] Shutting down...')
-    await staticIdRedis.dump()
-    await staticIdRedis.close()
-    await stopWorker()
+    // await staticIdRedis.dump()
+    //await staticIdRedis.close()
+    await stopWorkers()
     await cleanOldJobs()
     console.log('[Main] Cleaning Redis...')
     await closeQueue()

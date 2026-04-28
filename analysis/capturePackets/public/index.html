@@ -212,10 +212,25 @@
         <select id="gameChatChannelList">
           <option value="none" disabled>None</option>
         </select>
-        <button type="button" id="btnSetChatChannel">Set Channel</button>
+        <button type="button" id="btnSetChatChannel">Set Chat Channel</button>
         <button id="btnRefreshChatChannels" style="padding: 5px 10px; font-size: 12px">
           Refresh
         </button>
+      </div>
+
+      <!-- Chat Channels Management -->
+      <div class="panel" style="margin-top: 10px">
+        <div class="panel-header">Chat Channels for mercs</div>
+        <div class="controls" style="padding: 10px">
+          <select id="newChannelSelect">
+            <option value="">Select channel...</option>
+          </select>
+          <button id="btnAddChatChannel">Add</button>
+          <button id="btnRefreshChatChannel">Refresh</button>
+          <div id="chatChannelsList" class="list" style="margin-top: 10px">
+            <div class="list-item">No channels saved</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -388,12 +403,22 @@
       async function refreshJobsStatus() {
         try {
           const res = await fetch(API + '/jobs/status')
+          /*
+          [
+  { "queue": "find-objects", "waiting": 0, "active": 1, "failed": 0, delayed:0,total:0 },
+  { "queue": "notification-discord", "waiting": 45, "active": 2, "failed": 10, delayed:0,total:0 },
+  { "queue": "notification-in-game", "waiting": 0, "active": 0, "failed": 0, delayed:0,total:0 }
+  { "queue": "scan-kingdom", "waiting": 0, "active": 0, "failed": 0, delayed:0,total:0 }
+]
+
+          */
           const data = await res.json()
           if (data.success) {
-            document.getElementById('statWaiting').textContent = data.waiting
-            document.getElementById('statActive').textContent = data.active
-            document.getElementById('statCompleted').textContent = data.completed
-            document.getElementById('statFailed').textContent = data.failed
+            const scanQueue = data.status.filter(q => q.queue === 'scan-kingdom')?.[0] || {}
+            document.getElementById('statWaiting').textContent = scanQueue.waiting || 'no data'
+            document.getElementById('statActive').textContent = scanQueue.active || 'no data'
+            document.getElementById('statCompleted').textContent = scanQueue.completed || 'no data'
+            document.getElementById('statFailed').textContent = scanQueue.failed || 'no data'
           }
         } catch (e) {
           log('Jobs status error: ' + e.message)
@@ -642,8 +667,105 @@
 
       // chat channels
       document.getElementById('btnRefreshChatChannels').addEventListener('click', async () => {
-        getGameChatChannels()
+        await getGameChatChannels()
+        await loadChatChannels()
       })
+
+      // Chat channels management
+      async function loadChatChannels() {
+        try {
+          const res = await fetch(API + '/channels')
+          const data = await res.json()
+          const el = document.getElementById('chatChannelsList')
+          if (data.success && data.channels.length > 0) {
+            el.innerHTML = data.channels
+              .map(
+                (c, i) => `
+              <div class="list-item">
+                <span>${c.name}</span>
+                <span style="color:#ff0000"> : </span>
+                <span style="color:#999">${c.channelUrl}</span>
+                <button onclick="removeChatChannel(${i})" style="padding:2px 5px;font-size:10px;margin-left:5px">Remove</button>
+              </div>
+            `
+              )
+              .join('')
+          } else {
+            el.innerHTML = '<div class="list-item">No channels saved</div>'
+          }
+        } catch (e) {
+          log('Load channels error: ' + e.message)
+        }
+      }
+
+      async function populateChannelSelect() {
+        try {
+          const res = await fetch(API + '/gameChatChannels')
+          const data = await res.json()
+          const select = document.getElementById('newChannelSelect')
+          select.innerHTML = '<option value="">Select channel...</option>'
+          if (data.channels) {
+            data.channels.forEach(c => {
+              const opt = document.createElement('option')
+              opt.value = JSON.stringify({ name: c._name, channelUrl: c._url })
+              opt.text = c._name
+
+              select.appendChild(opt)
+            })
+          }
+        } catch (e) {
+          console.error('Populate select error:', e.message)
+        }
+      }
+
+      window.removeChatChannel = async function (index) {
+        try {
+          const res = await fetch(API + '/channels/' + index, { method: 'DELETE' })
+          const data = await res.json()
+          if (data.success) {
+            loadChatChannels()
+            log('Channel removed')
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+
+      document.getElementById('btnAddChatChannel').addEventListener('click', async () => {
+        const select = document.getElementById('newChannelSelect')
+        const selected = select.value
+        if (!selected || selected === '') {
+          return log('Select a channel')
+        }
+        try {
+          const channelData = JSON.parse(selected)
+          const res = await fetch(API + '/channels', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(channelData)
+          })
+          const data = await res.json()
+          if (data.success) {
+            select.value = ''
+            loadChatChannels()
+            log('Channel added')
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      })
+
+      document.getElementById('btnRefreshChatChannel').addEventListener('click', () => {
+        populateChannelSelect()
+      })
+
+      // Load channels on page load
+      loadChatChannels()
+      populateChannelSelect()
 
       // Job queue handlers
       document.getElementById('btnRefreshJobs').addEventListener('click', async () => {
