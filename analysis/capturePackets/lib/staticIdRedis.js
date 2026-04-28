@@ -158,18 +158,30 @@ async function searchByName(queryText) {
 }
 
 // Función auxiliar para limpiar la respuesta de ioredis
+
 function parseSearchResults(raw) {
   const [total, ...data] = raw
   const docs = []
+
   for (let i = 0; i < data.length; i += 2) {
     const id = data[i]
-    const fields = data[i + 1]
+    const fields = data[i + 1] // Es el array [campo, valor, campo, valor...]
     const obj = { id }
+
     for (let j = 0; j < fields.length; j += 2) {
-      obj[fields[j]] = fields[j + 1]
+      const key = fields[j]
+      const value = fields[j + 1]
+
+      // Convertimos a número si el campo es 'level'
+      if (key === 'level') {
+        obj[key] = Number(value)
+      } else {
+        obj[key] = value
+      }
     }
     docs.push(obj)
   }
+
   return { total, docs }
 }
 
@@ -226,12 +238,14 @@ async function close() {
 }
 
 module.exports = {
+  setupIndex,
   getRedis,
   init,
   getStaticIdData,
   addOrUpdateStaticId,
   getStaticIdSize,
   getStaticIdValues,
+  searchByName,
   dump,
   close
 }

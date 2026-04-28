@@ -414,8 +414,9 @@
                 .map(
                   t => `
                 <div class="list-item">
-                  <span>${t.key}</span> <span>${t.name}</span>
-                  <span style="color:#aabb33">Next run: ${t.nextRunAt}</span>
+                  <span>Kingdom: ${t.kingdom || 'N/A'}</span>
+                  <span>${t.name}</span>
+                  <span style="color:#aabb33">Next: ${t.nextRunAt}</span>
                   <span style="color:#569cd6">${t.interval}</span>
                 </div>
               `

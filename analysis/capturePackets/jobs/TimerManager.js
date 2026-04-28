@@ -211,13 +211,15 @@ class TimerManager {
     return repeatableJobs.map(job => {
       // BullMQ guarda la configuración de tiempo en propiedades específicas
       const frequency = job.every ? `${job.every}ms` : job.pattern
+      const jobData = job.template?.data || {}
 
       return {
-        key: job.key, // El ID único que asignaste (ej: "kingdom:123")
-        name: job.name, // El nombre de la tarea/plantilla
-        interval: frequency, // Valor legible de cada cuánto se ejecuta
+        id: job.id,
+        kingdom: jobData.kingdom || null,
+        name: job.name,
+        interval: frequency,
         nextRunAt: job.next ? new Date(job.next).toLocaleString() : 'Never',
-        data: job.template.data || {}
+        data: jobData
       }
     })
   }

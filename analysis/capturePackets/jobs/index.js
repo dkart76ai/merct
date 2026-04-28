@@ -22,26 +22,38 @@ const PRIORITY = {
 }
 
 function getQueue() {
-  if (!queue) {
-    queue = new Queue(QUEUE_NAME, {
-      connection: getRedis(),
-      defaultJobOptions: {
-        attempts: 2,
-        backoff: {
-          type: 'exponential',
-          delay: 1000
-        },
-        removeOnComplete: {
-          count: 1,
-          age: 1
-        },
-        removeOnFail: {
-          count: 10,
-          age: 300
-        }
+  if (queue) {
+    // Test if connection is still alive
+    try {
+      if (queue.client?.status === 'ready') {
+        return queue
       }
-    })
+    } catch (e) {
+      // Connection test failed, recreate queue
+      console.log('[Queue] Connection closed, recreating...')
+      queue = null
+    }
   }
+  
+  queue = new Queue(QUEUE_NAME, {
+    connection: getRedis(),
+    defaultJobOptions: {
+      attempts: 2,
+      backoff: {
+        type: 'exponential',
+        delay: 1000
+      },
+      removeOnComplete: {
+        count: 1,
+        age: 1
+      },
+      removeOnFail: {
+        count: 10,
+        age: 300
+      }
+    }
+  })
+  
   return queue
 }
 

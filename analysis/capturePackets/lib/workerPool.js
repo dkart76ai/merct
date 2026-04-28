@@ -32,7 +32,12 @@ function getPool() {
           filename: path.join(__dirname, '..', 'workers', 'tasks.js'),
           maxThreads: WORKER_POOL_SIZE,
           name: 'packet-worker',
-          env: { ...process.env, FORCE_COLOR: '1' }
+          env: {
+            ...process.env,
+            FORCE_COLOR: '1',
+            REDIS_HOST: process.env.REDIS_HOST || 'localhost',
+            REDIS_PORT: process.env.REDIS_PORT || '6379'
+          }
         })
 
         pool.on('message', msg => {

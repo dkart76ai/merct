@@ -15,7 +15,7 @@ const staticIdRedis = require('../lib/staticIdRedis')
 const { getRedis } = require('../lib/redis')
 const { saveObjects } = require('../lib/database')
 
-const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
+// const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
 
 //---------------------------------
 // Task handlers for Piscina
