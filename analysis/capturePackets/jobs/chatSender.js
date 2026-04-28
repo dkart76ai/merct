@@ -30,7 +30,8 @@ async function notifyDiscord(msg = '', coord = null) {
     let message = msg
     if (coord) {
       const dbEntry = await staticIdRedis.getStaticIdData(coord.staticId)
-      message = `K:${coord.k} X:${coord.x} Y:${coord.y} ${dbEntry?.name || ''} (${msg})`
+      const extra = msg ? `(${msg})` : ''
+      message = `K:${coord.k} X:${coord.x} Y:${coord.y} ${dbEntry?.name || ''} ${extra}`
     }
     await fetch(DISCORD_WEBHOOK, {
       method: 'POST',
@@ -44,15 +45,8 @@ async function notifyDiscord(msg = '', coord = null) {
   }
 }
 
-async function sendMessage(msg = '', coord = null, staticId = 400) {
-  const redisClient = getRedis()
-  const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
-  if (!activeChatChannel && !channelUrl) {
-    console.log('[ChatSender] No active chat channel')
-    return
-  }
-
-  const chatChannel = activeChatChannel || channelUrl
+async function sendMessage(channelUrl, msg = '', coord = null, staticId = 400) {
+  if (!channelUrl) return
 
   let page = getChatPage()
 
@@ -132,7 +126,7 @@ async function sendMessage(msg = '', coord = null, staticId = 400) {
         return { success: false, error: err.message }
       }
     },
-    { channelUrl: chatChannel, data, message }
+    { channelUrl, data, message }
   )
 }
 

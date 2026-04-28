@@ -1,17 +1,19 @@
 const { Queue, Worker } = require('bullmq')
+
 const { getRedis } = require('../lib/redis')
+const {
+  scanKingdomHandler,
+  findObjectsHandler,
+  discordNotificationHandler,
+  gameNotificationHandler
+} = require('./handlers/index.js')
 
-const QUEUE_NAME = 'playwtb-jobs'
-
-let queue = null
-let worker = null
-let timerManager = null
-
-const JOB_TYPES = {
+const JOB_TYPES = (QUEUE_NAMES = {
   FIND_OBJECTS: 'find-objects',
-  NOTIFICATION: 'notification',
+  NOTIFICATION_DISCORD: 'notification-discord',
+  NOTIFICATION_GAME: 'notification-in-game',
   SCAN_KINGDOM: 'scan-kingdom'
-}
+})
 
 const PRIORITY = {
   CRITICAL: 1,
@@ -21,44 +23,32 @@ const PRIORITY = {
   IDLE: 5
 }
 
-function getQueue() {
-  if (queue) {
-    // Test if connection is still alive
-    try {
-      if (queue.client?.status === 'ready') {
-        return queue
-      }
-    } catch (e) {
-      // Connection test failed, recreate queue
-      console.log('[Queue] Connection closed, recreating...')
-      queue = null
-    }
-  }
-  
-  queue = new Queue(QUEUE_NAME, {
+const queues = {}
+let workerFindObjects = null
+let workerNotificationDiscord = null
+let workerNotificationGame = null
+let workerScanKingdom = null
+let timerManager = null
+
+function getQueue(name) {
+  if (queues[name]) return queues[name]
+
+  queues[name] = new Queue(name, {
     connection: getRedis(),
     defaultJobOptions: {
-      attempts: 2,
-      backoff: {
-        type: 'exponential',
-        delay: 1000
-      },
-      removeOnComplete: {
-        count: 1,
-        age: 1
-      },
-      removeOnFail: {
-        count: 10,
-        age: 300
-      }
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 2000 },
+      removeOnComplete: { count: 50 }, // Mantén un pequeño historial
+      removeOnFail: { count: 100 }
     }
   })
-  
-  return queue
+  console.log(`[QueueManager] Cola "${name}" inicializada.`)
+  return queues[name]
 }
 
-async function addJob(type, data, options = {}) {
-  const q = getQueue()
+// Función genérica para añadir trabajos a CUALQUIER cola
+async function addJob(queueName, jobName, data, opts = {}) {
+  const q = getQueue(queueName)
 
   const jobOptions = {}
 
@@ -78,39 +68,80 @@ async function addJob(type, data, options = {}) {
     jobOptions.repeat = options.repeat
   }
 
-  const job = await q.add(type, data, jobOptions)
-
   console.log(
     `[Queue] Added job ${job.id} (${type}) with priority ${options.priority || PRIORITY.NORMAL}`
   )
 
-  return job
+  return await q.add(jobName, data, jobOptions)
 }
 
-async function addCritical(type, data) {
-  return addJob(type, data, { priority: PRIORITY.CRITICAL })
+//  await addJob(QUEUE_NAMES.DISCORD, 'send-alert', { text: '...' });
+
+async function addScanKingdomJob(data, opts = {}) {
+  addJob(QUEUE_NAMES.SCAN_KINGDOM, JOB_TYPES.SCAN_KINGDOM, data, opts)
+}
+async function addCriticalScanJob(data) {
+  return addScanKingdomJob(data, { priority: PRIORITY.CRITICAL })
 }
 
-async function addHigh(type, data) {
-  return addJob(type, data, { priority: PRIORITY.HIGH })
-}
-async function addNormal(type, data) {
-  return addJob(type, data, { priority: PRIORITY.NORMAL })
+async function addDiscordNotificationJob(data, opts = {}) {
+  addJob(QUEUE_NAMES.NOTIFICATION_DISCORD, JOB_TYPES.NOTIFICATION_DISCORD, data, opts)
 }
 
-async function addLow(type, data) {
-  return addJob(type, data, { priority: PRIORITY.LOW })
+async function addFindObjectsJob(data, opts = {}) {
+  addJob(QUEUE_NAMES.FIND_OBJECTS, JOB_TYPES.FIND_OBJECTS, data, opts)
 }
 
-async function addDelayed(type, data, delayMs) {
-  return addJob(type, data, { priority: PRIORITY.LOW, delay: delayMs })
+async function addGameNotificationJob(data, opts = {}) {
+  addJob(QUEUE_NAMES.NOTIFICATION_GAME, JOB_TYPES.NOTIFICATION_GAME, data, opts)
 }
+
+//--------------------
+function startWorker(queueName, handler, config = {}) {
+  const worker = new Worker(queueName, handler, {
+    connection: getRedis(),
+    concurrency: config.concurrency || 1,
+    limiter: config.limiter // Aquí pones el Rate Limit específico
+  })
+
+  worker.on('completed', (job, err) => {
+    console.log(` [Worker][${queueName}] Job ${job.id} completed successfully`)
+  })
+  worker.on('failed', (job, err) => {
+    console.log(` [Worker][${queueName}] Job ${job.id} failed: ${err.message}`)
+  })
+  worker.on('error', (job, err) => {
+    console.log(` [Worker][${queueName}] Error: ${err.message}`)
+  })
+
+  console.log('[Worker] Started')
+  return worker
+}
+
+/*
+// 1. Worker para Discord (Lento pero seguro)
+startWorker('discord-queue', discordHandler, {
+  concurrency: 2,
+  limiter: { max: 5, duration: 2000 }
+});
+
+// 2. Worker para Telegram (Más permisivo)
+startWorker('telegram-queue', telegramHandler, {
+  concurrency: 5,
+  limiter: { max: 30, duration: 1000 }
+});
+
+// 3. Worker para Escaneos (Pesado, sin rate limit estricto)
+startWorker('scan-queue', scanHandler, {
+  concurrency: 10
+});
+*/
 
 async function getTimerManagerInstance() {
   const { TimerManager } = require('./TimerManager')
 
   if (!timerManager) {
-    const queueInstance = getQueue()
+    const queueInstance = getQueue(QUEUE_NAMES.SCAN_KINGDOM)
     timerManager = new TimerManager(queueInstance)
 
     // Es vital esperar a que se rehidrate antes de empezar a programar nuevos
@@ -120,181 +151,156 @@ async function getTimerManagerInstance() {
   return timerManager
 }
 
-async function startWorker(handlers) {
-  const connection = getRedis()
+function initializeWorkers() {
+  try {
+    // Worker dedicado solo a escanear (Sin limitadores si tu DB lo aguanta)
+    workerScanKingdom = startWorker(QUEUE_NAMES.SCAN_KINGDOM, scanKingdomHandler, {
+      concurrency: 5
+    })
 
-  worker = new Worker(
-    QUEUE_NAME,
-    async job => {
-      console.log(`[Worker] Processing job ${job.id} (${job.name}) priority ${job.priority}`)
-
-      const handler = handlers[job.name]
-      if (!handler) {
-        throw new Error(`No handler registered for job type: ${job.name}`)
+    // Worker de Discord: Lento (Ej: 5 mensajes cada 2 segundos)
+    workerNotificationDiscord = startWorker(
+      QUEUE_NAMES.NOTIFICATION_DISCORD,
+      discordNotificationHandler,
+      {
+        concurrency: 2,
+        limiter: { max: 5, duration: 2000 }
       }
+    )
 
-      const result = await handler(job.data)
+    // Worker   Rápido (Ej: 30 mensajes por segundo)
+    workerNotificationGame = startWorker(QUEUE_NAMES.NOTIFICATION_GAME, gameNotificationHandler, {
+      concurrency: 10,
+      limiter: { max: 30, duration: 1000 }
+    })
 
-      // Process chained jobs if handler returned them
-      if (result && result.nextJobs) {
-        for (const nextJob of result.nextJobs) {
-          await addJob(nextJob.type, nextJob.payload, {
-            priority: nextJob.priority || PRIORITY.NORMAL
-          })
-        }
-      }
-
-      console.log(`[Worker] Job  ${job.name} ${job.id} completed`)
-
-      return result
-    },
-    {
-      connection,
-      concurrency: 5, // process 5 jobs at same time
-      limiter: {
-        max: 10,
-        duration: 1000
-      }
-    }
-  )
-
-  worker.on('completed', job => {
-    console.log(`[Worker] Job ${job.id} completed successfully`)
-  })
-
-  worker.on('failed', (job, err) => {
-    console.error(`[Worker] Job ${job.id} failed:`, err.message)
-  })
-
-  worker.on('error', err => {
-    console.error('[Worker] Error:', err.message)
-  })
-
-  console.log('[Worker] Started')
-
-  return worker
-}
-
-async function stopWorker() {
-  if (worker) {
-    await worker.close()
-    worker = null
-    console.log('[Worker] Stopped')
+    workerFindObjects = startWorker(QUEUE_NAMES.FIND_OBJECTS, findObjectsHandler, {
+      concurrency: 10,
+      limiter: { max: 30, duration: 1000 }
+    })
+  } catch (error) {
+    console.error('❌ Error crítico al iniciar:', error)
+    // process.exit(1);
   }
 }
 
-async function getQueueStatus() {
-  const q = getQueue()
-
-  const [waiting, active, completed, failed, delayed] = await Promise.all([
-    q.getWaitingCount(),
-    q.getActiveCount(),
-    q.getCompletedCount(),
-    q.getFailedCount(),
-    q.getDelayedCount()
-  ])
-
-  return {
-    waiting,
-    active,
-    completed,
-    failed,
-    delayed,
-    total: waiting + active + delayed
+async function stopWorkers() {
+  if (workerScanKingdom) {
+    await workerScanKingdom.close()
+    workerScanKingdom = null
+    console.log('[Worker] workerScanKingdom stoped')
   }
-}
-
-async function getJob(jobId) {
-  const q = getQueue()
-  return q.getJob(jobId)
+  if (workerNotificationDiscord) {
+    await workerNotificationDiscord.close()
+    workerNotificationDiscord = null
+    console.log('[Worker] workerNotificationDiscord stoped')
+  }
+  if (workerNotificationGame) {
+    await workerNotificationGame.close()
+    workerNotificationGame = null
+    console.log('[Worker] workerNotificationGame stoped')
+  }
+  if (workerFindObjects) {
+    await workerFindObjects.close()
+    workerFindObjects = null
+    console.log('[Worker] workerFindObjects stoped')
+  }
 }
 
 async function cleanOldJobs() {
-  const q = getQueue()
+  const Q1 = getQueue(QUEUE_NAME.SCAN_KINGDOM)
   // Clean ALL completed jobs (max 10000, age 0 = all)
-  await q.clean(0, 10000, 'completed')
-  // Clean ALL failed jobs
-  await q.clean(0, 5000, 'failed')
-  console.log('[Queue] Cleaned all completed and failed jobs')
-}
+  await Q1.clean(0, 10000, 'completed')
+  await Q1.clean(0, 5000, 'failed')
+  console.log('[Queue] ScanKingdom Cleaned all completed and failed jobs')
 
-async function addJobAndWait(type, data, options = {}) {
-  const q = getQueue()
+  const Q2 = getQueue(QUEUE_NAME.FIND_OBJECTS)
+  await Q2.clean(0, 10000, 'completed')
+  await Q2.clean(0, 5000, 'failed')
+  console.log('[Queue] FindObjects Cleaned all completed and failed jobs')
 
-  const jobOptions = {}
-  if (options.priority !== undefined) {
-    jobOptions.priority = options.priority
-  }
+  const Q3 = getQueue(QUEUE_NAME.NOTIFICATION_DISCORD)
+  await Q3.clean(0, 10000, 'completed')
+  await Q3.clean(0, 5000, 'failed')
+  console.log('[Queue] NotificationDiscord Cleaned all completed and failed jobs')
 
-  // Don't repeat, we want to wait for this one
-  if (options.delay) {
-    jobOptions.delay = options.delay
-  }
-
-  const job = await q.add(type, data, jobOptions)
-
-  console.log(`[Queue] Added job ${job.id} (${type}), waiting for result...`)
-
-  try {
-    // Wait for job to complete (with timeout)
-    const result = await job.waitUntilFinished(q.eventsEmitter, {
-      timeout: options.timeout || 30000 // 30 second default
-    })
-
-    return {
-      jobId: job.id,
-      success: true,
-      result
-    }
-  } catch (error) {
-    console.error(`[Queue] Job  ${job.name} ${job.id} failed or timed out:`, error.message)
-    return {
-      jobId: job.id,
-      success: false,
-      error: error.message
-    }
-  }
-}
-
-async function pauseQueue() {
-  const q = getQueue()
-  await q.pause()
-  console.log('[Queue] Paused')
-}
-
-async function resumeQueue() {
-  const q = getQueue()
-  await q.resume()
-  console.log('[Queue] Resumed')
+  const Q4 = getQueue(QUEUE_NAME.NOTIFICATION_GAME)
+  await Q4.clean(0, 10000, 'completed')
+  await Q4.clean(0, 5000, 'failed')
+  console.log('[Queue] NofiticationGame Cleaned all completed and failed jobs')
 }
 
 async function closeQueue() {
-  if (queue) {
-    await queue.close()
-    queue = null
-    console.log('[Queue] Closed')
-  }
+  const Q1 = getQueue(QUEUE_NAME.SCAN_KINGDOM)
+  const Q2 = getQueue(QUEUE_NAME.FIND_OBJECTS)
+  const Q3 = getQueue(QUEUE_NAME.NOTIFICATION_DISCORD)
+  const Q4 = getQueue(QUEUE_NAME.NOTIFICATION_GAME)
+
+  await Q1.close()
+  await Q2.close()
+  await Q3.close()
+  await Q4.close()
+  console.log('[Queue] All queues Closed')
 }
 
+async function getQueueStatus() {
+  // Obtenemos los nombres de las colas que definimos antes
+  const statusPromises = Object.values(QUEUE_NAMES).map(async queueName => {
+    const q = getQueue(queueName)
+
+    const [waiting, active, completed, failed, delayed] = await Promise.all([
+      q.getWaitingCount(),
+      q.getActiveCount(),
+      q.getCompletedCount(),
+      q.getFailedCount(),
+      q.getDelayedCount()
+    ])
+
+    return {
+      queue: queueName,
+      waiting,
+      active,
+      completed,
+      failed,
+      delayed,
+      total: waiting + active + delayed
+    }
+  })
+
+  return await Promise.all(statusPromises)
+}
+//------
+// const scanKingdomHandler = async job => {
+//   const result = await doScanLogic(job.data)
+
+//   if (result.foundSomething) {
+//     // Enviar a la cola de Discord (con su propio rate limit)
+//     await addJob(QUEUE_NAMES.DISCORD, 'send-alert', { text: '...' })
+
+//     // Enviar a la cola de Telegram (con su propio rate limit)
+//     await addJob(QUEUE_NAMES.TELEGRAM, 'send-alert', { text: '...' })
+//   }
+// }
+
+// await getQueue('discord-queue').add('notif', { ... });
+// await getQueue('telegram-queue').add('notif', { ... });
+
 module.exports = {
-  getQueue,
-  addJob,
-  addCritical,
-  addHigh,
-  addNormal,
-  addLow,
-  addDelayed,
-  addJobAndWait,
-  getTimerManager: getTimerManagerInstance,
-  startWorker,
-  stopWorker,
-  getQueueStatus,
-  getJob,
-  cleanOldJobs,
-  pauseQueue,
-  resumeQueue,
-  closeQueue,
+  QUEUE_NAMES,
   JOB_TYPES,
   PRIORITY,
-  QUEUE_NAME
+  initializeWorkers,
+  stopWorkers,
+  cleanOldJobs,
+  closeQueue,
+  getQueueStatus,
+  addScanKingdomJob,
+  addCriticalScanJob,
+  addDiscordNotificationJob,
+  addFindObjectsJob,
+  addGameNotificationJob,
+  addCriticalScanJob,
+  addDiscordJob,
+  addTelegramJob,
+  getTimerManager: getTimerManagerInstance
 }

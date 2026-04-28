@@ -2,7 +2,7 @@ const { scanKingdomHandler } = require('./scanKingdom')
 // const { extractObjectsHandler } = require('./extractObjects')
 // const { saveObjectsHandler } = require('./saveObjects')
 const { findObjectsHandler } = require('./findObjects')
-const { notificationHandler } = require('./notification')
+const { discordNotificationHandler } = require('./discordNotification')
 // const { processPacketHandler } = require('./processPacket')
 
 module.exports = {
@@ -10,6 +10,6 @@ module.exports = {
   // extractObjectsHandler,
   // saveObjectsHandler,
   findObjectsHandler,
-  notificationHandler
+  discordNotificationHandler
   // processPacketHandler
 }
