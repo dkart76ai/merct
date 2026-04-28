@@ -121,18 +121,18 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   objects12.forEach(async o => {
     const dbEntry = await staticIdRedis.getStaticIdData(o.staticId)
 
-    const isComplete =
-      dbEntry && dbEntry.name && dbEntry.entryType && dbEntry.level != null && dbEntry.level >= 0
+    const isComplete = dbEntry && dbEntry.name && dbEntry.level != null && dbEntry.level >= 0
 
     // NOTE : dont delete static id updater
     if (!isComplete) {
-      await staticIdRedis.addOrUpdateStaticId(o.staticId, {
-        level: o.level
-      })
+      // await staticIdRedis.addOrUpdateStaticId(o.staticId, {
+      //   level: o.level
+      // })
 
       console.log(
-        `${o.kingdom},${o.x},${o.y} staticid:${o.staticId}, lvl:${dbEntry?.level}-${dbEntry?.name || 'unknown'} level:${o.level}`
+        `[worker-task] found staticid:${o.staticId}, ${o.kingdom},${o.x},${o.y}  level:${o.level}`
       )
+      console.log(`[worker-task] on db  ${dbEntry?.name || 'unknown'} level:${dbEntry.level}`)
 
       parentPort.postMessage({
         cmd: 'sendmsg',
@@ -150,11 +150,34 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
         staticId: o.staticId
       })
     }
+
+    const dragonMounds = [199, 200, 201, 202, 203]
+    const wellSprings = [208, 209, 210, 211, 212]
+    const villages = [34, 521, 522, 523, 524, 525, 40025, 40449, 40451]
+    const allStaticIds = [...dragonMounds, ...wellSprings, ...villages]
+    if (allStaticIds.includes(o.staticId)) {
+      //village lvl 25
+      parentPort.postMessage({
+        cmd: 'poi',
+        reason: '',
+        coords: { k: o.kingdom, x: o.x, y: o.y },
+        staticId: o.staticId
+      })
+    }
     // END NOTE
   })
 
+  //populate objects with name from redis
+  const objs = objects12.map(async o => {
+    const dbEntry = await staticIdRedis.getStaticIdData(o.staticId)
+    return {
+      ...o,
+      name: dbEntry?.name || 'unknown'
+    }
+  })
+
   if (shouldSaveObjects) {
-    const result = saveObjects(objects12)
+    const result = saveObjects(objs)
     console.log(
       `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
     )
