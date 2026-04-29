@@ -13,7 +13,7 @@ async function gameNotificationHandler(data) {
 
   console.log(`[Notification-Game] `, message, object)
 
-  const { kingdom, x, y, staticId } = object
+  const { k, x, y, staticId } = object
 
   if (toMainChannel) {
     const redisClient = getRedis()

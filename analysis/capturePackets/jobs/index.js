@@ -78,22 +78,22 @@ async function addJob(queueName, jobName, data, opts = {}) {
 //  await addJob(QUEUE_NAMES.DISCORD, 'send-alert', { text: '...' });
 
 async function addScanKingdomJob(data, opts = {}) {
-  addJob(QUEUE_NAMES.SCAN_KINGDOM, JOB_TYPES.SCAN_KINGDOM, data, opts)
+  await addJob(QUEUE_NAMES.SCAN_KINGDOM, JOB_TYPES.SCAN_KINGDOM, data, opts)
 }
 async function addCriticalScanJob(data) {
   return addScanKingdomJob(data, { priority: PRIORITY.CRITICAL })
 }
 
 async function addDiscordNotificationJob(data, opts = {}) {
-  addJob(QUEUE_NAMES.NOTIFICATION_DISCORD, JOB_TYPES.NOTIFICATION_DISCORD, data, opts)
+  await addJob(QUEUE_NAMES.NOTIFICATION_DISCORD, JOB_TYPES.NOTIFICATION_DISCORD, data, opts)
 }
 
 async function addFindObjectsJob(data, opts = {}) {
-  addJob(QUEUE_NAMES.FIND_OBJECTS, JOB_TYPES.FIND_OBJECTS, data, opts)
+  await addJob(QUEUE_NAMES.FIND_OBJECTS, JOB_TYPES.FIND_OBJECTS, data, opts)
 }
 
 async function addGameNotificationJob(data, opts = {}) {
-  addJob(QUEUE_NAMES.NOTIFICATION_GAME, JOB_TYPES.NOTIFICATION_GAME, data, opts)
+  await addJob(QUEUE_NAMES.NOTIFICATION_GAME, JOB_TYPES.NOTIFICATION_GAME, data, opts)
 }
 
 //--------------------
@@ -117,25 +117,6 @@ function startWorker(queueName, handler, config = {}) {
   console.log('[Worker] Started')
   return worker
 }
-
-/*
-// 1. Worker para Discord (Lento pero seguro)
-startWorker('discord-queue', discordHandler, {
-  concurrency: 2,
-  limiter: { max: 5, duration: 2000 }
-});
-
-// 2. Worker para Telegram (Más permisivo)
-startWorker('telegram-queue', telegramHandler, {
-  concurrency: 5,
-  limiter: { max: 30, duration: 1000 }
-});
-
-// 3. Worker para Escaneos (Pesado, sin rate limit estricto)
-startWorker('scan-queue', scanHandler, {
-  concurrency: 10
-});
-*/
 
 async function getTimerManagerInstance() {
   const { TimerManager } = require('./TimerManager')
@@ -299,8 +280,5 @@ module.exports = {
   addDiscordNotificationJob,
   addFindObjectsJob,
   addGameNotificationJob,
-  addCriticalScanJob,
-  addDiscordJob,
-  addTelegramJob,
   getTimerManager: getTimerManagerInstance
 }

@@ -405,20 +405,30 @@
           const res = await fetch(API + '/jobs/status')
           /*
           [
-  { "queue": "find-objects", "waiting": 0, "active": 1, "failed": 0, delayed:0,total:0 },
-  { "queue": "notification-discord", "waiting": 45, "active": 2, "failed": 10, delayed:0,total:0 },
-  { "queue": "notification-in-game", "waiting": 0, "active": 0, "failed": 0, delayed:0,total:0 }
-  { "queue": "scan-kingdom", "waiting": 0, "active": 0, "failed": 0, delayed:0,total:0 }
+ {
+	"success": true,
+	"status": [
+ 		{
+			"queue": "scan-kingdom",
+			"waiting": 0,
+			"active": 0,
+			"completed": 0,
+			"failed": 0,
+			"delayed": 0,
+			"total": 0
+		}
+	]
+}
 ]
 
           */
           const data = await res.json()
           if (data.success) {
             const scanQueue = data.status.filter(q => q.queue === 'scan-kingdom')?.[0] || {}
-            document.getElementById('statWaiting').textContent = scanQueue.waiting || 'no data'
-            document.getElementById('statActive').textContent = scanQueue.active || 'no data'
-            document.getElementById('statCompleted').textContent = scanQueue.completed || 'no data'
-            document.getElementById('statFailed').textContent = scanQueue.failed || 'no data'
+            document.getElementById('statWaiting').textContent = scanQueue.waiting ?? 'no data'
+            document.getElementById('statActive').textContent = scanQueue.active ?? 'no data'
+            document.getElementById('statCompleted').textContent = scanQueue.completed ?? 'no data'
+            document.getElementById('statFailed').textContent = scanQueue.failed ?? 'no data'
           }
         } catch (e) {
           log('Jobs status error: ' + e.message)

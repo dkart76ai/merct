@@ -6,7 +6,7 @@ async function discordNotificationHandler(data) {
 
   console.log(`[Notification-Discord] `, message, object)
 
-  const { kingdom: k, x, y, staticId } = object
+  const { k, x, y, staticId } = object
 
   notifyDiscord(message, { k, x, y })
 

@@ -231,7 +231,7 @@ async function dump() {
 
 async function close() {
   // if (redis) {
-  await dump()
+  //await dump()
   // await redis.quit()
   // redis = null
   // }

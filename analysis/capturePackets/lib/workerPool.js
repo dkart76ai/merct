@@ -5,6 +5,9 @@ const {
   scanKingdom: scanKingdomSync
 } = require('../workers/tasks')
 const { sendMessage, notifyDiscord } = require('../jobs/chatSender')
+const { addDiscordNotificationJob, addGameNotificationJob } = require('../jobs/index')
+const chatChannels = require('../lib/chatChannels.js')
+const staticIdRedis = require('../lib/staticIdRedis')
 // Toggle for fallback
 const USE_WORKERS = process.env.USE_WORKERS !== 'false'
 const WORKER_POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 8
@@ -40,15 +43,51 @@ function getPool() {
           }
         })
 
-        pool.on('message', msg => {
+        let chatIndex = 0
+        let count = 0
+
+        pool.on('message', async msg => {
+          const channels = await chatChannels.getChannels()
+          if (!channels || channels.length === 0) return
+
           // console.log('Mensaje recibido del worker:', msg)
           // Aquí verás: { coords: { k: o.kingdom, x: o.x, y: o.y }, staticId: o.staticId }
-          if (msg.cmd === 'merc') {
-            //creae a merc queue pool for mercs into game chat
-            sendMessage('', msg.coords, msg.staticId)
+          if (msg.cmd === 'merc' || msg.cmd === 'poi') {
+            // const dbEntry = await staticIdRedis.getStaticIdData(msg.staticId)
+            // //creae a merc queue pool for mercs into game chat
+            // // get channel url from saved array, rotate it
+            // if (chatIndex > channels.length) chatIndex = 0
+            // const channelUrl = channels[chatIndex].channelUrl
+            // chatIndex = (chatIndex + 1) % channels.length
+            // if (channelUrl) {
+            //   sendMessage(channelUrl, '', msg.coords, msg.staticId)
+            //   count++
+            //   console.log('msg sent to chat', count)
+            // }
+            // // send directly to discord, no queue needed
+            // notifyDiscord(dbEntry.name, msg.coords)
+            //TODO push jobs NOTIFICATION_GAME, NOTIFICATION_DISCORD
+            await addDiscordNotificationJob({
+              object: {
+                k: msg.coords.k,
+                x: msg.coords.x,
+                y: msg.coords.y,
+                staticId: msg.staticId
+              },
+              message: ''
+            })
+            await addGameNotificationJob({
+              object: {
+                k: msg.coords.k,
+                x: msg.coords.x,
+                y: msg.coords.y,
+                staticId: msg.staticId
+              },
+              message: '',
+              toMainChannel: false
+            })
 
-            // send directly to discord, no queue needed
-            notifyDiscord('', msg.coords)
+            // they handle different delays between messages, so must be separated jobs
           } else if (msg.cmd === 'sendmsg') {
             // cant spam, error too many messages
             // must set a job
