@@ -20,7 +20,7 @@ function getChatPage() {
   return globalPage
 }
 
-async function notifyDiscord(msg = '', coord = null) {
+async function notifyDiscord(msg = '', coord = null, staticId) {
   if (!DISCORD_WEBHOOK) {
     console.log('[ChatSender] No DISCORD_WEBHOOK configured')
     return
@@ -29,9 +29,9 @@ async function notifyDiscord(msg = '', coord = null) {
   try {
     let message = msg
     if (coord) {
-      const dbEntry = await staticIdRedis.getStaticIdData(coord.staticId)
-      const extra = msg ? `(${msg})` : ''
-      message = `K:${coord.k} X:${coord.x} Y:${coord.y} ${dbEntry?.name || ''} ${extra}`
+      const dbEntry = await staticIdRedis.getStaticIdData(staticId)
+
+      message = `K:${coord.k} X:${coord.x} Y:${coord.y} (${dbEntry?.name || ''})`
     }
     await fetch(DISCORD_WEBHOOK, {
       method: 'POST',

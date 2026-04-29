@@ -52,25 +52,26 @@ function initializeWorkers() {
       concurrency: 5
     })
 
-    // Worker de Discord: Lento (Ej: 5 mensajes cada 2 segundos)
     workerNotificationDiscord = startWorker(
       QUEUE_NAMES.NOTIFICATION_DISCORD,
       discordNotificationHandler,
       {
         concurrency: 2,
-        limiter: { max: 5, duration: 2000 }
+        limiter: {
+          max: 25, // Máximo de trabajos
+          duration: 60000 // Por cada 60,000 ms (1 minuto)
+        }
       }
     )
 
-    // Worker   Rápido (Ej: 30 mensajes por segundo)
     workerNotificationGame = startWorker(QUEUE_NAMES.NOTIFICATION_GAME, gameNotificationHandler, {
-      concurrency: 10,
-      limiter: { max: 30, duration: 1000 }
+      concurrency: 5,
+      limiter: { max: 30, duration: 60000 }
     })
 
     workerFindObjects = startWorker(QUEUE_NAMES.FIND_OBJECTS, findObjectsHandler, {
       concurrency: 10,
-      limiter: { max: 30, duration: 1000 }
+      limiter: { max: 10, duration: 1000 }
     })
   } catch (error) {
     console.error('❌ Error crítico al iniciar:', error)

@@ -1,6 +1,7 @@
 const { getRedis } = require('../../lib/redis')
 const { sendMessage } = require('../chatSender')
 const { loadEnvFile } = require('node:process')
+const chatChannels = require('../../lib/chatChannels.js')
 
 loadEnvFile()
 
@@ -26,11 +27,11 @@ async function gameNotificationHandler(job) {
       return { success: false, error: 'no active channel' }
     }
 
-    sendMessage(chatChannel, message, { k: kingdom, x, y }, staticId)
+    sendMessage(chatChannel, message, { k, x, y }, staticId)
   } else {
     const channelUrl = await getChannel()
     if (!channelUrl) return { success: false, error: 'no channel url' }
-    sendMessage(channelUrl, message, { k: kingdom, x, y }, staticId)
+    sendMessage(channelUrl, message, { k, x, y }, staticId)
   }
 
   return {
