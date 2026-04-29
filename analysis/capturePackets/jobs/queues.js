@@ -27,27 +27,27 @@ async function addJob(queueName, jobName, data, opts = {}) {
 
   const jobOptions = {}
 
-  if (options.priority !== undefined) {
+  if (opts.priority !== undefined) {
     jobOptions.priority = opts.priority
   }
 
-  if (options.jobId) {
+  if (opts.jobId) {
     jobOptions.jobId = opts.jobId
   }
 
-  if (options.delay) {
+  if (opts.delay) {
     jobOptions.delay = opts.delay
   }
 
-  if (options.repeat) {
+  if (opts.repeat) {
     jobOptions.repeat = opts.repeat
   }
 
+  const job = await q.add(jobName, data, jobOptions)
   console.log(
-    `[Queue] Added job ${job.id} (${type}) with priority ${opts.priority || PRIORITY.NORMAL}`
+    `[Queue] Added job ${job.id} (${jobName}) with priority ${opts.priority || PRIORITY.NORMAL}`
   )
-
-  return await q.add(jobName, data, jobOptions)
+  return job
 }
 
 //  await addJob(QUEUE_NAMES.DISCORD, 'send-alert', { text: '...' });

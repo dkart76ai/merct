@@ -1,8 +1,8 @@
 const { findObjects } = require('../../lib/database')
 const { JOB_TYPES, PRIORITY } = require('../constants')
 
-async function findObjectsHandler(data) {
-  const { staticId, level, amount } = data
+async function findObjectsHandler(job) {
+  const { staticId, level, amount } = job.data
 
   console.log(`[FindObjects] Searching: staticId=${staticId}, level=${level}, amount=${amount}`)
 

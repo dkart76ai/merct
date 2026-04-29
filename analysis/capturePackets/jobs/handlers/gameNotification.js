@@ -8,8 +8,8 @@ const CHAT_CHANNEL_URL = process.env.CHAT_CHANNEL_URL || ''
 
 let chatIndex = 0
 
-async function gameNotificationHandler(data) {
-  const { object, message, toMainChannel = false } = data
+async function gameNotificationHandler(job) {
+  const { object, message, toMainChannel = false } = job.data
 
   console.log(`[Notification-Game] `, message, object)
 

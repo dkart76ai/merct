@@ -1,7 +1,7 @@
 const { notifyDiscord } = require('../chatSender')
 
-async function discordNotificationHandler(data) {
-  const { object, message } = data
+async function discordNotificationHandler(job) {
+  const { object, message } = job.data
 
   console.log(`[Notification-Discord] `, message, object)
 

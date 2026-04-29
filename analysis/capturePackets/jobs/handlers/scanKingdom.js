@@ -1,7 +1,7 @@
 const { scanKingdom } = require('../../workers/tasks')
 
-async function scanKingdomHandler(payload) {
-  const { kingdom, shouldSaveObjects } = payload
+async function scanKingdomHandler(job) {
+  const { kingdom, shouldSaveObjects } = job.data
 
   try {
     const result = scanKingdom(kingdom, shouldSaveObjects)
