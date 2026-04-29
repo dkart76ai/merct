@@ -198,9 +198,17 @@ function findObjects(query) {
     params.push(staticId)
   }
 
+  // if (name !== undefined) {
+  //   sql += ' AND LOWER(name) LIKE LOWER(?)'
+  //   params.push(`%${name}%`)
+  // }
+
   if (name !== undefined) {
-    sql += ' AND name = ?'
-    params.push(name)
+    const words = name.trim().split(/\s+/) // Separa por espacios
+    words.forEach(word => {
+      sql += ' AND name LIKE ? COLLATE NOCASE'
+      params.push(`%${word}%`)
+    })
   }
 
   if (level !== undefined) {

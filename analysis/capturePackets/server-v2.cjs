@@ -3,6 +3,9 @@ const path = require('path')
 const fs = require('fs')
 const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
+const { createStream } = require('rotating-file-stream')
+const msgpack = require('@msgpack/msgpack')
+
 const { kingdomUrls } = require('./lib/kingdomUrls.js')
 const {
   multiDecodeMsgPack2,
@@ -11,8 +14,8 @@ const {
   getMsgPack2ndBlockRequest,
   scanPacket312
 } = require('./lib/messagePack.js')
-const { createStream } = require('rotating-file-stream')
-const msgpack = require('@msgpack/msgpack')
+const { addGameNotificationJob } = require('./jobs/index')
+
 const { addJob, initializeWorkers, stopWorkers } = require('./jobs/index.js')
 const { getTimerManager, cleanOldJobs, getQueueStatus, closeQueue } = require('./jobs/queues.js')
 const { JOB_TYPES, PRIORITY } = require('./jobs/constants.js')
@@ -237,32 +240,54 @@ function setupWebsocketListener() {
               // message from chat channel registered
               console.log(`📨 Chat message from ${channelUrl}: ${message}`)
               if (message.startsWith('mmfind')) {
-                const commandLine = message.split(' ').filter(Boolean)
-                const [command, amount, objName, level] = commandLine
+                // const pattern = /(\d+)\s+(.+)\s+(?:level|lvl)\s+(\d+)/
+                const pattern = /^mmfind\s+(\d+)\s+(.+)\s+(?:level|lvl)\s*(\d+)/i
+                const match = message.match(pattern)
 
-                if (objName !== '') {
-                  const results = await staticIdRedis.searchByName(objName)
+                if (match) {
+                  const [fullMatch, _amount, _name, _level] = match
+                  // mmfind 2 crypts level 20
 
-                  console.log('mmfind results', results)
-                }
-                /*
-                {results.docs[0].name
+                  if (_name !== '' && _level !== '') {
+                    const level = parseInt(_level) || 0
+                    const amount = Math.max(parseInt(_amount) || 10, 10)
+                    const name = _name
 
-  total: 2, // Cantidad total de coincidencias encontradas
-  docs: [
+                    const results = findObjects({ name, level, amount })
+
+                    /*
+
+ {
+  total: 2,
+  returned: 2,
+  objects: [
     {
-      id: "obj:1",      // La clave original en Redis
-      name: "Juan",     // Campo del hash
-      level: "10"       // Campo del hash (nota: Redis devuelve todo como string)
+      id: 62085,      key: '146:642:932',      objectId: '627373445560',
+      staticId: 2407, name: 'Crypt', level: 20, kingdom: 146, x: 642, y: 932,
+      timestamp: 0,      firstSeenAt: 1777471009216,      lastSeenAt: 1777471009216,
+      seenCount: 1,      warning: 0,      warningSetAt: null,
+      data: '{"objectId":627373445560,"staticId":2407,"level":20,"kingdom":146,"x":642,"y":932,"timestamp":0,"isUnlocked":false,"name":"Crypt"}'
     },
-    {
-      id: "obj:2",
-      name: "Juana de Arco",
-      level: "5"
-    }
-  ]
-}
-                */
+]}
+                    */
+
+                    if (results.total > 0) {
+                      for (obj of results.objects) {
+                        await addGameNotificationJob({
+                          object: {
+                            k: obj.kingdom,
+                            x: obj.x,
+                            y: obj.y,
+                            staticId: obj.staticId
+                          },
+                          message: obj.name,
+                          toMainChannel: true
+                        })
+                      }
+                    }
+                    console.log('[BOT] mmfind', amount, name, level, 'results', results)
+                  }
+                }
               }
             }
           } catch (e) {
@@ -852,7 +877,7 @@ app.post('/api/browser/start', async (req, res) => {
 
     await browserInitialize()
 
-    setupWebsocketListener()
+    // setupWebsocketListener()
     await patchSendbird()
 
     setupPacketCaptureListener()

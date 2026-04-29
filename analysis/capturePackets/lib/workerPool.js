@@ -124,6 +124,15 @@ function getPool() {
             // that sends msg every 5 minutes or so
             // create  a queue pool, where to extract messages to send
             // sendMessage(msg.reason, msg.coords, msg.staticId)
+            await addDiscordNotificationJob({
+              object: {
+                k: msg.coords.k,
+                x: msg.coords.x,
+                y: msg.coords.y,
+                staticId: msg.staticId
+              },
+              message: `incomplete data`
+            })
           }
         })
         console.log(`[Worker Pool] Initialized with ${WORKER_POOL_SIZE} threads`)

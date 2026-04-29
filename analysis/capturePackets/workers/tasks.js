@@ -151,19 +151,19 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
       })
     }
 
-    const dragonMounds = [199, 200, 201, 202, 203]
-    const wellSprings = [208, 209, 210, 211, 212]
-    const villages = [34, 521, 522, 523, 524, 525, 40025, 40449, 40451]
-    const allStaticIds = [...dragonMounds, ...wellSprings, ...villages]
-    if (allStaticIds.includes(o.staticId)) {
-      //village lvl 25
-      parentPort.postMessage({
-        cmd: 'poi',
-        reason: '',
-        coords: { k: o.kingdom, x: o.x, y: o.y },
-        staticId: o.staticId
-      })
-    }
+    // const dragonMounds = [199, 200, 201, 202, 203]
+    // const wellSprings = [208, 209, 210, 211, 212]
+    // const villages = [34, 521, 522, 523, 524, 525, 40025, 40449, 40451]
+    // const allStaticIds = [...dragonMounds, ...wellSprings, ...villages]
+    // if (allStaticIds.includes(o.staticId)) {
+    //   //village lvl 25
+    //   parentPort.postMessage({
+    //     cmd: 'poi',
+    //     reason: '',
+    //     coords: { k: o.kingdom, x: o.x, y: o.y },
+    //     staticId: o.staticId
+    //   })
+    // }
     // END NOTE
   })
 
