@@ -8,7 +8,7 @@ function getRedis() {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       // Minimal retry settings
-      maxRetriesPerRequest: 20,
+      maxRetriesPerRequest: null,
       retryStrategy(times) {
         if (times > 20) {
           console.log('[Redis] Max retries reached, giving up')

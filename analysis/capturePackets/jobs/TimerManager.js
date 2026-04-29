@@ -1,5 +1,5 @@
 const { Queue } = require('bullmq')
-const { JOB_TYPES, PRIORITY } = require('./index')
+const { JOB_TYPES, PRIORITY } = require('./constants')
 
 class TimerManager {
   constructor(queue) {

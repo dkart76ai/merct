@@ -1,5 +1,5 @@
 const { findObjects } = require('../../lib/database')
-const { addJob, JOB_TYPES, PRIORITY } = require('../index')
+const { JOB_TYPES, PRIORITY } = require('../constants')
 
 async function findObjectsHandler(data) {
   const { staticId, level, amount } = data
@@ -16,17 +16,7 @@ async function findObjectsHandler(data) {
       console.log(`[FindObjects] Triggering notification for ${result.objects.length} objects`)
 
       return {
-        success: true,
-        nextJobs: [
-          {
-            type: JOB_TYPES.NOTIFICATION,
-            priority: PRIORITY.LOW,
-            payload: {
-              objects: result.objects,
-              searchCriteria: { staticId, level, amount }
-            }
-          }
-        ]
+        success: true
       }
     }
 

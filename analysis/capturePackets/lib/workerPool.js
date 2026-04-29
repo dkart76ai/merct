@@ -4,7 +4,6 @@ const {
   processPacket: processPacketSync,
   scanKingdom: scanKingdomSync
 } = require('../workers/tasks')
-const { sendMessage, notifyDiscord } = require('../jobs/chatSender')
 const { addDiscordNotificationJob, addGameNotificationJob } = require('../jobs/index')
 const chatChannels = require('../lib/chatChannels.js')
 const staticIdRedis = require('../lib/staticIdRedis')
@@ -51,22 +50,8 @@ function getPool() {
           if (!channels || channels.length === 0) return
 
           // console.log('Mensaje recibido del worker:', msg)
-          // Aquí verás: { coords: { k: o.kingdom, x: o.x, y: o.y }, staticId: o.staticId }
+          // Aquí verás: { coords: { k: o.k , x: o.x, y: o.y }, staticId: o.staticId }
           if (msg.cmd === 'merc' || msg.cmd === 'poi') {
-            // const dbEntry = await staticIdRedis.getStaticIdData(msg.staticId)
-            // //creae a merc queue pool for mercs into game chat
-            // // get channel url from saved array, rotate it
-            // if (chatIndex > channels.length) chatIndex = 0
-            // const channelUrl = channels[chatIndex].channelUrl
-            // chatIndex = (chatIndex + 1) % channels.length
-            // if (channelUrl) {
-            //   sendMessage(channelUrl, '', msg.coords, msg.staticId)
-            //   count++
-            //   console.log('msg sent to chat', count)
-            // }
-            // // send directly to discord, no queue needed
-            // notifyDiscord(dbEntry.name, msg.coords)
-            //TODO push jobs NOTIFICATION_GAME, NOTIFICATION_DISCORD
             await addDiscordNotificationJob({
               object: {
                 k: msg.coords.k,

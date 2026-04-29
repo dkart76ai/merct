@@ -1,4 +1,3 @@
-const { getRedis } = require('../../lib/redis')
 const { notifyDiscord } = require('../chatSender')
 
 async function discordNotificationHandler(data) {

@@ -13,29 +13,14 @@ const {
 } = require('./lib/messagePack.js')
 const { createStream } = require('rotating-file-stream')
 const msgpack = require('@msgpack/msgpack')
-const {
-  addJob,
-
-  getTimerManager,
-  initializeWorkers,
-  stopWorkers,
-  cleanOldJobs,
-  getQueueStatus,
-
-  closeQueue,
-  JOB_TYPES,
-  PRIORITY
-} = require('./jobs/index.js')
+const { addJob, initializeWorkers, stopWorkers } = require('./jobs/index.js')
+const { getTimerManager, cleanOldJobs, getQueueStatus, closeQueue } = require('./jobs/queues.js')
+const { JOB_TYPES, PRIORITY } = require('./jobs/constants.js')
 const { getPool, processPacket, scanKingdom } = require('./lib/workerPool.js')
 
 const staticIdRedis = require('./lib/staticIdRedis.js')
 const chatChannels = require('./lib/chatChannels.js')
 const { setChatPage, getChatPage, sendMessage, notifyDiscord } = require('./jobs/chatSender.js')
-const {
-  scanKingdomHandler,
-  findObjectsHandler,
-  notificationHandler
-} = require('./jobs/handlers/index.js')
 
 const {
   initDb,
@@ -1008,18 +993,11 @@ async function main() {
     })
 
   // Initialize worker pool (non-blocking CPU tasks)
-  getPool()
+  getPool() //worker_threads
 
   console.log('[Main] Starting BullMQ worker...')
 
-  // const handlers = {
-  //   [JOB_TYPES.SCAN_KINGDOM]: scanKingdomHandler,
-  //   [JOB_TYPES.FIND_OBJECTS]: findObjectsHandler,
-  //   [JOB_TYPES.NOTIFICATION]: notificationHandler
-  // }
-
-  // await startWorker(handlers)
-  initializeWorkers()
+  initializeWorkers() // bullmq
 
   const server = app.listen(PORT, () => {
     console.log(`[Main] Server running on http://localhost:${PORT}`)

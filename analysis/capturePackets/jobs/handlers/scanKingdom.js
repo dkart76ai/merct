@@ -1,4 +1,4 @@
-const { scanKingdom } = require('../../lib/workerPool.js')
+const { scanKingdom } = require('../../workers/tasks')
 
 async function scanKingdomHandler(payload) {
   const { kingdom, shouldSaveObjects } = payload
