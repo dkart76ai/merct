@@ -74,7 +74,7 @@ async function sendMessage(channelUrl, msg = '', coord = null, staticId = 400) {
         }
       }
     })
-    message = '/%0%/'
+    message = `[${msg}] /%0%/`
   }
 
   const result = await page.evaluate(

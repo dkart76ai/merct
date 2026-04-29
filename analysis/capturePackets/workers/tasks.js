@@ -168,7 +168,7 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   })
 
   //populate objects with name from redis
-  const objs = objects12.map(async o => {
+  const objectsPromises = objects12.map(async o => {
     const dbEntry = await staticIdRedis.getStaticIdData(o.staticId)
     return {
       ...o,
@@ -176,7 +176,11 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
     }
   })
 
+  // 2. Esperamos a que TODAS se resuelvan
+  const objs = await Promise.all(objectsPromises)
+
   if (shouldSaveObjects) {
+    console.log('saveobject', objs[0])
     const result = saveObjects(objs)
     console.log(
       `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`

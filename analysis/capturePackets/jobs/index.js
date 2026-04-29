@@ -65,8 +65,8 @@ function initializeWorkers() {
     )
 
     workerNotificationGame = startWorker(QUEUE_NAMES.NOTIFICATION_GAME, gameNotificationHandler, {
-      concurrency: 5,
-      limiter: { max: 30, duration: 60000 }
+      concurrency: 2,
+      limiter: { max: 20, duration: 60000 } // 20 messages per minute, 3secs per message
     })
 
     workerFindObjects = startWorker(QUEUE_NAMES.FIND_OBJECTS, findObjectsHandler, {

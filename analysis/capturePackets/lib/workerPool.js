@@ -28,7 +28,8 @@ const flushBuffer = async () => {
 
   const linesPromises = currentBatch.map(async m => {
     const dbEntry = await staticIdRedis.getStaticIdData(m.staticId)
-    return `K:${m.coords.k} X:${m.coords.x} Y:${m.coords.y} (${dbEntry?.name || 'Desconocido'})`
+    countDiscord++
+    return `${countDiscord} : K:${m.coords.k} X:${m.coords.x} Y:${m.coords.y} (${dbEntry?.name || 'Desconocido'})`
   })
 
   // 2. Esperamos a que TODAS se resuelvan
@@ -37,7 +38,7 @@ const flushBuffer = async () => {
   // 3. Ahora sí podemos unir las strings
   let batchContent = lines.join('\n')
 
-  countDiscord += currentBatch.length
+  // countDiscord += currentBatch.length
   batchContent += `\ntotal coords ${countDiscord}\n`
 
   // Añadimos UN solo job que contiene muchas líneas
@@ -110,7 +111,7 @@ function getPool() {
                 y: msg.coords.y,
                 staticId: msg.staticId
               },
-              message: ``,
+              message: `${count}`,
               toMainChannel: false
             })
 
