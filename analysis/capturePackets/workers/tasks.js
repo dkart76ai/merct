@@ -168,7 +168,7 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   })
 
   //populate objects with name from redis
-  const objectsPromises = objects12.map(async o => {
+  const objectsPromises = objects12.filter(Boolean).map(async o => {
     const dbEntry = await staticIdRedis.getStaticIdData(o.staticId)
     return {
       ...o,
@@ -180,11 +180,13 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   const objs = await Promise.all(objectsPromises)
 
   if (shouldSaveObjects) {
-    console.log('saveobject', objs[0])
-    const result = saveObjects(objs)
-    console.log(
-      `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
-    )
+    if (objs.length > 0) {
+      console.log('saveobject', objs[0])
+      const result = saveObjects(objs)
+      console.log(
+        `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
+      )
+    }
   }
 
   return {
@@ -194,8 +196,13 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   }
 }
 
-async function scanKingdom({ kingdom, shouldSaveObjects }) {
+async function scanKingdom({ kingdom, shouldSaveObjects = false }) {
   console.log('task, scankingdom', { kingdom, shouldSaveObjects })
+
+  if (!kingdom) {
+    console.log('[scanKingdom:worker] No kingdom provided')
+    return { success: false, error: 'no kingdom' }
+  }
 
   const redisClient = getRedis()
 

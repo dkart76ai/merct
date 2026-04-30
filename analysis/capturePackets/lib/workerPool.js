@@ -165,7 +165,10 @@ async function processPacket({ request, response, shouldSaveObjects = false }) {
 }
 
 async function scanKingdom(kingdom, shouldSaveObjects = false) {
-  if (!kingdom) throw new Error('[Worker Pool] No kingdom provided')
+  if (!kingdom) {
+    console.log('[worker pool], no kingdom provided')
+    throw new Error('[Worker Pool] No kingdom provided')
+  }
 
   const p = getPool()
   if (!p || !USE_WORKERS) {

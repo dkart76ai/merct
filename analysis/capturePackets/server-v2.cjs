@@ -5,7 +5,7 @@ const { firefox } = require('playwright')
 const { loadEnvFile } = require('node:process')
 const { createStream } = require('rotating-file-stream')
 const msgpack = require('@msgpack/msgpack')
-
+const { setupDiscord } = require('./discord/index.js')
 const { kingdomUrls } = require('./lib/kingdomUrls.js')
 const {
   multiDecodeMsgPack2,
@@ -43,9 +43,11 @@ const config = {
 }
 
 /***SENDBIRD KEY CONSTANTS FOR GAME */
-const DEFAULT_KINGDOM = 'CONFIG:DEFAULT_KINGDOM'
-const ACTIVE_CHAT_CHANNEL = 'CONFIG:ACTIVE_CHAT_CHANNEL'
-const SCAN_OTHER_KINGDOMS_KEY = 'TIMERS:SCAN_OTHER_KINGDOMS_KEY'
+const {
+  DEFAULT_KINGDOM,
+  ACTIVE_CHAT_CHANNEL,
+  SCAN_OTHER_KINGDOMS_KEY
+} = require('./jobs/constants.js')
 
 // const SAVE_DIR = path.join(__dirname, 'captures')
 // const SAVE_DIR2 = path.join(__dirname, 'packetSender')
@@ -502,6 +504,7 @@ async function browserLoadUrlAndLogin() {
 
     // 2. Llenar credenciales
     // fill() espera automáticamente a que el elemento sea visible y accionable
+    await loginInput.waitFor({ state: 'visible', timeout: 5000 })
     console.log('Ingresando credenciales...')
     await loginInput.click()
     await loginInput.pressSequentially(config.accountUser, { delay: 20 })
@@ -987,6 +990,7 @@ async function main() {
     console.error('[Main] Redis not available:', e.message)
   }
 
+  setupDiscord()
   await ensureSaveDir()
   initDb()
 

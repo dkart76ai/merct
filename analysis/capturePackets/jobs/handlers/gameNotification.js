@@ -2,7 +2,7 @@ const { getRedis } = require('../../lib/redis')
 const { sendMessage } = require('../chatSender')
 const { loadEnvFile } = require('node:process')
 const chatChannels = require('../../lib/chatChannels.js')
-
+const { ACTIVE_CHAT_CHANNEL } = require('../constants.js')
 loadEnvFile()
 
 const CHAT_CHANNEL_URL = process.env.CHAT_CHANNEL_URL || ''

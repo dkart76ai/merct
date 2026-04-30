@@ -7,7 +7,7 @@ const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK || ''
 const staticIdRedis = require('../lib/staticIdRedis')
 const { getRedis } = require('../lib/redis.js')
 
-const ACTIVE_CHAT_CHANNEL = 'CONFIG:ACTIVE_CHAT_CHANNEL'
+const { ACTIVE_CHAT_CHANNEL } = require('./constants.js')
 
 console.log('[ChatSender] Initialized', DISCORD_WEBHOOK, channelUrl)
 
@@ -74,7 +74,7 @@ async function sendMessage(channelUrl, msg = '', coord = null, staticId = 400) {
         }
       }
     })
-    message = `[${msg}] /%0%/`
+    message = `/%0%/`
   }
 
   const result = await page.evaluate(

@@ -190,33 +190,39 @@ function findObjects(query) {
   const { staticId, name, level, amount = 10 } = query
 
   const database = getDb()
-  let sql = 'SELECT * FROM objects WHERE 1=1'
-  const params = []
+  let sql = 'SELECT *, ((x - ?) * (x - ?) + (y - ?) * (y - ?)) AS distance FROM objects WHERE 1=1'
+  const mix = 448
+  const miy = 480
+  const params = [mix, mix, miy, miy]
 
   if (staticId !== undefined) {
     sql += ' AND staticId = ?'
     params.push(staticId)
   }
 
-  // if (name !== undefined) {
-  //   sql += ' AND LOWER(name) LIKE LOWER(?)'
-  //   params.push(`%${name}%`)
-  // }
-
   if (name !== undefined) {
-    const words = name.trim().split(/\s+/) // Separa por espacios
-    words.forEach(word => {
-      sql += ' AND name LIKE ? COLLATE NOCASE'
-      params.push(`%${word}%`)
-    })
+    sql += ' AND LOWER(name) LIKE LOWER(?)'
+    if (!name.includes('%')) {
+      params.push(`${name}%`)
+    } else {
+      params.push(name)
+    }
   }
+
+  // if (name !== undefined) {
+  //   const words = name.trim().split(/\s+/) // Separa por espacios
+  //   words.forEach(word => {
+  //     sql += ' AND name LIKE ? COLLATE NOCASE'
+  //     params.push(`%${word}%`)
+  //   })
+  // }
 
   if (level !== undefined) {
     sql += ' AND level = ?'
     params.push(level)
   }
 
-  sql += ' ORDER BY lastSeenAt DESC LIMIT ?'
+  sql += ' ORDER BY distance ASC, lastSeenAt DESC LIMIT ?'
   params.push(amount)
 
   const rows = database.prepare(sql).all(...params)
