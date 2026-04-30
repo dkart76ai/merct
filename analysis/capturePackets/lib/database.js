@@ -37,6 +37,17 @@ function initDb() {
     )
   `)
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS userPosition (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key TEXT UNIQUE NOT NULL,
+      x INTEGER,
+      y INTEGER
+    )
+  `)
+
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_key ON userPosition(key)`)
+
   db.exec(`CREATE INDEX IF NOT EXISTS idx_key ON objects(key)`)
   db.exec(`CREATE INDEX IF NOT EXISTS idx_staticId ON objects(staticId)`)
   db.exec(`CREATE INDEX IF NOT EXISTS idx_level ON objects(level)`)
@@ -65,6 +76,45 @@ let cleanupInterval = null
 
 function getKey(obj) {
   return `${obj.kingdom}:${obj.x}:${obj.y}`
+}
+
+function saveUserPosition({ userId, x, y }) {
+  const now = Date.now()
+  const database = getDb()
+
+  const existing = database.prepare('SELECT * FROM userPosition WHERE key = ?').get(userId)
+
+  if (existing) {
+    database
+      .prepare(
+        `
+      UPDATE userPosition SET
+        x = ?,
+        y = ?
+      WHERE key = ?
+    `
+      )
+      .run(x, y, userId)
+
+    return { action: 'updated', userId }
+  } else {
+    database
+      .prepare(
+        `
+      INSERT INTO userPosition (key, x, y)
+      VALUES (?, ?, ?)
+    `
+      )
+      .run(userId, x, y)
+
+    console.log(`[DB] Saved new user position: ${userId}, x: ${x}, y: ${y}`)
+    return { action: 'created', userId }
+  }
+}
+
+function getUserPosition(userId) {
+  const database = getDb()
+  return database.prepare('SELECT * FROM userPosition WHERE key = ?').get(userId)
 }
 
 function saveObject(obj) {
@@ -187,12 +237,23 @@ function saveObjects(objects) {
 }
 
 function findObjects(query) {
-  const { staticId, name, level, amount = 10 } = query
+  const { staticId, name, level, amount = 10, userId } = query
+
+  const userPosition = getUserPosition(userId)
+  // console.log('[findObjects] userPosition', userPosition)
+  // userPosition { id: 1, key: '1182035430531670106', x: 500, y: 800 }
+
+  // if user didnt set pos, fallback to my position
+  let mix = 448
+  let miy = 480
+
+  if (userPosition !== undefined) {
+    mix = userPosition.x
+    miy = userPosition.y
+  }
 
   const database = getDb()
   let sql = 'SELECT *, ((x - ?) * (x - ?) + (y - ?) * (y - ?)) AS distance FROM objects WHERE 1=1'
-  const mix = 448
-  const miy = 480
   const params = [mix, mix, miy, miy]
 
   if (staticId !== undefined) {
@@ -347,6 +408,7 @@ module.exports = {
   saveObject,
   saveObjects,
   findObjects,
+  saveUserPosition,
   getStats,
   clearDb,
   getAllObjects,
