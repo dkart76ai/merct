@@ -372,35 +372,171 @@ function _extractObj12Data(decoder) {
 }
 
 // Opcode 402 - Versión 23 elementos
-function _isPlayerObject23(decoder) {
+function _isValidPlayerObject23(decoder) {
   const startOff = decoder.off
   try {
     const len = decoder.readArrayHeader()
     if (len !== 23) return false
 
-    // [0] Array de 1
+    // [0] Array de 1 [1108101725624]  object id
     if (decoder.readArrayHeader() !== 1) return false
     decoder.skip()
 
     // [1], [2], [3] deben ser Strings (0xa0-0xbf, 0xd9-0xdb)
     if (!decoder.isNextString()) return false
-    decoder.skip()
+    decoder.skip() //"tb:54052127"
     if (!decoder.isNextString()) return false
-    decoder.skip()
+    decoder.skip() //"Scarlet Witch"
     if (!decoder.isNextString()) return false
-    decoder.skip()
+    decoder.skip() //"IN"
 
-    // ... saltar hasta el [8]
-    for (let i = 4; i <= 7; i++) decoder.skip()
+    // [4]... saltar hasta el [6]
+    for (let i = 4; i <= 6; i++) decoder.skip()
 
-    // [8] Number (Level)
+    // [7] Number (hero Level)
     if (!decoder.isNextNumber()) return false
+    decoder.skip()
+
+    // [8] Number (city Level)
+    if (!decoder.isNextNumber()) return false
+    decoder.skip()
+
+    //[9]
+    decoder.skip()
+
+    // [10] Number (might)
+    if (!decoder.isNextNumber()) return false
+    decoder.skip()
+
+    // [11] Array de 1 [1108101725624]  clan id
+    if (decoder.readArrayHeader() !== 1) return false
+    decoder.skip()
+
+    //[12]
+    decoder.skip()
+
+    //[13] clan name
+    if (!decoder.isNextString()) return false
+    decoder.skip() //"BLD"
+
+    //[14]  0
+    decoder.skip()
+
+    //[15]  cooords [k,x,y]
+    if (decoder.readArrayHeader() !== 3) return false
+    decoder.skip()
+    decoder.skip()
+    decoder.skip()
+
+    // [16] Array de 1 [1108101725624]  clan id
+    if (decoder.readArrayHeader() !== 1) return false
+    decoder.skip()
+
+    //[17]  // gold ingots
+    if (!decoder.isNextNumber()) return false
+    decoder.skip()
+
+    //[18]
+    decoder.skip()
+
+    // [19 y 20]  2 arrays
+    decoder.skip()
+    decoder.skip()
+
+    //[21] timezone  "(UTC-50-30)"
+    if (!decoder.isNextString()) return false
+    decoder.skip()
 
     return true // Si pasa estas pruebas críticas, es el objeto
   } catch (e) {
     return false
   } finally {
     decoder.off = startOff
+  }
+}
+
+function _extractObj23Data(decoder) {
+  // Entramos al array principal de 23
+  decoder.readArrayHeader()
+
+  // [0] ID de objeto (Está en un array de 1)
+  decoder.readArrayHeader() // ["1189748226882n"]
+  const objectId = decoder.decode()
+
+  // [1] progressId
+  const progressId = decoder.decode() // "tb:54052127"
+  // [2] name
+  const playerName = decoder.decode() // "Scarlet Witch"
+  // [3] country
+  const country = decoder.decode() // "IN"
+
+  // salta [4,5,6]
+  decoder.skip()
+  decoder.skip()
+  decoder.skip()
+
+  // [7] heroLevel
+  const heroLevel = decoder.decode() // 201
+  // [8] city Level
+  const cityLevel = decoder.decode() // 40
+
+  // salta [9]
+  decoder.skip()
+
+  // [10] might
+  const might = decoder.decode() // 172162451
+
+  // [11] clan ID  (Está en un array de 1)
+  decoder.readArrayHeader() // ["1189748226882n"]
+  const clanId = decoder.decode()
+
+  // salta [12]
+  decoder.skip()
+
+  // [13] clan name
+  const clanName = decoder.decode() // 40
+
+  // salta [14]
+  decoder.skip()
+
+  //[15] coords  [k,x,y]
+  decoder.readArrayHeader()
+  const kingdom = decoder.decode()
+  const x = decoder.decode()
+  const y = decoder.decode()
+
+  // salta [16]  [11111111]
+  decoder.skip()
+
+  // [17] gold
+  const gold = decoder.decode() // 40
+
+  //salta [18,19,20]  num,y 2 array
+  decoder.skip()
+  decoder.skip()
+  decoder.skip()
+
+  // [21] timezone "(UTC-50-30)"
+  const timezone = decoder.decode() // 40
+
+  //[22]     [0]
+  decoder.skip()
+
+  return {
+    objectId,
+    progressId,
+    playerName,
+    country,
+    heroLevel,
+    cityLevel,
+    might,
+    clanId,
+    clanName,
+    kingdom,
+    x,
+    y,
+    gold,
+    timezone
   }
 }
 
@@ -525,7 +661,7 @@ function _extractObj42Data(decoder) {
  null
 ]
 */
-  // Entramos al array principal de 12
+  // Entramos al array principal de 42
   decoder.readArrayHeader()
 
   // [0] ID de objeto (Está en un array de 1)
@@ -570,7 +706,7 @@ function _extractObj42Data(decoder) {
   // const coso12 = decoder.decode()
 
   // [13] level
-  const level = decoder.decode() //29
+  const cityLevel = decoder.decode() //29
 
   // [14] al [16] No nos interesan (9, 0, 0)
   decoder.skip()
@@ -593,28 +729,29 @@ function _extractObj42Data(decoder) {
   const targetY = decoder.decode()
 
   // [19 al 38]   No nos interesan
-  for (let i = 19; i <= 38; i++) decoder.skip()
+  for (let i = 19; i <= 25; i++) decoder.skip()
+  for (let i = 26; i <= 38; i++) decoder.skip()
 
   // [39] shieldOn? (boolen)
-  const isShieldActive = decoder.decode()
+  const hasShield = decoder.decode()
 
   // [40] timestamp
   const timestamp = decoder.decode()
 
   return {
     objectId,
-    unknownId1,
-    staticId,
+    unknownId1, //
+    staticId, //
     clanId,
     kingdom,
-    level,
+    cityLevel,
     sourceKingdom,
     sourceX,
     sourceY,
     targetKingdom,
     targetX,
     targetY,
-    isShieldActive,
+    hasShield,
     timestamp
   }
 }
@@ -693,8 +830,9 @@ function scanPacket402(buffer) {
       // 1. Intentamos validar cada estructura (El orden importa: de más compleja a menos)
 
       if (_isValidPlayerObject23(decoder)) {
-        results.players23.push(decoder.decode())
-        continue
+        const player = _extractObj23Data(decoder)
+        results.players23.push(player)
+        continue // El decode ya movió el off al final del objeto
       }
     }
 
@@ -721,12 +859,6 @@ module.exports = {
   // game functions
   getRequestHeader,
   getMsgPack2ndBlockRequest,
-  // findFirstInt,
-  // isObject12,
-  // extractObj12Data,
-  // isPlayerObject23,
-  // isValidPlayerObject42,
-  // extractObj42Data,
   scanPacket312,
   scanPacket402
 }
@@ -738,16 +870,7 @@ module.exports = {
 
 // console.log('testing scanPacket312', 'players', players42.length, 'objects', objects12.length)
 // console.log(styleText('red', 'first 5 players'))
-// players42
-//   .slice(0, 5)
-//   .forEach(player =>
-//     console.log(
-//       styleText(
-//         'green',
-//         `${player.sourceKingdom}:${player.sourceX}:${player.sourceY} ${player.level} shield = ${String(player.isShieldActive)}`
-//       )
-//     )
-//   )
+// players42.slice(0, 5).forEach(player => console.log(player))
 // console.log(styleText('red', 'first 5 objects'))
 // objects12
 //   .slice(0, 5)
@@ -773,3 +896,11 @@ module.exports = {
 // // dec.off = 1
 // console.log(_isValidPlayerObject42(dec))
 // console.log(_extractObj42Data(dec))
+
+// const p402 =
+//   'owAAAKMAAACSzZIBzVHwkZHcFwCRz0OeAQASAQAAq3RiOjY0NjQ2NTYwpEtBbm6iVVMIzp2WmADOrZaYAHMiEM4mla8Ekc8UAAAApgAAAM4aFAIAo0FPVwCTzJLNsgHNyAGRz+S/DgISAQAAzVcCzketIgCRksygztmr8mmWkh0BksygEpLMoReSzKIMks0sAQGSzUkBAakoVVRDKzcwMCmRAQ=='
+// const bytes2 = decodeBase64(p402)
+// const { players23 } = scanPacket402(bytes2)
+// console.log('testing scanPacket312', 'players', players23.length)
+// console.log(styleText('blue', 'first 5 players'))
+// players23.slice(0, 5).forEach(player => console.log(player))

@@ -37,6 +37,33 @@ function initDb() {
     )
   `)
 
+  //playerid = objectId
+  //progressID tb:1234567
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS players (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      objectId TEXT UNIQUE NOT NULL,
+      playerId TEXT,
+      playerName TEXT,
+      country TEXT,
+      progressId TEXT,
+      clanId TEXT,
+      clanName TEXT,
+      cityLevel INTEGER,
+      heroLevel INTEGER,
+      kingdom INTEGER,
+      x INTEGER,
+      y INTEGER,
+      might INTEGER,
+      gold INTEGER,
+      timezone TEXT,
+      timestamp INTEGER,
+      hasShield BOOLEAN,
+      previousCheckAt INTEGER,
+      lastCheckAt INTEGER
+    )
+  `)
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS userPosition (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,6 +72,10 @@ function initDb() {
       y INTEGER
     )
   `)
+
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_objectId ON players(objectId)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_playerName ON players(playerName)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_clanName ON players(clanName)`)
 
   db.exec(`CREATE INDEX IF NOT EXISTS idx_key ON userPosition(key)`)
 
@@ -295,6 +326,79 @@ function findObjects(query) {
   }
 }
 
+// function upsertPlayer(playerKey, data) {
+//   const now = Date.now()
+
+//   const columns = Object.keys(data)
+//   if (columns.length === 0) return
+
+//   const database = getDb()
+
+//   const colNames = ['key', 'lastCheckAt', ...columns].join(', ')
+//   // Usamos 'unixepoch()' para el primer insert
+//   const placeholders = ['?', 'unixepoch()', ...columns.map(() => '?')].join(', ')
+
+//   const updateFragment = columns.map(col => `${col} = excluded.${col}`).join(', ')
+
+//   const sql = `
+//     INSERT INTO players (${colNames})
+//     VALUES (${placeholders})
+//     ON CONFLICT(key) DO UPDATE SET
+//       previousCheckAt = lastCheckAt,
+//       lastCheckAt = unixepoch(), -- Genera el timestamp actual automáticamente
+//       ${updateFragment}
+//   `
+
+//   const stmt = database.prepare(sql)
+
+//   // Solo pasamos el playerKey y los valores de data
+//   return stmt.run(playerKey, ...Object.values(data))
+// }
+
+function getUpsertStatement(player) {
+  const database = getDb()
+
+  const { objectId, ...data } = player
+  const columns = Object.keys(data)
+
+  const colNames = ['objectId', 'lastCheckAt', ...columns].join(', ')
+  const placeholders = ['?', 'unixepoch()', ...columns.map(() => '?')].join(', ')
+  const updateFragment = columns.map(col => `${col} = excluded.${col}`).join(', ')
+
+  const sql = `
+    INSERT INTO players (${colNames})
+    VALUES (${placeholders})
+    ON CONFLICT(objectId) DO UPDATE SET
+      previousCheckAt = lastCheckAt,
+      lastCheckAt = unixepoch(),
+      ${updateFragment}
+  `
+
+  return {
+    stmt: database.prepare(sql),
+    values: [objectId, ...Object.values(data)]
+  }
+}
+
+// Para usarla con un solo jugador:
+function savePlayer(player) {
+  const { stmt, values } = getUpsertStatement(player)
+  return stmt.run(values)
+}
+
+// Uso: savePlayers(miArrayDePlayers);
+const savePlayers = getDb().transaction(players => {
+  if (players.length > 0) {
+    console.log('[Database] saveplayers', players[0])
+    for (const player of players) {
+      const { stmt, values } = getUpsertStatement(player)
+      stmt.run(values)
+    }
+    return { success: true }
+  }
+  return { success: false }
+})
+
 function getStats() {
   const database = getDb()
 
@@ -408,6 +512,7 @@ module.exports = {
   saveObject,
   saveObjects,
   findObjects,
+  savePlayers,
   saveUserPosition,
   getStats,
   clearDb,

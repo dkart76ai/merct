@@ -81,6 +81,8 @@ function getPool() {
             REDIS_HOST: process.env.REDIS_HOST || 'localhost',
             REDIS_PORT: process.env.REDIS_PORT || '6379'
           }
+          // stdout: process.stdout,
+          // stderr: process.stderr
         })
 
         let count = 0

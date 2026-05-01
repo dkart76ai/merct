@@ -9,11 +9,12 @@ const {
   getRequestHeader,
   multiDecodeMsgPack2,
   encodeMsgPack2MultiFragments,
-  scanPacket312
+  scanPacket312,
+  scanPacket402
 } = require('../lib/messagePack.js')
 const staticIdRedis = require('../lib/staticIdRedis')
 const { getRedis } = require('../lib/redis')
-const { saveObjects } = require('../lib/database')
+const { saveObjects, savePlayers } = require('../lib/database')
 
 // const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
 
@@ -71,6 +72,10 @@ const processPacket = async ({ request, response }) => {
     if (opCode === 312) {
       extractDataFrom312(response)
     }
+
+    if (opCode === 402) {
+      extractDataFrom402(response)
+    }
   } catch (e) {
     return { success: false, error: e.message }
   }
@@ -111,8 +116,48 @@ function buildPacket22Payload(tokenBigInt, token) {
   return packetData
 }
 
+async function extractDataFrom402(response) {
+  console.log(styleText('yellow', 'extractDataFrom402'))
+  const { players23 } = scanPacket402(response)
+  console.log('scanPacket402: players23:', players23.length)
+
+  // save players
+  if (players23.length > 0) {
+    //prepare data to send to database
+    const players = players23.map(p => {
+      return {
+        objectId: String(p.objectId),
+        progressId: p.progressId,
+        playerName: p.playerName,
+        country: p.country,
+        heroLevel: p.heroLevel,
+        cityLevel: p.cityLevel,
+        might: p.might,
+        clanId: String(p.clanId),
+        clanName: p.clanName,
+        kingdom: p.kingdom,
+        x: p.x,
+        y: p.y,
+        gold: p.gold,
+        timezone: p.timezone
+      }
+    })
+    try {
+      const result = savePlayers(players)
+      console.log(`[tasks][SavePlayers] `, result)
+    } catch (e) {
+      console.error('[tasks][SavePlayers][extractDataFrom402', e.message)
+    }
+  }
+
+  return {
+    success: true,
+    players23
+  }
+}
+
 async function extractDataFrom312(response, shouldSaveObjects = false) {
-  console.log(styleText('red', 'This is not green!'))
+  console.log(styleText('red', 'extractDataFrom312'))
 
   const { players42, objects12 } = scanPacket312(response)
   console.log('scanPacket312: players42:', players42.length)
@@ -184,8 +229,34 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
       console.log('saveobject', objs[0])
       const result = saveObjects(objs)
       console.log(
-        `[SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
+        `[tasks][SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
       )
+    }
+  }
+
+  // save players
+  if (players42.length > 0) {
+    //prepare data to send to database
+    const players = players42.map(p => {
+      return {
+        objectId: String(p.objectId),
+        playerId: String(p.objectId),
+        clanId: String(p.clanId),
+        kingdom: p.kingdom,
+        cityLevel: p.cityLevel,
+        kingdom: p.sourceKingdom,
+        x: p.sourceX,
+        y: p.sourceY,
+        hasShield: p.hasShield ? 1 : 0,
+        timestamp: p.timestamp
+      }
+    })
+
+    try {
+      const result = savePlayers(players)
+      console.log(`[tasks][SavePlayers] `, result)
+    } catch (e) {
+      console.error('[tasks][SavePlayers][extractDataFrom402', e.message)
     }
   }
 

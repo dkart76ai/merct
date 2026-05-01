@@ -66,7 +66,6 @@ async function processFindCommand(message) {
     // const userPosition = getUserPosition(message.author.id)
     // console.log('[BOT] User position:', userPosition)
 
-    //TODO: pass userid to findobjects,  so internally when findobjects are being called,
     // it uses user position to get objects closer to the user
 
     // Llamamos a la DB
