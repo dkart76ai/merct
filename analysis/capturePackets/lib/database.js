@@ -399,6 +399,11 @@ const savePlayers = getDb().transaction(players => {
   return { success: false }
 })
 
+function getPlayersIdFromKingdom(kingdom) {
+  const database = getDb()
+  return database.prepare('SELECT playerId FROM players where kingdom=?').all(kingdom)
+}
+
 function getStats() {
   const database = getDb()
 
@@ -513,6 +518,7 @@ module.exports = {
   saveObjects,
   findObjects,
   savePlayers,
+  getPlayersIdFromKingdom,
   saveUserPosition,
   getStats,
   clearDb,

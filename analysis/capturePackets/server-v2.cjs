@@ -34,6 +34,10 @@ const {
   closeDb
 } = require('./lib/database.js')
 const { getRedis } = require('./lib/redis.js')
+
+//TODO: remove below line after test
+const { getPlayerInfo402 } = require('./workers/tasks.js')
+
 loadEnvFile()
 const CHAT_CHANNEL_URL = process.env.CHAT_CHANNEL_URL || ''
 
@@ -581,6 +585,8 @@ async function handleStopTimer(req, res) {
   const timerManager = await getTimerManager()
 
   timerManager.stopScan(kingdom)
+
+  getPlayerInfo402(kingdom)
   res.json({ success: true, message: `Stopped timers for ${kingdom} kingdom` })
 }
 

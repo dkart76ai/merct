@@ -9,12 +9,13 @@ const {
   getRequestHeader,
   multiDecodeMsgPack2,
   encodeMsgPack2MultiFragments,
+  encodeBase64,
   scanPacket312,
   scanPacket402
 } = require('../lib/messagePack.js')
 const staticIdRedis = require('../lib/staticIdRedis')
 const { getRedis } = require('../lib/redis')
-const { saveObjects, savePlayers } = require('../lib/database')
+const { saveObjects, savePlayers, getPlayersIdFromKingdom } = require('../lib/database')
 
 // const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
 
@@ -82,6 +83,15 @@ const processPacket = async ({ request, response }) => {
 }
 
 // scan kingdom -----
+function buildPacket402Payload(playerIds, tokenBigInt, token) {
+  if (!tokenBigInt || !token) return null
+
+  const randomSeq = Math.floor(Math.random() * 32000) + 1
+  const packetData = [[402, randomSeq, [[tokenBigInt], token], ''], [playerIds.map(p => [p])]]
+
+  return packetData
+}
+
 function buildPacket312Payload(tiles, tokenBigInt, token) {
   if (!tokenBigInt || !token) return null
 
@@ -127,6 +137,7 @@ async function extractDataFrom402(response) {
     const players = players23.map(p => {
       return {
         objectId: String(p.objectId),
+        playerId: String(p.objectId),
         progressId: p.progressId,
         playerName: p.playerName,
         country: p.country,
@@ -267,6 +278,116 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   }
 }
 
+function generatePlayerArrays(playersIds) {
+  const groupedPlayers = []
+
+  while (playersIds.length > 0) {
+    // Generar un tamaño aleatorio entre 10 y 20
+    const randomSize = Math.floor(Math.random() * (20 - 10 + 1)) + 10
+
+    // .splice extrae los elementos y modifica el array original
+    const group = playersIds.splice(0, randomSize)
+
+    groupedPlayers.push(group)
+  }
+
+  return groupedPlayers
+}
+
+async function getPlayerInfo402(kingdom) {
+  // get player detail from specific kingdom
+  // get players Id from DB filter for kingdom
+  // build array of players ids, grouped on 20, or probably random from 10 to 20
+  // generate packet with those player id
+  // send to server
+  // extract and save data from result
+
+  console.log('task, getPlayerInfo402', { kingdom })
+
+  if (!kingdom) {
+    console.log('[getPlayerInfo402] No kingdom provided')
+    return { success: false, error: 'no kingdom' }
+  }
+
+  const redisClient = getRedis()
+
+  const _token1 = await redisClient.get('myPlayerId:BigInt')
+  if (!_token1) {
+    throw new Error('no session token1')
+  }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    throw new Error('no session token2')
+  }
+
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    throw new Error('invalid kingdom')
+  }
+
+  const HEADERS = {
+    'Content-Type': 'application/octet-stream',
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
+    Referer: 'https://totalbattle.com/'
+  }
+
+  console.log(`[getPlayerInfo402] Sending packets to ${url}  `)
+  try {
+    const token1 = BigInt(_token1)
+    const token2 = new Uint8Array(_token2)
+
+    const playerIdsDB = getPlayersIdFromKingdom(kingdom)
+    // console.log('[getPlayerInfo402] playersIds', playerIdsDB)
+
+    const playersArr = playerIdsDB.map(p => Number(p.playerId))
+    const playerIdsArray = generatePlayerArrays(playersArr)
+
+    //TODO: remove line below
+    const playerIds = playerIdsArray[0]
+
+    let players = 0
+    // for (const playerIds of playerIdsArray) {
+    const packetData402 = buildPacket402Payload(playerIds, token1, token2)
+
+    // Encode the packet
+    const encoded402 = encodeMsgPack2MultiFragments(packetData402)
+    console.log('encoded request base64', encodeBase64(encoded402))
+
+    // Send to server
+    console.log(`[getPlayerInfo402] Sending packet402 to ${url}  `)
+    const response402 = await fetch(url, {
+      method: 'POST',
+      headers: HEADERS,
+      body: encoded402
+    })
+
+    console.log('respnse', response402)
+
+    if (!response402.ok) {
+      throw new Error(`Server returned ${response402.status}: ${response402.statusText}`)
+    }
+
+    // Get response buffer
+    const buffer402 = await response402.arrayBuffer()
+    const bytes402 = new Uint8Array(buffer402)
+
+    console.log('encoded result base64', encodeBase64(bytes402))
+
+    const result = await extractDataFrom402(bytes402)
+    console.log('[getPlayerInfo402] extract dataaaaaaaaaaa', result.players23.length)
+
+    players += result.players23?.length || 0
+    // }
+
+    console.log(`[getPlayerInfo402] Success  players ${players} `)
+    return { success: true, players }
+  } catch (error) {
+    console.error(`[getPlayerInfo402] Error:`, error.message)
+  }
+}
+
 async function scanKingdom({ kingdom, shouldSaveObjects = false }) {
   console.log('task, scankingdom', { kingdom, shouldSaveObjects })
 
@@ -392,5 +513,6 @@ async function scanKingdom({ kingdom, shouldSaveObjects = false }) {
 
 module.exports = {
   processPacket,
+  getPlayerInfo402,
   scanKingdom
 }
