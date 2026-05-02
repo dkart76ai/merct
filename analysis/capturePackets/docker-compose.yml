@@ -23,8 +23,9 @@ services:
       - CHAT_ACCOUNT_USER=${CHAT_ACCOUNT_USER:-}
       - CHAT_ACCOUNT_PWD=${CHAT_ACCOUNT_PWD:-}
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      - DISCORD_CHANNELID=${DISCORD_CHANNELID:-}
     volumes:
-      - ./captures:/app/captures
+      - ./public:/app/captures
       - ./staticId-db.json:/app/staticId-db.json
       - ./myplayer.json:/app/myplayer.json
       - ./.env:/app/.env

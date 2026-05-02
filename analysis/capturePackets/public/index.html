@@ -84,6 +84,16 @@
         width: 18px;
         height: 18px;
       }
+      .container {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+      }
+      .side-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
 
       .panel {
         background: #252526;
@@ -175,220 +185,224 @@
   </head>
   <body>
     <div class="header"><h1>PlayWTB - Job Queue System</h1></div>
-
-    <!-- Browser Controls -->
-    <div class="panel">
-      <div class="panel-header">
-        <div>
-          Browser <span id="browserStatus" class="count">Stopped</span>
-          <span id="gameStatus" class="count">Stopped</span>
+    <div class="container">
+      <div class="side-container">
+        <!-- Browser Controls -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              Browser <span id="browserStatus" class="count">Stopped</span>
+              <span id="gameStatus" class="count">Stopped</span>
+            </div>
+            <div class="tokens">
+              <div>PlayerId: <span id="token1">none</span></div>
+              <div>Session Token: <span id="token2">none</span></div>
+            </div>
+          </div>
+          <div class="controls" style="padding: 15px">
+            <button id="btnBrowserStart">Start Browser</button>
+            <button id="btnBrowserStop" disabled class="danger">Stop Browser</button>
+            <button id="btnCaptureScreenshot">Capture screenshot</button>
+            <label>
+              <input type="checkbox" id="cbCapturing" disabled />
+              <span>Capture Packets for analysis</span>
+            </label>
+          </div>
         </div>
-        <div class="tokens">
-          <div>PlayerId: <span id="token1">none</span></div>
-          <div>Session Token: <span id="token2">none</span></div>
+
+        <div class="panel">
+          <div>
+            <input
+              type="text"
+              style="width: 100px"
+              id="defaultKingdom"
+              onchange="saveValue(this.value, 'defaultKingdom')"
+            />
+            <button type="button" id="btnSetDefaultKingdom">Set default kingdom</button>
+          </div>
+          <div>
+            <select id="gameChatChannelList">
+              <option value="none" disabled>None</option>
+            </select>
+            <button type="button" id="btnSetChatChannel">Set Chat Channel</button>
+            <button id="btnRefreshChatChannels" style="padding: 5px 10px; font-size: 12px">
+              Refresh
+            </button>
+          </div>
+
+          <!-- Chat Channels Management -->
+          <div class="panel" style="margin-top: 10px">
+            <div class="panel-header">Chat Channels for mercs</div>
+            <div class="controls" style="padding: 10px">
+              <select id="newChannelSelect">
+                <option value="">Select channel...</option>
+              </select>
+              <button id="btnAddChatChannel">Add</button>
+              <button id="btnRefreshChatChannel">Refresh</button>
+              <div id="chatChannelsList" class="list" style="margin-top: 10px">
+                <div class="list-item">No channels saved</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Queue Status -->
+        <div class="panel">
+          <div class="panel-header">
+            Job Queue
+            <button id="btnRefreshJobs" style="padding: 5px 10px; font-size: 12px">Refresh</button>
+          </div>
+          <div class="controls" style="padding: 15px">
+            <div class="stat">
+              <div class="stat-item">
+                <div class="stat-value" id="statWaiting">0</div>
+                <div class="stat-label">Waiting</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="statActive">0</div>
+                <div class="stat-label">Active</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="statCompleted">0</div>
+                <div class="stat-label">Completed</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="statFailed">0</div>
+                <div class="stat-label">Failed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>Scanner for Kingdom <span id="kingdom"></span></div>
+          </div>
+          <div class="controls" style="padding: 15px">
+            <button id="btnScanKingdom" disabled>Scan Now</button>
+            <div style="margin-left: 32px">
+              <span class="section-title">Interval (ms):</span>
+              <input
+                type="number"
+                id="timerInterval"
+                value="300000"
+                style="width: 100px"
+                onchange="saveValue(this.value, 'scanKingdomTimer')"
+              />
+            </div>
+            <button id="btnTimerStart" disabled>Start Timer</button>
+            <button id="btnTimerStop" class="danger" disabled>Stop Timer</button>
+          </div>
+        </div>
+
+        <!-- Other kingdoms Scanner periodic job scheduler -->
+        <div class="panel">
+          <div class="panel-header">Other Kingdoms Scanner</div>
+          <div class="controls" style="padding: 15px">
+            <input
+              type="text"
+              id="otherKingdoms"
+              onchange="saveValue(this.value, 'otherKingdoms')"
+              placeholder="147,142,143"
+              style="width: 250px"
+            />
+
+            <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
+            <button id="btnScanOtherKingdomsNow">Scan Now</button>
+            <div style="margin-left: 32px">
+              <span class="section-title">Interval (ms):</span>
+              <input
+                type="number"
+                id="timerIntervalOtherKingdoms"
+                value="300000"
+                style="width: 100px"
+                onchange="saveValue(this.value, 'otherKingdoms1Timer')"
+              />
+            </div>
+            <button id="btnScanOtherKingdomStart">Start Timer</button>
+            <button id="btnScanOtherKingdomStop" class="danger">Stop Timer</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="controls" style="padding: 15px">
+            <input
+              type="text"
+              id="otherKingdoms2"
+              onchange="saveValue(this.value, 'otherKingdoms2')"
+              placeholder="147,142,143"
+              style="width: 250px"
+            />
+
+            <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
+            <button id="btnScanOtherKingdomsNow2">Scan Now</button>
+            <div style="margin-left: 32px">
+              <span class="section-title">Interval (ms):</span>
+              <input
+                type="number"
+                id="timerIntervalOtherKingdoms2"
+                value="300000"
+                style="width: 100px"
+                onchange="saveValue(this.value, 'otherKingdoms2Timer')"
+              />
+            </div>
+            <button id="btnScanOtherKingdomStart2">Start Timer</button>
+            <button id="btnScanOtherKingdomStop2" class="danger">Stop Timer</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="controls" style="padding: 15px">
+            <input
+              type="text"
+              id="otherKingdoms3"
+              onchange="saveValue(this.value, 'otherKingdoms3')"
+              placeholder="147,142,143"
+              style="width: 250px"
+            />
+
+            <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
+            <button id="btnScanOtherKingdomsNow3">Scan Now</button>
+            <div style="margin-left: 32px">
+              <span class="section-title">Interval (ms):</span>
+              <input
+                type="number"
+                id="timerIntervalOtherKingdoms3"
+                value="300000"
+                style="width: 100px"
+                onchange="saveValue(this.value, 'otherKingdoms3Timer')"
+              />
+            </div>
+            <button id="btnScanOtherKingdomStart3">Start Timer</button>
+            <button id="btnScanOtherKingdomStop3" class="danger">Stop Timer</button>
+          </div>
+        </div>
+
+        <!-- Active Timers -->
+        <div class="panel">
+          <div class="panel-header">
+            Active Timers
+            <button id="btnRefreshTimers">Refresh</button>
+            <button id="btnStopAllTimers">Stop All</button>
+          </div>
+          <div class="list" id="timersList">
+            <div class="list-item">No active timers</div>
+          </div>
         </div>
       </div>
-      <div class="controls" style="padding: 15px">
-        <button id="btnBrowserStart">Start Browser</button>
-        <button id="btnBrowserStop" disabled class="danger">Stop Browser</button>
-        <button id="btnCaptureScreenshot">Capture screenshot</button>
-        <label>
-          <input type="checkbox" id="cbCapturing" disabled />
-          <span>Capture Packets for analysis</span>
-        </label>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div>
-        <input
-          type="text"
-          style="width: 100px"
-          id="defaultKingdom"
-          onchange="saveValue(this.value, 'defaultKingdom')"
-        />
-        <button type="button" id="btnSetDefaultKingdom">Set default kingdom</button>
-      </div>
-      <div>
-        <select id="gameChatChannelList">
-          <option value="none" disabled>None</option>
-        </select>
-        <button type="button" id="btnSetChatChannel">Set Chat Channel</button>
-        <button id="btnRefreshChatChannels" style="padding: 5px 10px; font-size: 12px">
-          Refresh
-        </button>
-      </div>
-
-      <!-- Chat Channels Management -->
-      <div class="panel" style="margin-top: 10px">
-        <div class="panel-header">Chat Channels for mercs</div>
-        <div class="controls" style="padding: 10px">
-          <select id="newChannelSelect">
-            <option value="">Select channel...</option>
-          </select>
-          <button id="btnAddChatChannel">Add</button>
-          <button id="btnRefreshChatChannel">Refresh</button>
-          <div id="chatChannelsList" class="list" style="margin-top: 10px">
-            <div class="list-item">No channels saved</div>
+      <div class="side-container">
+        <!-- Log -->
+        <div class="panel">
+          <div class="panel-header">Log</div>
+          <div class="log" id="log"></div>
+        </div>
+        <div class="panel">
+          <div class="img-container">
+            <img id="screenshot" src="screenshot.jpg" alt="screenshot" width="200px" />
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Job Queue Status -->
-    <div class="panel">
-      <div class="panel-header">
-        Job Queue
-        <button id="btnRefreshJobs" style="padding: 5px 10px; font-size: 12px">Refresh</button>
-      </div>
-      <div class="controls" style="padding: 15px">
-        <div class="stat">
-          <div class="stat-item">
-            <div class="stat-value" id="statWaiting">0</div>
-            <div class="stat-label">Waiting</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="statActive">0</div>
-            <div class="stat-label">Active</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="statCompleted">0</div>
-            <div class="stat-label">Completed</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="statFailed">0</div>
-            <div class="stat-label">Failed</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div>Scanner for Kingdom <span id="kingdom"></span></div>
-      </div>
-      <div class="controls" style="padding: 15px">
-        <button id="btnScanKingdom" disabled>Scan Now</button>
-        <div style="margin-left: 32px">
-          <span class="section-title">Interval (ms):</span>
-          <input type="number" id="timerInterval" value="60000" style="width: 100px" />
-        </div>
-        <button id="btnTimerStart" disabled>Start Timer</button>
-        <button id="btnTimerStop" class="danger" disabled>Stop Timer</button>
-      </div>
-    </div>
-
-    <!-- Other kingdoms Scanner periodic job scheduler -->
-    <div class="panel">
-      <div class="panel-header">Other Kingdoms Scanner</div>
-      <div class="controls" style="padding: 15px">
-        <input
-          type="text"
-          id="otherKingdoms"
-          onchange="saveValue(this.value, 'otherKingdoms')"
-          placeholder="147,142,143"
-          style="width: 250px"
-        />
-
-        <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
-        <button id="btnScanOtherKingdomsNow">Scan Now</button>
-        <div style="margin-left: 32px">
-          <span class="section-title">Interval (ms):</span>
-          <input type="number" id="timerIntervalOtherKingdoms" value="60000" style="width: 100px" />
-        </div>
-        <button id="btnScanOtherKingdomStart">Start Timer</button>
-        <button id="btnScanOtherKingdomStop" class="danger">Stop Timer</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="controls" style="padding: 15px">
-        <input
-          type="text"
-          id="otherKingdoms2"
-          onchange="saveValue(this.value, 'otherKingdoms2')"
-          placeholder="147,142,143"
-          style="width: 250px"
-        />
-
-        <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
-        <button id="btnScanOtherKingdomsNow2">Scan Now</button>
-        <div style="margin-left: 32px">
-          <span class="section-title">Interval (ms):</span>
-          <input
-            type="number"
-            id="timerIntervalOtherKingdoms2"
-            value="60000"
-            style="width: 100px"
-          />
-        </div>
-        <button id="btnScanOtherKingdomStart2">Start Timer</button>
-        <button id="btnScanOtherKingdomStop2" class="danger">Stop Timer</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="controls" style="padding: 15px">
-        <input
-          type="text"
-          id="otherKingdoms3"
-          onchange="saveValue(this.value, 'otherKingdoms3')"
-          placeholder="147,142,143"
-          style="width: 250px"
-        />
-
-        <!-- <input type="number" id="mercLevel" placeholder="Min Level" style="width: 100px" /> -->
-        <button id="btnScanOtherKingdomsNow3">Scan Now</button>
-        <div style="margin-left: 32px">
-          <span class="section-title">Interval (ms):</span>
-          <input
-            type="number"
-            id="timerIntervalOtherKingdoms3"
-            value="60000"
-            style="width: 100px"
-          />
-        </div>
-        <button id="btnScanOtherKingdomStart3">Start Timer</button>
-        <button id="btnScanOtherKingdomStop3" class="danger">Stop Timer</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div>Find objects in K: <span id="kingdomObj"></span></div>
-      </div>
-      <div class="controls" style="padding: 15px">
-        <label
-          >Amount : <input type="number" id="objectAmount" value="10" style="width: 100px"
-        /></label>
-        <label
-          >Object name :
-          <input type="text" id="objectName" placeholder="cripta" style="width: 250px" /></label
-        ><label
-          >Amount : <input type="number" id="objectLevel" value="20" style="width: 100px"
-        /></label>
-        <button id="btnFindObjects">Search</button>
-      </div>
-    </div>
-
-    <!-- Active Timers -->
-    <div class="panel">
-      <div class="panel-header">
-        Active Timers
-        <button id="btnRefreshTimers">Refresh</button>
-        <button id="btnStopAllTimers">Stop All</button>
-      </div>
-      <div class="list" id="timersList">
-        <div class="list-item">No active timers</div>
-      </div>
-    </div>
-
-    <!-- Log -->
-    <div class="panel">
-      <div class="panel-header">Log</div>
-      <div class="log" id="log"></div>
-    </div>
-
     <script>
       const API = '/api'
       let refreshInterval = null
@@ -480,9 +494,9 @@
             document.getElementById('cbCapturing').checked = data.capturing
 
             const kingdomEl = document.getElementById('kingdom')
-            const kingdomEl2 = document.getElementById('kingdomObj')
+
             kingdomEl.textContent = data.kingdom
-            kingdomEl2.textContent = data.kingdom
+
             document.getElementById('btnScanKingdom').disabled = data?.kingdom.trim() == ''
             document.getElementById('btnTimerStart').disabled = data?.kingdom.trim() == ''
             document.getElementById('btnTimerStop').disabled = data?.kingdom.trim() == ''
@@ -567,33 +581,16 @@
       }
 
       // Browser handlers
-      document.getElementById('btnFindObjects').addEventListener('click', async () => {
-        const name = document.getElementById('objectName').value.trim()
-        const level = parseInt(document.getElementById('objectLevel').value) || 0
-        const amount = parseInt(document.getElementById('objectAmount').value) || 0
-
-        log(`Searching for objects: ${objectAmount} ${objectName} lvl: ${objectLevel}`)
-        const res = await fetch(API + '/api/objects/find-and-notify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, level, amount })
-        })
-        const data = await res.json()
-        if (data.success) {
-          log('result: ')
-        } else {
-          log('Error: ' + data.error)
-        }
-      })
 
       document.getElementById('btnCaptureScreenshot').addEventListener('click', async () => {
-        log('Capturing screenshot...')
+        // log('Capturing screenshot...')
         const res = await fetch(API + '/screenshot', { method: 'GET' })
         const data = await res.json()
         if (data.success) {
-          log('Screenshot ready')
+          // log('Screenshot ready')
+          document.getElementById('screenshot').src = `screenshot.jpg?t=${Date.now()}`
         } else {
-          log('Error: ' + data.error)
+          // log('Error: ' + data.error)
         }
       })
 
@@ -643,7 +640,7 @@
         localStorage.setItem(key, val)
       }
 
-      window.onload = function () {
+      window.addEventListener('DOMContentLoaded', () => {
         const defaultKingdom = localStorage.getItem('defaultKingdom')
         if (defaultKingdom) {
           document.getElementById('defaultKingdom').value = defaultKingdom
@@ -663,7 +660,27 @@
         if (otherKingdoms3) {
           document.getElementById('otherKingdoms3').value = otherKingdoms3
         }
-      }
+
+        const scanKingdomTimer = localStorage.getItem('scanKingdomTimer')
+        if (scanKingdomTimer) {
+          document.getElementById('timerInterval').value = scanKingdomTimer
+        }
+
+        const otherKingdoms1Timer = localStorage.getItem('otherKingdoms1Timer')
+        if (otherKingdoms1Timer) {
+          document.getElementById('timerIntervalOtherKingdoms').value = otherKingdoms1Timer
+        }
+
+        const otherKingdoms2Timer = localStorage.getItem('otherKingdoms2Timer')
+        if (otherKingdoms2Timer) {
+          document.getElementById('timerIntervalOtherKingdoms2').value = otherKingdoms2Timer
+        }
+
+        const otherKingdoms3Timer = localStorage.getItem('otherKingdoms3Timer')
+        if (otherKingdoms3Timer) {
+          document.getElementById('timerIntervalOtherKingdoms3').value = otherKingdoms3Timer
+        }
+      })
       // document.getElementById('defaultKingdom').addEventListener('change',()=>{
       // })
       document.getElementById('btnSetDefaultKingdom').addEventListener('click', async () => {
@@ -814,7 +831,7 @@
 
       document.getElementById('btnTimerStart').addEventListener('click', async () => {
         // const kingdoms = document.getElementById('kingdoms').value.trim()
-        const interval = parseInt(document.getElementById('timerInterval').value) || 60000
+        const interval = parseInt(document.getElementById('timerInterval').value) || 300000
         // if (!kingdoms) return log('Enter kingdoms')
 
         const res = await fetch(API + '/timer/start', {
@@ -866,7 +883,7 @@
       document.getElementById('btnScanOtherKingdomStart').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms').value
         const interval =
-          parseInt(document.getElementById('timerIntervalOtherKingdoms').value) || 60000
+          parseInt(document.getElementById('timerIntervalOtherKingdoms').value) || 300000
         const res = await fetch(API + '/timer/scan-other-kingdoms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -912,7 +929,7 @@
       document.getElementById('btnScanOtherKingdomStart2').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms2').value
         const interval =
-          parseInt(document.getElementById('timerIntervalOtherKingdoms2').value) || 60000
+          parseInt(document.getElementById('timerIntervalOtherKingdoms2').value) || 300000
         const res = await fetch(API + '/timer/scan-other-kingdoms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -958,7 +975,7 @@
       document.getElementById('btnScanOtherKingdomStart3').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms3').value
         const interval =
-          parseInt(document.getElementById('timerIntervalOtherKingdoms3').value) || 60000
+          parseInt(document.getElementById('timerIntervalOtherKingdoms3').value) || 300000
         const res = await fetch(API + '/timer/scan-other-kingdoms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

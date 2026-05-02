@@ -7,21 +7,6 @@ const PREFIX = 'staticid:'
 const INDEX_KEY = 'staticid:index'
 const DB_FILE = path.join(__dirname, '..', 'staticId-db.json')
 
-// let redis = null
-
-// function getRedis() {
-//   if (!redis) {
-//     redis = new Redis({
-//       host: process.env.REDIS_HOST || 'localhost',
-//       port: parseInt(process.env.REDIS_PORT || '6379'),
-//       maxRetriesPerRequest: null
-//     })
-//     redis.on('error', err => {
-//       console.error('[StaticIdRedis] Redis error:', err.message)
-//     })
-//   }
-//   return redis
-// }
 async function setupIndex() {
   const r = getRedis()
 
@@ -53,6 +38,8 @@ async function setupIndex() {
 
 async function init() {
   const r = getRedis()
+  // await r.del(INDEX_KEY) // delete specific key
+  // await r.flushdb()  // clean all
   const count = await r.scard(INDEX_KEY)
   if (count === 0 && fs.existsSync(DB_FILE)) {
     console.log('[StaticIdRedis] Loading existing staticId-db.json into Redis...')

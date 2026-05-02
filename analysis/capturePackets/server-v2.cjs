@@ -13,7 +13,8 @@ const {
   getRequestHeader,
   getMsgPack2ndBlockRequest,
   scanPacket312,
-  encodeBase64
+  encodeBase64,
+  scanPacket402
 } = require('./lib/messagePack.js')
 const { addGameNotificationJob } = require('./jobs/index')
 
@@ -40,7 +41,7 @@ const { getRedis } = require('./lib/redis.js')
 const { getPlayerInfo402 } = require('./workers/tasks.js')
 
 const opCodeInfo = {
-  2: 'appear when click on clan button',
+  2: 'appear when click on clan button/claim chest',
   24: 'appear when click on clan button',
   203: 'account info',
   208: 'gift ?',
@@ -127,9 +128,9 @@ const logStream = createStream('traffic.bin', {
   path: LOGS_DIR
 })
 
-const logStream2 = createStream('traffic.bin', {
-  size: '2M', // Rota cada 10MB para que sean fáciles de descargar
-  interval: '30m', // O cada día
+const logStream2 = createStream('decoded.bin', {
+  size: '600K', // Rota cada 10MB para que sean fáciles de descargar
+  interval: '10m', // O cada día
   path: LOGS_DIR2
 })
 
@@ -173,52 +174,35 @@ function savePacketByOpcode(opCode, packetBuffer) {
 
 // Función para guardar el par (Llamada desde tu lógica de red)
 function saveTrafficPair(url, reqBuffer, resBuffer, opCode) {
-  const pair = {
-    ts: Date.now(),
-    url,
-    opCode,
-    req: reqBuffer, // Buffer original de MessagePack
-    res: resBuffer // Buffer original de MessagePack
-  }
-
-  // Serializamos el par completo
-  const encoded = msgpack.encode(pair)
-  logStream.write(encoded)
-
-  // // try again !! save decoded data
-  // const { results: decodedRequest } = multiDecodeMsgPack2(reqBuffer, true)
-  // const { results: decodedResponse } = multiDecodeMsgPack2(resBuffer)
-  // const pair2 = {
+  // const pair = {
   //   ts: Date.now(),
   //   url,
   //   opCode,
-  //   req: decodedRequest, // Buffer original de MessagePack
-  //   res: decodedResponse // Buffer original de MessagePack
+  //   req: reqBuffer, // Buffer original de MessagePack
+  //   res: resBuffer // Buffer original de MessagePack
   // }
-  // logStream2.write(const encoded = JSON.stringify(
-  //   pair2,
-  //   (k, v) => (typeof v === 'bigint' ? v.toString() : v),
-  //   2
-  // ))
+
+  // Serializamos el par completo
+  // const encoded = msgpack.encode(pair)
+  // logStream.write(encoded)
+
+  // // try again !! save decoded data
+  const { results: decodedRequest } = multiDecodeMsgPack2(reqBuffer, false)
+  const { results: decodedResponse } = multiDecodeMsgPack2(resBuffer)
+
+  const { players23 } = scanPacket402(resBuffer)
+  const pair2 = {
+    ts: Date.now(),
+    url,
+    opCode,
+    reqB64: encodeBase64(reqBuffer),
+    resB64: encodeBase64(resBuffer),
+    req: decodedRequest, // Buffer original de MessagePack
+    res: decodedResponse, // Buffer original de MessagePack
+    players402: players23.length || 0
+  }
+  logStream2.write(JSON.stringify(pair2, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2))
 }
-
-// function getFirstValue(data, depth = 0) {
-//   if (depth > 10) return null // Prevent stack overflow on circular/deep structures
-//   if (!data || !Array.isArray(data)) return null
-
-//   try {
-//     for (let item of data) {
-//       if (typeof item === 'number') return item
-//       if (Array.isArray(item)) {
-//         const resultado = getFirstValue(item, depth + 1)
-//         if (resultado !== undefined) return resultado
-//       }
-//     }
-//   } catch (e) {
-//     console.error('[getFirstValue] ', e.message)
-//   }
-//   return null
-// }
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -503,10 +487,10 @@ function setupPacketCaptureListener() {
       const { opCode: opCode } = getRequestHeader(postDataBuff)
 
       if (capturingEnabled) {
-        // const ignoreOpcodes = [318]
-        // if (!ignoreOpcodes.includes(opCode)) {
-        //   saveTrafficPair(url, postDataBuff, responseBody, opCode)
-        // }
+        const ignoreOpcodes = [318]
+        if (!ignoreOpcodes.includes(opCode)) {
+          saveTrafficPair(url, postDataBuff, responseBody, opCode)
+        }
 
         if (![314, 318, 601, 24201].includes(opCode)) {
           const packetDescription = opCodeInfo[opCode] || ''
@@ -551,26 +535,40 @@ async function browserInitialize() {
   console.log('....launching browser')
   browser = await firefox.launch({
     headless: process.env.HEADLESS !== 'false',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage', // Clave para evitar crashes en contenedores
-      '--use-gl=angle', // Fuerza el uso de la capa de abstracción de gráficos
-      // '--use-angle=gl', // Selecciona el motor GL
-      '--use-angle=swiftshader', // FUERZA el renderizado por software (SwiftShader)
-      '--ignore-gpu-blocklist' // Ignora la lista negra de GPUs no compatibles
-    ]
+    // args: [
+    //   '--no-sandbox',
+    //   '--disable-setuid-sandbox',
+    //   '--disable-dev-shm-usage', // Clave para evitar crashes en contenedores
+    //   '--use-gl=angle', // Fuerza el uso de la capa de abstracción de gráficos
+    //   // '--use-angle=gl', // Selecciona el motor GL
+    //   '--use-angle=swiftshader', // FUERZA el renderizado por software (SwiftShader)
+    //   '--ignore-gpu-blocklist' // Ignora la lista negra de GPUs no compatibles
+    // ],
+    firefoxUserPrefs: {
+      'webgl.force-enabled': true, // Ignora la lista negra de GPUs
+      'webgl.disabled': false, // Asegura que no esté desactivado
+      'webgl.enable-webgl2': true, // Habilita WebGL 2
+      'layers.acceleration.force-enabled': true,
+      'gfx.webrender.all': true, // Fuerza el motor de renderizado moderno
+      'gfx.webrender.software': true, // Específico para entornos sin GPU (Docker)
+      'media.autoplay.default': 1,
+      'media.autoplay.enabled.user-gestures-needed': false,
+      'media.volume_scale': '0.0' // Establece el volumen maestro a 0
+    }
   })
   const options = {
-    screen: { width: 1360, height: 1024 },
-    viewport: { width: 1360, height: 1024 },
+    screen: { width: 1024, height: 768 },
+    viewport: { width: 1024, height: 768 },
     deviceScaleFactor: 1,
     userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     extraHTTPHeaders: {
       'Accept-Language': 'en-US,en;q=0.9',
       'sec-ch-ua': '"Chromium";v="125", "Not(A:Brand";v="99", "Google Chrome";v="125"' // Remove "HeadlessChrome"
-    }
+    },
+    muteAudio: true,
+    isMobile: false,
+    hasTouch: false
   }
 
   context = await browser.newContext(options)
@@ -585,12 +583,13 @@ async function browserLoadUrlAndLogin() {
 
   await page.goto('https://totalbattle.com/es', { waitUntil: 'domcontentloaded' })
   console.log('launching totalbattle, wait ')
-  await page.waitForTimeout(120000)
 
   const loginInput = page.getByRole('textbox', { name: 'E-mail' })
   const loginButtonTab = page.locator('span[data-id="login"]')
   const passwordInput = page.getByRole('textbox', { name: 'Contraseña' })
   const loginButton = page.getByRole('button', { name: 'Iniciar sesión' })
+
+  await loginButtonTab.waitFor({ state: 'visible', timeout: 120000 })
 
   try {
     // 1. Abrir pestaña de login (si es necesario)
@@ -619,7 +618,12 @@ async function browserLoadUrlAndLogin() {
     await loginInput.waitFor({ state: 'hidden', timeout: 5000 })
     console.log('Login exitoso')
 
-    await page.screenshot({ path: 'captures/screenshot.png' })
+    await page.screenshot({
+      path: `public/screenshot.jpg`,
+      type: 'jpeg',
+      quality: 30,
+      fullPage: false
+    })
 
     await monitor()
   } catch (error) {
@@ -634,12 +638,16 @@ async function monitor() {
 
       // 1. Presionar la tecla Escape
       await page.keyboard.press('Escape')
+      await page.keyboard.press('Escape')
+      await page.keyboard.press('Escape')
       console.log(`[${timestamp}] Tecla Escape presionada.`)
 
       // 2. Tomar captura de pantalla
       // Se guarda en /app/captures que está mapeado a tu host
       await page.screenshot({
-        path: `captures/screenshot.png`,
+        path: `public/screenshot.jpg`,
+        type: 'jpeg',
+        quality: 30,
         fullPage: false
       })
       console.log(`[${timestamp}] Captura guardada.`)
@@ -707,7 +715,7 @@ async function handleStopTimer(req, res) {
 
   timerManager.stopScan(kingdom)
 
-  getPlayerInfo402(kingdom)
+  // getPlayerInfo402(kingdom)
   res.json({ success: true, message: `Stopped timers for ${kingdom} kingdom` })
 }
 
@@ -1000,10 +1008,15 @@ app.post('/api/objects/find-and-notify', async (req, res) => {
 // })
 app.get('/api/screenshot', async (req, res) => {
   if (!page) {
-    return res.json({ success: true })
+    return res.json({ success: false, error: 'browser not ready' })
   }
 
-  await page.screenshot({ path: 'captures/screenshot.png' })
+  await page.screenshot({
+    path: `public/screenshot.jpg`,
+    type: 'jpeg',
+    quality: 30,
+    fullPage: false
+  })
   res.json({ success: true })
 })
 
