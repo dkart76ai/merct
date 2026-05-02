@@ -16,10 +16,16 @@ const {
   encodeBase64,
   scanPacket402
 } = require('./lib/messagePack.js')
-const { addGameNotificationJob } = require('./jobs/index')
 
-const { addJob, initializeWorkers, stopWorkers } = require('./jobs/index.js')
-const { getTimerManager, cleanOldJobs, getQueueStatus, closeQueue } = require('./jobs/queues.js')
+const { initializeWorkers, stopWorkers } = require('./jobs/index.js')
+const {
+  addJob,
+  getTimerManager,
+  addGameNotificationJob,
+  cleanOldJobs,
+  getQueueStatus,
+  closeQueue
+} = require('./jobs/queues.js')
 const { JOB_TYPES, PRIORITY } = require('./jobs/constants.js')
 const { getPool, processPacket, scanKingdomWorker } = require('./lib/workerPool.js')
 
@@ -1193,7 +1199,7 @@ async function main() {
     console.log('  POST /api/channels - Add chat channel')
     console.log('  DELETE /api/channels/:index - Remove chat channel')
 
-    // notifyDiscord('٩(̾●̮̮̃̾•̃̾)۶') //┌∩┐(◣_◢)┌∩┐
+    notifyDiscord('٩(̾●̮̮̃̾•̃̾)۶') //┌∩┐(◣_◢)┌∩┐
     // sendMessage(CHAT_CHANNEL_URL,'٩(̾●̮̮̃̾•̃̾)۶') // ۜ\(סּںסּَ` )/ۜ
   })
 

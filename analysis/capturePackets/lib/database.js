@@ -224,7 +224,7 @@ function saveObjects(objects) {
     updated: 0,
     objects: []
   }
-  console.log('[DB] Saving object, db:', DB_FILE)
+  // console.log('[DB] Saving object, db:', DB_FILE)
   const database = getDb()
   const insert = database.prepare(`
     INSERT INTO objects (key, objectId, staticId, name, level, kingdom, x, y, timestamp, firstSeenAt, lastSeenAt, seenCount, warning, data)
@@ -279,7 +279,7 @@ function saveObjects(objects) {
   transaction.immediate(objects)
 
   // stats.lastSavedAt = Date.now()
-  console.log('[database] objects saved', objects.length)
+  // console.log('[database] objects saved', objects.length)
   return results
 }
 
@@ -329,6 +329,9 @@ function findObjects(query) {
     sql += ' AND level = ?'
     params.push(level)
   }
+
+  sql += ' AND kingdom = ?'
+  params.push(146)
 
   sql += ' ORDER BY distance ASC, lastSeenAt DESC LIMIT ?'
   params.push(amount)

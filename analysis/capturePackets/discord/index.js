@@ -7,7 +7,7 @@ const {
   ButtonStyle
 } = require('discord.js')
 const { findObjects, saveUserPosition, deleteObject } = require('../lib/database')
-const { addGameNotificationJob } = require('../jobs/index')
+const { addGameNotificationJob } = require('../jobs/queues')
 
 loadEnvFile()
 

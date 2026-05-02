@@ -1,7 +1,7 @@
 const { styleText } = require('node:util')
 
 console.log(styleText('green', 'This is green!'))
-const { parentPort } = require('worker_threads')
+// const { parentPort } = require('worker_threads')
 const { Piscina } = require('piscina')
 const path = require('path')
 const { kingdomUrls } = require('../lib/kingdomUrls.js')
@@ -16,6 +16,7 @@ const {
 const staticIdRedis = require('../lib/staticIdRedis')
 const { getRedis } = require('../lib/redis')
 const { saveObjects, savePlayers, getPlayersIdFromKingdom } = require('../lib/database')
+const { addDiscordNotificationJob, addGameNotificationJob } = require('../jobs/queues.js')
 
 // const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
 
@@ -147,9 +148,9 @@ function buildPacket22Payload(tokenBigInt, token) {
 }
 
 async function extractDataFrom402(response) {
-  console.log(styleText('yellow', 'extractDataFrom402'))
+  // console.log(styleText('yellow', 'extractDataFrom402'))
   const { players23 } = scanPacket402(response)
-  console.log('scanPacket402: players23:', players23.length)
+  console.log('[tasks][extractDataFrom402] scanPacket402: players23:', players23.length)
 
   // save players
   if (players23.length > 0) {
@@ -175,9 +176,9 @@ async function extractDataFrom402(response) {
     })
     try {
       const result = savePlayers(players)
-      console.log(`[tasks][SavePlayers] `, result)
+      // console.log(`[tasks][extractDataFrom402][SavePlayers] `, result)
     } catch (e) {
-      console.error('[tasks][SavePlayers][extractDataFrom402', e.message)
+      console.error('[tasks][extractDataFrom402][SavePlayers] error', e.message)
     }
   }
 
@@ -188,62 +189,49 @@ async function extractDataFrom402(response) {
 }
 
 async function extractDataFrom312(response, shouldSaveObjects = false) {
-  console.log(styleText('red', 'extractDataFrom312'))
+  // console.log(styleText('red', 'extractDataFrom312'))
 
   const { players42, objects12 } = scanPacket312(response)
-  console.log('scanPacket312: players42:', players42.length)
-  console.log('scanPacket312: objects12:', objects12.length)
+  console.log('[tasks][extractDataFrom312] scanPacket312: players42:', players42.length)
+  console.log('[tasks][extractDataFrom312] scanPacket312: objects12:', objects12.length)
 
-  objects12.forEach(async o => {
-    const dbEntry = await staticIdRedis.getStaticIdData(o.staticId)
+  // if (parentPort) {
+  //   objects12.forEach(async o => {
+  //     const dbEntry = await staticIdRedis.getStaticIdData(o.staticId)
 
-    const isComplete = dbEntry && dbEntry.name && dbEntry.level != null && dbEntry.level >= 0
+  //     const isComplete = dbEntry && dbEntry.name && dbEntry.level != null && dbEntry.level >= 0
 
-    // NOTE : dont delete static id updater
-    if (!isComplete) {
-      // await staticIdRedis.addOrUpdateStaticId(o.staticId, {
-      //   level: o.level
-      // })
+  //     // NOTE : dont delete static id updater
+  //     if (!isComplete) {
+  //       // await staticIdRedis.addOrUpdateStaticId(o.staticId, {
+  //       //   level: o.level
+  //       // })
 
-      console.log(
-        `[worker-task] found staticid:${o.staticId}, ${o.kingdom},${o.x},${o.y}  level:${o.level}`
-      )
-      console.log(
-        `[worker-task] ${o.staticId} on db  ${dbEntry?.name || 'unknown name'} level:${dbEntry?.level || 'unknown level'}`
-      )
+  //       console.log(
+  //         `[worker-task] found staticid:${o.staticId}, ${o.kingdom},${o.x},${o.y}  level:${o.level}`
+  //       )
+  //       console.log(
+  //         `[worker-task] ${o.staticId} on db  ${dbEntry?.name || 'unknown name'} level:${dbEntry?.level || 'unknown level'}`
+  //       )
+  //     }
 
-      parentPort.postMessage({
-        cmd: 'sendmsg',
-        reason: 'missing data',
-        coords: { k: o.kingdom, x: o.x, y: o.y },
-        staticId: o.staticId
-      })
-    }
-
-    if (o.staticId === 400) {
-      parentPort.postMessage({
-        cmd: 'merc',
-        reason: '',
-        coords: { k: o.kingdom, x: o.x, y: o.y },
-        staticId: o.staticId
-      })
-    }
-
-    // const dragonMounds = [199, 200, 201, 202, 203]
-    // const wellSprings = [208, 209, 210, 211, 212]
-    // const villages = [34, 521, 522, 523, 524, 525, 40025, 40449, 40451]
-    // const allStaticIds = [...dragonMounds, ...wellSprings, ...villages]
-    // if (allStaticIds.includes(o.staticId)) {
-    //   //village lvl 25
-    //   parentPort.postMessage({
-    //     cmd: 'poi',
-    //     reason: '',
-    //     coords: { k: o.kingdom, x: o.x, y: o.y },
-    //     staticId: o.staticId
-    //   })
-    // }
-    // END NOTE
-  })
+  //     // const dragonMounds = [199, 200, 201, 202, 203]
+  //     // const wellSprings = [208, 209, 210, 211, 212]
+  //     // const villages = [34, 521, 522, 523, 524, 525, 40025, 40449, 40451]
+  //     // const allStaticIds = [...dragonMounds, ...wellSprings, ...villages]
+  //     // if (allStaticIds.includes(o.staticId)) {
+  //     //   //village lvl 25
+  //     //   parentPort.postMessage({
+  //     //     cmd: 'poi',
+  //     //     reason: '',
+  //     //     coords: { k: o.kingdom, x: o.x, y: o.y },
+  //     //     staticId: o.staticId
+  //     //   })
+  //     // }
+  //     // END NOTE
+  //   })
+  // } else {
+  // direct call, no worker threads
 
   //populate objects with name from redis
   const objectsPromises = objects12.filter(Boolean).map(async o => {
@@ -257,12 +245,47 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   // 2. Esperamos a que TODAS se resuelvan
   const objs = await Promise.all(objectsPromises)
 
+  const mercenaries = objs.filter(o => o.staticId === 400)
+  if (mercenaries.length > 0) {
+    const lines = mercenaries.map(m => {
+      return ` K:${m.kingdom} X:${m.x} Y:${m.y} (${m.name || 'Desconocido'})`
+    })
+
+    // 3. Ahora sí podemos unir las strings
+    let batchContent = lines.join('\n')
+    console.log(styleText('green', 'MERCENARIES FOUND!'))
+    console.log(styleText('green', 'MERCENARIES FOUND!'))
+    console.log(styleText('green', 'MERCENARIES FOUND!'))
+    console.log(styleText('green', 'MERCENARIES FOUND!'))
+
+    // Añadimos UN solo job que contiene muchas líneas
+    await addDiscordNotificationJob({
+      content: batchContent, // Asegúrate de que tu worker de Discord use este campo
+      isBatch: true,
+      count: lines.length
+    })
+
+    for (merc of mercenaries) {
+      await addGameNotificationJob({
+        object: {
+          k: merc.kingdom,
+          x: merc.x,
+          y: merc.y,
+          staticId: merc.staticId
+        },
+        message: ``,
+        toMainChannel: false
+      })
+    }
+  }
+  // }
+
   if (shouldSaveObjects) {
     if (objs.length > 0) {
-      console.log('saveobject', objs[0])
+      // console.log('[tasks][extractDataFrom312] [SaveObjects] ', objs[0])
       const result = saveObjects(objs)
       console.log(
-        `[tasks][SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
+        `[tasks][extractDataFrom312] [SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
       )
     }
   }
@@ -287,9 +310,9 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
 
     try {
       const result = savePlayers(players)
-      console.log(`[tasks][SavePlayers] `, result)
+      // console.log(`[tasks][extractDataFrom312][SavePlayers] `, result)
     } catch (e) {
-      console.error('[tasks][SavePlayers][extractDataFrom402', e.message)
+      console.error('[tasks][extractDataFrom312][SavePlayers] error', e.message)
     }
   }
 
@@ -324,10 +347,10 @@ async function getPlayerInfo402(kingdom) {
   // send to server
   // extract and save data from result
 
-  console.log('task, getPlayerInfo402', { kingdom })
+  // console.log('[tasks][getPlayerInfo402]', { kingdom })
 
   if (!kingdom) {
-    console.log('[getPlayerInfo402] No kingdom provided')
+    console.log('[tasks][getPlayerInfo402] No kingdom provided')
     return { success: false, error: 'no kingdom' }
   }
 
@@ -355,7 +378,7 @@ async function getPlayerInfo402(kingdom) {
     Referer: 'https://totalbattle.com/'
   }
 
-  console.log(`[getPlayerInfo402] Sending packets to ${url}  `)
+  // console.log(`[tasks] [getPlayerInfo402] Sending packets to ${url}  `)
   try {
     const token1 = BigInt(_token1)
     const token2 = new Uint8Array(_token2)
@@ -364,7 +387,7 @@ async function getPlayerInfo402(kingdom) {
     const packetData40001 = buildPacket41000Payload(token1, token2)
     // Encode the packet
     const encoded40001 = encodeMsgPack2MultiFragments(packetData40001)
-    console.log('encoded request base64', encodeBase64(encoded40001))
+    // console.log('[tasks][getPlayerInfo402]encoded request base64', encodeBase64(encoded40001))
 
     const playerIdsDB = getPlayersIdFromKingdom(kingdom)
     // console.log('[getPlayerInfo402] playersIds', playerIdsDB)
@@ -375,14 +398,14 @@ async function getPlayerInfo402(kingdom) {
 
     for (const playerIds of playerIdsArray.slice(0, 5)) {
       // Send to server 40001
-      console.log(`[getPlayerInfo40001] Sending packet40001 to ${url}  `, playerIds)
+      // console.log(`[tasks][getPlayerInfo402]  Sending packet40001 to ${url}  `, playerIds)
       const response40001 = await fetch(url, {
         method: 'POST',
         headers: HEADERS,
         body: encoded40001
       })
 
-      console.log('respnse', response40001)
+      // console.log('[tasks][getPlayerInfo402] getPlayerInfo40001 respnse', response40001)
 
       if (!response40001.ok) {
         throw new Error(`Server returned ${response40001.status}: ${response40001.statusText}`)
@@ -392,7 +415,7 @@ async function getPlayerInfo402(kingdom) {
       const buffer40001 = await response40001.arrayBuffer()
       const bytes40001 = new Uint8Array(buffer40001)
 
-      console.log('40001 encoded result base64', encodeBase64(bytes40001))
+      // console.log('[tasks][getPlayerInfo402]40001 encoded result base64', encodeBase64(bytes40001))
 
       //-----410000 fin
 
@@ -401,17 +424,17 @@ async function getPlayerInfo402(kingdom) {
 
       // Encode the packet
       const encoded402 = encodeMsgPack2MultiFragments(packetData402)
-      console.log('402 encoded request base64', encodeBase64(encoded402))
+      // console.log('[tasks][getPlayerInfo402]402 encoded request base64', encodeBase64(encoded402))
 
       // Send to server
-      console.log(`[getPlayerInfo402] Sending packet402 to ${url}  `)
+      // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
       const response402 = await fetch(url, {
         method: 'POST',
         headers: HEADERS,
         body: encoded402
       })
 
-      console.log('respnse', response402)
+      // console.log('[getPlayerInfo402] respnse', response402)
 
       if (!response402.ok) {
         throw new Error(`Server returned ${response402.status}: ${response402.statusText}`)
@@ -421,32 +444,32 @@ async function getPlayerInfo402(kingdom) {
       const buffer402 = await response402.arrayBuffer()
       const bytes402 = new Uint8Array(buffer402)
 
-      console.log('encoded result base64', encodeBase64(bytes402))
+      // console.log('[tasks][getPlayerInfo402]encoded result base64', encodeBase64(bytes402))
 
       const result402 = await extractDataFrom402(bytes402)
 
-      console.log(
-        styleText('red', '[getPlayerInfo402] extract dataaaaaaaaaaa'),
-        result402.players23.length
-      )
+      // console.log(
+      //   styleText('red', '[tasks] [getPlayerInfo402] extract dataaaaaaaaaaa'),
+      //   result402.players23.length
+      // )
 
       players += result402.players23?.length || 0
     }
 
-    console.log(`[getPlayerInfo402] Success  players ${players} `)
+    // console.log(`[tasks] [getPlayerInfo402] Success  players ${players} `)
     return { success: true, players }
   } catch (error) {
-    console.error(`[getPlayerInfo402] Error:`, error.message)
+    console.error(`[tasks] [getPlayerInfo402] Error:`, error.message)
   }
 }
 
 async function scanKingdomTask(data) {
-  console.log('task,scankingdom data', data)
+  // console.log('[tasks] [scanKingdomTask] data', data)
   const { kingdom, shouldSaveObjects = false } = data
-  console.log('task, scankingdom', { kingdom, shouldSaveObjects })
+  // console.log('[tasks][scanKingdomTask]', { kingdom, shouldSaveObjects })
 
   if (!kingdom) {
-    console.log('[scanKingdom:worker] No kingdom provided')
+    console.log('[tasks][scanKingdomTask] No kingdom provided')
     return { success: false, error: 'no kingdom' }
   }
 
@@ -467,7 +490,7 @@ async function scanKingdomTask(data) {
     throw new Error('invalid kingdom')
   }
 
-  console.log(`[ScanKingdom] Sending packets to ${url}  `)
+  console.log(`[tasks][scanKingdomTask] Sending packets to ${url}  `)
 
   try {
     const token1 = BigInt(_token1)
@@ -486,7 +509,7 @@ async function scanKingdomTask(data) {
       Referer: 'https://totalbattle.com/'
     }
     // Send to server
-    console.log(`[ScanKingdom] Sending packet313 to ${url}  `)
+    // console.log(`[tasks][scanKingdomTask] Sending packet313 to ${url}  `)
     const response313 = await fetch(url, {
       method: 'POST',
       headers: HEADERS,
@@ -504,7 +527,7 @@ async function scanKingdomTask(data) {
     const encoded22 = encodeMsgPack2MultiFragments(packetData22)
 
     // Send to server
-    console.log(`[ScanKingdom] Sending packet22 to ${url}  `)
+    // console.log(`[tasks][scanKingdomTask] Sending packet22 to ${url}  `)
     const response22 = await fetch(url, {
       method: 'POST',
       headers: HEADERS,
@@ -532,7 +555,7 @@ async function scanKingdomTask(data) {
       const encoded312 = encodeMsgPack2MultiFragments(packetData312)
 
       // Send to server
-      console.log(`[ScanKingdom] Sending packet312 to ${url}  `)
+      // console.log(`[tasks][scanKingdomTask] Sending packet312 to ${url}  `)
       const response312 = await fetch(url, {
         method: 'POST',
         headers: HEADERS,
@@ -598,10 +621,10 @@ async function scanKingdomTask(data) {
       /// -- end testing 402
     }
 
-    console.log(`[ScanKingdom] Success objects ${objects}, players ${players} `)
+    // console.log(`[tasks][scanKingdomTask] Success objects ${objects}, players ${players} `)
     return { success: true, objects, players }
   } catch (error) {
-    console.error(`[ScanKingdom] Error:`, error.message)
+    console.error(`[tasks][scanKingdomTask] Error:`, error.message)
   }
 }
 

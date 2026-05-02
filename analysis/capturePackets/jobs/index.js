@@ -9,15 +9,6 @@ const {
 } = require('./handlers/index.js')
 const { QUEUE_NAMES } = require('./constants.js')
 
-const {
-  addScanKingdomJob,
-  addCriticalScanJob,
-  addDiscordNotificationJob,
-  addFindObjectsJob,
-  addGameNotificationJob,
-  getQueue
-} = require('./queues.js')
-
 let workerFindObjects = null
 let workerNotificationDiscord = null
 let workerNotificationGame = null
@@ -102,29 +93,7 @@ async function stopWorkers() {
   }
 }
 
-//------
-// const scanKingdomHandler = async job => {
-//   const result = await doScanLogic(job.data)
-
-//   if (result.foundSomething) {
-//     // Enviar a la cola de Discord (con su propio rate limit)
-//     await addJob(QUEUE_NAMES.DISCORD, 'send-alert', { text: '...' })
-
-//     // Enviar a la cola de Telegram (con su propio rate limit)
-//     await addJob(QUEUE_NAMES.TELEGRAM, 'send-alert', { text: '...' })
-//   }
-// }
-
-// await getQueue('discord-queue').add('notif', { ... });
-// await getQueue('telegram-queue').add('notif', { ... });
-
 module.exports = {
   initializeWorkers,
-  stopWorkers,
-
-  addScanKingdomJob,
-  addCriticalScanJob,
-  addDiscordNotificationJob,
-  addFindObjectsJob,
-  addGameNotificationJob
+  stopWorkers
 }

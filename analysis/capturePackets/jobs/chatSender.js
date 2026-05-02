@@ -64,7 +64,7 @@ async function sendMessage(channelUrl, msg = '', coord = null, staticId = 400) {
       subs: {
         '/%0%/': {
           type: 'coord',
-          entryType: dbEntry.entryType || 'poi',
+          entryType: 'poi',
           x: coord?.x ?? 0,
           y: coord?.y ?? 0,
           realmId: coord?.k ?? 0,

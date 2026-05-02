@@ -2,9 +2,13 @@ const { notifyDiscord } = require('../chatSender')
 
 async function discordNotificationHandler(job) {
   const { object = {}, message = '', isBatch = false, content = '', count = 0 } = job.data
+  // console.log('[discordNotificationHandler] job', job.data)
 
   if (isBatch) {
-    notifyDiscord(content)
+    if (content !== '') {
+      notifyDiscord(content)
+      // console.log(`[Notification-Discord] batch`, content)
+    }
   } else {
     console.log(`[Notification-Discord] `, message, object)
 
