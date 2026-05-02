@@ -188,7 +188,9 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
       console.log(
         `[worker-task] found staticid:${o.staticId}, ${o.kingdom},${o.x},${o.y}  level:${o.level}`
       )
-      console.log(`[worker-task] on db  ${dbEntry?.name || 'unknown'} level:${dbEntry.level}`)
+      console.log(
+        `[worker-task] ${o.staticId} on db  ${dbEntry?.name || 'unknown name'} level:${dbEntry?.level || 'unknown level'}`
+      )
 
       parentPort.postMessage({
         cmd: 'sendmsg',

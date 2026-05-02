@@ -12,7 +12,8 @@ const {
   encodeMsgPack2MultiFragments,
   getRequestHeader,
   getMsgPack2ndBlockRequest,
-  scanPacket312
+  scanPacket312,
+  encodeBase64
 } = require('./lib/messagePack.js')
 const { addGameNotificationJob } = require('./jobs/index')
 
@@ -37,6 +38,65 @@ const { getRedis } = require('./lib/redis.js')
 
 //TODO: remove below line after test
 const { getPlayerInfo402 } = require('./workers/tasks.js')
+
+const opCodeInfo = {
+  2: 'appear when click on clan button',
+  24: 'appear when click on clan button',
+  203: 'account info',
+  208: 'gift ?',
+  311: 'something with tiles',
+  312: 'list object/cities in area',
+  313: 'change kingdom',
+  318: 'ping/servertime',
+  402: 'player detail',
+  403: 'resource detail ? / info-guide?',
+  603: 'city teleport inside kingdom? with 204?',
+  701: 'attack/send caravan/crypt exploration',
+  707: 'enemy/my troops detail ?',
+  801: 'repair building status ?/temple troops revive',
+  804: 'repair building/revive wuth gold ',
+  805: 'revive with sacred pots ',
+  1001: 'open city/bonus chest',
+  1002: 'buy blueprints/speedup',
+  1003: 'troop training',
+  1004: 'complete troop training/equipment',
+  1005: 'speedup troop training/equipment',
+  1007: 'create equipment',
+  1101: 'create building/caravan',
+  1102: 'upgrade building/capitol',
+  1103: 'speedup building/capitol',
+  1106: 'clean terrain inside city, for buildings',
+  14003: 'clan wealth detail',
+  10000: 'something with attack? march lines? completed building?',
+  12002: 'start daily mission',
+  12003: 'complete daily mission/achievements',
+  12005: 'speedup daily mission',
+  12010: 'add daily mission',
+  12011: 'update resources from chest',
+  12012: 'complete daily task',
+  12013: 'collect daily reward chest',
+  13009: 'premium ads',
+  15000: 'something with upgrade city',
+  15100: 'something with upgrade city',
+  15009: 'help request',
+  15026: 'help all',
+  15013: 'open chest',
+  15031: 'clan history resource sent',
+  15042: 'reinforcement request list',
+  17001: 'pay taxes',
+  24301: 'player flags ?',
+  48003: 'advertising',
+  41000: 'click on city ?',
+  31000: 'mini game - stage completed',
+  31001: 'mini game - list levels',
+  30014: 'click on scroll captain ?',
+  36004: 'in-progress raids list',
+  314: 'click on scroll captain ?',
+  24201: 'click on scroll captain ?',
+  27002: 'something with scroll captain ?',
+  300052: 'add resources',
+  300053: 'march speed up'
+}
 
 loadEnvFile()
 const CHAT_CHANNEL_URL = process.env.CHAT_CHANNEL_URL || ''
@@ -86,10 +146,10 @@ function savePacketByOpcode(opCode, packetBuffer) {
 
   // Si no existe el stream para este opCode, lo creamos
   if (!stream) {
-    stream = createStream(`${opCode}.bin`, {
-      size: '2M', // Rotar al llegar a 2MB
+    stream = createStream(`${opCode}.dec`, {
+      size: '500K', // Rotar al llegar a 2MB
       path: PACKET_SAMPLE_DIR,
-      maxFiles: 1 // Mantener solo la muestra actual de 2MB
+      maxFiles: 2 // Mantener solo la muestra actual de 2MB
     })
 
     stream.on('rotated', filename => {
@@ -366,6 +426,11 @@ async function patchSendbird() {
         'var SendBirdHelper = window.SendBirdHelper = {'
       )
 
+      body = body.replace(
+        'function _SendBirdMessageReport(requestId, handlerPointer, dataPointer) {',
+        'function _SendBirdMessageReport(requestId, handlerPointer, dataPointer) {return;'
+      )
+
       await route.fulfill({ response, body })
       console.log(`  🔧 Triumph.framework.js patched`)
     } catch (e) {
@@ -438,23 +503,35 @@ function setupPacketCaptureListener() {
       const { opCode: opCode } = getRequestHeader(postDataBuff)
 
       if (capturingEnabled) {
-        const ignoreOpcodes = [318]
-        if (!ignoreOpcodes.includes(opCode)) {
-          saveTrafficPair(url, postDataBuff, responseBody, opCode)
-        }
-        //  save 20 packet sample of each  opCode
-        // let packetSampleCounter = packetSample.get(opCode) || 0
-        // if (packetSampleCounter < 20) {
-        //   packetSample.set(opCode, packetSampleCounter + 1)
-        //   const { results: decodedRequest } = multiDecodeMsgPack2(postDataBuff, true)
-        //   const { results: decodedResponse } = multiDecodeMsgPack2(responseBody)
-        //   savePacketByOpcode(opCode, {
-        //     opCode,
-        //     url,
-        //     request: decodedRequest,
-        //     response: decodedResponse
-        //   })
+        // const ignoreOpcodes = [318]
+        // if (!ignoreOpcodes.includes(opCode)) {
+        //   saveTrafficPair(url, postDataBuff, responseBody, opCode)
         // }
+
+        if (![314, 318, 601, 24201].includes(opCode)) {
+          const packetDescription = opCodeInfo[opCode] || ''
+          console.log('[packetCollector] opcode', opCode, packetDescription)
+        }
+
+        //  save 20 packet sample of each  opCode
+        let packetSampleCounter = packetSample.get(opCode) || 0
+        if (packetSampleCounter < 20) {
+          packetSample.set(opCode, packetSampleCounter + 1)
+          const decodedRequest = multiDecodeMsgPack2(postDataBuff, false)
+          const decodedRequest2 = multiDecodeMsgPack2(postDataBuff, true)
+          const { results: decodedResponse } = multiDecodeMsgPack2(responseBody)
+          savePacketByOpcode(opCode, {
+            opCode,
+            url,
+            reqB64: encodeBase64(postDataBuff),
+            resB64: encodeBase64(responseBody),
+            request: decodedRequest.results,
+            requestWithGarbage: decodedRequest2.results,
+            bothReqSame:
+              encodeBase64(decodedRequest.results) === encodeBase64(decodedRequest2.results),
+            response: decodedResponse
+          })
+        }
       }
       const payload = {
         request: postDataBuff,
@@ -520,6 +597,7 @@ async function browserLoadUrlAndLogin() {
 
     // Forzamos el click si hay elementos flotantes que estorben,
     // o simplemente esperamos a que esté habilitado
+    await loginButton.waitFor({ state: 'visible', timeout: 5000 })
     await loginButton.click()
 
     // 4. Verificación post-login

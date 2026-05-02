@@ -33,3 +33,4 @@ analysis/capturePackets/lib/objects.db-wal
 analysis/capturePackets/decoded-logs/*.bin
 analysis/capturePackets/packet-sample/*.txt
 analysis/capturePackets/lib/logs/*.bin
+analysis/capturePackets/packet-sample/*.dec

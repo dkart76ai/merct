@@ -1,6 +1,12 @@
 const { loadEnvFile } = require('node:process')
-const { Client, GatewayIntentBits } = require('discord.js')
-const { findObjects, saveUserPosition } = require('../lib/database')
+const {
+  Client,
+  GatewayIntentBits,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
+} = require('discord.js')
+const { findObjects, saveUserPosition, deleteObject } = require('../lib/database')
 const { addGameNotificationJob } = require('../jobs/index')
 
 loadEnvFile()
@@ -43,6 +49,29 @@ async function processSetMyPosCommand(message) {
   }
 }
 
+// const createButtons = objects => {
+//   const buttonRows = []
+//   let currentRow = new ActionRowBuilder()
+
+//   objects.forEach((obj, index) => {
+//     // Crear el botón basado en el resultado actual
+//     const button = new ButtonBuilder()
+//       .setCustomId(`${obj.key}`)
+//       .setLabel(`${obj.kingdom} ${obj.x} ${obj.y}`)
+//       .setStyle(ButtonStyle.Primary)
+
+//     currentRow.addComponents(button)
+
+//     // Cada 5 botones, cerramos la fila y empezamos una nueva
+//     if (currentRow.components.length === 5 || index === objects.length - 1) {
+//       buttonRows.push(currentRow)
+//       currentRow = new ActionRowBuilder()
+//     }
+//   })
+
+//   return buttonRows
+// }
+
 async function processFindCommand(message) {
   // Regex: soporta "#find", cantidad, nombre con espacios, "lvl/level" y nivel
   ///#find\s+(?:(\d+)\s+)?(.+)\s+lvl\s+(\d+)/i
@@ -59,35 +88,102 @@ async function processFindCommand(message) {
   const match = message.content.match(pattern)
 
   if (match) {
-    const [, _amount, nombreBuscado, level] = match
+    const [, _amount, searchName, level] = match
     const amount = _amount || '5'
-    console.log('[BOT] Buscando:', amount, nombreBuscado, level)
+    console.log('[BOT] Buscando:', amount, searchName, level)
 
     // const userPosition = getUserPosition(message.author.id)
     // console.log('[BOT] User position:', userPosition)
 
     // it uses user position to get objects closer to the user
 
+    const maxAmount = Math.min(parseInt(amount), 8)
+    await message.reply(`Searching ${maxAmount} ${searchName}`)
+
     // Llamamos a la DB
     const results = findObjects({
-      name: nombreBuscado,
+      name: searchName,
       level: parseInt(level),
-      amount: parseInt(amount),
+      amount: maxAmount,
       userId: message.author.id
     })
-    console.log('[BOT] Resultados encontrados:', results.objects)
+    console.log('[BOT] Resultados encontrados:', results.objects.length)
 
     if (results.total > 0) {
       // 1. Buscamos el canal por su ID
       const targetChannel = client.channels.cache.get(process.env.DISCORD_CHANNELID)
 
       if (targetChannel) {
+        // let tareas = results.objects.slice()
+
+        // const respuesta = await message.reply({
+        //   content: `Click on button to remove that coord`,
+        //   components: createButtons(tareas),
+        //   fetchReply: true // Importante para poder usar el colector
+        // })
+
+        // 2. Creamos el colector
+        // filter: solo el usuario que ejecutó el comando puede usar los botones
+        // const filter = i => i.user.id === message.author.id
+
+        // const collector = respuesta.createMessageComponentCollector({
+        //   filter,
+        //   time: 360000 // El colector expira en 5 minutos
+        // })
+
+        // 3. Escuchamos los clics
+        // collector.on('collect', async i => {
+        //   // Extraemos el índice o ID del customId (ej: "btn_5")
+        //   const idSeleccionado = i.customId
+
+        //   const obj = tareas.find(t => t.key === idSeleccionado)
+        //   await addGameNotificationJob({
+        //     object: {
+        //       k: obj.kingdom,
+        //       x: obj.x,
+        //       y: obj.y,
+        //       staticId: obj.staticId
+        //     },
+        //     message: obj.name,
+        //     toMainChannel: true
+        //   })
+
+        //   // 3. Eliminar la tarea del array
+        //   tareas = tareas.filter(t => t.key !== idSeleccionado)
+        //   deleteObject(idSeleccionado)
+
+        //   // Respondemos al clic
+        //   // 4. Actualizar el mensaje con los botones restantes
+        //   if (tareas.length > 0) {
+        //     await i.update({
+        //       content: `Click on button to remove that coord`,
+        //       components: createButtons(tareas)
+        //     })
+        //   } else {
+        //     // Si no quedan tareas
+        //     await i.update({
+        //       content: '🎉',
+        //       components: []
+        //     })
+        //     collector.stop()
+        //   }
+        // })
+
+        // // 4. Qué pasa cuando el colector termina (por tiempo o por .stop())
+        // collector.on('end', collected => {
+        //   // if (collected.size === 0) {
+        //   message
+        //     .editReply({
+        //       content: 'Time expired. Try again if you need coords',
+        //       components: []
+        //     })
+        //     .catch(() => {}) // Evita errores si el mensaje fue borrado manualmente
+        //   // }
+        // })
         const respuesta = results.objects
           .map(obj => `**${obj.name}** Lvl ${obj.level} @ ${obj.kingdom} ${obj.x} ${obj.y}`)
           .join('\n')
-
-        // 2. Enviamos el mensaje a ese canal específico
-        await targetChannel.send(respuesta)
+        await message.reply(respuesta)
 
         for (obj of results.objects) {
           await addGameNotificationJob({
@@ -100,16 +196,19 @@ async function processFindCommand(message) {
             message: obj.name,
             toMainChannel: true
           })
+
+          deleteObject(obj.key)
         }
       } else {
         console.error('wrong channel')
       }
     } else {
-      await message.reply(`Cant find "${nombreBuscado}" level ${level}.`)
+      await message.reply(`Cant find "${searchName}" level ${level}.`)
     }
   } else {
     await message.reply(
       'Usage: `${FIND_COMMAND} amount object-name lvl nn`\n\n' +
+        'max amount: 5\n' +
         '**Examples:**\n' +
         '`${FIND_COMMAND} 5 crypt lvl 20`\n' +
         '`${FIND_COMMAND} 5 rare crypt level 25`\n\n' +

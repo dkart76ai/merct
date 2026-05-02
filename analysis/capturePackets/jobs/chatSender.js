@@ -31,7 +31,7 @@ async function notifyDiscord(msg = '', coord = null, staticId) {
     if (coord) {
       const dbEntry = await staticIdRedis.getStaticIdData(staticId)
 
-      message = `K:${coord.k} X:${coord.x} Y:${coord.y} (${dbEntry?.name || ''})`
+      message = `staticId:${staticId} K:${coord.k} X:${coord.x} Y:${coord.y} (${dbEntry?.name || 'unknown'} - Lvl:${dbEntry?.level || 'unknown'})`
     }
     await fetch(DISCORD_WEBHOOK, {
       method: 'POST',

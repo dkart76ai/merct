@@ -148,6 +148,22 @@ function getUserPosition(userId) {
   return database.prepare('SELECT * FROM userPosition WHERE key = ?').get(userId)
 }
 
+function deleteObject(key) {
+  if (!key) return
+
+  const database = getDb()
+
+  // 1. Prepare the delete statement
+  const deleteStmt = db.prepare('DELETE FROM objects WHERE key = ?')
+
+  // 2. Execute with the specific key
+  const result = deleteStmt.run(key)
+
+  // Result contains changes (number of rows deleted)
+  console.log(`Deleted ${result.changes} row(s).`)
+  return result
+}
+
 function saveObject(obj) {
   const key = getKey(obj)
   const now = Date.now()
@@ -389,7 +405,7 @@ function savePlayer(player) {
 // Uso: savePlayers(miArrayDePlayers);
 const savePlayers = getDb().transaction(players => {
   if (players.length > 0) {
-    console.log('[Database] saveplayers', players[0])
+    // console.log('[Database] saveplayers', players[0])
     for (const player of players) {
       const { stmt, values } = getUpsertStatement(player)
       stmt.run(values)
@@ -517,6 +533,7 @@ module.exports = {
   saveObject,
   saveObjects,
   findObjects,
+  deleteObject,
   savePlayers,
   getPlayersIdFromKingdom,
   saveUserPosition,
