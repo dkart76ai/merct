@@ -191,6 +191,7 @@
       <div class="controls" style="padding: 15px">
         <button id="btnBrowserStart">Start Browser</button>
         <button id="btnBrowserStop" disabled class="danger">Stop Browser</button>
+        <button id="btnCaptureScreenshot">Capture screenshot</button>
         <label>
           <input type="checkbox" id="cbCapturing" disabled />
           <span>Capture Packets for analysis</span>
@@ -580,6 +581,17 @@
         const data = await res.json()
         if (data.success) {
           log('result: ')
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
+      document.getElementById('btnCaptureScreenshot').addEventListener('click', async () => {
+        log('Capturing screenshot...')
+        const res = await fetch(API + '/screenshot', { method: 'GET' })
+        const data = await res.json()
+        if (data.success) {
+          log('Screenshot ready')
         } else {
           log('Error: ' + data.error)
         }

@@ -548,7 +548,19 @@ function setupPacketCaptureListener() {
 }
 
 async function browserInitialize() {
-  browser = await firefox.launch({ headless: false })
+  console.log('....launching browser')
+  browser = await firefox.launch({
+    headless: process.env.HEADLESS !== 'false',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage', // Clave para evitar crashes en contenedores
+      '--use-gl=angle', // Fuerza el uso de la capa de abstracción de gráficos
+      // '--use-angle=gl', // Selecciona el motor GL
+      '--use-angle=swiftshader', // FUERZA el renderizado por software (SwiftShader)
+      '--ignore-gpu-blocklist' // Ignora la lista negra de GPUs no compatibles
+    ]
+  })
   const options = {
     screen: { width: 1360, height: 1024 },
     viewport: { width: 1360, height: 1024 },
@@ -572,6 +584,8 @@ async function browserLoadUrlAndLogin() {
   if (!page) return
 
   await page.goto('https://totalbattle.com/es', { waitUntil: 'domcontentloaded' })
+  console.log('launching totalbattle, wait ')
+  await page.waitForTimeout(120000)
 
   const loginInput = page.getByRole('textbox', { name: 'E-mail' })
   const loginButtonTab = page.locator('span[data-id="login"]')
@@ -604,8 +618,37 @@ async function browserLoadUrlAndLogin() {
     // En lugar de un console.log inmediato, espera a que algo cambie (ej. desaparezca el input)
     await loginInput.waitFor({ state: 'hidden', timeout: 5000 })
     console.log('Login exitoso')
+
+    await page.screenshot({ path: 'captures/screenshot.png' })
+
+    await monitor()
   } catch (error) {
     console.error('Error durante el proceso de login:', error)
+  }
+}
+
+async function monitor() {
+  while (true) {
+    try {
+      const timestamp = new Date().toISOString().replace(/:/g, '-')
+
+      // 1. Presionar la tecla Escape
+      await page.keyboard.press('Escape')
+      console.log(`[${timestamp}] Tecla Escape presionada.`)
+
+      // 2. Tomar captura de pantalla
+      // Se guarda en /app/captures que está mapeado a tu host
+      await page.screenshot({
+        path: `captures/screenshot.png`,
+        fullPage: false
+      })
+      console.log(`[${timestamp}] Captura guardada.`)
+    } catch (error) {
+      console.error('Error en el ciclo de monitoreo:', error)
+    }
+
+    // Esperar 5 minutos (5 * 60 * 1000 ms)
+    await new Promise(resolve => setTimeout(resolve, 5 * 60 * 1000))
   }
 }
 
@@ -955,6 +998,14 @@ app.post('/api/objects/find-and-notify', async (req, res) => {
 //   res.status(404).json({ success: false, error: 'Not found' })
 //   // }
 // })
+app.get('/api/screenshot', async (req, res) => {
+  if (!page) {
+    return res.json({ success: true })
+  }
+
+  await page.screenshot({ path: 'captures/screenshot.png' })
+  res.json({ success: true })
+})
 
 app.post('/api/browser/start', async (req, res) => {
   try {
