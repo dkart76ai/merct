@@ -1,4 +1,4 @@
-const { scanKingdom } = require('../../workers/tasks')
+const { scanKingdomTask } = require('../../workers/tasks')
 
 async function scanKingdomHandler(job) {
   const { kingdom, shouldSaveObjects } = job.data
@@ -9,7 +9,7 @@ async function scanKingdomHandler(job) {
   }
 
   try {
-    const result = scanKingdom(kingdom, shouldSaveObjects)
+    const result = scanKingdomTask({ kingdom, shouldSaveObjects })
     return result
   } catch (error) {
     console.error(`[scanKingdomHandler] Error:`, error.message)

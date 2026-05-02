@@ -440,7 +440,9 @@ async function getPlayerInfo402(kingdom) {
   }
 }
 
-async function scanKingdom({ kingdom, shouldSaveObjects = false }) {
+async function scanKingdomTask(data) {
+  console.log('task,scankingdom data', data)
+  const { kingdom, shouldSaveObjects = false } = data
   console.log('task, scankingdom', { kingdom, shouldSaveObjects })
 
   if (!kingdom) {
@@ -606,5 +608,5 @@ async function scanKingdom({ kingdom, shouldSaveObjects = false }) {
 module.exports = {
   processPacket,
   getPlayerInfo402,
-  scanKingdom
+  scanKingdomTask
 }

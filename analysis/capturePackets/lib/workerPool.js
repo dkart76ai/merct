@@ -1,9 +1,6 @@
 const path = require('path')
 
-const {
-  processPacket: processPacketSync,
-  scanKingdom: scanKingdomSync
-} = require('../workers/tasks')
+const { processPacket: processPacketSync, scanKingdomTask } = require('../workers/tasks')
 const { addDiscordNotificationJob, addGameNotificationJob } = require('../jobs/index')
 const chatChannels = require('../lib/chatChannels.js')
 const staticIdRedis = require('../lib/staticIdRedis')
@@ -166,7 +163,7 @@ async function processPacket({ request, response, shouldSaveObjects = false }) {
   }
 }
 
-async function scanKingdom(kingdom, shouldSaveObjects = false) {
+async function scanKingdomWorker(kingdom, shouldSaveObjects = false) {
   if (!kingdom) {
     console.log('[worker pool], no kingdom provided')
     throw new Error('[Worker Pool] No kingdom provided')
@@ -175,13 +172,13 @@ async function scanKingdom(kingdom, shouldSaveObjects = false) {
   const p = getPool()
   if (!p || !USE_WORKERS) {
     console.log('worker pool, no workers, using sync scankingdom')
-    scanKingdomSync({ kingdom, shouldSaveObjects })
+    scanKingdomTask({ kingdom, shouldSaveObjects })
     return { success: false, error: 'Workers disabled' }
   }
 
   try {
     console.log('worker pool, calling scankingdom on threads')
-    const result = await p.run({ kingdom, shouldSaveObjects }, { name: 'scanKingdom' })
+    const result = await p.run({ kingdom, shouldSaveObjects }, { name: 'scanKingdomTask' })
     console.log('worker pool, result after scankingdom called', result)
     if (!result.success) throw new Error(result.error)
     return result
@@ -194,6 +191,6 @@ async function scanKingdom(kingdom, shouldSaveObjects = false) {
 module.exports = {
   getPool,
 
-  scanKingdom,
+  scanKingdomWorker,
   processPacket
 }

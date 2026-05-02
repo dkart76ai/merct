@@ -21,7 +21,7 @@ const { addGameNotificationJob } = require('./jobs/index')
 const { addJob, initializeWorkers, stopWorkers } = require('./jobs/index.js')
 const { getTimerManager, cleanOldJobs, getQueueStatus, closeQueue } = require('./jobs/queues.js')
 const { JOB_TYPES, PRIORITY } = require('./jobs/constants.js')
-const { getPool, processPacket, scanKingdom } = require('./lib/workerPool.js')
+const { getPool, processPacket, scanKingdomWorker } = require('./lib/workerPool.js')
 
 const staticIdRedis = require('./lib/staticIdRedis.js')
 const chatChannels = require('./lib/chatChannels.js')
@@ -669,7 +669,7 @@ async function handleScanKingdom(req, res) {
 
   try {
     //llama directo al worker thread
-    await scanKingdom(kingdom, true /* save objects */)
+    await scanKingdomWorker(kingdom, true /* save objects */)
   } catch (error) {
     console.log('error', error.message)
     return res.json({ success: false, error: error.message })
@@ -823,7 +823,7 @@ async function handleScanOtherKingdom(req, res) {
 
   try {
     for (const kingdom of kingdomList) {
-      await scanKingdom(kingdom, false /* dont save objects */)
+      await scanKingdomWorker(kingdom, false /* dont save objects */)
     }
   } catch (error) {
     console.log('error', error.message)
