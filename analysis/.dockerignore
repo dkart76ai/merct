@@ -1,0 +1,74 @@
+# Ignore node_modules in capturePackets
+capturePackets/node_modules
+capturePackets/npm-debug.log
+
+# Ignore node_modules in other analysis projects
+*/node_modules
+
+# Env files (except examples)
+capturePackets/.env
+capturePackets/.env.*
+!capturePackets/.env.example
+
+# Git
+capturePackets/.git
+capturePackets/.gitignore
+
+# IDE
+capturePackets/.idea
+capturePackets/.vscode
+*.swp
+*.swo
+
+# Docker files
+capturePackets/Dockerfile
+capturePackets/docker-compose*.yml
+capturePackets/.dockerignore
+
+# Logs
+capturePackets/logs
+capturePackets/*.log
+capturePackets/npm-debug.log*
+
+# OS
+capturePackets/.DS_Store
+capturePackets/Thumbs.db
+
+# Test coverage
+capturePackets/coverage
+capturePackets/.nyc_output
+
+# Build outputs
+capturePackets/dist
+capturePackets/build
+
+# Temporary files
+capturePackets/tmp
+capturePackets/temp
+capturePackets/*.tmp
+capturePackets/*.temp
+
+# Debug files
+capturePackets/*.map
+
+# Decoded logs (large, not needed in container)
+capturePackets/decoded-logs
+
+# Packet samples
+capturePackets/samples
+!capturePackets/samples/.gitkeep
+
+# Documentation
+capturePackets/*.md
+!capturePackets/README.md
+capturePackets/docs
+
+# Other analysis projects we don't need
+packetViewer
+packetViewer2
+decoderMsgPack
+temp_mod
+
+# IDE at analysis level
+.idea
+.vscode

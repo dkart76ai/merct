@@ -1,24 +1,16 @@
 services:
   app:
     build:
-      context: ..
-      dockerfile: capturePackets/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: playwtb-app
     ports:
       - "3000:3000"
-    ipc: host
-    env_file:
-      - .env
-    deploy:
-      resources:
-        limits:
-          memory: 2G
     environment:
       - NODE_ENV=production
       - PORT=3000
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - HEADLESS=true
       - CHAT_CHANNEL_URL=${CHAT_CHANNEL_URL:-}
       - CHAT_ACCOUNT_USER=${CHAT_ACCOUNT_USER:-}
       - CHAT_ACCOUNT_PWD=${CHAT_ACCOUNT_PWD:-}
@@ -27,7 +19,6 @@ services:
       - ./captures:/app/captures
       - ./staticId-db.json:/app/staticId-db.json
       - ./myplayer.json:/app/myplayer.json
-      - ./.env:/app/.env
     depends_on:
       redis:
         condition: service_healthy
@@ -51,6 +42,10 @@ services:
       - REDIS_ARGS=--appendonly yes --maxmemory 1gb --maxmemory-policy noeviction
     volumes:
       - redis-data:/data
+    # El comando cambia ligeramente para mantener tus políticas originales
+    #command: ["redis-server", "--appendonly", "yes", "--maxmemory", "1gb", "--maxmemory-policy", "allkeys-lru"]
+
+    #command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "noeviction"]
     restart: unless-stopped
     networks:
       - playwtb-network

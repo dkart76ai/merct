@@ -1,43 +1,46 @@
-# Build stage
-FROM node:20-alpine AS builder
+# --- Etapa 1: Build (Instalación de dependencias) ---
+FROM mcr.microsoft.com/playwright:v1.59.1-noble AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# INSTALAR HERRAMIENTAS DE COMPILACIÓN (Necesario para better-sqlite3)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
+# Copiar solo archivos necesarios para instalar dependencias
+COPY capturePackets/package*.json ./
+COPY message-pack/message-pack-1.0.1.tgz ./message-pack-1.0.1.tgz
+
+# Ajustar ruta y npm ci
+RUN sed -i "s|file:../message-pack/message-pack-1.0.1.tgz|file:./message-pack-1.0.1.tgz|" package.json
 RUN npm ci --only=production
 
-# Production stage
-FROM node:20-alpine
+# --- Etapa 2: Producción (Imagen final optimizada) ---
+# Usamos la versión "service", que es más ligera para entornos headless
+FROM mcr.microsoft.com/playwright:v1.59.1-noble
 
 WORKDIR /app
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Instalar solo curl (limpiando caché de apt para ahorrar espacio)
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy node_modules from builder
+# Copiar node_modules y código desde builder
 COPY --from=builder /app/node_modules ./node_modules
+COPY capturePackets/ ./
 
-# Copy application code
-COPY . .
+# Seguridad: Usar el usuario 'pwuser' que ya existe en la imagen oficial
+# Esto evita problemas de permisos con los navegadores instalados
+RUN chown -R pwuser:pwuser /app
+USER pwuser
 
-# Create non-root user
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -S appuser -u 1001 -G appgroup
+# Variable de entorno para asegurar que Playwright no intente descargar navegadores
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+# Forzar a que los navegadores corran en modo headless si la app lo permite
+ENV HEADLESS=true
 
-# Change ownership
-RUN chown -R appuser:appgroup /app
-
-USER appuser
-
-# Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || exit 1
-
-# Start command
-CMD ["node", "server-v2.js"]
+CMD ["node", "server-v2.cjs"]
