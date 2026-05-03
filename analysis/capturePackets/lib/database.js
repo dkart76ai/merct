@@ -60,7 +60,8 @@ function initDb() {
       timestamp INTEGER,
       hasShield BOOLEAN,
       previousCheckAt INTEGER,
-      lastCheckAt INTEGER
+      lastCheckAt INTEGER,
+      flagCount INTEGER
     )
   `)
 
@@ -422,6 +423,23 @@ function getPlayersIdFromKingdom(kingdom) {
   const database = getDb()
   return database.prepare('SELECT playerId FROM players where kingdom=?').all(kingdom)
 }
+function getPlayersObjectIdFromKingdom(kingdom) {
+  const database = getDb()
+  return database.prepare('SELECT objectId FROM players where kingdom=?').all(kingdom)
+}
+
+function savePlayerFlagCount(playerId, flagCount) {
+  const database = getDb()
+
+  const update = database.prepare(`
+    UPDATE players SET
+      flagCount = ?
+    WHERE objectId = ?
+  `)
+
+  update.run(flagCount, playerId)
+  return { success: true }
+}
 
 function getStats() {
   const database = getDb()
@@ -539,6 +557,8 @@ module.exports = {
   deleteObject,
   savePlayers,
   getPlayersIdFromKingdom,
+  getPlayersObjectIdFromKingdom,
+  savePlayerFlagCount,
   saveUserPosition,
   getStats,
   clearDb,

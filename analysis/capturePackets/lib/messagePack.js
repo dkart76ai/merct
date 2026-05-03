@@ -461,7 +461,7 @@ function _extractObj23Data(decoder) {
 
   // [0] ID de objeto (Está en un array de 1)
   decoder.readArrayHeader() // ["1189748226882n"]
-  const objectId = decoder.decode()
+  const playerId = decoder.decode()
 
   // [1] progressId
   const progressId = decoder.decode() // "tb:54052127"
@@ -505,8 +505,8 @@ function _extractObj23Data(decoder) {
   const x = decoder.decode()
   const y = decoder.decode()
 
-  // salta [16]  [11111111]
-  decoder.skip()
+  // salta [16]  [11111111] // otro id
+  const objectId = decoder.decode()
 
   // [17] gold
   const gold = decoder.decode() // 40
@@ -524,6 +524,7 @@ function _extractObj23Data(decoder) {
 
   return {
     objectId,
+    playerId,
     progressId,
     playerName,
     country,
@@ -675,7 +676,7 @@ function _extractObj42Data(decoder) {
 
   // [2] otro ID (Está en un array de 1)
   decoder.readArrayHeader() //["1189706126942n"]
-  const unknownId1 = decoder.decode()
+  const playerId = decoder.decode()
 
   // [3] staticId
   const staticId = decoder.decode() //2
@@ -740,7 +741,7 @@ function _extractObj42Data(decoder) {
 
   return {
     objectId,
-    unknownId1, //
+    playerId, //
     staticId, //
     clanId,
     kingdom,
@@ -779,7 +780,7 @@ function scanPacket312(buffer) {
       if (_isValidPlayerObject42(decoder)) {
         // this will push an array of msgpack which is the playerobjet42
         // and will need to decode that structure to get the real data
-        // { objectId, unknownId1, staticId, clanId, kingdom, level, sourceKingdom, sourceX, sourceY, targetKingdom, targetX, targetY, isShieldActive }
+        // { objectId, playerId, staticId, clanId, kingdom, level, sourceKingdom, sourceX, sourceY, targetKingdom, targetX, targetY, isShieldActive }
         const player = _extractObj42Data(decoder)
         results.players42.push(player)
 
@@ -843,6 +844,36 @@ function scanPacket402(buffer) {
   return results
 }
 
+function scanPacket24301(buffer) {
+  const decoder = getDecoder(buffer)
+  decoder.off = 8 //skip packet length
+
+  const results = {
+    flags: []
+  }
+
+  const startOfEntry = decoder.off
+  const byte = decoder.buf[decoder.off]
+
+  // [24301, seq] [{ "1198295910531": [ 19,1777835062] }]
+  // [24301, seq] [{  }]
+  /** //? someid        flagLevel, timestamp
+   * "1198295910531":  [ 19, 1777835062]
+   * "1198295933781": [ 19, 1777835062]
+   * "1198295959826": [ 30, 1777835062]
+   * "1198296104118": [ 19, 1777835062]
+   * "1198296179956": [ 35, 1777835062]
+   * "1198296182930": [ 35, 1777835062]
+   *
+   * total: 3x19 , 1x30, 2x35 =  6 flags
+   */
+  decoder.skip() // header [24301,seq]
+
+  const flagsData = decoder.decode() //[{ "1198295910531": [ 19,1777835062] }]
+
+  return flagsData
+}
+
 module.exports = {
   getDecoder,
   getEncoder,
@@ -855,11 +886,11 @@ module.exports = {
   encodeMsgPack2MultiFragments,
   encodeMsgPack2,
   encodeMsgPack2ToBase64,
-
   // game functions
   getRequestHeader,
   getMsgPack2ndBlockRequest,
   scanPacket312,
+  scanPacket24301,
   scanPacket402
 }
 
@@ -904,3 +935,12 @@ module.exports = {
 // console.log('testing scanPacket312', 'players', players23.length)
 // console.log(styleText('blue', 'first 5 players'))
 // players23.slice(0, 5).forEach(player => console.log(player))
+
+//test 313
+// const p313 =
+//   'BAEAAAQBAACSzTkBzbxvk9wkAJHPEwAAAPsAAADcGACRz3TPAwD7AAAAkc93AAAA+wAAAM3fJM7MiqRnAADOUUQQAM14A8z7zPuRAAEBkwAAAJMAAAAAAAAAAADOzIqkZwAAmQAAoAAAAAAAAJQAAAAAkIIQkhDOzUcZDEWSRc7gkwQAkIDAkJCAgICQkJSUzbTDAM6+PPZpzj6O92mUzbXDAM7BPPZpzkGO92mUzbbDAM7EPPZpzkSO92mUzbfDAM7HPPZpzkeO92mAgJCAgAAAxAxp6LwFRpnbz+qxzmgugICRAJHPAgAAAPsAAACQAMLAwADEDGnou/1GmdvP6rFcigs='
+// const bytes313 = decodeBase64(p313)
+// const { results: results313 } = multiDecodeMsgPack2(bytes313)
+// console.log('decoded', JSON.stringify(results313[1]))
+// console.log('userid', results313[1][0][0][0])
+// console.log('token', new Uint8Array(results313[1][0][24]))
