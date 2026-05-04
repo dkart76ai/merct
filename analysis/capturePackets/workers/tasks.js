@@ -24,7 +24,15 @@ const {
   getPlayersObjectIdFromKingdom
 } = require('../lib/database')
 const { addDiscordNotificationJob, addGameNotificationJob } = require('../jobs/queues.js')
-
+const {
+  sendPacket,
+  buildPacket41000Payload,
+  buildPacket312Payload,
+  buildPacket313Payload,
+  buildPacket22Payload,
+  buildPacket402Payload,
+  buildPacket24301Payload
+} = require('./networkHelper.js')
 // const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
 
 //---------------------------------
@@ -95,95 +103,6 @@ const processPacket = async ({ request, response }) => {
 const delay = ms => new Promise(r => setTimeout(r, ms))
 
 // scan kingdom -----
-function buildPacket41000Payload(tokenBigInt, token) {
-  if (!tokenBigInt || !token) return null
-
-  const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [[41000, randomSeq, [[tokenBigInt], token], ''], [2]]
-
-  return packetData
-}
-
-function buildPacket402Payload(playerIds, tokenBigInt, token) {
-  if (!tokenBigInt || !token) return null
-
-  const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [
-    [402, randomSeq, [[tokenBigInt], token], ''],
-    [playerIds.map(p => [BigInt(p)])]
-  ]
-
-  return packetData
-}
-
-function buildPacket24301Payload(playerId, tokenBigInt, token) {
-  if (!tokenBigInt || !token) return null
-
-  const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [[24301, randomSeq, [[tokenBigInt], token], ''], [[playerId]]]
-
-  return packetData
-}
-
-// function buildPacket213Payload(tokenBigInt, token) {
-//   const randomSeq = Math.floor(Math.random() * 32000) + 1
-//   const packetData = [
-//     [213, randomSeq, [[tokenBigInt], token], ''],
-//     [[0]] // <-- note: this is [[0]], not []
-//   ]
-//   return packetData
-// }
-
-// function buildPacket314Payload(tokenBigInt, token) {
-//   const randomSeq = Math.floor(Math.random() * 32000) + 1
-//   const packetData = [[314, randomSeq, [[tokenBigInt], token], ''], []]
-//   return packetData
-// }
-// function buildPacket318Payload(tokenBigInt, token) {
-//   const randomSeq = Math.floor(Math.random() * 32000) + 1
-//   const packetData = [[318, randomSeq, [[tokenBigInt], token], ''], []]
-//   return packetData
-// }
-
-// function buildPacket15100Payload(tokenBigInt, token) {
-//   const randomSeq = Math.floor(Math.random() * 32000) + 1
-//   const packetData = [[15100, randomSeq, [[tokenBigInt], token], ''], []]
-//   return packetData
-// }
-
-function buildPacket312Payload(tiles, tokenBigInt, token) {
-  if (!tokenBigInt || !token) return null
-
-  const zeros = new Array(tiles.length).fill(0)
-  const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [
-    [312, randomSeq, [[tokenBigInt], token], ''],
-    [tiles, zeros, [], []]
-  ]
-
-  return packetData
-}
-
-function buildPacket313Payload(tokenBigInt, token) {
-  if (!tokenBigInt || !token) return null
-
-  const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [[313, randomSeq, [[tokenBigInt], token], ''], []]
-
-  return packetData
-}
-
-function buildPacket22Payload(tokenBigInt, token) {
-  if (!tokenBigInt || !token) return null
-
-  const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [
-    [22, randomSeq, [[tokenBigInt], token], ''],
-    [1, 1]
-  ]
-
-  return packetData
-}
 
 async function extractDataFrom402(response) {
   // console.log(styleText('yellow', 'extractDataFrom402'))
@@ -241,7 +160,7 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
 
   //     const isComplete = dbEntry && dbEntry.name && dbEntry.level != null && dbEntry.level >= 0
 
-  //     // NOTE : dont delete static id updater
+  //     //! NOTE : dont delete static id updater
   //     if (!isComplete) {
   //       // await staticIdRedis.addOrUpdateStaticId(o.staticId, {
   //       //   level: o.level
@@ -268,7 +187,7 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   //     //     staticId: o.staticId
   //     //   })
   //     // }
-  //     // END NOTE
+  //     //! END NOTE
   //   })
   // } else {
   // direct call, no worker threads
@@ -421,96 +340,107 @@ async function extractDataFrom24301(playerId, response) {
   return { success: true, totalFlags }
 }
 
-// async function getPlayerFlagsKvK24301(kingdom) {
-//   console.log('[tasks][getPlayerFlagsKvK24301]', { kingdom })
+async function getPlayerFlagsKvK24301(kingdom) {
+  console.log('[tasks][getPlayerFlagsKvK24301]', { kingdom })
 
-//   if (!kingdom) {
-//     console.log('[tasks][getPlayerFlagsKvK24301] No kingdom provided')
-//     return { success: false, error: 'no kingdom' }
-//   }
+  if (!kingdom) {
+    console.log('[tasks][getPlayerFlagsKvK24301] No kingdom provided')
+    return { success: false, error: 'no kingdom' }
+  }
 
-//   const redisClient = getRedis()
+  const redisClient = getRedis()
 
-//   const _token1 = await redisClient.get('myPlayerId:BigInt')
-//   if (!_token1) {
-//     throw new Error('no session token1')
-//   }
+  const _token1 = await redisClient.get('myPlayerId:BigInt')
+  if (!_token1) {
+    throw new Error('no session token1')
+  }
 
-//   const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
-//   if (!_token2) {
-//     throw new Error('no session token2')
-//   }
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    throw new Error('no session token2')
+  }
 
-//   const url = kingdomUrls[kingdom]
-//   if (!url) {
-//     throw new Error('invalid kingdom')
-//   }
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    throw new Error('invalid kingdom')
+  }
 
-//   const HEADERS = {
-//     'Content-Type': 'application/octet-stream',
-//     'User-Agent':
-//       'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
-//     Referer: 'https://totalbattle.com/'
-//   }
+  console.log(`[tasks] [getPlayerFlagsKvK24301] Sending packets to ${url}  `)
+  try {
+    const token1 = BigInt(_token1)
+    const token2 = new Uint8Array(_token2)
 
-//   console.log(`[tasks] [getPlayerFlagsKvK24301] Sending packets to ${url}  `)
-//   try {
-//     const token1 = BigInt(_token1)
-//     const token2 = new Uint8Array(_token2)
+    const playerIdsDB = getPlayersObjectIdFromKingdom(kingdom)
+    console.log('[getPlayerInfo402] playersIds', playerIdsDB)
 
-//     const playerIdsDB = getPlayersObjectIdFromKingdom(kingdom) // ? get play, gold amount need update so we get all players
-//     console.log('[getPlayerInfo402] playersIds', playerIdsDB)
+    const playersArr = playerIdsDB
+      .filter(p => Boolean(p.playerId) && Boolean(p.objectId))
+      .map(p => ({ playerId: Number(p.playerId), objectId: Number(p.objectId) }))
+    console.log('[getPlayerInfo402] playersIds playersArr', playersArr)
 
-//     const playersArr = playerIdsDB.map(p => Number(p.objectId)).filter(Boolean)
-//     console.log('[getPlayerInfo402] playersIds playersArr', playersArr)
+    let flagCounter = 0
+    for (const player of playersArr) {
+      const result24301 = await sendPacket24301(
+        url,
+        player.objectId,
+        player.playerId,
+        token1,
+        token2
+      )
+      flagCounter += result24301.totalFlags
 
-//     let flagCounter = 0
-//     for (const playerId of playersArr) {
-//       // for (const playerIds of playerIdsArray) {
-//       const packetData24301 = buildPacket24301Payload(playerId, token1, token2)
+      console.log(
+        styleText('red', '[tasks][getPlayerFlagsKvK24301] extract data, players '),
+        result24301.totalFlags
+      )
+    }
 
-//       // Encode the packet
-//       const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
-//       console.log(
-//         '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
-//         encodeBase64(encoded24301)
-//       )
+    console.log(`[tasks] [getPlayerFlagsKvK24301] Success   `)
+    return { success: true, flagCounter }
+  } catch (error) {
+    console.error(`[tasks] [getPlayerFlagsKvK24301] Error:`, error.message)
+  }
+}
 
-//       // Send to server
-//       // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
-//       const response24301 = await fetch(url, {
-//         method: 'POST',
-//         headers: HEADERS,
-//         body: encoded24301
-//       })
+async function send402packet(url, playerIds, token1, token2) {
+  const packetData402 = buildPacket402Payload(playerIds, token1, token2)
 
-//       // console.log('[getPlayerInfo402] respnse', response402)
+  // Encode the packet
+  const encoded402 = encodeMsgPack2MultiFragments(packetData402)
+  // console.log('[402] encoded request base64', encodeBase64(encoded402))
 
-//       if (!response24301.ok) {
-//         throw new Error(`Server returned ${response24301.status}: ${response24301.statusText}`)
-//       }
+  // Send to server
+  // console.log(`[getPlayerInfo402] Sending packet402 to ${url}  `)
 
-//       // Get response buffer
-//       const buffer24301 = await response24301.arrayBuffer()
-//       const bytes24301 = new Uint8Array(buffer24301)
+  const bytes402 = await sendPacket(url, encoded402)
+  // console.log('[402]encoded result base64', encodeBase64(bytes402))
 
-//       console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
+  const result402 = await extractDataFrom402(bytes402)
+  return result402
+}
 
-//       const result24301 = await extractDataFrom24301(playerId, bytes24301)
-//       flagCounter += result24301.totalFlags
+async function sendPacket24301(url, objectId, playerId, token1, token2) {
+  // ? use objectId to create the payload
+  const packetData24301 = buildPacket24301Payload(objectId, token1, token2)
 
-//       console.log(
-//         styleText('red', '[tasks][getPlayerFlagsKvK24301] extract data, players '),
-//         result24301.totalFlags
-//       )
-//     }
+  // Encode the packet
+  const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
+  console.log(
+    '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
+    encodeBase64(encoded24301)
+  )
 
-//     console.log(`[tasks] [getPlayerFlagsKvK24301] Success   `)
-//     return { success: true, flagCounter }
-//   } catch (error) {
-//     console.error(`[tasks] [getPlayerFlagsKvK24301] Error:`, error.message)
-//   }
-// }
+  // Send to server
+  // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
+
+  const bytes24301 = await sendPacket(url, encoded24301)
+
+  console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
+
+  // ?  use playerId to save in DB
+  const result24301 = await extractDataFrom24301(playerId, bytes24301)
+  return result24301
+}
 
 async function getPlayerInfo402(kingdom) {
   /**
@@ -551,82 +481,20 @@ async function getPlayerInfo402(kingdom) {
     throw new Error('invalid kingdom')
   }
 
-  const HEADERS = {
-    'Content-Type': 'application/octet-stream',
-    'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
-    Referer: 'https://totalbattle.com/'
-  }
-
   console.log(`[tasks] [getPlayerInfo402] Sending packets to ${url}  `)
   try {
     const token1 = BigInt(_token1)
     const token2 = new Uint8Array(_token2)
 
-    // prepare 41000 first
-    // const packetData40001 = buildPacket41000Payload(token1, token2)
-    // // Encode the packet
-    // const encoded40001 = encodeMsgPack2MultiFragments(packetData40001)
-    // console.log('[tasks][getPlayerInfo402]encoded request base64', encodeBase64(encoded40001))
-
     const playerIdsDB = getPlayersIdFromKingdom(kingdom) // ? get play, gold amount need update so we get all players
     // console.log('[getPlayerInfo402] playersIds', playerIdsDB)
 
-    const playersArr = playerIdsDB.map(p => Number(p.playerId))
+    const playersArr = playerIdsDB.filter(p => Boolean(p.playerId)).map(p => Number(p.playerId))
     const playerIdsArray = generatePlayerArrays(playersArr)
     let players = 0
 
     for (const playerIds of playerIdsArray) {
-      // Send to server 40001
-      // console.log(`[tasks][getPlayerInfo402]  Sending packet40001 to ${url}  `, playerIds)
-      // const response40001 = await fetch(url, {
-      //   method: 'POST',
-      //   headers: HEADERS,
-      //   body: encoded40001
-      // })
-
-      // console.log('[tasks][getPlayerInfo402] getPlayerInfo40001 respnse', response40001)
-
-      // if (!response40001.ok) {
-      //   throw new Error(`Server returned ${response40001.status}: ${response40001.statusText}`)
-      // }
-
-      // Get response buffer
-      // const buffer40001 = await response40001.arrayBuffer()
-      // const bytes40001 = new Uint8Array(buffer40001)
-
-      // console.log('[tasks][getPlayerInfo402]40001 encoded result base64', encodeBase64(bytes40001))
-
-      //-----410000 fin
-
-      // for (const playerIds of playerIdsArray) {
-      const packetData402 = buildPacket402Payload(playerIds, token1, token2)
-
-      // Encode the packet
-      const encoded402 = encodeMsgPack2MultiFragments(packetData402)
-      // console.log('[tasks][getPlayerInfo402]402 encoded request base64', encodeBase64(encoded402))
-
-      // Send to server
-      // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
-      const response402 = await fetch(url, {
-        method: 'POST',
-        headers: HEADERS,
-        body: encoded402
-      })
-
-      // console.log('[getPlayerInfo402] respnse', response402)
-
-      if (!response402.ok) {
-        throw new Error(`Server returned ${response402.status}: ${response402.statusText}`)
-      }
-
-      // Get response buffer
-      const buffer402 = await response402.arrayBuffer()
-      const bytes402 = new Uint8Array(buffer402)
-
-      // console.log('[tasks][getPlayerInfo402]encoded result base64', encodeBase64(bytes402))
-
-      const result402 = await extractDataFrom402(bytes402)
+      const result402 = await send402packet(url, playerIds, token1, token2)
 
       console.log(
         styleText('red', '[tasks] [getPlayerInfo402] extract data, players '),
@@ -683,28 +551,7 @@ async function scanKingdomTask(data) {
     const encoded313 = encodeMsgPack2MultiFragments(packetData313)
     // console.log('[313] encoded request base64', encodeBase64(encoded313))
 
-    const HEADERS = {
-      'Content-Type': 'application/octet-stream',
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
-      Referer: 'https://totalbattle.com/'
-    }
-    // Send to server
-    // console.log(`[tasks][scanKingdomTask] Sending packet313 to ${url}  `)
-    const response313 = await fetch(url, {
-      method: 'POST',
-      headers: HEADERS,
-      body: encoded313
-    })
-    // Get response buffer
-    // const buffer313 = await response313.arrayBuffer()
-    // const bytes313 = new Uint8Array(buffer313)
-    // console.log('[313]encoded result base64', encodeBase64(bytes313))
-
-    if (!response313.ok) {
-      throw new Error(`packet313: Server returned ${response313.status}: ${response313.statusText}`)
-    }
-
+    const bytes313 = await sendPacket(url, encoded313)
     // Decode 313 response to get new session tokens
     // const { results: results313 } = multiDecodeMsgPack2(bytes313)
     // console.log('decoded', JSON.stringify(results313[1]))
@@ -729,71 +576,9 @@ async function scanKingdomTask(data) {
     // console.log('[22] encoded request base64', encodeBase64(encoded22))
     // Send to server
     // console.log(`[tasks][scanKingdomTask] Sending packet22 to ${url}  `)
-    const response22 = await fetch(url, {
-      method: 'POST',
-      headers: HEADERS,
-      body: encoded22
-    })
-    // Get response buffer
-    // const buffer22 = await response22.arrayBuffer()
-    // const bytes22 = new Uint8Array(buffer22)
-    // console.log('[22]encoded result base64', encodeBase64(bytes22))
-    if (!response22.ok) {
-      throw new Error(`packet22: Server returned ${response22.status}: ${response22.statusText}`)
-    }
+
+    const bytes22 = await sendPacket(url, encoded22)
     await delay(200)
-
-    // test code below to make 402 to work
-    // test code below to make 402 to work
-    // test code below to make 402 to work
-    // test code below to make 402 to work
-
-    // const packetData314 = buildPacket314Payload(token1, token2)
-    // const encoded314 = encodeMsgPack2MultiFragments(packetData314)
-    // console.log('[314] encoded request base64', encodeBase64(encoded314))
-    // const response314 = await fetch(url, { method: 'POST', headers: HEADERS, body: encoded314 })
-    // // Get response buffer
-    // const buffer314 = await response314.arrayBuffer()
-    // const bytes314 = new Uint8Array(buffer314)
-    // console.log('[314]encoded result base64', encodeBase64(bytes314))
-    // await delay(200)
-
-    // const packetData318 = buildPacket318Payload(token1, token2)
-    // const encoded318 = encodeMsgPack2MultiFragments(packetData318)
-    // console.log('[318] encoded request base64', encodeBase64(encoded318))
-    // const response318 = await fetch(url, { method: 'POST', headers: HEADERS, body: encoded318 })
-    // // Get response buffer
-    // const buffer318 = await response318.arrayBuffer()
-    // const bytes318 = new Uint8Array(buffer318)
-    // console.log('[318]encoded result base64', encodeBase64(bytes318))
-    // await delay(200)
-
-    // const packetData15100 = buildPacket15100Payload(token1, token2)
-    // const encoded15100 = encodeMsgPack2MultiFragments(packetData15100)
-    // console.log('[15100] encoded request base64', encodeBase64(encoded15100))
-    // const response15100 = await fetch(url, { method: 'POST', headers: HEADERS, body: encoded15100 })
-    // // Get response buffer
-    // const buffer15100 = await response15100.arrayBuffer()
-    // const bytes15100 = new Uint8Array(buffer15100)
-    // console.log('[15100]encoded result base64', encodeBase64(bytes15100))
-    // await delay(200)
-
-    // const packetData213 = buildPacket213Payload(token1, token2)
-    // const encoded213 = encodeMsgPack2MultiFragments(packetData213)
-    // console.log('[213] encoded request base64', encodeBase64(encoded213))
-    // const response213 = await fetch(url, { method: 'POST', headers: HEADERS, body: encoded213 })
-    // // Optionally decode response213 to get full game state
-    // // Get response buffer
-    // const buffer213 = await response213.arrayBuffer()
-    // const bytes213 = new Uint8Array(buffer213)
-    // console.log('[213]encoded result base64', encodeBase64(bytes213))
-    // await delay(200)
-    // // Then proceed with 312 loop and 402...
-
-    // fin test code for 402
-    // fin test code for 402
-    // fin test code for 402
-    // fin test code for 402
 
     //------ send packet 312
 
@@ -801,7 +586,7 @@ async function scanKingdomTask(data) {
 
     let objects = 0
     let players = 0
-    for (const tiles of tilesArray /*.slice(0, 1)*/) {
+    for (const tiles of tilesArray) {
       const packetData312 = buildPacket312Payload(tiles, token1, token2)
 
       // Encode the packet
@@ -810,79 +595,28 @@ async function scanKingdomTask(data) {
 
       // Send to server
       // console.log(`[tasks][scanKingdomTask] Sending packet312 to ${url}  `)
-      const response312 = await fetch(url, {
-        method: 'POST',
-        headers: HEADERS,
-        body: encoded312
-      })
-      // Get response buffer
-      const buffer312 = await response312.arrayBuffer()
-      const bytes312 = new Uint8Array(buffer312)
+
+      const bytes312 = await sendPacket(url, encoded312)
       console.log('[312]encoded result base64', encodeBase64(bytes312))
       // console.log('[312]encoded result base64, skipping because is too big')
-
-      if (!response312.ok) {
-        throw new Error(`Server returned ${response312.status}: ${response312.statusText}`)
-      }
 
       const result312 = await extractDataFrom312(bytes312, shouldSaveObjects)
 
       objects += result312.objects12?.length || 0
       players += result312.players42?.length || 0
 
-      //---------testing 402
-      //---------testing 402
-      //---------testing 402
-      //---------testing 402
-
       await delay(200)
       if (result312.players42.length > 0) {
         // get all objectids from players42 array
         // generate a 402 packet and send to server
         const allPlayersIds = result312.players42.map(p => p.playerId).filter(Boolean)
-        const packetData402 = buildPacket402Payload(allPlayersIds, token1, token2)
         console.log(
           styleText(
             'magenta',
             `building 402 packet with ${result312.players42.length} players from 312`
           )
         )
-        /**
- *  Error: The argument 'format' must be one of: 'reset', 'bold', 'dim', 'italic', 'underline',
- * 'blink', 'inverse', 'hidden', 'strikethrough', 'doubleunderline',
- * 'framed', 'overlined',
- *
- * 'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white',  'gray', 'redBright',
- *  'greenBright', 'yellowBright', 'blueBright', 'magentaBright', 'cyanBright', 'whiteBright', '
- *
- * 'bgBlack', 'bgRed', 'bgGreen', 'bgYellow', 'bgBlue', 'bgMagenta', 'bgCyan', 'bgWhite',
- * bgGray', 'bgRedBright', 'bgGreenBright', 'bgYellowBright', 'bgBlueBright', 'bgMagentaBright', 'bgCyanBright', 'bgWhiteBright'
-
- */
-        // Encode the packet
-        const encoded402 = encodeMsgPack2MultiFragments(packetData402)
-        console.log('[402] encoded request base64', encodeBase64(encoded402))
-
-        // Send to server
-        // console.log(`[getPlayerInfo402] Sending packet402 to ${url}  `)
-        const response402 = await fetch(url, {
-          method: 'POST',
-          headers: HEADERS,
-          body: encoded402
-        })
-
-        // console.log('respnse', response402)
-
-        if (!response402.ok) {
-          throw new Error(`Server returned ${response402.status}: ${response402.statusText}`)
-        }
-
-        // Get response buffer
-        const buffer402 = await response402.arrayBuffer()
-        const bytes402 = new Uint8Array(buffer402)
-        console.log('[402]encoded result base64', encodeBase64(bytes402))
-
-        const result402 = await extractDataFrom402(bytes402)
+        const result402 = await send402packet(url, allPlayersIds, token1, token2)
 
         console.log(
           styleText('green', '[getPlayerInfo402] extract data, total players'),
@@ -894,53 +628,19 @@ async function scanKingdomTask(data) {
         ///! flag info start
         for (const player of result312.players42) {
           // extract flag info
-          const packetData24301 = buildPacket24301Payload(player.objectId, token1, token2)
 
-          // Encode the packet
-          const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
-          console.log(
-            '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
-            encodeBase64(encoded24301)
+          const result24301 = await sendPacket24301(
+            url,
+            player.objectId,
+            player.playerId,
+            token1,
+            token2
           )
-
-          // Send to server
-          // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
-          const response24301 = await fetch(url, {
-            method: 'POST',
-            headers: HEADERS,
-            body: encoded24301
-          })
-
-          // console.log('[getPlayerInfo402] respnse', response402)
-
-          if (!response24301.ok) {
-            throw new Error(`Server returned ${response24301.status}: ${response24301.statusText}`)
-          }
-
-          // Get response buffer
-          const buffer24301 = await response24301.arrayBuffer()
-          const bytes24301 = new Uint8Array(buffer24301)
-
-          console.log(
-            '[tasks][getPlayerFlagsKvK24301]encoded result base64',
-            encodeBase64(bytes24301)
-          )
-
-          const result24301 = await extractDataFrom24301(player.playerId, bytes24301)
         }
         ///! flag info end
         ///! flag info end
         ///! flag info end
       } //endif 671
-
-      /**
-       * end testing 402
-       * * end testing 402
-       * ! end testing 402
-       * ? end testing 402
-       * TODO: dfs
-       * @param hhh  asfsf assdfsaf
-       */
     } //end for 641
 
     // console.log(`[tasks][scanKingdomTask] Success objects ${objects}, players ${players} `)

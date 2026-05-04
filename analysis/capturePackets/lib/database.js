@@ -426,7 +426,7 @@ function getPlayersIdFromKingdom(kingdom) {
 }
 function getPlayersObjectIdFromKingdom(kingdom) {
   const database = getDb()
-  return database.prepare('SELECT objectId FROM players where kingdom=?').all(kingdom)
+  return database.prepare('SELECT playerId, objectId FROM players where kingdom=?').all(kingdom)
 }
 
 function savePlayerFlagCount(playerId, flagCount) {
