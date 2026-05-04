@@ -51,6 +51,7 @@ function initDb() {
       clanId TEXT,
       clanName TEXT,
       cityLevel INTEGER,
+      heroType INTEGER,
       heroLevel INTEGER,
       kingdom INTEGER,
       x INTEGER,
@@ -431,7 +432,7 @@ function getPlayersObjectIdFromKingdom(kingdom) {
 
 function savePlayerFlagCount(playerId, flagCount) {
   const database = getDb()
-  console.log('[database] [savePlayerFlagCount] playerid type', typeof playerId)
+
   const update = database.prepare(`
     UPDATE players SET
       flagCount = ?
@@ -441,6 +442,51 @@ function savePlayerFlagCount(playerId, flagCount) {
   const result = update.run(flagCount, playerId)
   console.log('[database] update flagcount', result)
   return { success: true }
+}
+
+function getPlayers(
+  nameFilter,
+  clanFilter,
+  kingdomFilter,
+  shieldFilter,
+  sortBy,
+  sortOrder,
+  limit,
+  offset
+) {
+  const db = getDb()
+  const whereClauses = []
+  const params = []
+  if (nameFilter) {
+    whereClauses.push('LOWER(playerName) LIKE LOWER(?)')
+    params.push('%%' + nameFilter + '%%')
+  }
+  if (clanFilter) {
+    whereClauses.push('LOWER(clanName) LIKE LOWER(?)')
+    params.push('%%' + clanFilter + '%%')
+  }
+  if (kingdomFilter) {
+    whereClauses.push('kingdom = ?')
+    params.push(kingdomFilter)
+  }
+  if (shieldFilter === 'true') {
+    whereClauses.push('hasShield = 1')
+  } else if (shieldFilter === 'false') {
+    whereClauses.push('hasShield = 0')
+  }
+  const whereSql = whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''
+  const countSql = 'SELECT COUNT(*) as total FROM players ' + whereSql
+  const { total } = db.prepare(countSql).get(...params)
+  const dataSql =
+    'SELECT playerId, playerName, clanName, kingdom, might, gold, hasShield, x, y, cityLevel, heroLevel, heroType, country, timezone, flagCount FROM players ' +
+    whereSql +
+    ' ORDER BY ' +
+    sortBy +
+    ' ' +
+    sortOrder +
+    ' LIMIT ? OFFSET ?'
+  const players = db.prepare(dataSql).all(...params, limit, offset)
+  return { success: true, players, total }
 }
 
 function getStats() {
@@ -560,6 +606,7 @@ module.exports = {
   savePlayers,
   getPlayersIdFromKingdom,
   getPlayersObjectIdFromKingdom,
+  getPlayers,
   savePlayerFlagCount,
   saveUserPosition,
   getStats,

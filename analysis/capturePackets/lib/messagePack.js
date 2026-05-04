@@ -390,8 +390,11 @@ function _isValidPlayerObject23(decoder) {
     if (!decoder.isNextString()) return false
     decoder.skip() //"IN"
 
+    if (!decoder.isNextNumber()) return false
+    decoder.skip() // hero type  2=alrick 3=thaddeus
+
     // [4]... saltar hasta el [6]
-    for (let i = 4; i <= 6; i++) decoder.skip()
+    for (let i = 5; i <= 6; i++) decoder.skip()
 
     // [7] Number (hero Level)
     if (!decoder.isNextNumber()) return false
@@ -470,8 +473,10 @@ function _extractObj23Data(decoder) {
   // [3] country
   const country = decoder.decode() // "IN"
 
-  // salta [4,5,6]
-  decoder.skip()
+  //[4] hero type
+  const heroType = decoder.decode() // hero type  2=alrick 3=thaddeus
+
+  // salta [5,6]
   decoder.skip()
   decoder.skip()
 
@@ -528,6 +533,7 @@ function _extractObj23Data(decoder) {
     progressId,
     playerName,
     country,
+    heroType,
     heroLevel,
     cityLevel,
     might,

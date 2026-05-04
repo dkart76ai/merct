@@ -38,13 +38,17 @@ const {
   findObjects,
   getStats,
   getAllObjects,
+  getPlayers,
   startCleanup,
   closeDb
 } = require('./lib/database.js')
 const { getRedis } = require('./lib/redis.js')
 
 //TODO: remove below line after test
-const { getPlayerInfo402 /*, getPlayerFlagsKvK24301 */ } = require('./workers/tasks.js')
+const {
+  getPlayerInfo402,
+  refreshPlayerInfo402 /*, getPlayerFlagsKvK24301 */
+} = require('./workers/tasks.js')
 
 const opCodeInfo = {
   2: 'appear when click on clan button/claim chest',
@@ -982,6 +986,65 @@ app.post('/api/objects/find-and-notify', async (req, res) => {
   }
 })
 
+// ---- Player List API ----
+
+const VALID_PLAYER_SORT_COLUMNS = [
+  'playerName',
+  'clanName',
+  'kingdom',
+  'might',
+  'gold',
+  'hasShield',
+  'x',
+  'y',
+  'cityLevel',
+  'heroLevel'
+]
+
+app.post('/api/refreshPlayerCoords', async (req, res) => {
+  try {
+    const playerId = parseInt(req.body.playerId)
+    const kingdom = parseInt(req.body.kingdom)
+
+    const result = await refreshPlayerInfo402(playerId, kingdom)
+    console.log('[server.v2]refreshPlayerCoords', result)
+    res.json({ success: true })
+  } catch (e) {
+    console.error('Players API error:', e.message)
+    res.status(500).json({ success: false, error: e.message })
+  }
+})
+
+app.get('/api/players', (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50))
+    const offset = (page - 1) * limit
+    const sortBy = VALID_PLAYER_SORT_COLUMNS.includes(req.query.sortBy) ? req.query.sortBy : 'might'
+    const sortOrder = /^(asc|desc)$/i.test(req.query.sortOrder)
+      ? req.query.sortOrder.toUpperCase()
+      : 'DESC'
+    const nameFilter = req.query.name || ''
+    const clanFilter = req.query.clan || ''
+    const kingdomFilter = req.query.kingdom ? parseInt(req.query.kingdom) : null
+    const shieldFilter = req.query.shield
+
+    const { success, players, total } = getPlayers(
+      nameFilter,
+      clanFilter,
+      kingdomFilter,
+      shieldFilter,
+      sortBy,
+      sortOrder,
+      limit,
+      offset
+    )
+    res.json({ success: true, players, total, page, limit, totalPages: Math.ceil(total / limit) })
+  } catch (e) {
+    console.error('Players API error:', e.message)
+    res.status(500).json({ success: false, error: e.message })
+  }
+})
 // async (req, res) => {
 // const { kingdoms } = req.body
 

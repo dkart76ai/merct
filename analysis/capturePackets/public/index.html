@@ -181,6 +181,86 @@
       .row-wrap {
         flex-wrap: wrap;
       }
+
+      /* Players Panel */
+      .players-panel {
+        max-height: 600px;
+        overflow-y: auto;
+      }
+      .players-filters {
+        display: flex;
+        gap: 8px;
+        padding: 10px 15px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .players-filters input {
+        padding: 6px 10px;
+        font-size: 12px;
+        width: 140px;
+      }
+      .players-filters select {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      .players-filters button {
+        padding: 6px 14px;
+        font-size: 12px;
+      }
+      .players-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .players-table th {
+        background: #2d2d2d;
+        color: #569cd6;
+        padding: 8px 10px;
+        text-align: left;
+        cursor: pointer;
+        user-select: none;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      .players-table th:hover {
+        background: #383838;
+      }
+      .players-table th .sort-arrow {
+        margin-left: 4px;
+        font-size: 10px;
+      }
+      .players-table td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #3c3c3c;
+      }
+      .players-table tr:hover td {
+        background: #2d2d2d;
+      }
+      .players-table .shield-on {
+        color: #4caf50;
+      }
+      .players-table .shield-off {
+        color: #888;
+      }
+      .players-pagination {
+        display: flex;
+        gap: 8px;
+        padding: 10px 15px;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+      }
+      .players-pagination button {
+        padding: 4px 12px;
+        font-size: 12px;
+      }
+      .players-pagination button:disabled {
+        opacity: 0.4;
+      }
+      .players-pagination .page-info {
+        color: #888;
+      }
     </style>
   </head>
   <body>
@@ -391,6 +471,67 @@
         </div>
       </div>
       <div class="side-container">
+        <!-- Players Panel -->
+        <div class="panel">
+          <div class="panel-header">Players <span id="playerCount" class="count">0</span></div>
+          <div class="players-filters">
+            <input type="text" id="filterName" placeholder="Player name..." />
+            <input type="text" id="filterClan" placeholder="Clan name..." />
+            <input type="number" id="filterKingdom" placeholder="Kingdom" style="width: 90px" />
+            <select id="filterShield">
+              <option value="">All Shields</option>
+              <option value="true">Shield ON</option>
+              <option value="false">Shield OFF</option>
+            </select>
+            <button id="btnApplyFilters">Filter</button>
+            <button id="btnClearFilters" style="background: #555">Clear</button>
+          </div>
+          <div class="players-panel">
+            <table class="players-table">
+              <thead>
+                <tr>
+                  <th>refresh coords</th>
+                  <th onclick="sortPlayers('playerName')">
+                    Name <span class="sort-arrow" id="sort-playerName"></span>
+                  </th>
+                  <th onclick="sortPlayers('clanName')">
+                    Clan <span class="sort-arrow" id="sort-clanName"></span>
+                  </th>
+                  <th onclick="sortPlayers('kingdom')">
+                    Kingdom <span class="sort-arrow" id="sort-kingdom"></span>
+                  </th>
+                  <th onclick="sortPlayers('might')">
+                    Might <span class="sort-arrow" id="sort-might"></span>
+                  </th>
+                  <th onclick="sortPlayers('gold')">
+                    Gold <span class="sort-arrow" id="sort-gold"></span>
+                  </th>
+                  <th onclick="sortPlayers('hasShield')">
+                    Shield <span class="sort-arrow" id="sort-hasShield"></span>
+                  </th>
+                  <th>Hero <span id="hero"></span></th>
+                  <th onclick="sortPlayers('flagCount')">
+                    Flags <span class="sort-arrow" id="sort-flagCount"></span>
+                  </th>
+                  <th>X</th>
+                  <th>Y</th>
+                </tr>
+              </thead>
+              <tbody id="playersBody">
+                <tr>
+                  <td colspan="9" style="text-align: center; color: #888; padding: 20px">
+                    Click Filter to load players
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="players-pagination">
+            <button id="btnPrevPage" disabled>Prev</button>
+            <span class="page-info" id="pageInfo">Page 0 of 0</span>
+            <button id="btnNextPage" disabled>Next</button>
+          </div>
+        </div>
         <!-- Log -->
         <div class="panel">
           <div class="panel-header">Log</div>
@@ -411,7 +552,8 @@
 
       function log(msg) {
         const el = document.getElementById('log')
-        el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`
+        el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}
+`
         el.scrollTop = el.scrollHeight
       }
 
@@ -547,6 +689,23 @@
         if (refreshInterval) {
           clearInterval(refreshInterval)
           refreshInterval = null
+        }
+      }
+
+      async function refreshPlayerCoords(playerId, kingdom) {
+        try {
+          const res = await fetch(API + '/refreshPlayerCoords', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerId, kingdom })
+          })
+          const data = await res.json()
+          if (data.success) {
+            log(`player with id ${playerId} refreshed`)
+            loadPlayers(1)
+          }
+        } catch (e) {
+          log('Browser status error: ' + e.message)
         }
       }
 
@@ -1019,6 +1178,139 @@
       //btnRefreshTimers
       document.getElementById('btnRefreshTimers').addEventListener('click', async () => {
         refreshTimers()
+      })
+
+      // ---- Players Panel ----
+      let playersPage = 1
+      let playersSortBy = 'might'
+      let playersSortOrder = 'DESC'
+
+      async function loadPlayers(page) {
+        playersPage = page || 1
+        var name = document.getElementById('filterName').value
+        var clan = document.getElementById('filterClan').value
+
+        var kingdom = document.getElementById('filterKingdom').value
+        var shield = document.getElementById('filterShield').value
+        var params = new URLSearchParams()
+        params.set('page', playersPage)
+        params.set('limit', 50)
+        params.set('sortBy', playersSortBy)
+        params.set('sortOrder', playersSortOrder)
+        if (name) params.set('name', name)
+        if (clan) params.set('clan', clan)
+        if (kingdom) params.set('kingdom', kingdom)
+        if (shield) params.set('shield', shield)
+        try {
+          var res = await fetch(API + '/players?' + params.toString())
+          var data = await res.json()
+          if (data.success) renderPlayers(data)
+          else log('Players error: ' + (data.error || 'unknown'))
+        } catch (e) {
+          log('Players fetch error: ' + e.message)
+        }
+      }
+
+      function renderPlayers(data) {
+        const HERO = {
+          1: 'Garvel',
+          2: 'Alrick',
+          3: 'Thaddeus',
+          4: 'Matenhaim',
+          5: 'Haemon',
+          6: 'Meriones',
+          7: 'Faron',
+          8: 'Thelensia',
+          9: 'Eirin',
+          10: 'Svyatogor',
+          11: 'Ryjong',
+          20: 'Guan Yu',
+          21: 'Yamato',
+          22: 'Nectarius'
+        }
+
+        var body = document.getElementById('playersBody')
+        document.getElementById('playerCount').textContent = data.total
+        document.getElementById('pageInfo').textContent =
+          'Page ' + data.page + ' of ' + data.totalPages
+        document.getElementById('btnPrevPage').disabled = data.page <= 1
+        document.getElementById('btnNextPage').disabled = data.page >= data.totalPages
+        if (!data.players || data.players.length === 0) {
+          body.innerHTML =
+            '<tr><td colspan="8" style="text-align:center;color:#888;padding:20px">No players found</td></tr>'
+          return
+        }
+        var rows = data.players
+          .map(function (p) {
+            var shieldClass = p.hasShield ? 'shield-on' : 'shield-off'
+            var shieldText = p.hasShield ? 'Yes' : 'No'
+            return (
+              '<tr><td>' +
+              `<button style="padding:5px;font-size:11px" onclick="refreshPlayerCoords(${p.playerId},${p.kingdom})">refresh</button>` +
+              '</td><td>' +
+              (p.playerName || '-') +
+              '</td><td>' +
+              (p.clanName || '-') +
+              '</td><td>' +
+              (p.kingdom || '-') +
+              '</td><td>' +
+              (p.might || 0) +
+              '</td><td>' +
+              (p.gold || 0) +
+              '</td><td class="' +
+              shieldClass +
+              '">' +
+              shieldText +
+              '</td><td>' +
+              (HERO[p.heroType] || 'unknown') +
+              '</td><td>' +
+              (p.flagCount || 0) +
+              '</td><td>' +
+              (p.x || 0) +
+              '</td><td>' +
+              (p.y || 0) +
+              '</td></tr>'
+            )
+          })
+          .join('')
+        body.innerHTML = rows
+        updateSortIndicators()
+      }
+
+      function sortPlayers(col) {
+        if (playersSortBy === col) {
+          playersSortOrder = playersSortOrder === 'ASC' ? 'DESC' : 'ASC'
+        } else {
+          playersSortBy = col
+          playersSortOrder = 'DESC'
+        }
+        loadPlayers(1)
+      }
+
+      function updateSortIndicators() {
+        var cols = ['playerName', 'clanName', 'kingdom', 'might', 'gold', 'hasShield', 'flagCount']
+        cols.forEach(function (col) {
+          var el = document.getElementById('sort-' + col)
+          if (el)
+            el.textContent = playersSortBy === col ? (playersSortOrder === 'ASC' ? '^' : 'v') : ''
+        })
+      }
+
+      document.getElementById('btnApplyFilters').addEventListener('click', function () {
+        loadPlayers(1)
+      })
+      document.getElementById('btnClearFilters').addEventListener('click', function () {
+        document.getElementById('filterName').value = ''
+        document.getElementById('filterClan').value = ''
+        document.getElementById('filterKingdom').value = ''
+        document.getElementById('filterShield').value = ''
+        loadPlayers(1)
+      })
+      document.getElementById('btnPrevPage').addEventListener('click', function () {
+        if (playersPage > 1) loadPlayers(playersPage - 1)
+      })
+      document.getElementById('btnNextPage').addEventListener('click', function () {
+        loadPlayers(playersPage + 1)
       })
 
       // Initial load

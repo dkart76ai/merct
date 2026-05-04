@@ -119,6 +119,7 @@ async function extractDataFrom402(response) {
         progressId: p.progressId,
         playerName: p.playerName,
         country: p.country,
+        heroType: p.heroType,
         heroLevel: p.heroLevel,
         cityLevel: p.cityLevel,
         might: p.might,
@@ -425,21 +426,70 @@ async function sendPacket24301(url, objectId, playerId, token1, token2) {
 
   // Encode the packet
   const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
-  console.log(
-    '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
-    encodeBase64(encoded24301)
-  )
+  // console.log(
+  //   '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
+  //   encodeBase64(encoded24301)
+  // )
 
   // Send to server
   // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
 
   const bytes24301 = await sendPacket(url, encoded24301)
 
-  console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
+  // console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
 
   // ?  use playerId to save in DB
   const result24301 = await extractDataFrom24301(playerId, bytes24301)
   return result24301
+}
+
+async function refreshPlayerInfo402(playerId, kingdom) {
+  console.log('[tasks][refreshPlayerInfo402]', { playerId })
+  if (!kingdom) {
+    console.log('[tasks][refreshPlayerInfo402] No kingdom provided')
+    return { success: false, error: 'no kingdom' }
+  }
+
+  if (!playerId) {
+    console.log('[tasks][refreshPlayerInfo402] No playerid provided')
+    return { success: false, error: 'no playerid' }
+  }
+
+  const redisClient = getRedis()
+
+  const _token1 = await redisClient.get('myPlayerId:BigInt')
+  if (!_token1) {
+    throw new Error('no session token1')
+  }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    throw new Error('no session token2')
+  }
+
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    throw new Error('invalid kingdom')
+  }
+
+  console.log(`[tasks] [refreshPlayerInfo402] Sending packets to ${url}  `)
+  try {
+    const token1 = BigInt(_token1)
+    const token2 = new Uint8Array(_token2)
+
+    const playerIds = [playerId]
+
+    const result402 = await send402packet(url, playerIds, token1, token2)
+
+    console.log(
+      styleText('red', '[tasks] [refreshPlayerInfo402] extract data, players '),
+      result402.players23.length
+    )
+
+    return { success: true, player: result402 }
+  } catch (error) {
+    console.error(`[tasks][refreshPlayerInfo402] Error:`, error.message)
+  }
 }
 
 async function getPlayerInfo402(kingdom) {
@@ -597,7 +647,7 @@ async function scanKingdomTask(data) {
       // console.log(`[tasks][scanKingdomTask] Sending packet312 to ${url}  `)
 
       const bytes312 = await sendPacket(url, encoded312)
-      console.log('[312]encoded result base64', encodeBase64(bytes312))
+      // console.log('[312]encoded result base64', encodeBase64(bytes312))
       // console.log('[312]encoded result base64, skipping because is too big')
 
       const result312 = await extractDataFrom312(bytes312, shouldSaveObjects)
@@ -653,6 +703,7 @@ async function scanKingdomTask(data) {
 module.exports = {
   processPacket,
   getPlayerInfo402,
+  refreshPlayerInfo402,
   // getPlayerFlagsKvK24301,
   scanKingdomTask
 }
