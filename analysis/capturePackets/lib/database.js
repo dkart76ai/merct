@@ -37,13 +37,14 @@ function initDb() {
     )
   `)
 
-  //playerid = objectId
+  //playerid = unique
+  //objectid = entityid updates on reloggin, temporary id
   //progressID tb:1234567
   db.exec(`
     CREATE TABLE IF NOT EXISTS players (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      objectId TEXT UNIQUE NOT NULL,
-      playerId TEXT,
+      objectId TEXT ,
+      playerId TEXT UNIQUE NOT NULL,
       playerName TEXT,
       country TEXT,
       progressId TEXT,
@@ -74,7 +75,7 @@ function initDb() {
     )
   `)
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_objectId ON players(objectId)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_playerId ON players(playerId)`)
   db.exec(`CREATE INDEX IF NOT EXISTS idx_playerName ON players(playerName)`)
   db.exec(`CREATE INDEX IF NOT EXISTS idx_clanName ON players(clanName)`)
 
@@ -378,17 +379,17 @@ function findObjects(query) {
 function getUpsertStatement(player) {
   const database = getDb()
 
-  const { objectId, ...data } = player
+  const { playerId, ...data } = player
   const columns = Object.keys(data)
 
-  const colNames = ['objectId', 'lastCheckAt', ...columns].join(', ')
+  const colNames = ['playerId', 'lastCheckAt', ...columns].join(', ')
   const placeholders = ['?', 'unixepoch()', ...columns.map(() => '?')].join(', ')
   const updateFragment = columns.map(col => `${col} = excluded.${col}`).join(', ')
 
   const sql = `
     INSERT INTO players (${colNames})
     VALUES (${placeholders})
-    ON CONFLICT(objectId) DO UPDATE SET
+    ON CONFLICT(playerId) DO UPDATE SET
       previousCheckAt = lastCheckAt,
       lastCheckAt = unixepoch(),
       ${updateFragment}
@@ -396,7 +397,7 @@ function getUpsertStatement(player) {
 
   return {
     stmt: database.prepare(sql),
-    values: [objectId, ...Object.values(data)]
+    values: [playerId, ...Object.values(data)]
   }
 }
 
@@ -430,14 +431,15 @@ function getPlayersObjectIdFromKingdom(kingdom) {
 
 function savePlayerFlagCount(playerId, flagCount) {
   const database = getDb()
-
+  console.log('[database] [savePlayerFlagCount] playerid type', typeof playerId)
   const update = database.prepare(`
     UPDATE players SET
       flagCount = ?
-    WHERE objectId = ?
+    WHERE playerId = ?
   `)
 
-  update.run(flagCount, playerId)
+  const result = update.run(flagCount, playerId)
+  console.log('[database] update flagcount', result)
   return { success: true }
 }
 

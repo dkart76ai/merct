@@ -383,7 +383,7 @@ async function extractDataFrom24301(playerId, response) {
   const data = scanPacket24301(response)
 
   //[{ "1198295910531": [ 19,1777835062] }]
-
+  // [-100001, 'unsupported type of atom']
   /**
    *[
       24301,  //! opcode
@@ -402,112 +402,115 @@ async function extractDataFrom24301(playerId, response) {
    * total: 3x19 , 1x30, 2x35 =  6 flags
    */
 
-  if (data.length === 0) return // error in packet
+  let totalFlags = 0
+  // if (data.length === 0) return // error in packet
+  // if (data.length === 2) return { success: false, totalFlags: 0 } // entityid expired, not returning flags "unsupported type of atom"
 
-  const innerObject = data[0] //[{}]
-  if (innerObject == undefined) return
-
-  const flagsValues = Object.values(innerObject) // []
-
-  const totalFlags = flagsValues.length
-  console.log('flags ', data, totalFlags)
-
+  if (data.length === 1) {
+    // 1 object with many keys is OK
+    const innerObject = data[0] //[{}]
+    if (innerObject !== undefined) {
+      const flagsValues = Object.values(innerObject) // [] o [[19, timestamp],[30, timestamp]] cada entrada es 1 flag
+      totalFlags = flagsValues.length
+    }
+  }
   //save data in db
-  savePlayerFlagCount(playerId, totalFlags)
+  savePlayerFlagCount(String(playerId), totalFlags)
+  console.log('[tasks][extractDataFrom24301] flags ', data, 'data len', data.length, totalFlags)
 
   return { success: true, totalFlags }
 }
 
-async function getPlayerFlagsKvK24301(kingdom) {
-  console.log('[tasks][getPlayerFlagsKvK24301]', { kingdom })
+// async function getPlayerFlagsKvK24301(kingdom) {
+//   console.log('[tasks][getPlayerFlagsKvK24301]', { kingdom })
 
-  if (!kingdom) {
-    console.log('[tasks][getPlayerFlagsKvK24301] No kingdom provided')
-    return { success: false, error: 'no kingdom' }
-  }
+//   if (!kingdom) {
+//     console.log('[tasks][getPlayerFlagsKvK24301] No kingdom provided')
+//     return { success: false, error: 'no kingdom' }
+//   }
 
-  const redisClient = getRedis()
+//   const redisClient = getRedis()
 
-  const _token1 = await redisClient.get('myPlayerId:BigInt')
-  if (!_token1) {
-    throw new Error('no session token1')
-  }
+//   const _token1 = await redisClient.get('myPlayerId:BigInt')
+//   if (!_token1) {
+//     throw new Error('no session token1')
+//   }
 
-  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
-  if (!_token2) {
-    throw new Error('no session token2')
-  }
+//   const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+//   if (!_token2) {
+//     throw new Error('no session token2')
+//   }
 
-  const url = kingdomUrls[kingdom]
-  if (!url) {
-    throw new Error('invalid kingdom')
-  }
+//   const url = kingdomUrls[kingdom]
+//   if (!url) {
+//     throw new Error('invalid kingdom')
+//   }
 
-  const HEADERS = {
-    'Content-Type': 'application/octet-stream',
-    'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
-    Referer: 'https://totalbattle.com/'
-  }
+//   const HEADERS = {
+//     'Content-Type': 'application/octet-stream',
+//     'User-Agent':
+//       'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
+//     Referer: 'https://totalbattle.com/'
+//   }
 
-  console.log(`[tasks] [getPlayerFlagsKvK24301] Sending packets to ${url}  `)
-  try {
-    const token1 = BigInt(_token1)
-    const token2 = new Uint8Array(_token2)
+//   console.log(`[tasks] [getPlayerFlagsKvK24301] Sending packets to ${url}  `)
+//   try {
+//     const token1 = BigInt(_token1)
+//     const token2 = new Uint8Array(_token2)
 
-    const playerIdsDB = getPlayersObjectIdFromKingdom(kingdom) // ? get play, gold amount need update so we get all players
-    console.log('[getPlayerInfo402] playersIds', playerIdsDB)
+//     const playerIdsDB = getPlayersObjectIdFromKingdom(kingdom) // ? get play, gold amount need update so we get all players
+//     console.log('[getPlayerInfo402] playersIds', playerIdsDB)
 
-    const playersArr = playerIdsDB.map(p => Number(p.objectId)).filter(Boolean)
-    console.log('[getPlayerInfo402] playersIds playersArr', playersArr)
+//     const playersArr = playerIdsDB.map(p => Number(p.objectId)).filter(Boolean)
+//     console.log('[getPlayerInfo402] playersIds playersArr', playersArr)
 
-    let flagCounter = 0
-    for (const playerId of playersArr) {
-      // for (const playerIds of playerIdsArray) {
-      const packetData24301 = buildPacket24301Payload(playerId, token1, token2)
+//     let flagCounter = 0
+//     for (const playerId of playersArr) {
+//       // for (const playerIds of playerIdsArray) {
+//       const packetData24301 = buildPacket24301Payload(playerId, token1, token2)
 
-      // Encode the packet
-      const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
-      console.log(
-        '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
-        encodeBase64(encoded24301)
-      )
+//       // Encode the packet
+//       const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
+//       console.log(
+//         '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
+//         encodeBase64(encoded24301)
+//       )
 
-      // Send to server
-      // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
-      const response24301 = await fetch(url, {
-        method: 'POST',
-        headers: HEADERS,
-        body: encoded24301
-      })
+//       // Send to server
+//       // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
+//       const response24301 = await fetch(url, {
+//         method: 'POST',
+//         headers: HEADERS,
+//         body: encoded24301
+//       })
 
-      // console.log('[getPlayerInfo402] respnse', response402)
+//       // console.log('[getPlayerInfo402] respnse', response402)
 
-      if (!response24301.ok) {
-        throw new Error(`Server returned ${response24301.status}: ${response24301.statusText}`)
-      }
+//       if (!response24301.ok) {
+//         throw new Error(`Server returned ${response24301.status}: ${response24301.statusText}`)
+//       }
 
-      // Get response buffer
-      const buffer24301 = await response24301.arrayBuffer()
-      const bytes24301 = new Uint8Array(buffer24301)
+//       // Get response buffer
+//       const buffer24301 = await response24301.arrayBuffer()
+//       const bytes24301 = new Uint8Array(buffer24301)
 
-      console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
+//       console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
 
-      const result24301 = await extractDataFrom24301(playerId, bytes24301)
-      flagCounter += result24301.totalFlags
+//       const result24301 = await extractDataFrom24301(playerId, bytes24301)
+//       flagCounter += result24301.totalFlags
 
-      console.log(
-        styleText('red', '[tasks][getPlayerFlagsKvK24301] extract data, players '),
-        result24301.totalFlags
-      )
-    }
+//       console.log(
+//         styleText('red', '[tasks][getPlayerFlagsKvK24301] extract data, players '),
+//         result24301.totalFlags
+//       )
+//     }
 
-    console.log(`[tasks] [getPlayerFlagsKvK24301] Success   `)
-    return { success: true, flagCounter }
-  } catch (error) {
-    console.error(`[tasks] [getPlayerFlagsKvK24301] Error:`, error.message)
-  }
-}
+//     console.log(`[tasks] [getPlayerFlagsKvK24301] Success   `)
+//     return { success: true, flagCounter }
+//   } catch (error) {
+//     console.error(`[tasks] [getPlayerFlagsKvK24301] Error:`, error.message)
+//   }
+// }
 
 async function getPlayerInfo402(kingdom) {
   /**
@@ -885,6 +888,49 @@ async function scanKingdomTask(data) {
           styleText('green', '[getPlayerInfo402] extract data, total players'),
           result402.players23.length
         )
+
+        ///! flag info start
+        ///! flag info start
+        ///! flag info start
+        for (const player of result312.players42) {
+          // extract flag info
+          const packetData24301 = buildPacket24301Payload(player.objectId, token1, token2)
+
+          // Encode the packet
+          const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
+          console.log(
+            '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
+            encodeBase64(encoded24301)
+          )
+
+          // Send to server
+          // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
+          const response24301 = await fetch(url, {
+            method: 'POST',
+            headers: HEADERS,
+            body: encoded24301
+          })
+
+          // console.log('[getPlayerInfo402] respnse', response402)
+
+          if (!response24301.ok) {
+            throw new Error(`Server returned ${response24301.status}: ${response24301.statusText}`)
+          }
+
+          // Get response buffer
+          const buffer24301 = await response24301.arrayBuffer()
+          const bytes24301 = new Uint8Array(buffer24301)
+
+          console.log(
+            '[tasks][getPlayerFlagsKvK24301]encoded result base64',
+            encodeBase64(bytes24301)
+          )
+
+          const result24301 = await extractDataFrom24301(player.playerId, bytes24301)
+        }
+        ///! flag info end
+        ///! flag info end
+        ///! flag info end
       } //endif 671
 
       /**
@@ -907,6 +953,6 @@ async function scanKingdomTask(data) {
 module.exports = {
   processPacket,
   getPlayerInfo402,
-  getPlayerFlagsKvK24301,
+  // getPlayerFlagsKvK24301,
   scanKingdomTask
 }

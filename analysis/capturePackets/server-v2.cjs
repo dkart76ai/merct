@@ -44,7 +44,7 @@ const {
 const { getRedis } = require('./lib/redis.js')
 
 //TODO: remove below line after test
-const { getPlayerInfo402, getPlayerFlagsKvK24301 } = require('./workers/tasks.js')
+const { getPlayerInfo402 /*, getPlayerFlagsKvK24301 */ } = require('./workers/tasks.js')
 
 const opCodeInfo = {
   2: 'appear when click on clan button/claim chest',
@@ -722,7 +722,7 @@ async function handleStopTimer(req, res) {
   timerManager.stopScan(kingdom)
 
   // getPlayerInfo402(kingdom)
-  getPlayerFlagsKvK24301(kingdom)
+  // getPlayerFlagsKvK24301(kingdom)
   res.json({ success: true, message: `Stopped timers for ${kingdom} kingdom` })
 }
 
