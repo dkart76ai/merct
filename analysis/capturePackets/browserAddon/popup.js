@@ -128,6 +128,7 @@
       btn.addEventListener('click', function () {
         var key = btn.dataset.key
         navigateTo(key)
+        searchObjects()
       })
     })
   }

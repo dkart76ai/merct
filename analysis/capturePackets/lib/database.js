@@ -353,6 +353,9 @@ function findObjectByKey(key) {
   let sql = 'SELECT * FROM objects WHERE key=?'
 
   const rows = database.prepare(sql).all(key)
+  // console.log('findobjectbykey ', rows)
+
+  database.prepare('DELETE FROM objects WHERE key=?').run(key)
 
   return {
     total: rows.length,
