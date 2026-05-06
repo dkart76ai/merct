@@ -6,7 +6,7 @@ const {
   ButtonBuilder,
   ButtonStyle
 } = require('discord.js')
-const { findObjects, saveUserPosition, deleteObject } = require('../lib/database')
+const { findObjects, findObjectByKey, saveUserPosition, deleteObject } = require('../lib/database')
 const { addGameNotificationJob } = require('../jobs/queues')
 
 loadEnvFile()
@@ -230,9 +230,12 @@ function setupDiscord() {
   })
 
   client.on('messageCreate', async message => {
-    if (message.author.bot) return
+    console.log('msg', message.author.bot, message.author.id)
+    const MI_EXTENSION_ID = '1488525756945530930'
 
-    if (message.channel.name !== 'clan') return
+    if (message.author.bot && message.author.id !== MI_EXTENSION_ID) return
+    console.log('channel name', message.channel.name)
+    if (!['clan', 'test'].includes(message.channel.name)) return
 
     console.log('[BOT] message', message.content)
 
@@ -240,6 +243,36 @@ function setupDiscord() {
       await processFindCommand(message)
     } else if (message.content.startsWith(SET_MYPOS_COMMAND)) {
       await processSetMyPosCommand(message)
+    } else if (message.content.startsWith('#sendMelon')) {
+      const pattern = new RegExp(`^#sendMelon\\s+(.+)`, 'i')
+
+      const match = message.content.match(pattern)
+      console.log('matcho', match)
+      if (match) {
+        const [, key] = match
+        console.log('buscando objeto con key', key)
+        // Llamamos a la DB
+        const results = findObjectByKey(key)
+        console.log('[BOT] Resultados encontrados:', results.objects.length)
+
+        if (results.total > 0) {
+          for (obj of results.objects) {
+            console.log('enviando notificacion', obj)
+            await addGameNotificationJob({
+              object: {
+                k: obj.kingdom,
+                x: obj.x,
+                y: obj.y,
+                staticId: obj.staticId
+              },
+              message: obj.name,
+              toMainChannel: true
+            })
+
+            deleteObject(obj.key)
+          }
+        }
+      }
     }
   })
 

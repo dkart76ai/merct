@@ -348,6 +348,18 @@ function findObjects(query) {
   }
 }
 
+function findObjectByKey(key) {
+  const database = getDb()
+  let sql = 'SELECT * FROM objects WHERE key=?'
+
+  const rows = database.prepare(sql).all(key)
+
+  return {
+    total: rows.length,
+    returned: rows.length,
+    objects: rows
+  }
+}
 // function upsertPlayer(playerKey, data) {
 //   const now = Date.now()
 
@@ -427,7 +439,9 @@ function getPlayersIdFromKingdom(kingdom) {
 }
 function getPlayersObjectIdFromKingdom(kingdom) {
   const database = getDb()
-  return database.prepare('SELECT playerId, objectId FROM players where kingdom=?').all(kingdom)
+  return database
+    .prepare('SELECT playerId, objectId FROM players where hasShield=0 AND kingdom=?')
+    .all(kingdom)
 }
 
 function savePlayerFlagCount(playerId, flagCount) {
@@ -602,6 +616,7 @@ module.exports = {
   saveObject,
   saveObjects,
   findObjects,
+  findObjectByKey,
   deleteObject,
   savePlayers,
   getPlayersIdFromKingdom,

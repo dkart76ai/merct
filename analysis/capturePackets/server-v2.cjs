@@ -219,6 +219,16 @@ const PORT = process.env.PORT || 4000
 
 app.use(express.json({ limit: '50mb' }))
 app.use(express.static(path.join(__dirname, 'public')))
+// ---- CORS headers for browser addon ----
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.header('Access-Control-Allow-Headers', 'Content-Type')
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200)
+  }
+  next()
+})
 
 let browser = null
 let context = null
@@ -1194,6 +1204,61 @@ app.post('/api/capturing/stop', async (req, res) => {
   capturingEnabled = false
 
   res.json({ success: true, message: 'Capturing stopped', capturing: false })
+}) // ---- Browser Addon API Endpoints ----
+
+const { getDb } = require('./lib/database.js')
+
+// POST /api/objects - Query objects with filters for browser addon
+
+app.post('/api/objects', (req, res) => {
+  try {
+    const db = getDb()
+    var body = req.body
+
+    let search = body.search.trim() || ''
+    var minLevel = body.minLevel ? body.minLevel : 1
+    var maxLevel = body.maxLevel ? body.maxLevel : 45
+    var playerX = body.playerX ? body.playerX : 448
+    var playerY = body.playerY ? body.playerY : 480
+
+    var whereClauses = []
+    var params = []
+
+    if (minLevel > 1) {
+      whereClauses.push('level >= ?')
+      params.push(minLevel)
+    }
+    if (maxLevel < 100) {
+      whereClauses.push('level <= ?')
+      params.push(maxLevel)
+    }
+
+    if (search !== '') {
+      whereClauses.push('LOWER(name) LIKE LOWER(?)')
+      if (search.includes('%')) {
+        params.push(search)
+      } else {
+        params.push('%' + search + '%')
+      }
+    }
+
+    if (search === '') {
+      return res.json({ success: true, objects: [], message: 'No filters selected' })
+    }
+
+    var whereSql = 'WHERE ' + whereClauses.join(' AND ')
+    var sql =
+      'SELECT *, ((x - ?) * (x - ?) + (y - ?) * (y - ?)) AS distance FROM objects ' +
+      whereSql +
+      ' ORDER BY distance ASC LIMIT 5000'
+    var allParams = [playerX, playerX, playerY, playerY].concat(params)
+    console.log({ sql, allParams })
+    var objects = db.prepare(sql).all(...allParams)
+    res.json({ success: true, objects: objects, count: objects.length })
+  } catch (e) {
+    console.error('Objects API error:', e.message)
+    res.status(500).json({ success: false, error: e.message })
+  }
 })
 
 async function main() {
