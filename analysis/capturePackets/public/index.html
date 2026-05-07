@@ -323,6 +323,9 @@
           <div id="chatChannelMemberList" class="list" style="margin-top: 10px">
             <div class="list-item">No members</div>
           </div>
+          <!-- <div id="chatChannelbannedMemberList" class="list" style="margin-top: 10px">
+            <div class="list-item">No banned members</div>
+          </div> -->
           <div id="chatChannelsList" class="list" style="margin-top: 10px">
             <div class="list-item">No channels saved</div>
           </div>
@@ -742,13 +745,17 @@
       }
 
       // Browser handlers
-      window.chatUnmuteUser = async function (userId) {
+      window.chatMuteUser = async function (userId, channelUrl) {
         try {
-          const res = await fetch(API + '/channels/' + userId, { method: 'POST' })
+          const res = await fetch(API + '/chat/muteUser', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channelUrl, userId })
+          })
           const data = await res.json()
           if (data.success) {
             loadChatChannels()
-            log('Channel removed')
+            log('User muted : ' + userId)
           } else {
             log('Error: ' + data.error)
           }
@@ -756,13 +763,17 @@
           log('Error: ' + e.message)
         }
       }
-      window.chatMuteUser = async function (userId) {
+      window.chatUnmuteUser = async function (userId, channelUrl) {
         try {
-          const res = await fetch(API + '/channels/' + userId, { method: 'POST' })
+          const res = await fetch(API + '/chat/unMuteUser', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channelUrl, userId })
+          })
           const data = await res.json()
           if (data.success) {
             loadChatChannels()
-            log('Channel removed')
+            log('User un-muted : ' + userId)
           } else {
             log('Error: ' + data.error)
           }
@@ -770,43 +781,49 @@
           log('Error: ' + e.message)
         }
       }
-      window.chatUnBlockUser = async function (userId) {
-        try {
-          const res = await fetch(API + '/channels/' + userId, { method: 'POST' })
-          const data = await res.json()
-          if (data.success) {
-            loadChatChannels()
-            log('Channel removed')
-          } else {
-            log('Error: ' + data.error)
-          }
-        } catch (e) {
-          log('Error: ' + e.message)
-        }
-      }
-      window.chatBlockUser = async function (userId) {
-        try {
-          const res = await fetch(API + '/channels/' + userId, { method: 'POST' })
-          const data = await res.json()
-          if (data.success) {
-            loadChatChannels()
-            log('Channel removed')
-          } else {
-            log('Error: ' + data.error)
-          }
-        } catch (e) {
-          log('Error: ' + e.message)
-        }
-      }
-      document.getElementById('btnChannelMembers').addEventListener('click', async () => {
-        const gameChatChannelList = document.getElementById('gameChatChannelList')
-        console.log('front chat channel selected', gameChatChannelList.value)
 
-        log(`getting channel member...${gameChatChannelList.value}`)
+      window.chatBanUser = async function (userId, channelUrl) {
+        try {
+          const res = await fetch(API + '/chat/banUser', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channelUrl, userId })
+          })
+          const data = await res.json()
+          if (data.success) {
+            loadChatChannels()
+            log('User banned : ' + userId)
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+      window.chatUnbanUser = async function (userId, channelUrl) {
+        try {
+          const res = await fetch(API + '/chat/unBanUser', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channelUrl, userId })
+          })
+          const data = await res.json()
+          if (data.success) {
+            loadChatChannels()
+            log('User un-banned : ' + userId)
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+
+      async function renderChannelMembers(channelUrl) {
         const res = await fetch(API + '/chat/channelMembers', {
           method: 'post',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ channelUrl: gameChatChannelList.value })
+          body: JSON.stringify({ channelUrl })
         })
         const data = await res.json()
         console.log('chat memberlist', data.memberList)
@@ -814,33 +831,83 @@
         if (data.success && data.memberList.length > 0) {
           el.innerHTML = data.memberList
             .map(member => {
+              const muteButton = member.isMuted
+                ? `<button onclick="chatUnmuteUser('${member.userId}','${channelUrl}')" style="padding:2px 5px;font-size:10px;margin-left:5px">UnMute</button>`
+                : `<button onclick="chatMuteUser('${member.userId}','${channelUrl}')" style="padding:2px 5px;font-size:10px;margin-left:5px">Mute</button>`
+              const banButton = member.isBanned
+                ? `<button onclick="chatUnBanUser('${member.userId}','${channelUrl}')" style="padding:2px 5px;font-size:10px;margin-left:5px">UnBan</button>`
+                : `<button onclick="chatBanUser('${member.userId}','${channelUrl}')" style="padding:2px 5px;font-size:10px;margin-left:5px">Ban</button>`
               return `
-      <div class="list-item">
-        <span>${member.nickname}</span>
-        <span>${member.connectionStatus}</span>
-        <span>${member.role || ''}</span>
-        <span>
-          ${
-            member.isMuted
-              ? `<button onclick="chatUnmuteUser('${member.userId}')" style="padding:2px 5px;font-size:10px;margin-left:5px">UnMute</button>`
-              : `<button onclick="chatMuteUser('${member.userId}')" style="padding:2px 5px;font-size:10px;margin-left:5px">Mute</button>`
-          }
-        </span>
-        <span>
-          ${
-            member.isBlockedByMe
-              ? `<button onclick="chatUnBlockUser('${member.userId}')" style="padding:2px 5px;font-size:10px;margin-left:5px">UnBlock</button>`
-              : `<button onclick="chatBlockUser('${member.userId}')" style="padding:2px 5px;font-size:10px;margin-left:5px">Block</button>`
-          }
-        </span>
-      </div>
-    `
+                <div class="list-item">
+                  <span>${member.nickname}</span>
+                  <span>${member.connectionStatus}</span>
+                  <span>${member.role || ''}</span>
+                  ${
+                    member.role !== 'operator'
+                      ? `<div>
+                          <span>
+                            ${muteButton}
+                          </span>
+                          <span>
+                            ${banButton}
+                          </span>
+                        </div>`
+                      : ''
+                  }
+                </div>
+              `
             })
             .join('')
+
+          // retrieve banned user list
         } else {
           el.innerHTML = '<div class="list-item">No members</div>'
 
           log('Error: ' + data.error)
+        }
+      }
+      // async function renderChannelBannedMembers(channelUrl) {
+      //   const res = await fetch(API + '/chat/channelBannedMembers', {
+      //     method: 'post',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({ channelUrl })
+      //   })
+      //   const data = await res.json()
+      //   console.log('chat memberlist', data.bannedMemberList)
+      //   const el = document.getElementById('chatChannelbannedMemberList')
+      //   if (data.success && data.bannedMemberList.length > 0) {
+      //     el.innerHTML = data.bannedMemberList
+      //       .map(member => {
+      //         return `
+      //           <div class="list-item">
+      //             <span>${member.nickname}</span>
+      //             <span>${member.connectionStatus}</span>
+      //             <span>${member.role || ''}</span>
+      //             <span>
+      //                 <button onclick="chatUnBanUser('${member.userId},${channelUrl}')" style="padding:2px 5px;font-size:10px;margin-left:5px">Ban</button>
+      //             </span>
+      //           </div>
+      //         `
+      //       })
+      //       .join('')
+      //   } else {
+      //     el.innerHTML = '<div class="list-item">No members</div>'
+
+      //     log('Error: ' + data.error)
+      //   }
+      // }
+
+      document.getElementById('btnChannelMembers').addEventListener('click', async () => {
+        const gameChatChannelList = document.getElementById('newChannelSelect')
+
+        if (gameChatChannelList.value !== '') {
+          const select = JSON.parse(gameChatChannelList.value)
+          console.log('front chat channel selected', select.channelUrl)
+          log(`getting channel member...${select.channelUrl}`)
+          await renderChannelMembers(select.channelUrl)
+          // await renderChannelBannedMembers(select.channelUrl)
+        } else {
+          alert('select a chat channel')
         }
       })
 
@@ -964,6 +1031,10 @@
       document.getElementById('gameChatChannelList').addEventListener('change', async e => {
         console.log('Selected Value:', e.target.value)
         console.log('Selected Text:', e.target.options[e.target.selectedIndex].text)
+        const el = document.getElementById('chatChannelMemberList')
+        el.innerHTML = '<div class="list-item">No members</div>'
+        // const el2 = document.getElementById('chatChannelbannedMemberList')
+        // el.innerHTML = '<div class="list-item">No banned members</div>'
       })
 
       // chat channels

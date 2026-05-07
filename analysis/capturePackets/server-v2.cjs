@@ -124,6 +124,8 @@ const {
   SCAN_OTHER_KINGDOMS_KEY
 } = require('./jobs/constants.js')
 
+const chatBannedMemberList = new Set()
+
 // const SAVE_DIR = path.join(__dirname, 'captures')
 // const SAVE_DIR2 = path.join(__dirname, 'packetSender')
 const LOGS_DIR = path.join(__dirname, 'logs')
@@ -1262,16 +1264,16 @@ app.post('/api/objects', (req, res) => {
 })
 
 app.post('/api/chat/channelMembers', async (req, res) => {
-  const channelUrl = req.body.channelUrl.trim() || ''
+  const channelUrl = req.body.channelUrl || ''
   if (!channelUrl) {
-    return res.json({ success: false, error: 'no channel' })
+    return res.json({ channelUrl, success: false, error: 'no channel' })
   }
 
   let page = getChatPage()
 
   if (!page) {
     console.log('no page')
-    return res.json({ success: false, error: 'no page' })
+    return res.json({ channelUrl, success: false, error: 'no page' })
   }
 
   console.log('channel url', channelUrl)
@@ -1280,20 +1282,16 @@ app.post('/api/chat/channelMembers', async (req, res) => {
       try {
         // use game's own SendBirdHelper — no new connection needed
         if (!window.SendBirdHelper?.sb) {
-          console.log('no sendbird')
-          return { success: false, error: 'SendBirdHelper not ready' }
+          return { channelUrl, success: false, error: 'SendBirdHelper not ready' }
         }
         const state = window.SendBirdHelper?.sb.connectionState
         if (state !== 'OPEN') {
-          console.log('chat not connected')
-          return { success: false, error: 'SendBirdHelper not ready', state }
+          return { channelUrl, success: false, error: 'SendBirdHelper not ready', state }
         }
-        console.log('en el browser del playwrt, chat channel', channelUrl)
 
         // find channel in existing list or fetch it
         let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
         if (!channel) {
-          console.log('fetching channel from SB', channelUrl)
           channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
         }
 
@@ -1307,22 +1305,24 @@ app.post('/api/chat/channelMembers', async (req, res) => {
             try {
               memberList = await query.next()
             } catch (e) {
-              console.log('no members found', e.message)
-              return { success: false, error: e.message }
+              return { channelUrl, success: false, error: e.message }
             }
           }
-          return { success: true, memberList }
-        }
-        return { success: false, error: 'no channel found' }
-      } catch (err) {
-        console.error(`[chat-sender] Sendmessage failed:`, err.message)
 
-        return { success: false, error: err.message }
+          memberList = memberList.map(m => {
+            return { ...m, isBanned: chatBannedMemberList.has(m.userId) }
+          })
+
+          return { channelUrl, success: true, memberList }
+        }
+        return { channelUrl, success: false, error: 'no channel found' }
+      } catch (err) {
+        return { channelUrl, success: false, error: err.message }
       }
     },
     { channelUrl }
   )
-  console.log('al final de api/chat/getAllChannels', result)
+  console.log('al final de api/chat/getAllChannels', JSON.stringify(result, null, 2))
   /** {
   success: true,
     memberList: [
@@ -1370,6 +1370,341 @@ app.post('/api/chat/channelMembers', async (req, res) => {
       isBlockingMe: false
     },
 ]}
+
+   */
+  res.json(result)
+})
+
+/*
+app.post('/api/chat/channelBannedMembers', async (req, res) => {
+  const channelUrl = req.body.channelUrl.trim() || ''
+  if (!channelUrl) {
+    return res.json({ channelUrl, success: false, error: 'no channel' })
+  }
+
+  let page = getChatPage()
+
+  if (!page) {
+    console.log('no page')
+    return res.json({ channelUrl, success: false, error: 'no page' })
+  }
+
+  console.log('banned, channel url', channelUrl)
+  const result = await page.evaluate(
+    async ({ channelUrl }) => {
+      try {
+        // use game's own SendBirdHelper — no new connection needed
+        if (!window.SendBirdHelper?.sb) {
+          return {
+            originChannel: channelUrl,
+            channelUrl: '',
+            success: false,
+            error: 'SendBirdHelper not ready'
+          }
+        }
+        const state = window.SendBirdHelper?.sb.connectionState
+        if (state !== 'OPEN') {
+          return {
+            originChannel: channelUrl,
+            channelUrl: '',
+            success: false,
+            error: 'SendBirdHelper not ready',
+            state
+          }
+        }
+
+        // find channel in existing list or fetch it
+        // let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
+        // if (!channel) {
+        let channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
+        // }
+        console.log('channel check', { channel, channelUrl })
+
+        let bannedMemberList = []
+        if (channel) {
+          const query = channel.createBannedUserListQuery({
+            limit: 100
+          })
+          while (query.hasNext) {
+            try {
+              const bannedList = await query.next()
+
+              bannedMemberList = bannedMemberList.concat(bannedList)
+            } catch (e) {
+              return {
+                originChannel: channelUrl,
+                channelUrl: channel.url,
+                success: false,
+                error: e.message
+              }
+            }
+          }
+
+          bannedMemberList = bannedMemberList.filter(b => !!b.restrictionInfo?.description)
+
+          return {
+            originChannel: channelUrl,
+            channelUrl: channel.url,
+            success: true,
+            bannedMemberList
+          }
+        }
+        return {
+          originChannel: channelUrl,
+          channelUrl: channel.url,
+          success: false,
+          error: 'no channel found'
+        }
+      } catch (err) {
+        return {
+          originChannel: channelUrl,
+          channelUrl: channel.url,
+          success: false,
+          error: err.message
+        }
+      }
+    },
+    { channelUrl }
+  )
+  console.log('al final de api/chat/channelBannedMembers', JSON.stringify(result, null, 2))
+
+  res.json(result)
+})
+*/
+
+app.post('/api/chat/muteUser', async (req, res) => {
+  const channelUrl = req.body.channelUrl || ''
+  const userId = req.body.userId
+  if (!channelUrl || !userId) {
+    return res.json({ success: false, error: 'no data' })
+  }
+
+  let page = getChatPage()
+
+  if (!page) {
+    console.log('no page')
+    return res.json({ success: false, error: 'no page' })
+  }
+
+  console.log('channel url', channelUrl, userId)
+  const result = await page.evaluate(
+    async ({ channelUrl, userId }) => {
+      try {
+        // use game's own SendBirdHelper — no new connection needed
+        if (!window.SendBirdHelper?.sb) {
+          return { success: false, error: 'SendBirdHelper not ready' }
+        }
+        const state = window.SendBirdHelper?.sb.connectionState
+        if (state !== 'OPEN') {
+          return { success: false, error: 'SendBirdHelper not ready', state }
+        }
+
+        // find channel in existing list or fetch it
+        let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
+        if (!channel) {
+          channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
+        }
+
+        if (channel) {
+          try {
+            if (channel.myRole === 'operator') {
+              const result = await channel.muteUserWithUserId(userId, 3600 * 5, 'Spam') //mute 5 hour
+              return { success: true, result }
+            } else {
+              return { success: false, error: 'no permissions' }
+            }
+          } catch (err) {
+            return { success: false, error: err.message }
+          }
+        }
+        return { success: false, error: 'no channel found' }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
+    },
+    { channelUrl, userId }
+  )
+  console.log('al final de api/chat/muteUser', result)
+  /**
+
+   */
+  res.json(result)
+})
+
+app.post('/api/chat/unMuteUser', async (req, res) => {
+  const channelUrl = req.body.channelUrl || ''
+  const userId = req.body.userId
+  if (!channelUrl || !userId) {
+    return res.json({ success: false, error: 'no data' })
+  }
+
+  let page = getChatPage()
+
+  if (!page) {
+    console.log('no page')
+    return res.json({ success: false, error: 'no page' })
+  }
+
+  console.log('channel url', channelUrl, userId)
+  const result = await page.evaluate(
+    async ({ channelUrl, userId }) => {
+      try {
+        // use game's own SendBirdHelper — no new connection needed
+        if (!window.SendBirdHelper?.sb) {
+          return { success: false, error: 'SendBirdHelper not ready' }
+        }
+        const state = window.SendBirdHelper?.sb.connectionState
+        if (state !== 'OPEN') {
+          return { success: false, error: 'SendBirdHelper not ready', state }
+        }
+
+        // find channel in existing list or fetch it
+        let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
+        if (!channel) {
+          channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
+        }
+
+        if (channel) {
+          try {
+            if (channel.myRole === 'operator') {
+              const result = await channel.unmuteUserWithUserId(userId)
+              return { success: true, result }
+            } else {
+              return { success: false, error: 'no permissions' }
+            }
+          } catch (err) {
+            return { success: false, error: err.message }
+          }
+        }
+        return { success: false, error: 'no channel found' }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
+    },
+    { channelUrl, userId }
+  )
+  console.log('al final de api/chat/muteUser', result)
+  /**
+
+   */
+  res.json(result)
+})
+
+app.post('/api/chat/banUser', async (req, res) => {
+  const channelUrl = req.body.channelUrl || ''
+  const userId = req.body.userId
+  if (!channelUrl || !userId) {
+    return res.json({ success: false, error: 'no data' })
+  }
+
+  let page = getChatPage()
+
+  if (!page) {
+    console.log('no page')
+    return res.json({ success: false, error: 'no page' })
+  }
+
+  console.log('channel url', channelUrl, userId)
+  const result = await page.evaluate(
+    async ({ channelUrl, userId }) => {
+      try {
+        // use game's own SendBirdHelper — no new connection needed
+        if (!window.SendBirdHelper?.sb) {
+          return { success: false, error: 'SendBirdHelper not ready' }
+        }
+        const state = window.SendBirdHelper?.sb.connectionState
+        if (state !== 'OPEN') {
+          return { success: false, error: 'SendBirdHelper not ready', state }
+        }
+
+        // find channel in existing list or fetch it
+        let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
+        if (!channel) {
+          channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
+        }
+
+        if (channel) {
+          try {
+            if (channel.myRole === 'operator') {
+              const result = await channel.banUserWithUserId(userId, 60 * 60 * 5, 'warning') //ban 5 horas
+              chatBannedMemberList.add(userId)
+              return { success: true, result }
+            } else {
+              return { success: false, error: 'no permissions' }
+            }
+          } catch (err) {
+            return { success: false, error: err.message }
+          }
+        }
+        return { success: false, error: 'no channel found' }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
+    },
+    { channelUrl, userId }
+  )
+  console.log('al final de api/chat/muteUser', result)
+  /**
+
+   */
+  res.json(result)
+})
+
+app.post('/api/chat/unBanUser', async (req, res) => {
+  const channelUrl = req.body.channelUrl.trim() || ''
+  const userId = req.body.userId
+  if (!channelUrl || !userId) {
+    return res.json({ success: false, error: 'no data' })
+  }
+
+  let page = getChatPage()
+
+  if (!page) {
+    console.log('no page')
+    return res.json({ success: false, error: 'no page' })
+  }
+
+  console.log('channel url', channelUrl, userId)
+  const result = await page.evaluate(
+    async ({ channelUrl, userId }) => {
+      try {
+        // use game's own SendBirdHelper — no new connection needed
+        if (!window.SendBirdHelper?.sb) {
+          return { success: false, error: 'SendBirdHelper not ready' }
+        }
+        const state = window.SendBirdHelper?.sb.connectionState
+        if (state !== 'OPEN') {
+          return { success: false, error: 'SendBirdHelper not ready', state }
+        }
+
+        // find channel in existing list or fetch it
+        let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
+        if (!channel) {
+          channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
+        }
+
+        if (channel) {
+          try {
+            if (channel.myRole === 'operator') {
+              const result = await channel.unbanUserWithUserId(userId)
+              chatBannedMemberList.delete(userId)
+              return { success: true, result }
+            } else {
+              return { success: false, error: 'no permissions' }
+            }
+          } catch (err) {
+            return { success: false, error: err.message }
+          }
+        }
+        return { success: false, error: 'no channel found' }
+      } catch (err) {
+        return { success: false, error: err.message }
+      }
+    },
+    { channelUrl, userId }
+  )
+  console.log('al final de api/chat/muteUser', result)
+  /**
 
    */
   res.json(result)
