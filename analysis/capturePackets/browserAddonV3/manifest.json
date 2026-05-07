@@ -1,26 +1,29 @@
 {
   "manifest_version": 3,
   "name": "TotalBattle Object Scanner",
-  "version": "1.0.0",
-  "description": "Scan and navigate to objects on the TotalBattle map",
+  "version": "1.0",
+  "description": "Scanner de objetos para TotalBattle compatible con múltiples navegadores",
+  "permissions": ["storage", "tabs", "activeTab"],
+  "host_permissions": ["http://localhost/*", "https://discord.com/*"],
   "action": {
     "default_popup": "popup.html",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
+    "default_icon": "icons/icon16.png"
   },
-  "permissions": ["activeTab", "storage"],
-  "host_permissions": ["https://*.totalbattle.com/*", "http://localhost/*", "https://discord.com*"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": ["background.js"],
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["https://*.totalbattle.com/*"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html"],
+      "matches": ["https://*.totalbattle.com/*"]
     }
   ],
   "commands": {
@@ -29,18 +32,12 @@
         "default": "Ctrl+Shift+Y",
         "mac": "Command+Shift+Y"
       },
-      "description": "Toggle object scanner"
+      "description": "Abrir/Cerrar el Scanner"
     }
   },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": ["popup.html"],
-      "matches": ["https://*.totalbattle.com/*"]
-    }
-  ]
+  }
 }

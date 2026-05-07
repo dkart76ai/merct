@@ -1,92 +1,65 @@
-﻿// Content script for TotalBattle Object Scanner
-// Injects UI into the game page and handles in-game messaging
+﻿const api = typeof browser !== 'undefined' ? browser : chrome
+let scannerFrame = null
 
-;(function () {
-  'use strict'
-
-  var scannerOpen = false
-  var scannerFrame = null
-
-  // Listen for messages from background/popup
-  chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.action === 'toggleScanner') {
-      toggleScanner()
-      sendResponse({ open: scannerOpen })
-    }
-    if (request.action === 'sendCoords') {
-      sendGameMessage(request.key)
-      sendResponse({ success: true })
-    }
-  })
-
-  function toggleScanner() {
-    scannerOpen = !scannerOpen
-    if (scannerOpen) {
-      showScanner()
-    } else {
-      hideScanner()
-    }
+// 1. Escuchar mensajes del Background
+api.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'toggleScanner') {
+    toggleScanner()
+    sendResponse({ status: 'done' })
   }
 
-  function showScanner() {
-    if (scannerFrame) {
-      scannerFrame.style.display = 'block'
-      return
-    }
+  if (request.action === 'sendCoords') {
+    console.log('[Scanner] Recibidas coordenadas para navegar:', request.key)
+    // Aquí puedes añadir la lógica para mover el mapa del juego si es necesario
+    sendResponse({ success: true })
+  }
+})
+
+// 2. Función para crear o mostrar/ocultar el iframe
+function toggleScanner() {
+  if (scannerFrame) {
+    // Si ya existe, simplemente alternamos visibilidad
+    const isHidden = scannerFrame.style.display === 'none'
+    scannerFrame.style.display = isHidden ? 'block' : 'none'
+  } else {
+    // Si no existe, lo creamos
     scannerFrame = document.createElement('iframe')
     scannerFrame.id = 'tb-scanner-frame'
-    scannerFrame.src = chrome.runtime.getURL('popup.html')
-    scannerFrame.style.cssText =
-      'position:fixed;top:50px;right:20px;width:620px;height:600px;border:2px solid #569cd6;border-radius:8px;z-index:999999;background:#1e1e1e;box-shadow:0 0 20px rgba(0,0,0,0.5);'
+    // Importante: usar api.runtime.getURL para cargar el archivo interno
+    scannerFrame.src = api.runtime.getURL('popup.html')
+
+    // Estilos para que flote sobre el juego
+    scannerFrame.style.cssText = `
+    all: initial !important;
+  display: block !important;
+  position: fixed !important;
+  top: 50px !important;
+  right: 20px !important;
+  width: 620px !important;
+  min-width: 620px !important; /* Añade esta línea */
+  height: 600px !important;
+  min-height: 600px !important; /* Añade esta línea */
+  box-sizing: border-box !important; /* Añade esta línea */
+  border: 2px solid #569cd6 !important;
+  z-index: 2147483647 !important; /* Máximo valor posible */
+`
     document.body.appendChild(scannerFrame)
-
-    // Close button inside iframe message
-    window.addEventListener('message', function (e) {
-      if (e.data === 'close-scanner') {
-        hideScanner()
-      }
-      if (e.data.action === 'navigate-to') {
-        sendGameMessage(e.data.key)
-      }
-    })
   }
+}
 
-  function hideScanner() {
-    scannerOpen = false
-    if (scannerFrame) {
-      scannerFrame.style.display = 'none'
-    }
+// 3. Escuchar el cierre desde el botón dentro del Iframe (vía postMessage)
+window.addEventListener('message', event => {
+  if (event.data === 'close-scanner') {
+    if (scannerFrame) scannerFrame.style.display = 'none'
   }
+})
 
-  // Dentro de content.js, mejora esta función:
-  function sendGameMessage(key) {
-    console.log('Enviando comando:', key)
-
-    // Usamos el API de promesas de Chrome
-    chrome.runtime
-      .sendMessage({
-        action: 'SEND_TO_DISCORD',
-        data: '#sendMelon ' + key
-      })
-      .then(response => {
-        if (response && response.status === 'ok') {
-          console.log('✅ Notificación enviada a Discord')
-        } else {
-          console.error('❌ Error al notificar:', response)
-        }
-      })
-      .catch(error => {
-        console.error('❌ Error de conexión con el background:', error)
-      })
+// 4. Atajo de teclado (Ctrl + Shift + Y)
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key.toUpperCase() === 'Y') {
+    e.preventDefault()
+    toggleScanner()
   }
+})
 
-  // Add keyboard shortcut listener on the page
-  document.addEventListener('keydown', function (e) {
-    if (e.ctrlKey && e.shiftKey && e.key === 'Y') {
-      e.preventDefault()
-      toggleScanner()
-    }
-  })
-
-  console.log('[Scanner] Content script loaded')
-})()
+console.log('[Scanner] Content script cargado y listo.')
