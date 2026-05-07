@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PlayWTB - Job Queue System</title>
+    <title>TBHalp</title>
     <style>
       * {
         box-sizing: border-box;
@@ -264,7 +264,6 @@
     </style>
   </head>
   <body>
-    <div class="header"><h1>PlayWTB - Job Queue System</h1></div>
     <div class="container">
       <div class="side-container">
         <!-- Browser Controls -->
@@ -309,20 +308,23 @@
               Refresh
             </button>
           </div>
-
-          <!-- Chat Channels Management -->
-          <div class="panel" style="margin-top: 10px">
-            <div class="panel-header">Chat Channels for mercs</div>
-            <div class="controls" style="padding: 10px">
-              <select id="newChannelSelect">
-                <option value="">Select channel...</option>
-              </select>
-              <button id="btnAddChatChannel">Add</button>
-              <button id="btnRefreshChatChannel">Refresh</button>
-              <div id="chatChannelsList" class="list" style="margin-top: 10px">
-                <div class="list-item">No channels saved</div>
-              </div>
-            </div>
+        </div>
+        <!-- Chat Channels Management -->
+        <div class="panel" style="margin-top: 10px">
+          <div class="panel-header">Chat Channels for mercs</div>
+          <div class="controls" style="padding: 10px">
+            <select id="newChannelSelect">
+              <option value="">Select channel...</option>
+            </select>
+            <button id="btnAddChatChannel">Add</button>
+            <button id="btnRefreshChatChannel">Refresh</button>
+            <button id="btnChannelMembers">Get channel members</button>
+          </div>
+          <div id="chatChannelMemberList" class="list" style="margin-top: 10px">
+            <div class="list-item">No members</div>
+          </div>
+          <div id="chatChannelsList" class="list" style="margin-top: 10px">
+            <div class="list-item">No channels saved</div>
           </div>
         </div>
 
@@ -740,6 +742,107 @@
       }
 
       // Browser handlers
+      window.chatUnmuteUser = async function (userId) {
+        try {
+          const res = await fetch(API + '/channels/' + userId, { method: 'POST' })
+          const data = await res.json()
+          if (data.success) {
+            loadChatChannels()
+            log('Channel removed')
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+      window.chatMuteUser = async function (userId) {
+        try {
+          const res = await fetch(API + '/channels/' + userId, { method: 'POST' })
+          const data = await res.json()
+          if (data.success) {
+            loadChatChannels()
+            log('Channel removed')
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+      window.chatUnBlockUser = async function (userId) {
+        try {
+          const res = await fetch(API + '/channels/' + userId, { method: 'POST' })
+          const data = await res.json()
+          if (data.success) {
+            loadChatChannels()
+            log('Channel removed')
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+      window.chatBlockUser = async function (userId) {
+        try {
+          const res = await fetch(API + '/channels/' + userId, { method: 'POST' })
+          const data = await res.json()
+          if (data.success) {
+            loadChatChannels()
+            log('Channel removed')
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+      document.getElementById('btnChannelMembers').addEventListener('click', async () => {
+        const gameChatChannelList = document.getElementById('gameChatChannelList')
+        console.log('front chat channel selected', gameChatChannelList.value)
+
+        log(`getting channel member...${gameChatChannelList.value}`)
+        const res = await fetch(API + '/chat/channelMembers', {
+          method: 'post',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelUrl: gameChatChannelList.value })
+        })
+        const data = await res.json()
+        console.log('chat memberlist', data.memberList)
+        const el = document.getElementById('chatChannelMemberList')
+        if (data.success && data.memberList.length > 0) {
+          el.innerHTML = data.memberList
+            .map(member => {
+              return `
+      <div class="list-item">
+        <span>${member.nickname}</span>
+        <span>${member.connectionStatus}</span>
+        <span>${member.role || ''}</span>
+        <span>
+          ${
+            member.isMuted
+              ? `<button onclick="chatUnmuteUser('${member.userId}')" style="padding:2px 5px;font-size:10px;margin-left:5px">UnMute</button>`
+              : `<button onclick="chatMuteUser('${member.userId}')" style="padding:2px 5px;font-size:10px;margin-left:5px">Mute</button>`
+          }
+        </span>
+        <span>
+          ${
+            member.isBlockedByMe
+              ? `<button onclick="chatUnBlockUser('${member.userId}')" style="padding:2px 5px;font-size:10px;margin-left:5px">UnBlock</button>`
+              : `<button onclick="chatBlockUser('${member.userId}')" style="padding:2px 5px;font-size:10px;margin-left:5px">Block</button>`
+          }
+        </span>
+      </div>
+    `
+            })
+            .join('')
+        } else {
+          el.innerHTML = '<div class="list-item">No members</div>'
+
+          log('Error: ' + data.error)
+        }
+      })
 
       document.getElementById('btnCaptureScreenshot').addEventListener('click', async () => {
         // log('Capturing screenshot...')

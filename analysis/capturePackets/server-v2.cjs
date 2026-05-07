@@ -1261,6 +1261,120 @@ app.post('/api/objects', (req, res) => {
   }
 })
 
+app.post('/api/chat/channelMembers', async (req, res) => {
+  const channelUrl = req.body.channelUrl.trim() || ''
+  if (!channelUrl) {
+    return res.json({ success: false, error: 'no channel' })
+  }
+
+  let page = getChatPage()
+
+  if (!page) {
+    console.log('no page')
+    return res.json({ success: false, error: 'no page' })
+  }
+
+  console.log('channel url', channelUrl)
+  const result = await page.evaluate(
+    async ({ channelUrl }) => {
+      try {
+        // use game's own SendBirdHelper — no new connection needed
+        if (!window.SendBirdHelper?.sb) {
+          console.log('no sendbird')
+          return { success: false, error: 'SendBirdHelper not ready' }
+        }
+        const state = window.SendBirdHelper?.sb.connectionState
+        if (state !== 'OPEN') {
+          console.log('chat not connected')
+          return { success: false, error: 'SendBirdHelper not ready', state }
+        }
+        console.log('en el browser del playwrt, chat channel', channelUrl)
+
+        // find channel in existing list or fetch it
+        let channel = window.SendBirdHelper.channelsList.find(c => c.url === channelUrl)
+        if (!channel) {
+          console.log('fetching channel from SB', channelUrl)
+          channel = await window.SendBirdHelper.sb.groupChannel.getChannel(channelUrl)
+        }
+
+        let memberList = []
+        if (channel) {
+          const query = channel.createMemberListQuery({
+            limit: 100,
+            order: 'operator_then_member_alphabetical'
+          })
+          if (query.hasNext) {
+            try {
+              memberList = await query.next()
+            } catch (e) {
+              console.log('no members found', e.message)
+              return { success: false, error: e.message }
+            }
+          }
+          return { success: true, memberList }
+        }
+        return { success: false, error: 'no channel found' }
+      } catch (err) {
+        console.error(`[chat-sender] Sendmessage failed:`, err.message)
+
+        return { success: false, error: err.message }
+      }
+    },
+    { channelUrl }
+  )
+  console.log('al final de api/chat/getAllChannels', result)
+  /** {
+  success: true,
+    memberList: [
+    {
+      _iid: 'su-a9a7b7fb-1ac5-4af6-a305-0a02f7839674',
+      userId: 'tb:71415620',
+      nickname: 'Elrond',
+      plainProfileUrl: '',
+      requireAuth: false,
+      metaData: [Object],
+      connectionStatus: 'online',
+      isActive: true,
+      lastSeenAt: 0,
+      preferredLanguages: null,
+      friendDiscoveryKey: null,
+      friendName: null,
+      _hashValue: -618876971,
+      _updatedAt: 0,
+      restrictionInfo: [Object],
+      state: 'joined',
+      role: 'operator',
+      isMuted: false,
+      isBlockedByMe: false,
+      isBlockingMe: false
+    }, {
+      _iid: 'su-a9a7b7fb-1ac5-4af6-a305-0a02f7839674',
+      userId: 'tb:19883131',
+      nickname: 'Moogumuro',
+      plainProfileUrl: '',
+      requireAuth: false,
+      metaData: [Object],
+      connectionStatus: 'offline',
+      isActive: true,
+      lastSeenAt: 1778114163898,
+      preferredLanguages: null,
+      friendDiscoveryKey: null,
+      friendName: null,
+      _hashValue: -226016454,
+      _updatedAt: 0,
+      restrictionInfo: [Object],
+      state: 'joined',
+      role: null,
+      isMuted: false,
+      isBlockedByMe: false,
+      isBlockingMe: false
+    },
+]}
+
+   */
+  res.json(result)
+})
+
 async function main() {
   console.log('[Main] Starting server...')
 

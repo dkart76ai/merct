@@ -128,6 +128,8 @@ async function sendMessage(channelUrl, msg = '', coord = null, staticId = 400) {
     },
     { channelUrl, data, message }
   )
+
+  return result
 }
 
 module.exports = {
