@@ -152,6 +152,11 @@ function getUserPosition(userId) {
   return database.prepare('SELECT * FROM userPosition WHERE key = ?').get(userId)
 }
 
+function getPlayerById(playerId) {
+  const database = getDb()
+  return database.prepare('SELECT * FROM players WHERE playerId = ?').get(playerId)
+}
+
 function deleteObject(key) {
   if (!key) return
 
@@ -623,6 +628,7 @@ module.exports = {
   findObjectByKey,
   deleteObject,
   savePlayers,
+  getPlayerById,
   getPlayersIdFromKingdom,
   getPlayersObjectIdFromKingdom,
   getPlayers,

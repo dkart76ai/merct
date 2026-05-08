@@ -39,6 +39,7 @@ const {
   getStats,
   getAllObjects,
   getPlayers,
+  getPlayerById,
   startCleanup,
   closeDb
 } = require('./lib/database.js')
@@ -1028,6 +1029,32 @@ app.post('/api/refreshPlayerCoords', async (req, res) => {
     console.log('[server.v2]refreshPlayerCoords', result)
 
     await getResourceInfo601(playerId, kingdom)
+
+    res.json({ success: true })
+  } catch (e) {
+    console.error('Players API error:', e.message)
+    res.status(500).json({ success: false, error: e.message })
+  }
+})
+
+app.post('/api/reportPlayerCoords', async (req, res) => {
+  try {
+    const playerId = String(req.body.playerId)
+
+    const result = getPlayerById(playerId)
+    // console.log('player reportplayercords', playerId, result)
+    if (result) {
+      await addGameNotificationJob({
+        object: {
+          k: result.kingdom,
+          x: result.x,
+          y: result.y,
+          staticId: 2
+        },
+        message: result.playerName,
+        toMainChannel: true
+      })
+    }
 
     res.json({ success: true })
   } catch (e) {

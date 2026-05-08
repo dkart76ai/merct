@@ -60,16 +60,23 @@ async function sendMessage(channelUrl, msg = '', coord = null, staticId = 400) {
   if (!!coord) {
     const dbEntry = await staticIdRedis.getStaticIdData(staticId)
 
+    let name = dbEntry.name || ''
+    let entryType = 'poi'
+    if ([2, 4, 171000].includes(staticId)) {
+      name = msg
+      entryType = 'user'
+    }
+
     data = JSON.stringify({
       subs: {
         '/%0%/': {
           type: 'coord',
-          entryType: 'poi',
+          entryType,
           x: coord?.x ?? 0,
           y: coord?.y ?? 0,
           realmId: coord?.k ?? 0,
           staticId,
-          name: dbEntry.name || '',
+          name,
           v: 1
         }
       }

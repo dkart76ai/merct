@@ -496,6 +496,7 @@
               <thead>
                 <tr>
                   <th>refresh coords</th>
+                  <th>post coords</th>
                   <th onclick="sortPlayers('playerName')">
                     Name <span class="sort-arrow" id="sort-playerName"></span>
                   </th>
@@ -514,7 +515,7 @@
                   <th onclick="sortPlayers('hasShield')">
                     Shield <span class="sort-arrow" id="sort-hasShield"></span>
                   </th>
-                  <th class="timestamp"></th>
+
                   <th>Hero <span id="hero"></span></th>
                   <th onclick="sortPlayers('flagCount')">
                     Flags <span class="sort-arrow" id="sort-flagCount"></span>
@@ -704,6 +705,23 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ playerId, kingdom })
+          })
+          const data = await res.json()
+          if (data.success) {
+            log(`player with id ${playerId} refreshed`)
+            loadPlayers(1)
+          }
+        } catch (e) {
+          log('Browser status error: ' + e.message)
+        }
+      }
+
+      async function reportPlayerCoords(playerId) {
+        try {
+          const res = await fetch(API + '/reportPlayerCoords', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerId })
           })
           const data = await res.json()
           if (data.success) {
@@ -1419,10 +1437,17 @@
           .map(function (p) {
             const shieldClass = p.hasShield ? 'shield-on' : 'shield-off'
             const shieldText = p.hasShield ? 'Yes' : 'No'
-            const timestamp = new Date(p.timestamp * 1000)
+            // const date = new Date(p.timestamp * 1000)
+            // const year = date.getFullYear()
+            // const month = String(date.getMonth() + 1).padStart(2, '0')
+            // const day = String(date.getDate()).padStart(2, '0')
+
+            // const customDate = `${day}-${month}-${year}` // "2026-05-08"
             return (
               '<tr><td>' +
               `<button style="padding:5px;font-size:11px" onclick="refreshPlayerCoords(${p.playerId},${p.kingdom})">refresh</button>` +
+              '<td>' +
+              `<button style="padding:5px;font-size:11px" onclick="reportPlayerCoords(${p.playerId})">coord</button>` +
               '</td><td>' +
               (p.playerName || '-') +
               '</td><td>' +
@@ -1437,8 +1462,6 @@
               shieldClass +
               '">' +
               shieldText +
-              '</td><td>' +
-              timestamp +
               '</td><td>' +
               (HERO[p.heroType] || 'unknown') +
               '</td><td>' +
