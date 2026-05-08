@@ -11,6 +11,8 @@ const api = typeof browser !== 'undefined' ? browser : chrome
       <div class="slider-row">
         <input type="text" id="search" placeholder="Search...">
         <button class="btn" id="searchBtn">Search</button>
+         <button id="getVillageL25">8 villages lvl 25</button>
+          <button id="getCryptL20">8 crypts lvl 20</button>
       </div>
       <div class="slider-row">
         <label>Level:</label>
@@ -37,6 +39,12 @@ const api = typeof browser !== 'undefined' ? browser : chrome
     document.getElementById('searchBtn').addEventListener('click', searchObjects)
     document.getElementById('closeBtn').addEventListener('click', () => {
       window.parent.postMessage('close-scanner', '*')
+    })
+    document.getElementById('getVillageL25').addEventListener('click', () => {
+      api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 villa lvl 25' })
+    })
+    document.getElementById('getCryptL20').addEventListener('click', () => {
+      api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 crypt lvl 20' })
     })
   }
 

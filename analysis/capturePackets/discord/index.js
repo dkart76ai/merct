@@ -97,7 +97,7 @@ async function processFindCommand(message) {
 
     // it uses user position to get objects closer to the user
 
-    const maxAmount = Math.min(parseInt(amount), 8)
+    const maxAmount = Math.min(parseInt(amount), 15)
     await message.reply(`Searching ${maxAmount} ${searchName}`)
 
     // Llamamos a la DB
