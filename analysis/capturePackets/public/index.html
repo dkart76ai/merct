@@ -514,6 +514,7 @@
                   <th onclick="sortPlayers('hasShield')">
                     Shield <span class="sort-arrow" id="sort-hasShield"></span>
                   </th>
+                  <th class="timestamp"></th>
                   <th>Hero <span id="hero"></span></th>
                   <th onclick="sortPlayers('flagCount')">
                     Flags <span class="sort-arrow" id="sort-flagCount"></span>
@@ -1361,12 +1362,12 @@
 
       async function loadPlayers(page) {
         playersPage = page || 1
-        var name = document.getElementById('filterName').value
-        var clan = document.getElementById('filterClan').value
+        const name = document.getElementById('filterName').value
+        const clan = document.getElementById('filterClan').value
 
-        var kingdom = document.getElementById('filterKingdom').value
-        var shield = document.getElementById('filterShield').value
-        var params = new URLSearchParams()
+        const kingdom = document.getElementById('filterKingdom').value
+        const shield = document.getElementById('filterShield').value
+        const params = new URLSearchParams()
         params.set('page', playersPage)
         params.set('limit', 50)
         params.set('sortBy', playersSortBy)
@@ -1376,8 +1377,8 @@
         if (kingdom) params.set('kingdom', kingdom)
         if (shield) params.set('shield', shield)
         try {
-          var res = await fetch(API + '/players?' + params.toString())
-          var data = await res.json()
+          const res = await fetch(API + '/players?' + params.toString())
+          const data = await res.json()
           if (data.success) renderPlayers(data)
           else log('Players error: ' + (data.error || 'unknown'))
         } catch (e) {
@@ -1403,7 +1404,7 @@
           22: 'Nectarius'
         }
 
-        var body = document.getElementById('playersBody')
+        const body = document.getElementById('playersBody')
         document.getElementById('playerCount').textContent = data.total
         document.getElementById('pageInfo').textContent =
           'Page ' + data.page + ' of ' + data.totalPages
@@ -1414,10 +1415,11 @@
             '<tr><td colspan="8" style="text-align:center;color:#888;padding:20px">No players found</td></tr>'
           return
         }
-        var rows = data.players
+        const rows = data.players
           .map(function (p) {
-            var shieldClass = p.hasShield ? 'shield-on' : 'shield-off'
-            var shieldText = p.hasShield ? 'Yes' : 'No'
+            const shieldClass = p.hasShield ? 'shield-on' : 'shield-off'
+            const shieldText = p.hasShield ? 'Yes' : 'No'
+            const timestamp = new Date(p.timestamp * 1000)
             return (
               '<tr><td>' +
               `<button style="padding:5px;font-size:11px" onclick="refreshPlayerCoords(${p.playerId},${p.kingdom})">refresh</button>` +
@@ -1435,6 +1437,8 @@
               shieldClass +
               '">' +
               shieldText +
+              '</td><td>' +
+              timestamp +
               '</td><td>' +
               (HERO[p.heroType] || 'unknown') +
               '</td><td>' +
@@ -1462,9 +1466,17 @@
       }
 
       function updateSortIndicators() {
-        var cols = ['playerName', 'clanName', 'kingdom', 'might', 'gold', 'hasShield', 'flagCount']
+        const cols = [
+          'playerName',
+          'clanName',
+          'kingdom',
+          'might',
+          'gold',
+          'hasShield',
+          'flagCount'
+        ]
         cols.forEach(function (col) {
-          var el = document.getElementById('sort-' + col)
+          const el = document.getElementById('sort-' + col)
           if (el)
             el.textContent = playersSortBy === col ? (playersSortOrder === 'ASC' ? '^' : 'v') : ''
         })

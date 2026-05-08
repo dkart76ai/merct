@@ -47,6 +47,7 @@ const { getRedis } = require('./lib/redis.js')
 //TODO: remove below line after test
 const {
   getPlayerInfo402,
+  getResourceInfo601,
   refreshPlayerInfo402 /*, getPlayerFlagsKvK24301 */
 } = require('./workers/tasks.js')
 
@@ -517,6 +518,11 @@ function setupPacketCaptureListener() {
         if (![314, 318, 601, 24201].includes(opCode)) {
           const packetDescription = opCodeInfo[opCode] || ''
           console.log('[packetCollector] opcode', opCode, packetDescription)
+        }
+
+        if (opCode === 15013) {
+          console.log('open chest packet 15013 req', encodeBase64(postDataBuff))
+          console.log('open chest packet 15013 res', encodeBase64(responseBody))
         }
 
         //  save 20 packet sample of each  opCode
@@ -1020,6 +1026,9 @@ app.post('/api/refreshPlayerCoords', async (req, res) => {
 
     const result = await refreshPlayerInfo402(playerId, kingdom)
     console.log('[server.v2]refreshPlayerCoords', result)
+
+    await getResourceInfo601(playerId, kingdom)
+
     res.json({ success: true })
   } catch (e) {
     console.error('Players API error:', e.message)

@@ -40,6 +40,7 @@ function initDb() {
   //playerid = unique
   //objectid = entityid updates on reloggin, temporary id
   //progressID tb:1234567
+  //timestamp city creation date
   db.exec(`
     CREATE TABLE IF NOT EXISTS players (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -495,7 +496,7 @@ function getPlayers(
   const countSql = 'SELECT COUNT(*) as total FROM players ' + whereSql
   const { total } = db.prepare(countSql).get(...params)
   const dataSql =
-    'SELECT playerId, playerName, clanName, kingdom, might, gold, hasShield, x, y, cityLevel, heroLevel, heroType, country, timezone, flagCount FROM players ' +
+    'SELECT * FROM players ' +
     whereSql +
     ' ORDER BY ' +
     sortBy +

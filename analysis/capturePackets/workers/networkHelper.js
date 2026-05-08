@@ -91,6 +91,19 @@ function buildPacket24301Payload(playerId, tokenBigInt, token) {
   return packetData
 }
 
+function buildPacket601Payload(playerId, tokenBigInt, token) {
+  //something with resources maybe
+  if (!tokenBigInt || !token) return null
+
+  const randomSeq = Math.floor(Math.random() * 32000) + 1
+  const packetData = [
+    [24301, randomSeq, [[tokenBigInt], token], ''],
+    [[[[playerId], 0, 2147483647]]]
+  ]
+
+  return packetData
+}
+
 function buildPacket213Payload(tokenBigInt, token) {
   const randomSeq = Math.floor(Math.random() * 32000) + 1
   const packetData = [
@@ -128,7 +141,8 @@ module.exports = {
   buildPacket213Payload,
   buildPacket314Payload,
   buildPacket318Payload,
-  buildPacket15100Payload
+  buildPacket15100Payload,
+  buildPacket601Payload
 }
 
 // styletext
