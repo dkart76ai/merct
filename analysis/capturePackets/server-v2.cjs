@@ -882,7 +882,7 @@ async function handleScanOtherKingdom(req, res) {
 
   res.json({
     success: true,
-    message: `kingdom ${kingdoms} scanned`
+    message: `kingdom ${kingdoms} enqueued`
   })
 }
 
