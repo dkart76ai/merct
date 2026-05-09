@@ -557,7 +557,10 @@ function setupPacketCaptureListener() {
         response: responseBody,
         shouldSaveObjects: false // manual scrolling
       }
-      const result = processPacket(payload)
+      //?set and forget (callback will handle the result)
+      processPacket(payload)
+        // .then(res => console.log(`[main][setupPacketCaptureListener] completed`))
+        .catch(err => console.error(`[main][setupPacketCaptureListener] error:`, err.message))
     } catch (e) {
       console.error('Capture error:', e.message)
     }
@@ -702,17 +705,22 @@ async function handleScanKingdom(req, res) {
     return res.json({ success: false, error: 'no default kingdom is set' })
   }
 
-  try {
-    //llama directo al worker thread
-    scanKingdomWorker(kingdom, true /* save objects */)
-  } catch (error) {
-    console.log('error', error.message)
-    return res.json({ success: false, error: error.message })
-  }
+  //?set and forget (callback will handle the result)
+  scanKingdomWorker(kingdom, true /* save objects */)
+    .then(res => console.log(`[main][handleScanKingdom] Kingdom ${kingdom} completed`))
+    .catch(err => console.error(`[main][handleScanKingdom] Kingdom ${kingdom} error:`, err.message))
+
+  // try {
+  //   //llama directo al worker thread
+  //   scanKingdomWorker(kingdom, true /* save objects */)
+  // } catch (error) {
+  //   console.log('error', error.message)
+  //   return res.json({ success: false, error: error.message })
+  // }
 
   res.json({
     success: true,
-    message: `kingdom ${kingdom} scanned`
+    message: `kingdom ${kingdom} enqueued`
   })
 }
 
@@ -958,18 +966,25 @@ app.post('/api/scanKingdom402', async (req, res) => {
     return res.json({ success: false, error: 'no valid kingdoms' })
   }
 
-  try {
-    for (const kingdom of kingdomList) {
-      scanRefreshPlayerInfoWorker(kingdom)
-    }
-  } catch (error) {
-    console.log('error', error.message)
-    return res.json({ success: false, error: error.message })
-  }
+  //?set and forget (callback will handle the result)
+  kingdomList.forEach(kingdom => {
+    scanRefreshPlayerInfoWorker(kingdom)
+      .then(res => console.log(`[main][scanKingdom402] Kingdom ${kingdom} completed`))
+      .catch(err => console.error(`[main][scanKingdom402] Kingdom ${kingdom} error:`, err.message))
+  })
+
+  // try {
+  //   for (const kingdom of kingdomList) {
+  //     await scanRefreshPlayerInfoWorker(kingdom)
+  //   }
+  // } catch (error) {
+  //   console.log('error', error.message)
+  //   return res.json({ success: false, error: error.message })
+  // }
 
   res.json({
     success: true,
-    message: `kingdom ${kingdoms} scanned`
+    message: `kingdom ${kingdoms} scan enqueued`
   })
 })
 

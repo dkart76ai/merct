@@ -150,26 +150,28 @@ function getPool() {
 
 // Wrapper functions with fallback
 
-function processPacket({ request, response, shouldSaveObjects = false }) {
+async function processPacket({ request, response, shouldSaveObjects = false }) {
   if (!request || !response) throw new Error('No data provided')
 
   const p = getPool()
   if (!p || !USE_WORKERS) {
-    processPacketSync({ request, response, shouldSaveObjects })
-    // return { success: false, error: 'Workers disabled' }
+    return await processPacketSync({ request, response, shouldSaveObjects })
   }
 
-  p.run({ request, response, shouldSaveObjects }, { name: 'processPacket' })
-    .then(result => {
-      //do something with result of scanKingdomTask call
-    })
-    .catch(e => {
-      console.error('[workerPol][scanKingdomWorker], error in scanKingdomTask', e.message)
-    })
-  return { success: true }
+  try {
+    // ESPERAMOS a que Piscina termine para que BullMQ sepa el resultado real
+    const result = await p.run({ request, response, shouldSaveObjects }, { name: 'processPacket' })
+
+    // Aquí puedes procesar el resultado
+    return { success: true, data: result }
+  } catch (e) {
+    console.error('[workerPool][scanKingdomWorker], error', e.message)
+    // Al lanzar el error, BullMQ marcará el job como "Failed" y podrá reintentarlo
+    throw e
+  }
 }
 
-function scanKingdomWorker(kingdom, shouldSaveObjects = false, checkFlags = false) {
+async function scanKingdomWorker(kingdom, shouldSaveObjects = false, checkFlags = false) {
   if (!kingdom) {
     console.log('[worker pool], no kingdom provided')
     throw new Error('[Worker Pool] No kingdom provided')
@@ -177,24 +179,27 @@ function scanKingdomWorker(kingdom, shouldSaveObjects = false, checkFlags = fals
 
   const p = getPool()
   if (!p || !USE_WORKERS) {
-    console.log('worker pool, no workers, using sync scankingdom')
-    scanKingdomTask({ kingdom, shouldSaveObjects, checkFlags })
+    // console.log('worker pool, no workers, using sync scankingdom')
+    return await scanKingdomTask({ kingdom, shouldSaveObjects, checkFlags })
   }
 
-  // console.log('worker pool, calling scankingdom on threads')
-  // ? set and forget, no await needed, or returning anything,handle error on catch
-  p.run({ kingdom, shouldSaveObjects, checkFlags }, { name: 'scanKingdomTask' })
-    .then(result => {
-      //do something with result of scanKingdomTask call
-    })
-    .catch(e => {
-      console.error('[workerPol][scanKingdomWorker], error in scanKingdomTask', e.message)
-    })
+  try {
+    // ESPERAMOS a que Piscina termine para que BullMQ sepa el resultado real
+    const result = await p.run(
+      { kingdom, shouldSaveObjects, checkFlags },
+      { name: 'scanKingdomTask' }
+    )
 
-  return { success: true }
+    // Aquí puedes procesar el resultado
+    return { success: true, data: result }
+  } catch (e) {
+    console.error('[workerPool][scanKingdomWorker], error', e.message)
+    // Al lanzar el error, BullMQ marcará el job como "Failed" y podrá reintentarlo
+    throw e
+  }
 }
 
-function scanRefreshPlayerInfoWorker(kingdom) {
+async function scanRefreshPlayerInfoWorker(kingdom) {
   if (!kingdom) {
     console.log('[worker pool], no kingdom provided')
     throw new Error('[Worker Pool] No kingdom provided')
@@ -202,19 +207,23 @@ function scanRefreshPlayerInfoWorker(kingdom) {
 
   const p = getPool()
   if (!p || !USE_WORKERS) {
-    console.log('worker pool, no workers, using sync scankingdom')
-    scanRefreshPlayerInfoTask({ kingdom })
+    // console.log('worker pool, no workers, using sync scankingdom')
+    return await scanRefreshPlayerInfoTask({ kingdom })
   }
 
-  p.run({ kingdom }, { name: 'scanRefreshPlayerInfoTask' })
-    .then(result => {
-      //do something with result of scanKingdomTask call
-    })
-    .catch(e => {
-      console.error('[workerPol][scanKingdomWorker], error in scanKingdomTask', e.message)
-    })
-  return { success: true }
+  try {
+    // ESPERAMOS a que Piscina termine para que BullMQ sepa el resultado real
+    const result = await p.run({ kingdom }, { name: 'scanRefreshPlayerInfoTask' })
+
+    // Aquí puedes procesar el resultado
+    return { success: true, data: result }
+  } catch (e) {
+    console.error('[workerPool][scanKingdomWorker], error', e.message)
+    // Al lanzar el error, BullMQ marcará el job como "Failed" y podrá reintentarlo
+    throw e
+  }
 }
+
 module.exports = {
   getPool,
   scanRefreshPlayerInfoWorker,
