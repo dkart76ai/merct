@@ -2,20 +2,13 @@ import React, { useState, useCallback, useMemo } from 'react'
 import JsonView from '@uiw/react-json-view'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import { vscodeTheme } from '@uiw/react-json-view/vscode'
-import {
-  decodeMsgPackBase64,
-  multiDecodeMsgPackBase64,
-  multiDecodeMsgPack2,
-  encodeMsgPack2,
-  encodeMsgPack2MultiFragments,
-  encodeBase64,
-  decodeBase64,
-  decodeMsgPack2
-} from 'message-pack'
-import staticIdDB from './staticId-db.json'
+const { MsgPackTurboDecoder, MsgPackLazyDecoder, MsgPackTurboEncoder } = require('message-pack')
+
 // ============================================
 // CONVERT NUMBERS TO HEX
 // ============================================
+let decoder = null
+let encoder = null
 
 function convertToHex(data) {
   if (data === null) return null
@@ -41,12 +34,6 @@ function convertToHex(data) {
   }
   if (typeof data === 'boolean') return data
   if (typeof data === 'string') {
-    // const t = data
-    //   .split(',')
-    //   .map(c => String.fromCharCode(c))
-    //   .join('')
-    // console.log('string found ', data, t)
-
     return data
   }
   if (Array.isArray(data)) {
@@ -62,6 +49,127 @@ function convertToHex(data) {
   return data
 }
 
+function decodeBase64(base64String) {
+  let cleanBase64 = base64String.replace(/\s/g, '')
+  if (cleanBase64.includes(',')) {
+    cleanBase64 = cleanBase64.split(',')[1]
+  }
+
+  const binaryString = atob(cleanBase64)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+
+  return bytes
+}
+
+function encodeBase64(buffer) {
+  const b64 = btoa(String.fromCharCode(...buffer))
+  return b64
+}
+function getDecoder(buffer) {
+  if (decoder) {
+    decoder.setBuffer(buffer)
+    decoder.off = 0 // Reset offset to beginning
+    return decoder
+  }
+
+  decoder = new MsgPackLazyDecoder(buffer)
+  return decoder
+}
+
+function getEncoder(buffer) {
+  if (encoder) {
+    encoder.reset() //set offset to 0
+    return encoder
+  }
+
+  encoder = new MsgPackTurboEncoder(buffer)
+  return encoder
+}
+function multiDecodeMsgPack2(buff, decodeAll = false) {
+  if (!buff || buff.length === 0) {
+    console.warn('multiDecodeMsgPack2: Empty buffer received')
+    return { results: [], bufLen: 0, len: 0 }
+  }
+
+  if (buff.length < 8) {
+    console.warn('multiDecodeMsgPack2: Buffer too small for header:', buff.length, 'bytes')
+    return { results: [], bufLen: 0, len: 0 }
+  }
+
+  const decoder = getDecoder(buff)
+
+  // 2. Leemos los dos enteros del encabezado (4 buff cada uno)
+  // Usamos getUint32. El primero está en offset 0, el segundo en offset 4.
+  const longitud1 = decoder.view.getUint32(0, true) // Offset 0
+  const longitud2 = decoder.view.getUint32(4, true) // Offset 4
+
+  // console.log(`Longitudes del encabezado: ${longitud1}, ${longitud2}, buff.len=`, buff.length)
+
+  decoder.off = 8 // Saltamos tu encabezado
+
+  const results = []
+  try {
+    while (decoder.off < decoder.buf.length) {
+      // console.log('Decodificando en offset:', decoder.off)
+      if (!decodeAll) {
+        if (decoder.off >= longitud2) break
+      }
+      const data = decoder.decode()
+      if (data !== undefined) {
+        results.push(data)
+      }
+    }
+  } catch (err) {
+    console.error('multiDecodeMsgPack2: Error en offset ' + decoder.off + ':', err.message)
+    // Inspecciona los bytes cercanos al error
+    console.log(
+      'multiDecodeMsgPack2: Bytes problemáticos:',
+      buff.slice(decoder.off, decoder.off + 10)
+    )
+  }
+
+  // console.log(results) // Aquí tienes todo el contenido
+  return { results, bufLen: longitud1, len: longitud2 }
+}
+
+function multiDecodeMsgPackBase64(base64String, decodeAll = false) {
+  try {
+    const bytes = decodeBase64(base64String)
+
+    return multiDecodeMsgPack2(bytes, decodeAll)
+  } catch (e) {
+    throw new Error('Failed to decode: ' + e.message)
+  }
+}
+
+function encodeMsgPack2MultiFragments(fragmentos = [], len = null) {
+  if (!Array.isArray(fragmentos)) {
+    console.error('json dont have a wrapping []')
+    return
+  }
+  const encoder = getEncoder()
+
+  encoder.off = 8
+
+  fragmentos.forEach(obj => {
+    encoder.encode(obj)
+  })
+
+  const finalBuf = encoder.getBuffer()
+  const view = new DataView(finalBuf.buffer)
+
+  const totalLength = finalBuf.length
+  const msgpackPayloadLength = len ? len : totalLength - 8
+
+  view.setUint32(0, totalLength, true)
+  view.setUint32(4, msgpackPayloadLength, true)
+
+  return finalBuf
+}
+
 // ============================================
 // MAIN APP
 // ============================================
@@ -72,78 +180,18 @@ function App() {
   const [input, setInput] = useState('')
   const [decoded, setDecoded] = useState(null)
   const [hexData, setHexData] = useState(null)
-  const [objects, setObjects] = useState(null)
   const [error, setError] = useState(null)
   const [stats, setStats] = useState(null)
   const [encodeInput, setEncodeInput] = useState('')
   const [encodedOutput, setEncodedOutput] = useState('')
   const [encodedOutputB64, setEncodedOutputB64] = useState('')
   const [encodeError, setEncodeError] = useState(null)
-
-  function extractObjects(data) {
-    const objects = []
-
-    function isValidObject(arr) {
-      if (!Array.isArray(arr) || arr.length !== 12) return false
-      if (!Array.isArray(arr[0]) || arr[0].length !== 1) return false
-      if (!Array.isArray(arr[8]) || arr[8].length !== 3) return false
-      if (!Array.isArray(arr[9]) || arr[9].length !== 1) return false
-      if (typeof arr[11] !== 'boolean') return false
-      return true
-    }
-
-    function findObjects(arr, depth = 0) {
-      console.log('findobjects: depth', depth)
-      if (depth > 200) return
-      for (const item of arr) {
-        if (Array.isArray(item)) {
-          if (isValidObject(item)) {
-            const staticId = item[1]
-            const known = staticIdDB[staticId]
-            const obj = {
-              objectId: item[0][0],
-              staticId: staticId,
-              name: known?.name || null,
-              level: known?.level || null,
-              entryType: known?.entryType || null,
-              unk1: item[2],
-              unk2: item[3],
-              unk3: item[4],
-              level: item[5],
-              unk4: item[6],
-              unk5: item[7],
-              kingdom: item[8][0],
-              x: item[8][1],
-              y: item[8][2],
-              unk6: item[9][0],
-              extra: item[10],
-              isActive: item[11]
-            }
-            objects.push(obj)
-            console.log('objeto encontrado:', obj.staticId, obj.name)
-          } else {
-            findObjects(item, depth + 1)
-          }
-        }
-      }
-    }
-
-    findObjects(data)
-    return objects
-  }
-
-  const handleGetObject = () => {
-    if (!decoded) return
-    console.log('extracting objects from', decoded)
-    const obj = extractObjects(decoded)
-    setObjects(obj)
-  }
+  const [decodeAll, setDecodeAll] = useState(false)
 
   const handleClear = () => {
     setDecoded(null)
     setHexData(null)
     setInput('')
-    setObjects(null)
   }
 
   const handleEncodeClear = () => {
@@ -163,7 +211,9 @@ function App() {
 
     try {
       const data = JSON.parse(encodeInput)
-      const encoded = encodeMsgPack2MultiFragments([data])
+
+      const encoded = encodeMsgPack2MultiFragments(data)
+
       const encodedB64 = encodeBase64(encoded)
       setEncodedOutput(encoded)
       setEncodedOutputB64(encodedB64)
@@ -177,7 +227,7 @@ function App() {
 
   const handleLoadEncodedSample = () => {
     if (decoded) {
-      setEncodeInput(decoded.map(d => JSON.stringify(d)).join(''))
+      setEncodeInput(JSON.stringify(decoded))
     }
   }
 
@@ -201,27 +251,13 @@ function App() {
     }
 
     try {
-      //let result = decodeMsgPackBase64(input)
-      const bytes = decodeBase64(input)
-      let result = multiDecodeMsgPackBase64(input)
-      // let result = decodeMsgPack2(bytes)
-      console.log('decoded result', result)
+      let decoded = multiDecodeMsgPackBase64(input, decodeAll)
 
-      // const test = encodeMsgPack2(result)
-      const test = encodeMsgPack2MultiFragments(result.results, result.len)
-      // console.log('test reencode', test)
-      console.log('original encoded len', bytes.length)
-      console.log('original encoded', [...bytes].map(n => n.toString()).join(' ,'))
-      console.log('test reencode   ', [...test].map(n => n.toString()).join(' ,'))
-      let result2 = multiDecodeMsgPack2(test)
-      console.log('otra vez decoded', result2)
-      console.log('match', JSON.stringify([...bytes]) === JSON.stringify([...test]))
-
-      setDecoded(result.results)
-      setHexData(convertToHex(result.results))
+      setDecoded(decoded.results)
+      setHexData(convertToHex(decoded.results))
       setError(null)
       setStats({
-        items: Array.isArray(result) ? result.length : 1,
+        items: Array.isArray(decoded) ? decoded.length : 1,
         size: input.length
       })
     } catch (e) {
@@ -230,7 +266,7 @@ function App() {
       setHexData(null)
       setStats(null)
     }
-  }, [input])
+  }, [input, decodeAll])
 
   const handleCopyDecoded = () => {
     if (decoded) {
@@ -280,11 +316,13 @@ function App() {
             <button className='sample-btn' onClick={handleDecode}>
               Decode
             </button>
+            <label>
+              {' '}
+              Full decode (include garbage)
+              <input type='checkbox' checked={decodeAll} onChange={e => setDecodeAll(!decodeAll)} />
+            </label>
             <button className='sample-btn' onClick={handleClear}>
               Clear
-            </button>
-            <button className='sample-btn' onClick={handleGetObject} disabled={!decoded}>
-              Search for objects
             </button>
           </div>
           <div className='panel-content'>
@@ -351,21 +389,16 @@ function App() {
             </div>
             {stats && <div className='stats'>Numeric values as hex</div>}
           </div>
-
-          <div className='panel'>
-            <div className='panel-header'>Objects</div>
-            <div className='panel-content'>
-              {objects && (
-                <div className='json-viewer'>
-                  <JsonView value={objects} displayDataTypes={false} style={githubDarkTheme} />
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
         <div className='panel'>
-          <div className='panel-header'>Encoder (JSON to MsgPack)</div>
+          <div className='panel-header'>
+            Encoder (JSON to MsgPack){' '}
+            <span style={{ fontSize: 12, color: 'pink' }}>
+              orignal messagepack dont use a external [] wrap, here its using it to be able to
+              handle it with javascript
+            </span>
+          </div>
           <div className='panel-content'>
             <textarea
               value={encodeInput}
