@@ -1,20 +1,9 @@
-const { Queue } = require('bullmq')
 const { JOB_TYPES, PRIORITY } = require('./constants')
 
 class TimerManager {
   constructor(queue) {
     this.queue = queue
     this.timers = new Map()
-  }
-
-  async scheduleScanKingdom(kingdom, options = {}) {
-    const { intervalMs = 180000, shouldSaveObjects } = options
-    const timerKey = `kingdom:${kingdom}`
-
-    return this.scheduleCustom(`kingdom:${kingdom}`, intervalMs, JOB_TYPES.SCAN_KINGDOM, {
-      kingdom,
-      shouldSaveObjects
-    })
   }
 
   //updated
@@ -123,10 +112,6 @@ class TimerManager {
   // Helpers rápidos
   isRunning(kingdom) {
     return this.timers.has(`kingdom:${kingdom}`)
-  }
-
-  stopScan(kingdom) {
-    return this.stopByKey(`kingdom:${kingdom}`)
   }
 
   async stopByKeyFull(key) {

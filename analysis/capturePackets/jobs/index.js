@@ -5,7 +5,8 @@ const {
   scanKingdomHandler,
   findObjectsHandler,
   discordNotificationHandler,
-  gameNotificationHandler
+  gameNotificationHandler,
+  scanRefreshPlayerInfoHandler
 } = require('./handlers/index.js')
 const { QUEUE_NAMES } = require('./constants.js')
 
@@ -13,6 +14,7 @@ let workerFindObjects = null
 let workerNotificationDiscord = null
 let workerNotificationGame = null
 let workerScanKingdom = null
+let workerScanKingdomRefreshPlayerInfo = null
 
 //--------------------
 function startWorker(queueName, handler, config = {}) {
@@ -23,7 +25,7 @@ function startWorker(queueName, handler, config = {}) {
   })
 
   worker.on('completed', (job, err) => {
-    console.log(` [Worker][${queueName}] Job ${job.id} completed successfully`)
+    // console.log(` [Worker][${queueName}] Job ${job.id} completed successfully`)
   })
   worker.on('failed', (job, err) => {
     console.log(` [Worker][${queueName}] Job ${job.id} failed: ${err.message}`)
@@ -40,14 +42,26 @@ function initializeWorkers() {
   try {
     // Worker dedicado solo a escanear (Sin limitadores si tu DB lo aguanta)
     workerScanKingdom = startWorker(QUEUE_NAMES.SCAN_KINGDOM, scanKingdomHandler, {
-      concurrency: 5
+      concurrency: 3
     })
+
+    workerScanKingdomRefreshPlayerInfo = startWorker(
+      QUEUE_NAMES.SCAN_REFRESH_PLAYER_INFO,
+      scanRefreshPlayerInfoHandler,
+      {
+        concurrency: 1,
+        limiter: {
+          max: 10, // Máximo de trabajos
+          duration: 60000 // Por cada 60,000 ms (1 minuto)
+        }
+      }
+    )
 
     workerNotificationDiscord = startWorker(
       QUEUE_NAMES.NOTIFICATION_DISCORD,
       discordNotificationHandler,
       {
-        concurrency: 2,
+        concurrency: 1,
         limiter: {
           max: 25, // Máximo de trabajos
           duration: 60000 // Por cada 60,000 ms (1 minuto)
@@ -56,12 +70,12 @@ function initializeWorkers() {
     )
 
     workerNotificationGame = startWorker(QUEUE_NAMES.NOTIFICATION_GAME, gameNotificationHandler, {
-      concurrency: 2,
+      concurrency: 1,
       limiter: { max: 15, duration: 60000 } // 15 messages per minute, 4secs per message
     })
 
     workerFindObjects = startWorker(QUEUE_NAMES.FIND_OBJECTS, findObjectsHandler, {
-      concurrency: 10,
+      concurrency: 1,
       limiter: { max: 10, duration: 1000 }
     })
   } catch (error) {
@@ -75,6 +89,11 @@ async function stopWorkers() {
     await workerScanKingdom.close()
     workerScanKingdom = null
     console.log('[Worker] workerScanKingdom stoped')
+  }
+  if (workerScanKingdomRefreshPlayerInfo) {
+    await workerScanKingdomRefreshPlayerInfo.close()
+    workerScanKingdomRefreshPlayerInfo = null
+    console.log('[Worker] workerScanKingdomRefreshPlayerInfo stoped')
   }
   if (workerNotificationDiscord) {
     await workerNotificationDiscord.close()

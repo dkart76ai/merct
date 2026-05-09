@@ -40,7 +40,7 @@
         align-items: center;
       }
       button {
-        padding: 10px 20px;
+        padding: 5px 10px;
         background: #0e639c;
         color: white;
         border: none;
@@ -364,19 +364,19 @@
             <div>Scanner for Kingdom <span id="kingdom"></span></div>
           </div>
           <div class="controls" style="padding: 15px">
-            <button id="btnScanKingdom" disabled>Scan Now</button>
+            <button id="btnScanKingdom312" disabled>Scan Now</button>
             <div style="margin-left: 32px">
               <span class="section-title">Interval (ms):</span>
               <input
                 type="number"
-                id="timerInterval"
+                id="timerInterval312"
                 value="300000"
                 style="width: 100px"
-                onchange="saveValue(this.value, 'scanKingdomTimer')"
+                onchange="saveValue(this.value, 'scanKingdomTimer312')"
               />
             </div>
-            <button id="btnTimerStart" disabled>Start Timer</button>
-            <button id="btnTimerStop" class="danger" disabled>Stop Timer</button>
+            <button id="btnTimerStart312" disabled>Start Timer</button>
+            <button id="btnTimerStop312" class="danger" disabled>Stop Timer</button>
           </div>
         </div>
 
@@ -406,6 +406,27 @@
             </div>
             <button id="btnScanOtherKingdomStart">Start Timer</button>
             <button id="btnScanOtherKingdomStop" class="danger">Stop Timer</button>
+          </div>
+          <div class="controls" style="padding: 15px">
+            <button id="btnScanKingdom402" disabled>
+              Check for gold/update player info(coords)
+            </button>
+            <label>
+              <input type="checkbox" id="cbCheckFlags" disabled />
+              <span>Check flags</span>
+            </label>
+            <div style="margin-left: 32px">
+              <span class="section-title">Interval (ms):</span>
+              <input
+                type="number"
+                id="timerInterval402"
+                value="300000"
+                style="width: 100px"
+                onchange="saveValue(this.value, 'scanKingdomTimer402')"
+              />
+            </div>
+            <button id="btnTimerStart402" disabled>Start Timer</button>
+            <button id="btnTimerStop402" class="danger" disabled>Stop Timer</button>
           </div>
         </div>
 
@@ -646,9 +667,13 @@
 
             kingdomEl.textContent = data.kingdom
 
-            document.getElementById('btnScanKingdom').disabled = data?.kingdom.trim() == ''
-            document.getElementById('btnTimerStart').disabled = data?.kingdom.trim() == ''
-            document.getElementById('btnTimerStop').disabled = data?.kingdom.trim() == ''
+            document.getElementById('btnScanKingdom312').disabled = data?.kingdom.trim() == ''
+            document.getElementById('btnTimerStart312').disabled = data?.kingdom.trim() == ''
+            document.getElementById('btnTimerStop312').disabled = data?.kingdom.trim() == ''
+
+            document.getElementById('btnScanKingdom402').disabled = data?.kingdom.trim() == ''
+            document.getElementById('btnTimerStart402').disabled = data?.kingdom.trim() == ''
+            document.getElementById('btnTimerStop402').disabled = data?.kingdom.trim() == ''
 
             const token1El = document.getElementById('token1')
             const token2El = document.getElementById('token2')
@@ -1011,7 +1036,7 @@
 
         const scanKingdomTimer = localStorage.getItem('scanKingdomTimer')
         if (scanKingdomTimer) {
-          document.getElementById('timerInterval').value = scanKingdomTimer
+          document.getElementById('timerInterval312').value = scanKingdomTimer
         }
 
         const otherKingdoms1Timer = localStorage.getItem('otherKingdoms1Timer')
@@ -1164,8 +1189,8 @@
         refreshTimers()
       })
 
-      // Kingdom scanner handlers
-      document.getElementById('btnScanKingdom').addEventListener('click', async () => {
+      // Kingdom scanner handlers 312
+      document.getElementById('btnScanKingdom312').addEventListener('click', async () => {
         // const kingdoms = document.getElementById('kingdoms').value.trim()
 
         const res = await fetch(API + '/scanKingdom', {
@@ -1181,9 +1206,9 @@
         }
       })
 
-      document.getElementById('btnTimerStart').addEventListener('click', async () => {
+      document.getElementById('btnTimerStart312').addEventListener('click', async () => {
         // const kingdoms = document.getElementById('kingdoms').value.trim()
-        const interval = parseInt(document.getElementById('timerInterval').value) || 300000
+        const interval = parseInt(document.getElementById('timerInterval312').value) || 300000
         // if (!kingdoms) return log('Enter kingdoms')
 
         const res = await fetch(API + '/timer/start', {
@@ -1199,7 +1224,7 @@
         }
       })
 
-      document.getElementById('btnTimerStop').addEventListener('click', async () => {
+      document.getElementById('btnTimerStop312').addEventListener('click', async () => {
         // const kingdoms = document.getElementById('kingdoms').value.trim()
         // if (!kingdoms) return log('Enter kingdoms')
 
@@ -1207,6 +1232,61 @@
           method: 'POST'
           // headers: { 'Content-Type': 'application/json' },
           // body: JSON.stringify({ kingdoms })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
+      // Kingdom scanner handlers 402
+      document.getElementById('btnScanKingdom402').addEventListener('click', async () => {
+        const otherKingdoms = document.getElementById('otherKingdoms').value
+        const cbCheckFlags = document.getElementById('cbCheckFlags').checked
+        const res = await fetch(API + '/scanKingdom402', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kingdoms: otherKingdoms, checkFlags: cbCheckFlags })
+        })
+
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
+      document.getElementById('btnTimerStart402').addEventListener('click', async () => {
+        const otherKingdoms = document.getElementById('otherKingdoms').value
+        const cbCheckFlags = document.getElementById('cbCheckFlags').checked
+
+        const interval = parseInt(document.getElementById('timerInterval402').value) || 300000
+        const res = await fetch(API + '/timer/start402', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            interval,
+            kingdoms: otherKingdoms,
+            checkFlags: cbCheckFlags,
+            key: '1'
+          })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
+      document.getElementById('btnTimerStop402').addEventListener('click', async () => {
+        const res = await fetch(API + '/timer/stop402', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: '1' })
         })
         const data = await res.json()
         if (data.success) {

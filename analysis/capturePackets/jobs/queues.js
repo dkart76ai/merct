@@ -4,6 +4,7 @@ const { getRedis } = require('../lib/redis')
 const { QUEUE_NAMES, JOB_TYPES, PRIORITY } = require('./constants.js')
 const queues = {}
 let timerManager = null
+let timerManagerRefreshPlayer = null
 
 function getQueue(name) {
   if (queues[name]) return queues[name]
@@ -92,6 +93,11 @@ async function cleanOldJobs() {
   await Q4.clean(0, 10000, 'completed')
   await Q4.clean(0, 5000, 'failed')
   console.log('[Queue] NofiticationGame Cleaned all completed and failed jobs')
+
+  const Q5 = getQueue(QUEUE_NAMES.SCAN_REFRESH_PLAYER_INFO)
+  await Q5.clean(0, 10000, 'completed')
+  await Q5.clean(0, 5000, 'failed')
+  console.log('[Queue] refreshPlayerInfo Cleaned all completed and failed jobs')
 }
 
 async function closeQueue() {
@@ -99,11 +105,13 @@ async function closeQueue() {
   const Q2 = getQueue(QUEUE_NAMES.FIND_OBJECTS)
   const Q3 = getQueue(QUEUE_NAMES.NOTIFICATION_DISCORD)
   const Q4 = getQueue(QUEUE_NAMES.NOTIFICATION_GAME)
+  const Q5 = getQueue(QUEUE_NAMES.SCAN_REFRESH_PLAYER_INFO)
 
   await Q1.close()
   await Q2.close()
   await Q3.close()
   await Q4.close()
+  await Q5.close()
   console.log('[Queue] All queues Closed')
 }
 
@@ -148,6 +156,20 @@ async function getTimerManagerInstance() {
   return timerManager
 }
 
+async function getTimerManagerRefreshPlayerInstance() {
+  const { TimerManager } = require('./TimerManager')
+
+  if (!timerManagerRefreshPlayer) {
+    const queueInstance = getQueue(QUEUE_NAMES.SCAN_REFRESH_PLAYER_INFO)
+    timerManagerRefreshPlayer = new TimerManager(queueInstance)
+
+    // Es vital esperar a que se rehidrate antes de empezar a programar nuevos
+    await timerManagerRefreshPlayer.rehydrate()
+  }
+
+  return timerManagerRefreshPlayer
+}
+
 module.exports = {
   addScanKingdomJob,
   addCriticalScanJob,
@@ -158,5 +180,6 @@ module.exports = {
   closeQueue,
   getQueueStatus,
   getQueue,
-  getTimerManager: getTimerManagerInstance
+  getTimerManager: getTimerManagerInstance,
+  getTimerManagerRefreshPlayer: getTimerManagerRefreshPlayerInstance
 }

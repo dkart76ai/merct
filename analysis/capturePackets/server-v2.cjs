@@ -21,13 +21,19 @@ const { initializeWorkers, stopWorkers } = require('./jobs/index.js')
 const {
   addJob,
   getTimerManager,
+  getTimerManagerRefreshPlayer,
   addGameNotificationJob,
   cleanOldJobs,
   getQueueStatus,
   closeQueue
 } = require('./jobs/queues.js')
 const { JOB_TYPES, PRIORITY } = require('./jobs/constants.js')
-const { getPool, processPacket, scanKingdomWorker } = require('./lib/workerPool.js')
+const {
+  getPool,
+  processPacket,
+  scanKingdomWorker,
+  scanRefreshPlayerInfoWorker
+} = require('./lib/workerPool.js')
 
 const staticIdRedis = require('./lib/staticIdRedis.js')
 const chatChannels = require('./lib/chatChannels.js')
@@ -359,7 +365,7 @@ function setupWebsocketListener() {
                         })
                       }
                     }
-                    console.log('[BOT] mmfind', amount, name, level, 'results', results)
+                    // console.log('[BOT] mmfind', amount, name, level, 'results', results)
                   }
                 }
               }
@@ -388,7 +394,7 @@ async function updateValidChannels(newChannel) {
   await page.evaluate(channels => {
     if (window.BOT_VALID_CHANNELS) {
       window.BOT_VALID_CHANNELS = channels
-      console.log('Canales de bot actualizados:', channels)
+      // console.log('Canales de bot actualizados:', channels)
     }
   }, newChannels)
 }
@@ -551,7 +557,7 @@ function setupPacketCaptureListener() {
         response: responseBody,
         shouldSaveObjects: false // manual scrolling
       }
-      const result = await processPacket(payload)
+      const result = processPacket(payload)
     } catch (e) {
       console.error('Capture error:', e.message)
     }
@@ -698,7 +704,7 @@ async function handleScanKingdom(req, res) {
 
   try {
     //llama directo al worker thread
-    await scanKingdomWorker(kingdom, true /* save objects */)
+    scanKingdomWorker(kingdom, true /* save objects */)
   } catch (error) {
     console.log('error', error.message)
     return res.json({ success: false, error: error.message })
@@ -723,9 +729,14 @@ async function handleStartTimer(req, res) {
   const timerManager = await getTimerManager()
 
   //crea un queue, periodico, para llamar a  scanKingdom con worker_threads
-  timerManager.scheduleScanKingdom(kingdom, {
-    intervalMs: parseInt(interval),
+
+  const payload = {
+    kingdom,
     shouldSaveObjects: true
+  }
+  const timerKey = `kingdom:${kingdom}`
+  await timerManager.scheduleCustom(timerKey, parseInt(interval), JOB_TYPES.SCAN_KINGDOM, payload, {
+    priority: PRIORITY.NORMAL
   })
 
   res.json({
@@ -742,7 +753,7 @@ async function handleStopTimer(req, res) {
 
   const timerManager = await getTimerManager()
 
-  timerManager.stopScan(kingdom)
+  timerManager.stopByKey(`kingdom:${kingdom}`)
 
   // getPlayerInfo402(kingdom)
   // getPlayerFlagsKvK24301(kingdom)
@@ -751,7 +762,7 @@ async function handleStopTimer(req, res) {
 
 // Scan for other kingdoms timer
 app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
-  const { interval = 60000, kingdoms, key } = req.body
+  const { interval = 60000, kingdoms, key, checkFlags = false } = req.body
   console.log('kingdom', req.body)
 
   if (!kingdoms || kingdoms.trim() === '') {
@@ -775,7 +786,8 @@ app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
     for (const kingdom of kingdomList) {
       const payload = {
         kingdom,
-        shouldSaveObjects: false
+        shouldSaveObjects: false,
+        checkFlags
       }
       const timerKey = `kingdom:${kingdom}`
       await timerManager.scheduleCustom(
@@ -834,7 +846,7 @@ app.post('/api/timer/stop-scan-other-kingdoms', async (req, res) => {
 // Manual find and queue notification
 async function handleScanOtherKingdom(req, res) {
   // manual scan any kingdoms, use worker_threads, no jobs
-  const { kingdoms } = req.body
+  const { kingdoms, checkFlags = false } = req.body
 
   console.log('kingsomd', req.body)
   if (!kingdoms || kingdoms.trim() === '') {
@@ -853,7 +865,7 @@ async function handleScanOtherKingdom(req, res) {
 
   try {
     for (const kingdom of kingdomList) {
-      await scanKingdomWorker(kingdom, false /* dont save objects */)
+      scanKingdomWorker(kingdom, false /* dont save objects */, checkFlags)
     }
   } catch (error) {
     console.log('error', error.message)
@@ -927,6 +939,120 @@ app.post('/api/timer/start', handleStartTimer)
 
 app.post('/api/timer/stop', handleStopTimer)
 
+app.post('/api/scanKingdom402', async (req, res) => {
+  // manual scan any kingdoms, use worker_threads, no jobs
+  const { kingdoms } = req.body
+
+  console.log('kingsomd', req.body)
+  if (!kingdoms || kingdoms.trim() === '') {
+    return res.json({ success: false, error: 'enter kingdom' })
+  }
+  console.log(`[API] scan other Kingdom request - kingdoms: ${kingdoms} `)
+
+  const kingdomList = kingdoms
+    .split(',')
+    .map(k => parseInt(k.trim()))
+    .filter(k => kingdomUrls[k])
+
+  if (kingdomList.length === 0) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  try {
+    for (const kingdom of kingdomList) {
+      scanRefreshPlayerInfoWorker(kingdom)
+    }
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+
+  res.json({
+    success: true,
+    message: `kingdom ${kingdoms} scanned`
+  })
+})
+
+app.post('/api/timer/start402', async (req, res) => {
+  const { interval = 60000, kingdoms, key } = req.body
+  console.log('kingdom', req.body)
+
+  if (!kingdoms || kingdoms.trim() === '') {
+    return res.json({ success: false, error: 'enter kingdom' })
+  }
+
+  const kingdomList = kingdoms
+    .split(',')
+    .map(k => parseInt(k.trim()))
+    .filter(k => kingdomUrls[k])
+
+  if (kingdomList.length === 0) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  await redisClient.set(SCAN_OTHER_KINGDOMS_KEY + key + ':player_info', kingdoms)
+
+  const timerManager = await getTimerManagerRefreshPlayer()
+
+  try {
+    for (const kingdom of kingdomList) {
+      const payload = {
+        kingdom
+      }
+      const timerKey = `kingdom:${kingdom}:player_info`
+      await timerManager.scheduleCustom(
+        timerKey,
+        parseInt(interval),
+        JOB_TYPES.SCAN_REFRESH_PLAYER_INFO,
+        payload,
+        {
+          priority: PRIORITY.NORMAL
+        }
+      )
+    }
+    res.json({
+      success: true,
+      message: `kingdom ${kingdoms} scanner started every ${interval}ms`,
+      interval
+    })
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+})
+
+app.post('/api/timer/stop402', async (req, res) => {
+  const { key } = req.body
+  const kingdoms = await redisClient.get(SCAN_OTHER_KINGDOMS_KEY + key + ':player_info')
+  if (!kingdoms) {
+    return res.json({ success: false, error: 'no kingdoms, already stoped' })
+  }
+
+  const timerManager = await getTimerManagerRefreshPlayer()
+
+  const kingdomList = kingdoms
+    .split(',')
+    .map(k => parseInt(k.trim()))
+    .filter(k => kingdomUrls[k])
+
+  if (kingdomList.length === 0) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  try {
+    for (const kingdom of kingdomList) {
+      const timerKey = `kingdom:${kingdom}:player_info`
+      await timerManager.stopByKey(timerKey)
+    }
+
+    await redisClient.del(SCAN_OTHER_KINGDOMS_KEY + key + ':player_info')
+    res.json({ success: true, message: `${kingdoms} Kingdoms scanner stopped` })
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+})
+
 // Health check endpoint for Docker
 
 // Debug endpoint to check memory and DB stats
@@ -967,8 +1093,11 @@ app.get('/api/jobs/status', async (req, res) => {
 
 app.post('/api/timer/stop-all', async (req, res) => {
   const timerManager = await getTimerManager()
+  const timerManagerRefreshPlayer = await getTimerManagerRefreshPlayer()
 
   await timerManager.stopAll()
+  await timerManagerRefreshPlayer.stopAll()
+
   res.json({ success: true, message: 'All timers stopped' })
 })
 
@@ -976,7 +1105,10 @@ app.get('/api/timers', async (req, res) => {
   try {
     const timerManager = await getTimerManager()
     const active = await timerManager.getActiveTimers()
-    res.json({ success: true, timers: active })
+
+    const timerManagerRefreshPlayer = await getTimerManagerRefreshPlayer()
+    const activeRefreshPlayers = await timerManagerRefreshPlayer.getActiveTimers()
+    res.json({ success: true, timers: [...active, ...activeRefreshPlayers] })
   } catch (error) {
     console.error('[API] /api/timers error:', error.message)
     res.status(500).json({ success: false, error: error.message })
@@ -1143,6 +1275,7 @@ app.post('/api/browser/start', async (req, res) => {
     if (browser) {
       return res.json({ success: false, error: 'Browser already running' })
     }
+    res.json({ success: true, message: 'Browser starting...' })
 
     await browserInitialize()
 
@@ -1152,8 +1285,6 @@ app.post('/api/browser/start', async (req, res) => {
     setupPacketCaptureListener()
 
     await browserLoadUrlAndLogin()
-
-    res.json({ success: true, message: 'Browser started' })
   } catch (error) {
     console.error('Browser start error:', error)
     res.status(500).json({ success: false, error: error.message })

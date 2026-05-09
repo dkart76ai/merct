@@ -9,6 +9,7 @@ const CHAT_CHANNEL_URL = process.env.CHAT_CHANNEL_URL || ''
 
 let chatIndex = 0
 
+//? MUST be async, bullmq handles it
 async function gameNotificationHandler(job) {
   const { object, message, toMainChannel = false } = job.data
 

@@ -97,7 +97,7 @@ async function sendMessage(channelUrl, msg = '', coord = null, staticId = 400) {
           console.log('chat not connected')
           return { success: false, error: 'SendBirdHelper not ready', state }
         }
-        console.log('dentro chat channel', channelUrl)
+        // console.log('dentro chat channel', channelUrl)
 
         // //TODO: testing hide channel :D
         // var foundIndex = window.SendBirdHelper.channelsList.findIndex(function (ch, index, array) {
@@ -122,9 +122,9 @@ async function sendMessage(channelUrl, msg = '', coord = null, staticId = 400) {
             data
           })
 
-          console.log('message sent')
+          // console.log('message sent')
         } else {
-          console.log('no channel found, maybe is hidden ^_^')
+          // console.log('no channel found, maybe is hidden ^_^')
         }
         return { success: true }
       } catch (err) {

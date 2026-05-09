@@ -226,7 +226,11 @@ function setupDiscord() {
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.MessageContent
-    ]
+    ],
+    rest: {
+      timeout: 60000, // 60 segundos antes de abortar
+      retries: 3 // Reintentar si falla
+    }
   })
 
   client.on('messageCreate', async message => {

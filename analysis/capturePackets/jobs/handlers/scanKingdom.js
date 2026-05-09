@@ -1,5 +1,6 @@
 const { scanKingdomTask } = require('../../workers/tasks')
 
+//? MUST be async, bullmq handles it
 async function scanKingdomHandler(job) {
   const { kingdom, shouldSaveObjects } = job.data
 

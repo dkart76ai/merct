@@ -2,7 +2,8 @@ const QUEUE_NAMES = {
   FIND_OBJECTS: 'find-objects',
   NOTIFICATION_DISCORD: 'notification-discord',
   NOTIFICATION_GAME: 'notification-in-game',
-  SCAN_KINGDOM: 'scan-kingdom'
+  SCAN_KINGDOM: 'scan-kingdom',
+  SCAN_REFRESH_PLAYER_INFO: 'refresh-player-info'
 }
 
 const JOB_TYPES = QUEUE_NAMES

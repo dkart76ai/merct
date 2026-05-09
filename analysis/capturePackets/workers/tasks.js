@@ -31,6 +31,7 @@ const {
   buildPacket313Payload,
   buildPacket22Payload,
   buildPacket402Payload,
+  buildPacket601Payload,
   buildPacket24301Payload
 } = require('./networkHelper.js')
 // const POOL_SIZE = parseInt(process.env.WORKER_POOL_SIZE) || 4
@@ -107,7 +108,7 @@ const delay = ms => new Promise(r => setTimeout(r, ms))
 async function extractDataFrom402(response) {
   // console.log(styleText('yellow', 'extractDataFrom402'))
   const { players23 } = scanPacket402(response)
-  console.log('[tasks][extractDataFrom402] scanPacket402: players23:', players23.length)
+  // console.log('[tasks][extractDataFrom402] scanPacket402: players23:', players23.length)
 
   // save players
   if (players23.length > 0) {
@@ -134,7 +135,7 @@ async function extractDataFrom402(response) {
     })
     try {
       const result = savePlayers(players)
-      console.log(`[tasks][extractDataFrom402][SavePlayers] `, result)
+      // console.log(`[tasks][extractDataFrom402][SavePlayers] `, result)
     } catch (e) {
       console.error('[tasks][extractDataFrom402][SavePlayers] error', e.message)
     }
@@ -150,10 +151,10 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
   // console.log(styleText('red', 'extractDataFrom312'))
 
   const { players42, objects12 } = scanPacket312(response)
-  console.log(
-    styleText('yellow', `[tasks][extractDataFrom312] scanPacket312: players42: ${players42.length}`)
-  )
-  console.log('[tasks][extractDataFrom312] scanPacket312: objects12:', objects12.length)
+  // console.log(
+  //   styleText('yellow', `[tasks][extractDataFrom312] scanPacket312: players42: ${players42.length}`)
+  // )
+  // console.log('[tasks][extractDataFrom312] scanPacket312: objects12:', objects12.length)
 
   // if (parentPort) {
   //   objects12.forEach(async o => {
@@ -213,10 +214,10 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
 
     // 3. Ahora sí podemos unir las strings
     let batchContent = lines.join('\n')
-    console.log(styleText('green', 'MERCENARIES FOUND!'))
-    console.log(styleText('green', 'MERCENARIES FOUND!'))
-    console.log(styleText('green', 'MERCENARIES FOUND!'))
-    console.log(styleText('green', 'MERCENARIES FOUND!'))
+    // console.log(styleText('green', 'MERCENARIES FOUND!'))
+    // console.log(styleText('green', 'MERCENARIES FOUND!'))
+    // console.log(styleText('green', 'MERCENARIES FOUND!'))
+    // console.log(styleText('green', 'MERCENARIES FOUND!'))
 
     // Añadimos UN solo job que contiene muchas líneas
     await addDiscordNotificationJob({
@@ -244,9 +245,9 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
     if (objs.length > 0) {
       // console.log('[tasks][extractDataFrom312] [SaveObjects] ', objs[0])
       const result = saveObjects(objs)
-      console.log(
-        `[tasks][extractDataFrom312] [SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
-      )
+      // console.log(
+      //   `[tasks][extractDataFrom312] [SaveObjects] Created: ${result.created}, Updated: ${result.updated}, Total keys: ${result.objects?.length}`
+      // )
     }
   }
 
@@ -270,7 +271,7 @@ async function extractDataFrom312(response, shouldSaveObjects = false) {
 
     try {
       const result = savePlayers(players)
-      console.log(`[tasks][extractDataFrom312][SavePlayers] `, result)
+      // console.log(`[tasks][extractDataFrom312][SavePlayers] `, result)
     } catch (e) {
       console.error('[tasks][extractDataFrom312][SavePlayers] error', e.message)
     }
@@ -336,13 +337,13 @@ async function extractDataFrom24301(playerId, response) {
   }
   //save data in db
   savePlayerFlagCount(String(playerId), totalFlags)
-  console.log('[tasks][extractDataFrom24301] flags ', data, 'data len', data.length, totalFlags)
+  // console.log('[tasks][extractDataFrom24301] flags ', data, 'data len', data.length, totalFlags)
 
   return { success: true, totalFlags }
 }
 
 async function getPlayerFlagsKvK24301(kingdom) {
-  console.log('[tasks][getPlayerFlagsKvK24301]', { kingdom })
+  // console.log('[tasks][getPlayerFlagsKvK24301]', { kingdom })
 
   if (!kingdom) {
     console.log('[tasks][getPlayerFlagsKvK24301] No kingdom provided')
@@ -366,18 +367,18 @@ async function getPlayerFlagsKvK24301(kingdom) {
     throw new Error('invalid kingdom')
   }
 
-  console.log(`[tasks] [getPlayerFlagsKvK24301] Sending packets to ${url}  `)
+  // console.log(`[tasks] [getPlayerFlagsKvK24301] Sending packets to ${url}  `)
   try {
     const token1 = BigInt(_token1)
     const token2 = new Uint8Array(_token2)
 
     const playerIdsDB = getPlayersObjectIdFromKingdom(kingdom)
-    console.log('[getPlayerInfo402] playersIds', playerIdsDB)
+    // console.log('[getPlayerInfo402] playersIds', playerIdsDB)
 
     const playersArr = playerIdsDB
       .filter(p => Boolean(p.playerId) && Boolean(p.objectId))
       .map(p => ({ playerId: Number(p.playerId), objectId: Number(p.objectId) }))
-    console.log('[getPlayerInfo402] playersIds playersArr', playersArr)
+    // console.log('[getPlayerInfo402] playersIds playersArr', playersArr)
 
     let flagCounter = 0
     for (const player of playersArr) {
@@ -390,13 +391,13 @@ async function getPlayerFlagsKvK24301(kingdom) {
       )
       flagCounter += result24301.totalFlags
 
-      console.log(
-        styleText('red', '[tasks][getPlayerFlagsKvK24301] extract data, players '),
-        result24301.totalFlags
-      )
+      // console.log(
+      //   styleText('red', '[tasks][getPlayerFlagsKvK24301] extract data, players '),
+      //   result24301.totalFlags
+      // )
     }
 
-    console.log(`[tasks] [getPlayerFlagsKvK24301] Success   `)
+    // console.log(`[tasks] [getPlayerFlagsKvK24301] Success   `)
     return { success: true, flagCounter }
   } catch (error) {
     console.error(`[tasks] [getPlayerFlagsKvK24301] Error:`, error.message)
@@ -408,16 +409,33 @@ async function send402packet(url, playerIds, token1, token2) {
 
   // Encode the packet
   const encoded402 = encodeMsgPack2MultiFragments(packetData402)
-  // console.log('[402] encoded request base64', encodeBase64(encoded402))
+  console.log('[402] encoded request base64', encodeBase64(encoded402))
 
   // Send to server
   // console.log(`[getPlayerInfo402] Sending packet402 to ${url}  `)
 
   const bytes402 = await sendPacket(url, encoded402)
-  // console.log('[402]encoded result base64', encodeBase64(bytes402))
+  console.log('[402]encoded result base64', encodeBase64(bytes402))
 
   const result402 = await extractDataFrom402(bytes402)
   return result402
+}
+
+async function send601packet(url, playerId, token1, token2) {
+  const packetData601 = buildPacket601Payload(playerId, token1, token2)
+
+  // Encode the packet
+  const encoded601 = encodeMsgPack2MultiFragments(packetData601)
+  console.log('[601] encoded request base64', encodeBase64(encoded601))
+
+  // Send to server
+  // console.log(`[getPlayerInfo601] Sending packet601 to ${url}  `)
+
+  const bytes601 = await sendPacket(url, encoded601)
+  console.log('[601]encoded result base64', encodeBase64(bytes601))
+
+  // const result601 = await extractDataFrom601(bytes601)
+  // return result601
 }
 
 async function sendPacket24301(url, objectId, playerId, token1, token2) {
@@ -443,8 +461,55 @@ async function sendPacket24301(url, objectId, playerId, token1, token2) {
   return result24301
 }
 
+async function getResourceInfo601(playerId, kingdom) {
+  // console.log('[tasks][getResourceInfo601]', { playerId })
+  if (!kingdom) {
+    console.log('[tasks][getResourceInfo601] No kingdom provided')
+    return { success: false, error: 'no kingdom' }
+  }
+
+  if (!playerId) {
+    console.log('[tasks][getResourceInfo601] No playerid provided')
+    return { success: false, error: 'no playerid' }
+  }
+
+  const redisClient = getRedis()
+
+  const _token1 = await redisClient.get('myPlayerId:BigInt')
+  if (!_token1) {
+    throw new Error('no session token1')
+  }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    throw new Error('no session token2')
+  }
+
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    throw new Error('invalid kingdom')
+  }
+
+  // console.log(`[tasks] [getResourceInfo601] Sending packets to ${url}  `)
+  try {
+    const token1 = BigInt(_token1)
+    const token2 = new Uint8Array(_token2)
+
+    const result402 = await send601packet(url, playerId, token1, token2)
+
+    // console.log(
+    //   styleText('red', '[tasks] [getResourceInfo601] extract data, players '),
+    //   result402.players23.length
+    // )
+
+    return { success: true }
+  } catch (error) {
+    console.error(`[tasks][getResourceInfo601] Error:`, error.message)
+  }
+}
+
 async function refreshPlayerInfo402(playerId, kingdom) {
-  console.log('[tasks][refreshPlayerInfo402]', { playerId })
+  // console.log('[tasks][refreshPlayerInfo402]', { playerId })
   if (!kingdom) {
     console.log('[tasks][refreshPlayerInfo402] No kingdom provided')
     return { success: false, error: 'no kingdom' }
@@ -472,7 +537,7 @@ async function refreshPlayerInfo402(playerId, kingdom) {
     throw new Error('invalid kingdom')
   }
 
-  console.log(`[tasks] [refreshPlayerInfo402] Sending packets to ${url}  `)
+  // console.log(`[tasks] [refreshPlayerInfo402] Sending packets to ${url}  `)
   try {
     const token1 = BigInt(_token1)
     const token2 = new Uint8Array(_token2)
@@ -481,10 +546,10 @@ async function refreshPlayerInfo402(playerId, kingdom) {
 
     const result402 = await send402packet(url, playerIds, token1, token2)
 
-    console.log(
-      styleText('red', '[tasks] [refreshPlayerInfo402] extract data, players '),
-      result402.players23.length
-    )
+    // console.log(
+    //   styleText('red', '[tasks] [refreshPlayerInfo402] extract data, players '),
+    //   result402.players23.length
+    // )
 
     return { success: true, player: result402 }
   } catch (error) {
@@ -507,7 +572,7 @@ async function getPlayerInfo402(kingdom) {
   // send to server
   // extract and save data from result
 
-  console.log('[tasks][getPlayerInfo402]', { kingdom })
+  // console.log('[tasks][getPlayerInfo402]', { kingdom })
 
   if (!kingdom) {
     console.log('[tasks][getPlayerInfo402] No kingdom provided')
@@ -531,7 +596,7 @@ async function getPlayerInfo402(kingdom) {
     throw new Error('invalid kingdom')
   }
 
-  console.log(`[tasks] [getPlayerInfo402] Sending packets to ${url}  `)
+  // console.log(`[tasks] [getPlayerInfo402] Sending packets to ${url}  `)
   try {
     const token1 = BigInt(_token1)
     const token2 = new Uint8Array(_token2)
@@ -546,10 +611,10 @@ async function getPlayerInfo402(kingdom) {
     for (const playerIds of playerIdsArray) {
       const result402 = await send402packet(url, playerIds, token1, token2)
 
-      console.log(
-        styleText('red', '[tasks] [getPlayerInfo402] extract data, players '),
-        result402.players23.length
-      )
+      // console.log(
+      //   styleText('red', '[tasks] [getPlayerInfo402] extract data, players '),
+      //   result402.players23.length
+      // )
 
       players += result402.players23?.length || 0
     }
@@ -563,7 +628,7 @@ async function getPlayerInfo402(kingdom) {
 
 async function scanKingdomTask(data) {
   // console.log('[tasks] [scanKingdomTask] data', data)
-  const { kingdom, shouldSaveObjects = false } = data
+  const { kingdom, shouldSaveObjects = false, checkFlags = false } = data
   // console.log('[tasks][scanKingdomTask]', { kingdom, shouldSaveObjects })
 
   if (!kingdom) {
@@ -588,7 +653,7 @@ async function scanKingdomTask(data) {
     throw new Error('invalid kingdom')
   }
 
-  console.log(`[tasks][scanKingdomTask] Sending packets to ${url}  `)
+  // console.log(`[tasks][scanKingdomTask] Sending packets to ${url}  `)
 
   try {
     let token1 = BigInt(_token1)
@@ -655,27 +720,29 @@ async function scanKingdomTask(data) {
       objects += result312.objects12?.length || 0
       players += result312.players42?.length || 0
 
-      await delay(200)
-      if (result312.players42.length > 0) {
-        // get all objectids from players42 array
-        // generate a 402 packet and send to server
-        const allPlayersIds = result312.players42.map(p => p.playerId).filter(Boolean)
-        console.log(
-          styleText(
-            'magenta',
-            `building 402 packet with ${result312.players42.length} players from 312`
-          )
-        )
-        const result402 = await send402packet(url, allPlayersIds, token1, token2)
+      // if (result312.players42.length > 0) {
+      //   // get all objectids from players42 array
+      //   // generate a 402 packet and send to server
+      //   const allPlayersIds = result312.players42.map(p => p.playerId).filter(Boolean)
+      //   console.log(
+      //     styleText(
+      //       'magenta',
+      //       `building 402 packet with ${result312.players42.length} players from 312`
+      //     )
+      //   )
+      //   const result402 = await send402packet(url, allPlayersIds, token1, token2)
 
-        console.log(
-          styleText('green', '[getPlayerInfo402] extract data, total players'),
-          result402.players23.length
-        )
+      //   console.log(
+      //     styleText('green', '[getPlayerInfo402] extract data, total players'),
+      //     result402.players23.length
+      //   )
 
-        ///! flag info start
-        ///! flag info start
-        ///! flag info start
+      ///! flag info start
+      ///! flag info start
+      ///! flag info start
+
+      if (checkFlags) {
+        await delay(200)
         for (const player of result312.players42) {
           // extract flag info
 
@@ -686,11 +753,14 @@ async function scanKingdomTask(data) {
             token1,
             token2
           )
+
+          console.log('[tasks][scankingdomtask] checkflags', result24301)
         }
-        ///! flag info end
-        ///! flag info end
-        ///! flag info end
-      } //endif 671
+      }
+      ///! flag info end
+      ///! flag info end
+      ///! flag info end
+      // } //endif 671
     } //end for 641
 
     // console.log(`[tasks][scanKingdomTask] Success objects ${objects}, players ${players} `)
@@ -700,10 +770,70 @@ async function scanKingdomTask(data) {
   }
 }
 
+async function scanRefreshPlayerInfoTask(data) {
+  const { kingdom } = data
+
+  if (!kingdom) {
+    console.log('[tasks][scanRefreshPlayerInfoTask] No kingdom provided')
+    return { success: false, error: 'no kingdom' }
+  }
+
+  const redisClient = getRedis()
+
+  const _token1 = await redisClient.get('myPlayerId:BigInt')
+  if (!_token1) {
+    throw new Error('no session token1')
+  }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    throw new Error('no session token2')
+  }
+
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    throw new Error('invalid kingdom')
+  }
+
+  // console.log(`[tasks][scanRefreshPlayerInfoTask] Sending packets to ${url}  `)
+
+  try {
+    let token1 = BigInt(_token1)
+    let token2 = new Uint8Array(_token2)
+
+    const playerIdsDB = getPlayersIdFromKingdom(kingdom) // [ { playerId: '609885609857' }]
+    const playerIds = playerIdsDB.map(p => p.playerId)
+
+    const playerArray = []
+    const groupSize = 20
+    for (let i = 0; i < playerIds.length; i += groupSize) {
+      playerArray.push(playerIds.slice(i, i + groupSize))
+    }
+    console.log('[scanRefreshPlayerInfoTask] playersIds', playerArray)
+
+    let playersCount = 0
+    for (const players of playerArray) {
+      const result402 = await send402packet(url, players, token1, token2)
+      console.log(
+        styleText('green', '[scanRefreshPlayerInfoTask] extract data, total players'),
+        result402.players23.length
+      )
+      playersCount += result402.players23.length
+    }
+
+    // console.log(`[tasks][scanRefreshPlayerInfoTask] Success objects ${objects}, players ${players} `)
+    return { success: true, players: playersCount }
+  } catch (error) {
+    console.error(`[tasks][scanRefreshPlayerInfoTask] Error:`, error.message)
+  }
+}
+
 module.exports = {
   processPacket,
   getPlayerInfo402,
   refreshPlayerInfo402,
   // getPlayerFlagsKvK24301,
-  scanKingdomTask
+  scanRefreshPlayerInfoTask,
+  scanKingdomTask,
+  getResourceInfo601
 }

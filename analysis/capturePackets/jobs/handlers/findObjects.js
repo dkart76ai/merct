@@ -1,6 +1,7 @@
 const { findObjects } = require('../../lib/database')
 const { JOB_TYPES, PRIORITY } = require('../constants')
 
+//? MUST be async, bullmq handles it
 async function findObjectsHandler(job) {
   const { staticId, level, amount } = job.data
 

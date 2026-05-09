@@ -1,6 +1,10 @@
 const path = require('path')
 
-const { processPacket: processPacketSync, scanKingdomTask } = require('../workers/tasks')
+const {
+  processPacket: processPacketSync,
+  scanRefreshPlayerInfoTask,
+  scanKingdomTask
+} = require('../workers/tasks')
 const { addDiscordNotificationJob, addGameNotificationJob } = require('../jobs/queues')
 const chatChannels = require('../lib/chatChannels.js')
 const staticIdRedis = require('../lib/staticIdRedis')
@@ -70,7 +74,8 @@ function getPool() {
       try {
         pool = new Piscina({
           filename: path.join(__dirname, '..', 'workers', 'tasks.js'),
-          maxThreads: WORKER_POOL_SIZE,
+          maxThreads: WORKER_POOL_SIZE, // O el número de núcleos que tengas
+          maxQueue: 100, // Asegúrate de que sea mayor a 50 para que no rechace tareas
           name: 'packet-worker',
           env: {
             ...process.env,
@@ -145,25 +150,26 @@ function getPool() {
 
 // Wrapper functions with fallback
 
-async function processPacket({ request, response, shouldSaveObjects = false }) {
+function processPacket({ request, response, shouldSaveObjects = false }) {
   if (!request || !response) throw new Error('No data provided')
 
   const p = getPool()
   if (!p || !USE_WORKERS) {
     processPacketSync({ request, response, shouldSaveObjects })
-    return { success: false, error: 'Workers disabled' }
+    // return { success: false, error: 'Workers disabled' }
   }
 
-  try {
-    const result = await p.run({ request, response, shouldSaveObjects }, { name: 'processPacket' })
-    if (!result.success) throw new Error(result.error)
-    return result
-  } catch (e) {
-    return { success: false, error: e.message }
-  }
+  p.run({ request, response, shouldSaveObjects }, { name: 'processPacket' })
+    .then(result => {
+      //do something with result of scanKingdomTask call
+    })
+    .catch(e => {
+      console.error('[workerPol][scanKingdomWorker], error in scanKingdomTask', e.message)
+    })
+  return { success: true }
 }
 
-async function scanKingdomWorker(kingdom, shouldSaveObjects = false) {
+function scanKingdomWorker(kingdom, shouldSaveObjects = false, checkFlags = false) {
   if (!kingdom) {
     console.log('[worker pool], no kingdom provided')
     throw new Error('[Worker Pool] No kingdom provided')
@@ -172,25 +178,46 @@ async function scanKingdomWorker(kingdom, shouldSaveObjects = false) {
   const p = getPool()
   if (!p || !USE_WORKERS) {
     console.log('worker pool, no workers, using sync scankingdom')
-    scanKingdomTask({ kingdom, shouldSaveObjects })
-    return { success: false, error: 'Workers disabled' }
+    scanKingdomTask({ kingdom, shouldSaveObjects, checkFlags })
   }
 
-  try {
-    console.log('worker pool, calling scankingdom on threads')
-    const result = await p.run({ kingdom, shouldSaveObjects }, { name: 'scanKingdomTask' })
-    console.log('worker pool, result after scankingdom called', result)
-    if (!result.success) throw new Error(result.error)
-    return result
-  } catch (e) {
-    console.log('worker pool, error in scankingdom', e.message)
-    return { success: false, error: e.message }
-  }
+  // console.log('worker pool, calling scankingdom on threads')
+  // ? set and forget, no await needed, or returning anything,handle error on catch
+  p.run({ kingdom, shouldSaveObjects, checkFlags }, { name: 'scanKingdomTask' })
+    .then(result => {
+      //do something with result of scanKingdomTask call
+    })
+    .catch(e => {
+      console.error('[workerPol][scanKingdomWorker], error in scanKingdomTask', e.message)
+    })
+
+  return { success: true }
 }
 
+function scanRefreshPlayerInfoWorker(kingdom) {
+  if (!kingdom) {
+    console.log('[worker pool], no kingdom provided')
+    throw new Error('[Worker Pool] No kingdom provided')
+  }
+
+  const p = getPool()
+  if (!p || !USE_WORKERS) {
+    console.log('worker pool, no workers, using sync scankingdom')
+    scanRefreshPlayerInfoTask({ kingdom })
+  }
+
+  p.run({ kingdom }, { name: 'scanRefreshPlayerInfoTask' })
+    .then(result => {
+      //do something with result of scanKingdomTask call
+    })
+    .catch(e => {
+      console.error('[workerPol][scanKingdomWorker], error in scanKingdomTask', e.message)
+    })
+  return { success: true }
+}
 module.exports = {
   getPool,
-
+  scanRefreshPlayerInfoWorker,
   scanKingdomWorker,
   processPacket
 }

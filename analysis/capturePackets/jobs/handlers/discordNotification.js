@@ -1,5 +1,6 @@
 const { notifyDiscord } = require('../chatSender')
 
+//? MUST be async, bullmq handles it
 async function discordNotificationHandler(job) {
   const { object = {}, message = '', isBatch = false, content = '', count = 0 } = job.data
   // console.log('[discordNotificationHandler] job', job.data)
