@@ -327,3 +327,5 @@ export const kingdomUrls = {
   1027: 'https://game-us45.totalbattle.com/rubens-realm1027',
   1028: 'https://game-us46.totalbattle.com/rubens-realm1028'
 }
+
+//1053 ultimo

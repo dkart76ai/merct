@@ -87,6 +87,10 @@ function getPool() {
           // stderr: process.stderr
         })
 
+        pool.on('drain', () => {
+          console.log('✅ Todos los workers han terminado su trabajo.')
+        })
+
         // let count = 0
 
         // pool.on('message', async msg => {
@@ -224,9 +228,27 @@ async function scanRefreshPlayerInfoWorker(kingdom) {
   }
 }
 
+function poolReport() {
+  const p = getPool()
+
+  console.log(`Uso del pool: ${(p.utilization * 100).toFixed(2)}%`)
+  console.log(`Tareas en cola: ${p.queueSize}`)
+
+  if (p.utilization > 0.8) {
+    console.log(
+      '⚠️ El pool está casi lleno, el bot de Discord podría sentir latencia en la transferencia de datos.'
+    )
+  }
+  return {
+    usage: `${(p.utilization * 100).toFixed(2)}%`,
+    queue: p.queueSize
+  }
+}
+
 module.exports = {
   getPool,
   scanRefreshPlayerInfoWorker,
   scanKingdomWorker,
-  processPacket
+  processPacket,
+  poolReport
 }

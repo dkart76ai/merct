@@ -32,6 +32,7 @@ const {
   getPool,
   processPacket,
   scanKingdomWorker,
+  poolReport,
   scanRefreshPlayerInfoWorker
 } = require('./lib/workerPool.js')
 
@@ -1099,6 +1100,16 @@ app.post('/api/timer/stop402', async (req, res) => {
 app.get('/api/jobs/status', async (req, res) => {
   try {
     const status = await getQueueStatus()
+
+    res.json({ success: true, status })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
+app.get('/api/pool/status', async (req, res) => {
+  try {
+    const status = poolReport()
 
     res.json({ success: true, status })
   } catch (error) {

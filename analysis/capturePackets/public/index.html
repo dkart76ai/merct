@@ -100,6 +100,7 @@
         border-radius: 8px;
         margin-bottom: 15px;
         overflow: hidden;
+        flex: 1;
       }
       .panel-header {
         font-weight: bold;
@@ -331,29 +332,54 @@
           </div>
         </div>
 
-        <!-- Job Queue Status -->
-        <div class="panel">
-          <div class="panel-header">
-            Job Queue
-            <button id="btnRefreshJobs" style="padding: 5px 10px; font-size: 12px">Refresh</button>
+        <div style="display: flex; justify-content: space-between; gap: 16px">
+          <!-- Job Queue Status -->
+          <div class="panel">
+            <div class="panel-header">
+              Job Queue
+              <button id="btnRefreshJobs" style="padding: 5px 10px; font-size: 12px">
+                Refresh
+              </button>
+            </div>
+            <div class="controls" style="padding: 15px">
+              <div class="stat">
+                <div class="stat-item">
+                  <div class="stat-value" id="statWaiting">0</div>
+                  <div class="stat-label">Waiting</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="statActive">0</div>
+                  <div class="stat-label">Active</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="statCompleted">0</div>
+                  <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="statFailed">0</div>
+                  <div class="stat-label">Failed</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="controls" style="padding: 15px">
-            <div class="stat">
-              <div class="stat-item">
-                <div class="stat-value" id="statWaiting">0</div>
-                <div class="stat-label">Waiting</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value" id="statActive">0</div>
-                <div class="stat-label">Active</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value" id="statCompleted">0</div>
-                <div class="stat-label">Completed</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value" id="statFailed">0</div>
-                <div class="stat-label">Failed</div>
+
+          <div class="panel">
+            <div class="panel-header">
+              Worker Pool
+              <button id="btnRefreshPool" style="padding: 5px 10px; font-size: 12px">
+                Refresh
+              </button>
+            </div>
+            <div class="controls" style="padding: 15px">
+              <div class="stat">
+                <div class="stat-item">
+                  <div class="stat-value" id="poolUsage">0</div>
+                  <div class="stat-label">Usage</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value" id="poolQueue">0</div>
+                  <div class="stat-label">queue</div>
+                </div>
               </div>
             </div>
           </div>
@@ -620,6 +646,20 @@
         }
       }
 
+      async function refreshPoolStatus() {
+        try {
+          const res = await fetch(API + '/pool/status')
+
+          const data = await res.json()
+          if (data.success) {
+            document.getElementById('poolUsage').textContent = data.status.usage ?? 'no data'
+            document.getElementById('poolQueue').textContent = data.status.queue ?? 'no data'
+          }
+        } catch (e) {
+          log('Jobs status error: ' + e.message)
+        }
+      }
+
       async function refreshTimers() {
         try {
           const res = await fetch(API + '/timers')
@@ -713,6 +753,7 @@
         refreshInterval = setInterval(() => {
           checkBrowserStatus()
           refreshJobsStatus()
+          refreshPoolStatus()
           refreshTimers()
         }, 5000)
       }
@@ -1189,6 +1230,11 @@
         refreshTimers()
       })
 
+      // worker pool handlers
+      document.getElementById('btnRefreshPool').addEventListener('click', async () => {
+        refreshPoolStatus()
+      })
+
       // Kingdom scanner handlers 312
       document.getElementById('btnScanKingdom312').addEventListener('click', async () => {
         // const kingdoms = document.getElementById('kingdoms').value.trim()
@@ -1604,6 +1650,7 @@
 
       // Initial load
       refreshJobsStatus()
+      refreshPoolStatus()
       refreshTimers()
       checkBrowserStatus()
       if (document.getElementById('browserStatus').textContent === 'Running') {
