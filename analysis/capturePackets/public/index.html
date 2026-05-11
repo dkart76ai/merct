@@ -288,6 +288,16 @@
               <span>Capture Packets for analysis</span>
             </label>
           </div>
+
+          <div class="controls" style="padding: 15px">
+            <input
+              type="text"
+              style="width: 200px"
+              id="myValues"
+              placeholder="ie: (your current gold) 1234 [multiples values comma separated]"
+            />
+            <button type="button" id="btnSetMyValues">Set values for debug</button>
+          </div>
         </div>
 
         <div class="panel">
@@ -1113,6 +1123,22 @@
         }
       })
 
+      document.getElementById('btnSetMyValues').addEventListener('click', async () => {
+        const myValues = document.getElementById('myValues').value
+
+        const res = await fetch(API + '/myValues', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ myValues })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
       document.getElementById('gameChatChannelList').addEventListener('change', async e => {
         console.log('Selected Value:', e.target.value)
         console.log('Selected Text:', e.target.options[e.target.selectedIndex].text)
@@ -1543,6 +1569,7 @@
           9: 'Eirin',
           10: 'Svyatogor',
           11: 'Ryjong',
+          12: 'Julia',
           20: 'Guan Yu',
           21: 'Yamato',
           22: 'Nectarius'

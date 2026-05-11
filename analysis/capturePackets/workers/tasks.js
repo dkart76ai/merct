@@ -403,6 +403,23 @@ async function getPlayerFlagsKvK24301(kingdom) {
     console.error(`[tasks] [getPlayerFlagsKvK24301] Error:`, error.message)
   }
 }
+async function send312packet(url, tiles, token1, token2, shouldSaveObjects) {
+  const packetData312 = buildPacket312Payload(tiles, token1, token2)
+
+  // Encode the packet
+  const encoded312 = encodeMsgPack2MultiFragments(packetData312)
+  // console.log('[312] encoded request base64', encodeBase64(encoded312))
+
+  // Send to server
+  // console.log(`[tasks][scanKingdomTask] Sending packet312 to ${url}  `)
+
+  const bytes312 = await sendPacket(url, encoded312)
+  // console.log('[312]encoded result base64', encodeBase64(bytes312))
+  // console.log('[312]encoded result base64, skipping because is too big')
+
+  const result312 = await extractDataFrom312(bytes312, shouldSaveObjects)
+  return result312
+}
 
 async function send402packet(url, playerIds, token1, token2) {
   const packetData402 = buildPacket402Payload(playerIds, token1, token2)
@@ -508,6 +525,24 @@ async function getResourceInfo601(playerId, kingdom) {
   }
 }
 
+/**
+ * Convierte coordenadas X, Y a un ID de región único.
+ * @param {number} x - Coordenada X (0-999)
+ * @param {number} y - Coordenada Y (0-999)
+ * @returns {number} ID de la región (0-2499)
+ */
+function getRegionIdFromCoords(x, y) {
+  const windowSize = 20 // Cada región es de 20x20 unidades
+  const regionsPerRow = 50 // 1000 / 20 = 50 regiones a lo ancho
+
+  // Usamos Math.floor para obtener el índice entero de la región
+  const regionX = Math.floor(x / windowSize)
+  const regionY = Math.floor(y / windowSize)
+
+  // Fórmula de aplanamiento
+  return regionY * regionsPerRow + regionX
+}
+
 async function refreshPlayerInfo402(playerId, kingdom) {
   // console.log('[tasks][refreshPlayerInfo402]', { playerId })
   if (!kingdom) {
@@ -546,6 +581,13 @@ async function refreshPlayerInfo402(playerId, kingdom) {
 
     const result402 = await send402packet(url, playerIds, token1, token2)
 
+    if (result402.players23.length > 0) {
+      const x = result402.players23[0].x
+      const y = result402.players23[0].y
+      const mapRegionId = getRegionIdFromCoords(x, y)
+      // /TODO: send 312
+      const result312 = send312packet(url, [mapRegionId], token1, token2, false)
+    }
     // console.log(
     //   styleText('red', '[tasks] [refreshPlayerInfo402] extract data, players '),
     //   result402.players23.length
@@ -702,20 +744,7 @@ async function scanKingdomTask(data) {
     let objects = 0
     let players = 0
     for (const tiles of tilesArray) {
-      const packetData312 = buildPacket312Payload(tiles, token1, token2)
-
-      // Encode the packet
-      const encoded312 = encodeMsgPack2MultiFragments(packetData312)
-      // console.log('[312] encoded request base64', encodeBase64(encoded312))
-
-      // Send to server
-      // console.log(`[tasks][scanKingdomTask] Sending packet312 to ${url}  `)
-
-      const bytes312 = await sendPacket(url, encoded312)
-      // console.log('[312]encoded result base64', encodeBase64(bytes312))
-      // console.log('[312]encoded result base64, skipping because is too big')
-
-      const result312 = await extractDataFrom312(bytes312, shouldSaveObjects)
+      const result312 = send312packet(url, tiles, token1, token2, shouldSaveObjects)
 
       objects += result312.objects12?.length || 0
       players += result312.players42?.length || 0

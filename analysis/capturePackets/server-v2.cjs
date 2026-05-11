@@ -11,7 +11,10 @@ const {
   multiDecodeMsgPack2,
   encodeMsgPack2MultiFragments,
   getRequestHeader,
+  getChestCode,
+  getChestCodeResponse,
   getMsgPack2ndBlockRequest,
+  findMyValuesInPacket,
   scanPacket312,
   encodeBase64,
   scanPacket402
@@ -140,7 +143,16 @@ const chatBannedMemberList = new Set()
 const LOGS_DIR = path.join(__dirname, 'logs')
 const LOGS_DIR2 = path.join(__dirname, 'decoded-logs')
 const PACKET_SAMPLE_DIR = path.join(__dirname, 'packet-sample')
+const PACKET_MY_VALUES_DIR = path.join(__dirname, 'my-values')
+
 const packetSample = new Map()
+const MY_VALUES = ''
+
+const URLS_DIR = path.join(__dirname, 'tburls.txt')
+const BATCH_SIZE = 100 // Write to disk every 100 unique strings
+let uniqueCache = new Set()
+let pendingWrite = []
+const writeStream = fs.createWriteStream(FILE_PATH, { flags: 'a' })
 
 // 1. Configurar el stream de escritura (Binario y Rotativo)
 const logStream = createStream('traffic.bin', {
@@ -154,6 +166,36 @@ const logStream2 = createStream('decoded.bin', {
   interval: '10m', // O cada día
   path: LOGS_DIR2
 })
+
+const logMyValuesStream = createStream('traffic.bin', {
+  size: '2M', // Rota cada 10MB para que sean fáciles de descargar
+  interval: '30m', // O cada día
+  path: PACKET_MY_VALUES_DIR
+})
+
+function saveUniqueUrls(newString) {
+  // 1. Instant check in memory
+  if (uniqueCache.has(newString)) return
+
+  // 2. Add to cache and pending buffer
+  uniqueCache.add(newString)
+  pendingWrite.push(newString)
+
+  // 3. Batch write if threshold reached
+  if (pendingWrite.length >= BATCH_SIZE) {
+    flushToDisk()
+  }
+}
+
+function flushToDisk() {
+  if (pendingWrite.length === 0) return
+
+  const dataToAppend = pendingWrite.join('\n') + '\n'
+  writeStream.write(dataToAppend)
+
+  // Clear only the pending buffer, keep the Set for uniqueness
+  pendingWrite = []
+}
 
 /**
  * Procesa y guarda el paquete basado en su opCode
@@ -191,6 +233,15 @@ function savePacketByOpcode(opCode, packetBuffer) {
     2
   )
   stream.write(encoded)
+}
+
+function saveMyValuesPackets(packets) {
+  const packetData = JSON.stringify(
+    packets,
+    (k, v) => (typeof v === 'bigint' ? v.toString() : v),
+    2
+  )
+  logMyValuesStream.write(packetData + '\n\n')
 }
 
 // Función para guardar el par (Llamada desde tu lógica de red)
@@ -498,6 +549,8 @@ function setupPacketCaptureListener() {
     const url = response.url()
     if (!url.includes('rubens-realm')) return
 
+    saveUniqueUrls(url)
+
     const _kingdom = url.split('rubens-realm')[1]
     // const kingdom = parseInt(_kingdom)
 
@@ -529,8 +582,10 @@ function setupPacketCaptureListener() {
         }
 
         if (opCode === 15013) {
-          console.log('open chest packet 15013 req', encodeBase64(postDataBuff))
-          console.log('open chest packet 15013 res', encodeBase64(responseBody))
+          // console.log('open chest packet 15013 req', encodeBase64(postDataBuff))
+          // console.log('open chest packet 15013 res', encodeBase64(responseBody))
+          // console.log('chest', getChestCode(postDataBuff)) //! no es chest code
+          console.log('chest response', getChestCodeResponse(responseBody))
         }
 
         //  save 20 packet sample of each  opCode
@@ -552,7 +607,24 @@ function setupPacketCaptureListener() {
             response: decodedResponse
           })
         }
+
+        if ((MY_VALUES.length = 0)) {
+          if (findMyValuesInPacket(MY_VALUES, responseBody)) {
+            const decodedRequest = multiDecodeMsgPack2(postDataBuff, false)
+            const decodedResponse = multiDecodeMsgPack2(responseBody)
+
+            saveMyValuesPackets({
+              opCode,
+              url,
+              reqB64: encodeBase64(postDataBuff),
+              resB64: encodeBase64(responseBody),
+              request: decodedRequest.results,
+              response: decodedResponse.results
+            })
+          }
+        }
       }
+
       const payload = {
         request: postDataBuff,
         response: responseBody,
@@ -942,6 +1014,18 @@ app.post('/api/kingdom', async (req, res) => {
   }
 })
 
+app.post('/api/myValues', async (req, res) => {
+  try {
+    const { values = '' } = req.body
+
+    MY_VALUES = values.trim()
+
+    res.json({ success: true, message: `values set to ${values}` })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
 app.post('/api/scanKingdom', handleScanKingdom)
 
 app.post('/api/timer/start', handleStartTimer)
@@ -1186,7 +1270,7 @@ app.post('/api/refreshPlayerCoords', async (req, res) => {
     const result = await refreshPlayerInfo402(playerId, kingdom)
     console.log('[server.v2]refreshPlayerCoords', result)
 
-    await getResourceInfo601(playerId, kingdom)
+    await getResourceInfo601(playerId, kingdom) //TODO: testing 601
 
     res.json({ success: true })
   } catch (e) {
@@ -1978,6 +2062,7 @@ async function main() {
     console.log('\n[Main] Shutting down...')
     // await staticIdRedis.dump()
     //await staticIdRedis.close()
+    flushToDisk()
     await stopWorkers()
     await cleanOldJobs()
     console.log('[Main] Cleaning Redis...')
@@ -1991,6 +2076,7 @@ async function main() {
     console.log('\n[Main] Shutting down...')
     // await staticIdRedis.dump()
     //await staticIdRedis.close()
+    flushToDisk()
     await stopWorkers()
     await cleanOldJobs()
     console.log('[Main] Cleaning Redis...')

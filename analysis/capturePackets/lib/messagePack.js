@@ -213,6 +213,46 @@ function getRequestHeader(buffer) {
   return { opCode, userId, token }
 }
 
+function getChestCode(buffer) {
+  //! this is not chest code, seems more like clan whealth counter
+  const decoder = getDecoder(buffer)
+  decoder.off = 8 //skip packet length
+  decoder.skip() //skip header, opcode,seq,sessiondata
+
+  decoder.readArrayHeader() // Entra al primer nivel [...]
+
+  const chestCode = decoder.decode() // Lee {"strChestCode":count}
+
+  return { chestCode }
+}
+
+function getChestCodeResponse(buffer) {
+  const decoder = getDecoder(buffer)
+  decoder.off = 8 //skip packet length
+  decoder.skip() //skip header, opcode,seq
+
+  decoder.readArrayHeader() // Entra al primer nivel [...]
+  decoder.readArrayHeader() // Entra al 2nd nivel [...]
+  /**
+ {
+          "1": 5500,
+          "2": 6250000,
+          "13": 10190,
+          "30": 6410,
+          "32": 1190,
+          "34": 479,
+          "35": 9500,
+          "1634": 1,
+          "2005": 1,
+          "2006": 3,
+          "72002": 2
+        },
+ */
+  const resourceCode = decoder.decode() // Lee {"strresourceCode":count}
+
+  return { resourceCode }
+}
+
 function getMsgPack2ndBlockRequest(buffer) {
   const decoder = getDecoder(buffer)
   // 1. Saltar los 8 bytes de cabecera del paquete (total len / buffer len)
@@ -286,6 +326,43 @@ function getMsgPack2ndBlockRequest(buffer) {
 //   }
 //   return null
 // }
+
+function findMyValuesInPacket(myValues, buffer) {
+  // Convertimos a Set para que la búsqueda sea O(1) en lugar de O(n)
+  const targetValues = new Set(myValues.split(',').map(Number))
+  const decoder = getDecoder(buffer)
+
+  decoder.off = 8 // Saltamos el header
+  const limit = decoder.buf.length
+
+  while (decoder.off < limit) {
+    // Si el siguiente byte representa un número
+    if (decoder.isNextNumber()) {
+      const val = decoder.decode()
+      if (targetValues.has(val)) return true
+    } else {
+      // Si es un mapa, arreglo o string, simplemente saltamos el marcador
+      // o el bloque completo para seguir buscando
+      const byte = decoder.buf[decoder.off]
+
+      // Optimizamos: si es un marcador de colección (fixmap/fixarray)
+      // solo saltamos el byte de cabecera para entrar en él
+      if ((byte >= 0x80 && byte <= 0x8f) || (byte >= 0x90 && byte <= 0x9f)) {
+        decoder.off++
+      }
+      //Marcadores de estructuras largas (Headers de 16/32 bits)
+      else if (byte == 0xdc || byte == 0xde) {
+        decoder.off += 3
+      } else if (byte == 0xdd || byte == 0xdf) {
+        decoder.off += 5
+      } else {
+        // Para todo lo demás (objetos complejos, strings largos), saltar
+        decoder.skip()
+      }
+    }
+  }
+  return false
+}
 
 // Opcode 312 - Versión 12 elementos
 function _isObject12(decoder) {
@@ -893,7 +970,10 @@ module.exports = {
   encodeMsgPack2,
   encodeMsgPack2ToBase64,
   // game functions
+  findMyValuesInPacket,
   getRequestHeader,
+  getChestCode,
+  getChestCodeResponse,
   getMsgPack2ndBlockRequest,
   scanPacket312,
   scanPacket24301,
