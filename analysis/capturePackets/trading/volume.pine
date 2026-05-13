@@ -1,0 +1,48 @@
+//@version=6
+indicator("LTF Volume Circles", overlay = true, max_labels_count = 500)
+
+// --- Inputs ---
+ltf_param  = input.timeframe("1", "Lower Timeframe")
+sma_period = input.int(50, "SMA Period (LTF Volume)")
+mult_low   = input.float(1.0, "Low Multiplier", step = 0.1)
+mult_med   = input.float(2.0, "Medium Multiplier", step = 0.1)
+mult_high  = input.float(3.0, "High Multiplier", step = 0.1)
+vol_filter = input.string("Low", "Visibility Level", options = ["Low", "Medium", "High"])
+
+// --- NUEVOS INPUTS DE COLOR ---
+color_up   = input.color(color.new(color.green, 50), "Color Círculo Alcista (Bullish)")
+color_down = input.color(color.new(color.red, 50), "Color Círculo Bajista (Bearish)")
+
+// --- Captura de Datos LTF ---
+ltf_c = request.security_lower_tf(syminfo.tickerid, ltf_param, close)
+ltf_o = request.security_lower_tf(syminfo.tickerid, ltf_param, open)
+ltf_v = request.security_lower_tf(syminfo.tickerid, ltf_param, volume)
+ltf_sma_vol = request.security(syminfo.tickerid, ltf_param, ta.sma(volume, sma_period))
+
+float current_mult = vol_filter == "High" ? mult_high : vol_filter == "Medium" ? mult_med : mult_low
+float threshold = ltf_sma_vol * current_mult
+
+// --- Dibujo ---
+if array.size(ltf_c) > 0
+    int count = array.size(ltf_c)
+    for i = 0 to count - 1
+        float v = array.get(ltf_v, i)
+        if v >= threshold
+            float c = array.get(ltf_c, i)
+            float o = array.get(ltf_o, i)
+
+            // Tamaño basado en volumen (Huge es el máximo de Pine)
+            string label_size = v / threshold > 2.5 ? size.huge : v / threshold > 1.5 ? size.large : size.normal
+
+            // Selección de color personalizada por el usuario
+            color final_color = c >= o ? color_up : color_down
+
+            label.new(
+                 x         = time,
+                 y         = c,
+                 text      = "◯", // Círculo hueco grande
+                 xloc      = xloc.bar_time,
+                 style     = label.style_none,
+                 textcolor = final_color,
+                 size      = label_size
+                 )
