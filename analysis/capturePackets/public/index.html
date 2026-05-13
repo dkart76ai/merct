@@ -99,7 +99,6 @@
         background: #252526;
         border-radius: 8px;
         margin-bottom: 15px;
-        overflow: hidden;
         flex: 1;
       }
       .panel-header {
@@ -801,7 +800,7 @@
           })
           const data = await res.json()
           if (data.success) {
-            log(`player with id ${playerId} refreshed`)
+            log(`player with id ${playerId} coords sent`)
             loadPlayers(1)
           }
         } catch (e) {

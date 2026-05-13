@@ -581,13 +581,16 @@ async function refreshPlayerInfo402(playerId, kingdom) {
 
     const result402 = await send402packet(url, playerIds, token1, token2)
 
-    if (result402.players23.length > 0) {
-      const x = result402.players23[0].x
-      const y = result402.players23[0].y
-      const mapRegionId = getRegionIdFromCoords(x, y)
-      // /TODO: send 312
-      const result312 = send312packet(url, [mapRegionId], token1, token2, false)
-    }
+    // if (result402.players23.length > 0) {
+    //   const x = result402.players23[0].x
+    //   const y = result402.players23[0].y
+    //   const mapRegionId = getRegionIdFromCoords(x, y)
+    //   // /TODO: send 312
+    //! no tiene sentido enviar un 312 a la misma posicion donde estuvo el jugador
+    //! por que ya se cambio de posicion, refrescar la misma posicion no va a devolver
+    //! su nueva ubicacion
+    //   // const result312 = send312packet(url, [mapRegionId], token1, token2, false)
+    // }
     // console.log(
     //   styleText('red', '[tasks] [refreshPlayerInfo402] extract data, players '),
     //   result402.players23.length

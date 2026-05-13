@@ -29,7 +29,8 @@ async function registerSlashCommands(token, clientId) {
         opt.setName('name').setDescription('Name (ej: crypt o %elf%)').setRequired(true)
       )
       .addIntegerOption(opt => opt.setName('lvl').setDescription('Level').setRequired(true))
-      .addIntegerOption(opt => opt.setName('amount').setDescription('Amount (máx 15)')),
+      .addIntegerOption(opt => opt.setName('amount').setDescription('Amount (máx 15)'))
+      .addIntegerOption(opt => opt.setName('kindgom').setDescription('Kingdom to search on')),
 
     new SlashCommandBuilder()
       .setName('setmypos')
@@ -70,6 +71,7 @@ async function handleFindInteraction(interaction) {
   // 1. Extraer valores directamente de la interacción (ya validados por Discord)
   const searchName = interaction.options.getString('name')
   const level = interaction.options.getInteger('lvl')
+  const kingdom = interaction.options.getInteger('kingdom') || 146
   // Si no pone cantidad, usamos 5 por defecto, máximo 15
   const amount = Math.min(interaction.options.getInteger('amount') || 5, 15)
 
@@ -84,7 +86,8 @@ async function handleFindInteraction(interaction) {
       name: searchName,
       level: level,
       amount: amount,
-      userId: interaction.user.id
+      userId: interaction.user.id,
+      kingdom
     })
 
     console.log('[BOT] Resultados encontrados:', results.objects.length)
@@ -192,16 +195,17 @@ async function setupDiscord() {
     // Escapamos el prefijo por seguridad y usamos el constructor RegExp
     // Nota: Las barras invertidas (\) deben duplicarse (\\) en strings
     const pattern = new RegExp(
-      `^${FIND_COMMAND}\\s+(?:(\\d+)\\s+)?(.+)\\s+(?:level|lvl)\\s+(\\d+)`,
+      `^${FIND_COMMAND}\\s+(?:(\\d+)\\s+)?(.+)\\s+(?:level|lvl)\\s+(\\d+)(?:\\s+(\\d+))?`,
       'i'
     )
 
     const match = message.content.match(pattern)
 
     if (match) {
-      const [, _amount, searchName, level] = match
+      const [, _amount, searchName, level, _kingdom] = match
       const amount = _amount || '5'
-      console.log('[BOT] Buscando:', amount, searchName, level)
+      const kingdom = _kingdom || '146'
+      console.log('[BOT] Buscando:', amount, searchName, level, kingdom)
 
       // const userPosition = getUserPosition(message.author.id)
       // console.log('[BOT] User position:', userPosition)
@@ -216,7 +220,8 @@ async function setupDiscord() {
         name: searchName,
         level: parseInt(level),
         amount: maxAmount,
-        userId: message.author.id
+        userId: message.author.id,
+        kingdom: parseInt(kingdom)
       })
       console.log('[BOT] Resultados encontrados:', results.objects.length)
 

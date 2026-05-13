@@ -226,6 +226,21 @@ function getChestCode(buffer) {
   return { chestCode }
 }
 
+function getTroopTrainCode(buffer) {
+  //! this is not chest code, seems more like clan whealth counter
+  const decoder = getDecoder(buffer)
+  decoder.off = 8 //skip packet length
+  decoder.skip() //skip header, opcode,seq,sessiondata
+
+  decoder.readArrayHeader() // Entra al primer nivel [...]
+  decoder.skip() //skip obj/instance id
+
+  const troopType = decoder.decode() // Lee {"strChestCode":count}
+  const troopAmount = decoder.decode() // Lee {"strChestCode":count}
+
+  return { troopType, troopAmount }
+}
+
 function getChestCodeResponse(buffer) {
   const decoder = getDecoder(buffer)
   decoder.off = 8 //skip packet length
@@ -974,6 +989,7 @@ module.exports = {
   getRequestHeader,
   getChestCode,
   getChestCodeResponse,
+  getTroopTrainCode,
   getMsgPack2ndBlockRequest,
   scanPacket312,
   scanPacket24301,

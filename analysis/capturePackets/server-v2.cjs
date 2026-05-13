@@ -13,6 +13,7 @@ const {
   getRequestHeader,
   getChestCode,
   getChestCodeResponse,
+  getTroopTrainCode,
   getMsgPack2ndBlockRequest,
   findMyValuesInPacket,
   scanPacket312,
@@ -146,13 +147,13 @@ const PACKET_SAMPLE_DIR = path.join(__dirname, 'packet-sample')
 const PACKET_MY_VALUES_DIR = path.join(__dirname, 'my-values')
 
 const packetSample = new Map()
-const MY_VALUES = ''
+let MY_VALUES = ''
 
 const URLS_DIR = path.join(__dirname, 'tburls.txt')
 const BATCH_SIZE = 100 // Write to disk every 100 unique strings
 let uniqueCache = new Set()
 let pendingWrite = []
-const writeStream = fs.createWriteStream(FILE_PATH, { flags: 'a' })
+const writeStream = fs.createWriteStream(URLS_DIR, { flags: 'a' })
 
 // 1. Configurar el stream de escritura (Binario y Rotativo)
 const logStream = createStream('traffic.bin', {
@@ -366,62 +367,13 @@ function setupWebsocketListener() {
             // if (msgData.data) {
             //   extractChatStaticIds(msgData.data)
             // }
-            const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
-            const validChannels = [activeChatChannel, CHAT_CHANNEL_URL].filter(Boolean)
-            if (validChannels.includes(channelUrl)) {
-              // message from chat channel registered
-              console.log(`📨 Chat message from ${channelUrl}: ${message}`)
-              if (message.startsWith('mmfind')) {
-                // const pattern = /(\d+)\s+(.+)\s+(?:level|lvl)\s+(\d+)/
-                const pattern = /^mmfind\s+(\d+)\s+(.+)\s+(?:level|lvl)\s*(\d+)/i
-                const match = message.match(pattern)
+            // const activeChatChannel = await redisClient.get(ACTIVE_CHAT_CHANNEL)
+            // const validChannels = [activeChatChannel, CHAT_CHANNEL_URL].filter(Boolean)
+            // if (validChannels.includes(channelUrl)) {
+            //   // message from chat channel registered
+            //   console.log(`📨 Chat message from ${channelUrl}: ${message}`)
 
-                if (match) {
-                  const [fullMatch, _amount, _name, _level] = match
-                  // mmfind 2 crypts level 20
-
-                  if (_name !== '' && _level !== '') {
-                    const level = parseInt(_level) || 0
-                    const amount = Math.max(parseInt(_amount) || 10, 10)
-                    const name = _name
-
-                    const results = findObjects({ name, level, amount })
-
-                    /*
-
- {
-  total: 2,
-  returned: 2,
-  objects: [
-    {
-      id: 62085,      key: '146:642:932',      objectId: '627373445560',
-      staticId: 2407, name: 'Crypt', level: 20, kingdom: 146, x: 642, y: 932,
-      timestamp: 0,      firstSeenAt: 1777471009216,      lastSeenAt: 1777471009216,
-      seenCount: 1,      warning: 0,      warningSetAt: null,
-      data: '{"objectId":627373445560,"staticId":2407,"level":20,"kingdom":146,"x":642,"y":932,"timestamp":0,"isUnlocked":false,"name":"Crypt"}'
-    },
-]}
-                    */
-
-                    if (results.total > 0) {
-                      for (obj of results.objects) {
-                        await addGameNotificationJob({
-                          object: {
-                            k: obj.kingdom,
-                            x: obj.x,
-                            y: obj.y,
-                            staticId: obj.staticId
-                          },
-                          message: obj.name,
-                          toMainChannel: true
-                        })
-                      }
-                    }
-                    // console.log('[BOT] mmfind', amount, name, level, 'results', results)
-                  }
-                }
-              }
-            }
+            // }
           } catch (e) {
             console.error('[websocket] Error: parsing data', e.message)
           }
@@ -586,6 +538,12 @@ function setupPacketCaptureListener() {
           // console.log('open chest packet 15013 res', encodeBase64(responseBody))
           // console.log('chest', getChestCode(postDataBuff)) //! no es chest code
           console.log('chest response', getChestCodeResponse(responseBody))
+        }
+
+        if (opCode === 1003) {
+          //!troop train
+          const troop = getTroopTrainCode(postDataBuff)
+          console.log('troop training ', troop.troopType, 'amount ', troop.troopAmount)
         }
 
         //  save 20 packet sample of each  opCode
@@ -1016,11 +974,11 @@ app.post('/api/kingdom', async (req, res) => {
 
 app.post('/api/myValues', async (req, res) => {
   try {
-    const { values = '' } = req.body
+    const { myValues = '' } = req.body
 
-    MY_VALUES = values.trim()
+    MY_VALUES = myValues.trim()
 
-    res.json({ success: true, message: `values set to ${values}` })
+    res.json({ success: true, message: `values set to ${MY_VALUES}` })
   } catch (error) {
     res.status(500).json({ success: false, error: error.message })
   }
@@ -1171,16 +1129,6 @@ app.post('/api/timer/stop402', async (req, res) => {
 //   })
 // })
 
-// app.get('/api/db/check', (req, res) => {
-//   const { findObjects } = require('./jobs/database')
-//   const objs = findObjects({ staticId: 400, level: 10, amount: 5 })
-//   res.json({
-//     found: objs.objects.length,
-//     total: objs.total,
-//     objects: objs.objects.slice(0, 3).map(o => `${o.kingdom}:${o.x}:${o.y} L${o.level}`)
-//   })
-// })
-
 app.get('/api/jobs/status', async (req, res) => {
   try {
     const status = await getQueueStatus()
@@ -1225,27 +1173,32 @@ app.get('/api/timers', async (req, res) => {
   }
 })
 
-app.post('/api/objects/find-and-notify', async (req, res) => {
-  const { staticId, level, amount = 10 } = req.body
+// app.post('/api/objects/find-and-notify', async (req, res) => {
+//   const { staticId, level, amount = 10 } = req.body
 
-  const nStaticId = parseInt(staticId)
-  const nLevel = parseInt(level)
-  const nAmount = parseInt(amount)
+//   const nStaticId = parseInt(staticId)
+//   const nLevel = parseInt(level)
+//   const nAmount = parseInt(amount)
 
-  const result = findObjects({ staticId: nStaticId, level: nLevel, amount: nAmount })
+//   const kingdom = await redisClient.get(DEFAULT_KINGDOM)
+//   if (!kingdom) {
+//     return res.json({ success: false, error: 'no default kingdom is set' })
+//   }
 
-  if (result.objects.length > 0) {
-    await addJob(JOB_TYPES.NOTIFICATION, {
-      type: 'objects-found',
-      priority: PRIORITY.LOW,
-      objects: result.objects,
-      searchCriteria: { staticId, level, amount }
-    })
-    res.json({ success: true, ...result, notified: result.objects.length > 0 })
-  } else {
-    res.json({ success: true, found: 0, notified: false })
-  }
-})
+//   const result = findObjects({ staticId: nStaticId, level: nLevel, amount: nAmount, kingdom })
+
+//   if (result.objects.length > 0) {
+//     await addJob(JOB_TYPES.NOTIFICATION, {
+//       type: 'objects-found',
+//       priority: PRIORITY.LOW,
+//       objects: result.objects,
+//       searchCriteria: { staticId, level, amount }
+//     })
+//     res.json({ success: true, ...result, notified: result.objects.length > 0 })
+//   } else {
+//     res.json({ success: true, found: 0, notified: false })
+//   }
+// })
 
 // ---- Player List API ----
 
@@ -1335,23 +1288,6 @@ app.get('/api/players', (req, res) => {
     res.status(500).json({ success: false, error: e.message })
   }
 })
-// async (req, res) => {
-// const { kingdoms } = req.body
-
-// const result = findObjects({ staticId: 400, level, amount })
-
-// if (result.objects.length > 0) {
-//   await addJob(JOB_TYPES.NOTIFICATION, {
-//     type: 'mercs-found',
-//     priority: PRIORITY.LOW,
-//     objects: result.objects,
-//     searchCriteria: { staticId: 400, level, amount }
-//   })
-//   res.json({ success: true, found: result.returned, total: result.total, notified: true })
-// } else {
-//   res.json({ success: true, found: 0, notified: false })
-// }
-// })
 
 // app.get('/api/captures', (req, res) => {
 //   res.json({ success: true, captures: [], count: 0 })

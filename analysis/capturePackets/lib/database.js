@@ -293,7 +293,7 @@ function saveObjects(objects) {
 }
 
 function findObjects(query) {
-  const { staticId, name, level, amount = 10, userId } = query
+  const { staticId, name, level, amount = 10, userId, kingdom = 146 } = query
 
   const userPosition = getUserPosition(userId)
   // console.log('[findObjects] userPosition', userPosition)
@@ -340,7 +340,7 @@ function findObjects(query) {
   }
 
   sql += ' AND kingdom = ?'
-  params.push(146)
+  params.push(kingdom)
 
   sql += ' ORDER BY distance ASC, lastSeenAt DESC LIMIT ?'
   params.push(amount)
