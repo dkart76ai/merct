@@ -438,8 +438,8 @@ async function send402packet(url, playerIds, token1, token2) {
   return result402
 }
 
-async function send601packet(url, playerId, token1, token2) {
-  const packetData601 = buildPacket601Payload(playerId, token1, token2)
+async function send601packet(url, objectId, token1, token2) {
+  const packetData601 = buildPacket601Payload(objectId, token1, token2)
 
   // Encode the packet
   const encoded601 = encodeMsgPack2MultiFragments(packetData601)
@@ -478,16 +478,16 @@ async function sendPacket24301(url, objectId, playerId, token1, token2) {
   return result24301
 }
 
-async function getResourceInfo601(playerId, kingdom) {
-  // console.log('[tasks][getResourceInfo601]', { playerId })
+async function getResourceInfo601(objectId, kingdom) {
+  // console.log('[tasks][getResourceInfo601]', { objectId })
   if (!kingdom) {
     console.log('[tasks][getResourceInfo601] No kingdom provided')
     return { success: false, error: 'no kingdom' }
   }
 
-  if (!playerId) {
-    console.log('[tasks][getResourceInfo601] No playerid provided')
-    return { success: false, error: 'no playerid' }
+  if (!objectId) {
+    console.log('[tasks][getResourceInfo601] No objectid provided')
+    return { success: false, error: 'no objectid' }
   }
 
   const redisClient = getRedis()
@@ -512,7 +512,7 @@ async function getResourceInfo601(playerId, kingdom) {
     const token1 = BigInt(_token1)
     const token2 = new Uint8Array(_token2)
 
-    const result402 = await send601packet(url, playerId, token1, token2)
+    const result601 = await send601packet(url, objectId, token1, token2)
 
     // console.log(
     //   styleText('red', '[tasks] [getResourceInfo601] extract data, players '),

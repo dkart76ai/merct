@@ -91,15 +91,12 @@ function buildPacket24301Payload(playerId, tokenBigInt, token) {
   return packetData
 }
 
-function buildPacket601Payload(playerId, tokenBigInt, token) {
+function buildPacket601Payload(objectId, tokenBigInt, token) {
   //something with resources maybe
   if (!tokenBigInt || !token) return null
 
   const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [
-    [24301, randomSeq, [[tokenBigInt], token], ''],
-    [[[[playerId], 0, 2147483647]]]
-  ]
+  const packetData = [[601, randomSeq, [[tokenBigInt], token], ''], [[[[objectId], 0, 2147483647]]]]
 
   return packetData
 }

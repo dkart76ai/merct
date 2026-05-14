@@ -774,12 +774,12 @@
         }
       }
 
-      async function refreshPlayerCoords(playerId, kingdom) {
+      async function refreshPlayerCoords(playerId, objectId, kingdom) {
         try {
           const res = await fetch(API + '/refreshPlayerCoords', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playerId, kingdom })
+            body: JSON.stringify({ playerId, objectId, kingdom })
           })
           const data = await res.json()
           if (data.success) {
@@ -1597,7 +1597,7 @@
             // const customDate = `${day}-${month}-${year}` // "2026-05-08"
             return (
               '<tr><td>' +
-              `<button style="padding:5px;font-size:11px" onclick="refreshPlayerCoords(${p.playerId},${p.kingdom})">refresh</button>` +
+              `<button style="padding:5px;font-size:11px" onclick="refreshPlayerCoords(${p.playerId},${p.objectId},${p.kingdom})">refresh</button>` +
               '<td>' +
               `<button style="padding:5px;font-size:11px" onclick="reportPlayerCoords(${p.playerId})">coord</button>` +
               '</td><td>' +

@@ -74,9 +74,10 @@ const opCodeInfo = {
   318: 'ping/servertime',
   402: 'player detail',
   403: 'resource detail ? / info-guide?',
+  601: 'target army detail/list',
   603: 'city teleport inside kingdom? with 204?',
   701: 'attack/send caravan/crypt exploration',
-  707: 'enemy/my troops detail ?',
+  707: 'enemy/my troops detail/ clan member portals ?',
   801: 'repair building status ?/temple troops revive',
   804: 'repair building/revive wuth gold ',
   805: 'revive with sacred pots ',
@@ -108,7 +109,7 @@ const opCodeInfo = {
   15031: 'clan history resource sent',
   15042: 'reinforcement request list',
   17001: 'pay taxes',
-  24301: 'player flags ?',
+  24301: 'player flags ',
   48003: 'advertising',
   41000: 'click on city ?',
   31000: 'mini game - stage completed',
@@ -537,13 +538,24 @@ function setupPacketCaptureListener() {
           // console.log('open chest packet 15013 req', encodeBase64(postDataBuff))
           // console.log('open chest packet 15013 res', encodeBase64(responseBody))
           // console.log('chest', getChestCode(postDataBuff)) //! no es chest code
-          console.log('chest response', getChestCodeResponse(responseBody))
+          console.log('chest response', JSON.stringify(getChestCodeResponse(responseBody)))
         }
 
         if (opCode === 1003) {
           //!troop train
           const troop = getTroopTrainCode(postDataBuff)
           console.log('troop training ', troop.troopType, 'amount ', troop.troopAmount)
+        }
+
+        if (opCode === 701) {
+          console.log(
+            'attack request data',
+            JSON.stringify(getMsgPack2ndBlockRequest(postDataBuff))
+          )
+        }
+
+        if (opCode === 15009) {
+          console.log('help request data', JSON.stringify(getMsgPack2ndBlockRequest(postDataBuff)))
         }
 
         //  save 20 packet sample of each  opCode
@@ -1218,12 +1230,14 @@ const VALID_PLAYER_SORT_COLUMNS = [
 app.post('/api/refreshPlayerCoords', async (req, res) => {
   try {
     const playerId = parseInt(req.body.playerId)
+    const objectId = parseInt(req.body.objectId)
     const kingdom = parseInt(req.body.kingdom)
 
     const result = await refreshPlayerInfo402(playerId, kingdom)
     console.log('[server.v2]refreshPlayerCoords', result)
 
-    await getResourceInfo601(playerId, kingdom) //TODO: testing 601
+    await getResourceInfo601(objectId, kingdom) //TODO: testing 601
+    //! 601 USES OBJECTID (not PLAYERID)
 
     res.json({ success: true })
   } catch (e) {
