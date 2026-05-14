@@ -502,7 +502,7 @@ function setupPacketCaptureListener() {
     const url = response.url()
     if (!url.includes('rubens-realm')) return
 
-    saveUniqueUrls(url)
+    // saveUniqueUrls(url)
 
     const _kingdom = url.split('rubens-realm')[1]
     // const kingdom = parseInt(_kingdom)
@@ -749,7 +749,7 @@ async function handleScanKingdom(req, res) {
   }
 
   //?set and forget (callback will handle the result)
-  scanKingdomWorker(kingdom, true /* save objects */)
+  scanKingdomWorker(kingdom, true /* save objects */, false)
     .then(res => console.log(`[main][handleScanKingdom] Kingdom ${kingdom} completed`))
     .catch(err => console.error(`[main][handleScanKingdom] Kingdom ${kingdom} error:`, err.message))
 
@@ -1010,7 +1010,7 @@ app.post('/api/scanKingdom402', async (req, res) => {
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
   }
-  console.log(`[API] scan other Kingdom request - kingdoms: ${kingdoms} `)
+  console.log(`[API] scan other Kingdom 402 request - kingdoms: ${kingdoms} `)
 
   const kingdomList = kingdoms
     .split(',')
@@ -1236,7 +1236,7 @@ app.post('/api/refreshPlayerCoords', async (req, res) => {
     const result = await refreshPlayerInfo402(playerId, kingdom)
     console.log('[server.v2]refreshPlayerCoords', result)
 
-    await getResourceInfo601(objectId, kingdom) //TODO: testing 601
+    await getResourceInfo601(playerId, objectId, kingdom) //TODO: testing 601
     //! 601 USES OBJECTID (not PLAYERID)
 
     res.json({ success: true })

@@ -565,8 +565,14 @@
                   <th onclick="sortPlayers('might')">
                     Might <span class="sort-arrow" id="sort-might"></span>
                   </th>
-                  <th onclick="sortPlayers('gold')">
-                    Gold <span class="sort-arrow" id="sort-gold"></span>
+                  <th onclick="sortPlayers('goldIngots')">
+                    GoldIngots <span class="sort-arrow" id="sort-goldIngots"></span>
+                  </th>
+                  <th onclick="sortPlayers('silver')">
+                    Silver <span class="sort-arrow" id="sort-silver"></span>
+                  </th>
+                  <th onclick="sortPlayers('food')">
+                    Food <span class="sort-arrow" id="sort-food"></span>
                   </th>
                   <th onclick="sortPlayers('hasShield')">
                     Shield <span class="sort-arrow" id="sort-hasShield"></span>
@@ -716,13 +722,13 @@
 
             kingdomEl.textContent = data.kingdom
 
-            document.getElementById('btnScanKingdom312').disabled = data?.kingdom.trim() == ''
-            document.getElementById('btnTimerStart312').disabled = data?.kingdom.trim() == ''
-            document.getElementById('btnTimerStop312').disabled = data?.kingdom.trim() == ''
+            document.getElementById('btnScanKingdom312').disabled = data?.kingdom?.trim() == ''
+            document.getElementById('btnTimerStart312').disabled = data?.kingdom?.trim() == ''
+            document.getElementById('btnTimerStop312').disabled = data?.kingdom?.trim() == ''
 
-            document.getElementById('btnScanKingdom402').disabled = data?.kingdom.trim() == ''
-            document.getElementById('btnTimerStart402').disabled = data?.kingdom.trim() == ''
-            document.getElementById('btnTimerStop402').disabled = data?.kingdom.trim() == ''
+            document.getElementById('btnScanKingdom402').disabled = data?.kingdom?.trim() == ''
+            document.getElementById('btnTimerStart402').disabled = data?.kingdom?.trim() == ''
+            document.getElementById('btnTimerStop402').disabled = data?.kingdom?.trim() == ''
 
             const token1El = document.getElementById('token1')
             const token2El = document.getElementById('token2')
@@ -1609,7 +1615,11 @@
               '</td><td>' +
               (p.might || 0) +
               '</td><td>' +
-              (p.gold || 0) +
+              (p.goldIngots || 0) +
+              '</td><td>' +
+              (p.silver || 0) +
+              '</td><td>' +
+              (p.food || 0) +
               '</td><td class="' +
               shieldClass +
               '">' +

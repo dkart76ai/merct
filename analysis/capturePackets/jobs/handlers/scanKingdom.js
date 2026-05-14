@@ -1,8 +1,8 @@
-const { scanKingdomTask } = require('../../workers/tasks')
-
+const { scanKingdomWorker } = require('../../lib/workerPool')
+//!bullmq llama a piscina
 //? MUST be async, bullmq handles it
 async function scanKingdomHandler(job) {
-  const { kingdom, shouldSaveObjects } = job.data
+  const { kingdom, shouldSaveObjects, checkFlags = false } = job.data
 
   if (!kingdom) {
     console.log('[scanKingdomHandler] No kingdom provided')
@@ -10,7 +10,7 @@ async function scanKingdomHandler(job) {
   }
 
   try {
-    const result = scanKingdomTask({ kingdom, shouldSaveObjects })
+    const result = await scanKingdomWorker(kingdom, shouldSaveObjects, checkFlags)
     return result
   } catch (error) {
     console.error(`[scanKingdomHandler] Error:`, error.message)

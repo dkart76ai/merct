@@ -1,4 +1,4 @@
-const { scanRefreshPlayerInfoTask } = require('../../workers/tasks')
+const { scanRefreshPlayerInfoWorker } = require('../../lib/workerPool')
 
 //? MUST be async, bullmq handles it
 async function scanRefreshPlayerInfoHandler(job) {
@@ -10,7 +10,7 @@ async function scanRefreshPlayerInfoHandler(job) {
   }
 
   try {
-    const result = scanRefreshPlayerInfoTask({ kingdom })
+    const result = await scanRefreshPlayerInfoWorker(kingdom)
     return result
   } catch (error) {
     console.error(`[scanRefreshPlayerInfoHandler] Error:`, error.message)

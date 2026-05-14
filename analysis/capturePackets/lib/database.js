@@ -58,7 +58,9 @@ function initDb() {
       x INTEGER,
       y INTEGER,
       might INTEGER,
-      gold INTEGER,
+      goldIngots INTEGER DEFAULT 0,
+      silver INTEGER DEFAULT 0,
+      food INTEGER DEFAULT 0,
       timezone TEXT,
       timestamp INTEGER,
       hasShield BOOLEAN,
@@ -462,8 +464,24 @@ function savePlayerFlagCount(playerId, flagCount) {
     WHERE playerId = ?
   `)
 
-  const result = update.run(flagCount, playerId)
+  const result = update.run(flagCount, String(playerId))
   console.log('[database] update flagcount', result)
+  return { success: true }
+}
+
+function savePlayerResources(playerId, silver = 0, food = 0, goldIngots = 0) {
+  const database = getDb()
+
+  const update = database.prepare(`
+    UPDATE players SET
+      silver = ?, food = ?, goldIngots = ?
+    WHERE playerId = ?
+  `)
+
+  console.log('[database][savePlayerResources]', playerId, typeof playerId)
+
+  const result = update.run(silver, food, goldIngots, String(playerId))
+  console.log('[database] update player resources', result)
   return { success: true }
 }
 
@@ -633,6 +651,7 @@ module.exports = {
   getPlayersObjectIdFromKingdom,
   getPlayers,
   savePlayerFlagCount,
+  savePlayerResources,
   saveUserPosition,
   getStats,
   clearDb,

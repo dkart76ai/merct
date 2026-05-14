@@ -605,8 +605,8 @@ function _extractObj23Data(decoder) {
   // salta [16]  [11111111] // otro id
   const objectId = decoder.decode()
 
-  // [17] gold
-  const gold = decoder.decode() // 40
+  // [17] goldIngots
+  const goldIngots = decoder.decode() // 40
 
   //salta [18,19,20]  num,y 2 array
   decoder.skip()
@@ -634,7 +634,7 @@ function _extractObj23Data(decoder) {
     kingdom,
     x,
     y,
-    gold,
+    goldIngots,
     timezone
   }
 }
@@ -942,16 +942,61 @@ function scanPacket402(buffer) {
   return results
 }
 
-function scanPacket24301(buffer) {
+function scanPacket601(buffer) {
   const decoder = getDecoder(buffer)
   decoder.off = 8 //skip packet length
 
-  const results = {
-    flags: []
-  }
+  decoder.skip() // header [601,seq]
+  decoder.readArrayHeader() // enter inside array [] 2 elements
+  decoder.readArrayHeader() // enter inside array [] 1 element
+  decoder.readArrayHeader() // enter inside array [] 36 elements
+  decoder.readArrayHeader() // enter inside [objectid]
+  const objectId = decoder.decode() // [0] objectid
 
-  const startOfEntry = decoder.off
-  const byte = decoder.buf[decoder.off]
+  decoder.skip() // [1] [24 element arr] object data like coords
+  decoder.skip() // [2] [9 elem arr ] [0,0,"",0,0,0,0,0,0]
+  decoder.skip() // [3] [4 elem arr ] [0,0,0,0]
+  decoder.skip() // [4] [0 elem arr ] []
+
+  // [5] es un obj con 281 items  resource info (clan capitol, player city, village rss)
+  const resources = decoder.decode() // element 4 /player cities resources
+  if (Object.keys(resources).length === 0) return null
+
+  //[elem 30] for monster resources, what troop type and how many
+
+  const gold = resources['1']?.[1] ?? 0
+  const silver = resources['2']?.[1] ?? 0 // player city or village same "2" code for silver
+  const wood = resources['3']?.[1] ?? 0
+  const iron = resources['4']?.[1] ?? 0
+  const stone = resources['5']?.[1] ?? 0
+  const food = resources['6']?.[1] ?? 0
+  const valorPoints = resources['8']?.[1] ?? 0
+  const conquestPoints = resources['9']?.[1] ?? 0
+  const greenTar = resources['13']?.[1] ?? 0
+  const blueprints = resources['14']?.[1] ?? 0
+  const goldIngots = resources['16']?.[1] ?? 0
+  const dragonCoins = resources['30']?.[1] ?? 0
+  const epicTar = resources['32']?.[1] ?? 0
+  const blueTar = resources['34']?.[1] ?? 0
+  const sacredPots = resources['35']?.[1] ?? 0
+  const rabiaPots = resources['55']?.[1] ?? 0
+
+  // clan resources
+  const cientificTractate = resources['20']?.[1] ?? 0
+  const clanWood = resources['21']?.[1] ?? 0
+  const clanSteel = resources['702006']?.[1] ?? 0
+  const clanSuppressionSeal = resources['703022']?.[1] ?? 0
+  const clanDragonCoin = resources['31']?.[1] ?? 0
+  const religiousTractate = resources['74284']?.[1] ?? 0
+  const ollympusTorch = resources['701216']?.[1] ?? 0
+  const chronogliphFragment = resources['701220']?.[1] ?? 0
+
+  return { objectId, silver, food, goldIngots }
+}
+
+function scanPacket24301(buffer) {
+  const decoder = getDecoder(buffer)
+  decoder.off = 8 //skip packet length
 
   // [24301, seq] [{ "1198295910531": [ 19,1777835062] }]
   // [24301, seq] [{  }]
@@ -993,7 +1038,8 @@ module.exports = {
   getMsgPack2ndBlockRequest,
   scanPacket312,
   scanPacket24301,
-  scanPacket402
+  scanPacket402,
+  scanPacket601
 }
 
 // const p312 =
