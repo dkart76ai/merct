@@ -2,7 +2,7 @@ const { styleText } = require('node:util')
 
 console.log(styleText('green', 'This is green!'))
 // const { parentPort } = require('worker_threads')
-const { Piscina } = require('piscina')
+// const { Piscina } = require('piscina')
 const path = require('path')
 const { kingdomUrls } = require('../lib/kingdomUrls.js')
 const {
@@ -107,7 +107,7 @@ const delay = ms => new Promise(r => setTimeout(r, ms))
 
 // scan kingdom -----
 
-async function extractDataFrom402(response) {
+function extractDataFrom402(response) {
   // console.log(styleText('yellow', 'extractDataFrom402'))
   const { players23 } = scanPacket402(response)
   // console.log('[tasks][extractDataFrom402] scanPacket402: players23:', players23.length)
@@ -149,22 +149,21 @@ async function extractDataFrom402(response) {
   }
 }
 
-async function extractDataFrom601(playerId, response) {
-  // console.log(styleText('yellow', 'extractDataFrom402'))
+function extractDataFrom601(response) {
+  // console.log(styleText('yellow', 'extractDataFrom5601'))
   const result601 = scanPacket601(response)
-  if (!result601) return { success: false }
-
-  const { objectId, silver, food, goldIngots } = result601
-  console.log('601 data', { objectId, silver, food, goldIngots })
-  try {
-    const result = savePlayerResources(playerId, silver, food, goldIngots)
-    return {
-      success: true,
-      result
+  if (result601.players36.length > 0) {
+    console.log('[tasks][extractDataFrom601] players', result601.players36)
+    try {
+      const result = savePlayerResources(result601.players36)
+      return {
+        success: true,
+        result
+      }
+      console.log(`[tasks][extractDataFrom601][savePlayerResources] `, result)
+    } catch (e) {
+      console.error('[tasks][extractDataFrom601][savePlayerResources] error', e.message)
     }
-    //     // console.log(`[tasks][extractDataFrom402][SavePlayers] `, result)
-  } catch (e) {
-    console.error('[tasks][extractDataFrom402][SavePlayers] error', e.message)
   }
 
   return {
@@ -325,7 +324,7 @@ function generatePlayerArrays(playersIds) {
   return groupedPlayers
 }
 
-async function extractDataFrom24301(playerId, response) {
+function extractDataFrom24301(playerId, response) {
   const data = scanPacket24301(response)
 
   //[{ "1198295910531": [ 19,1777835062] }]
@@ -451,32 +450,34 @@ async function send402packet(url, playerIds, token1, token2) {
 
   // Encode the packet
   const encoded402 = encodeMsgPack2MultiFragments(packetData402)
-  console.log('[402] encoded request base64', encodeBase64(encoded402))
+  // console.log('[402] encoded request base64', encodeBase64(encoded402))
 
   // Send to server
   // console.log(`[getPlayerInfo402] Sending packet402 to ${url}  `)
 
   const bytes402 = await sendPacket(url, encoded402)
-  console.log('[402]encoded result base64', encodeBase64(bytes402))
+  // console.log('[402]encoded result base64', encodeBase64(bytes402))
 
-  const result402 = await extractDataFrom402(bytes402)
+  const result402 = extractDataFrom402(bytes402)
   return result402
 }
 
-async function send601packet(url, playerId, objectId, token1, token2) {
-  const packetData601 = buildPacket601Payload(objectId, token1, token2)
+async function send601packet(url, objectIdArr, token1, token2) {
+  const packetData601 = buildPacket601Payload(objectIdArr, token1, token2)
 
   // Encode the packet
   const encoded601 = encodeMsgPack2MultiFragments(packetData601)
-  console.log('[601] encoded request base64', encodeBase64(encoded601))
 
   // Send to server
   // console.log(`[getPlayerInfo601] Sending packet601 to ${url}  `)
 
   const bytes601 = await sendPacket(url, encoded601)
-  console.log('[601]encoded result base64', encodeBase64(bytes601))
 
-  const result601 = await extractDataFrom601(playerId, bytes601)
+  const result601 = extractDataFrom601(bytes601)
+  // if (result601.success) {
+  console.log(styleText('yellow', '[601] encoded request base64'), encodeBase64(encoded601))
+  console.log(styleText('red', '[601]encoded result base64'), encodeBase64(bytes601))
+  // }
   return result601
 }
 
@@ -499,12 +500,13 @@ async function sendPacket24301(url, objectId, playerId, token1, token2) {
   // console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
 
   // ?  use playerId to save in DB
-  const result24301 = await extractDataFrom24301(playerId, bytes24301)
+  const result24301 = extractDataFrom24301(playerId, bytes24301)
   return result24301
 }
 
-async function getResourceInfo601(playerId, objectId, kingdom) {
+async function getResourceInfo601(objectId, kingdom) {
   // console.log('[tasks][getResourceInfo601]', { objectId })
+  //! single player refresh data
   if (!kingdom) {
     console.log('[tasks][getResourceInfo601] No kingdom provided')
     return { success: false, error: 'no kingdom' }
@@ -537,7 +539,7 @@ async function getResourceInfo601(playerId, objectId, kingdom) {
     const token1 = BigInt(_token1)
     const token2 = new Uint8Array(_token2)
 
-    const result601 = await send601packet(url, playerId, objectId, token1, token2)
+    const result601 = await send601packet(url, [objectId], token1, token2)
 
     // console.log(
     //   styleText('red', '[tasks] [getResourceInfo601] extract data, players '),
@@ -861,17 +863,17 @@ async function scanRefreshPlayerInfoTask(data) {
     let token2 = new Uint8Array(_token2)
 
     const playerObjIdsDB = getPlayersObjectIdFromKingdom(kingdom) // [ { playerId: '609885609857' }]
+    // console.log('players from db obj+id', playerObjIdsDB)
+
     const playerIds = playerObjIdsDB.map(p => p.playerId)
     const objectIds = playerObjIdsDB.map(p => p.objectId)
-
-    console.log('players from db obj+id', playerObjIdsDB)
 
     const playerArray = []
     const groupSize = 20
     for (let i = 0; i < playerIds.length; i += groupSize) {
       playerArray.push(playerIds.slice(i, i + groupSize))
     }
-    console.log('[scanRefreshPlayerInfoTask] playersIds', playerArray)
+    // console.log('[scanRefreshPlayerInfoTask] playersIds', playerArray)
 
     let playersCount = 0
     for (const players of playerArray) {
@@ -884,8 +886,15 @@ async function scanRefreshPlayerInfoTask(data) {
     }
 
     // send 601 packets to get player resources and update db
-    for (const player of playerObjIdsDB) {
-      const result601 = await send601packet(url, player.playerId, player.objectId, token1, token2)
+    const playerOIdsArray = []
+    const groupSize2 = 11
+    for (let i = 0; i < objectIds.length; i += groupSize2) {
+      playerOIdsArray.push(objectIds.slice(i, i + groupSize2))
+    }
+
+    for (const objIds of playerOIdsArray) {
+      //! TODO: send objectid as array, multiples ids
+      const result601 = await send601packet(url, objIds, token1, token2)
     }
 
     // console.log(`[tasks][scanRefreshPlayerInfoTask] Success objects ${objects}, players ${players} `)

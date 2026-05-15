@@ -945,53 +945,108 @@ function scanPacket402(buffer) {
 function scanPacket601(buffer) {
   const decoder = getDecoder(buffer)
   decoder.off = 8 //skip packet length
+  const limit = decoder.buf.length
 
+  const results = {
+    players36: []
+  }
   decoder.skip() // header [601,seq]
   decoder.readArrayHeader() // enter inside array [] 2 elements
-  decoder.readArrayHeader() // enter inside array [] 1 element
-  decoder.readArrayHeader() // enter inside array [] 36 elements
-  decoder.readArrayHeader() // enter inside [objectid]
-  const objectId = decoder.decode() // [0] objectid
+  const playerCount = decoder.readArrayHeader() // enter inside array [] N element , depends on how many players ids were send
 
-  decoder.skip() // [1] [24 element arr] object data like coords
-  decoder.skip() // [2] [9 elem arr ] [0,0,"",0,0,0,0,0,0]
-  decoder.skip() // [3] [4 elem arr ] [0,0,0,0]
-  decoder.skip() // [4] [0 elem arr ] []
+  while (decoder.off < limit && playerCount > 0) {
+    const startOfEntry = decoder.off
+    const byte = decoder.buf[decoder.off]
 
-  // [5] es un obj con 281 items  resource info (clan capitol, player city, village rss)
-  const resources = decoder.decode() // element 4 /player cities resources
-  if (Object.keys(resources).length === 0) return null
+    // Solo nos interesan los marcadores de Array (Fixarray, Array16, Array32)
+    if ((byte >= 0x90 && byte <= 0x9f) || byte === 0xdc || byte === 0xdd) {
+      const playerDataLen = decoder.readArrayHeader() // enter inside array [] 36 elements
+      if (playerDataLen === 36) {
+        decoder.readArrayHeader() // enter inside [objectid]
+        const objectId = decoder.decode() // [0] objectid
 
-  //[elem 30] for monster resources, what troop type and how many
+        decoder.skip() // [1] [24 element arr] object data like coords
+        /**
+ * [0]
+ * [1215475745057] //clan id
+ * 2:10001
+  3:1766079348
+  4:0
+  5:0
+  6:322615
+  7:220071
+  8:283  // kingdom
+  9:283  // kingdom
+  10:[ 0 ]
+  11:1
+  12:2
+  13:[283,262,184] //coords
+  14:[283,262,184] //coords
+  15:0
+  16:0
+  17:0
+  18:0
+  19:0
+  20:0
+  21:1766079348
+  22:0
+  23:1768905215
+ */
 
-  const gold = resources['1']?.[1] ?? 0
-  const silver = resources['2']?.[1] ?? 0 // player city or village same "2" code for silver
-  const wood = resources['3']?.[1] ?? 0
-  const iron = resources['4']?.[1] ?? 0
-  const stone = resources['5']?.[1] ?? 0
-  const food = resources['6']?.[1] ?? 0
-  const valorPoints = resources['8']?.[1] ?? 0
-  const conquestPoints = resources['9']?.[1] ?? 0
-  const greenTar = resources['13']?.[1] ?? 0
-  const blueprints = resources['14']?.[1] ?? 0
-  const goldIngots = resources['16']?.[1] ?? 0
-  const dragonCoins = resources['30']?.[1] ?? 0
-  const epicTar = resources['32']?.[1] ?? 0
-  const blueTar = resources['34']?.[1] ?? 0
-  const sacredPots = resources['35']?.[1] ?? 0
-  const rabiaPots = resources['55']?.[1] ?? 0
+        decoder.skip() // [2] [9 elem arr ] [0,0,"",0,0,0,0,0,0]
+        decoder.skip() // [3] [4 elem arr ] [0,0,0,0]
+        decoder.skip() // [4] [0 elem arr ] []
 
-  // clan resources
-  const cientificTractate = resources['20']?.[1] ?? 0
-  const clanWood = resources['21']?.[1] ?? 0
-  const clanSteel = resources['702006']?.[1] ?? 0
-  const clanSuppressionSeal = resources['703022']?.[1] ?? 0
-  const clanDragonCoin = resources['31']?.[1] ?? 0
-  const religiousTractate = resources['74284']?.[1] ?? 0
-  const ollympusTorch = resources['701216']?.[1] ?? 0
-  const chronogliphFragment = resources['701220']?.[1] ?? 0
+        // [5] es un obj con 281 items  resource info (clan capitol, player city, village rss)
+        const resources = decoder.decode() // element 4 /player cities resources
 
-  return { objectId, silver, food, goldIngots }
+        // Saltamos arr[6] hasta arr[35]
+        for (let i = 6; i <= 29; i++) decoder.skip()
+        decoder.skip() //[elem 30] for monster resources, what troop type and how many
+        for (let i = 31; i <= 35; i++) decoder.skip()
+
+        if (Object.keys(resources).length > 0) {
+          const gold = resources['1']?.[1] ?? 0
+          const silver = resources['2']?.[1] ?? 0 // player city or village same "2" code for silver
+          const wood = resources['3']?.[1] ?? 0
+          const iron = resources['4']?.[1] ?? 0
+          const stone = resources['5']?.[1] ?? 0
+          const food = resources['6']?.[1] ?? 0
+          const valorPoints = resources['8']?.[1] ?? 0
+          const conquestPoints = resources['9']?.[1] ?? 0
+          const greenTar = resources['13']?.[1] ?? 0
+          const blueprints = resources['14']?.[1] ?? 0
+          const goldIngots = resources['16']?.[1] ?? 0
+          const dragonCoins = resources['30']?.[1] ?? 0
+          const epicTar = resources['32']?.[1] ?? 0
+          const blueTar = resources['34']?.[1] ?? 0
+          const sacredPots = resources['35']?.[1] ?? 0
+          const rabiaPots = resources['55']?.[1] ?? 0
+
+          // clan resources
+          const cientificTractate = resources['20']?.[1] ?? 0
+          const clanWood = resources['21']?.[1] ?? 0
+          const clanSteel = resources['702006']?.[1] ?? 0
+          const clanSuppressionSeal = resources['703022']?.[1] ?? 0
+          const clanDragonCoin = resources['31']?.[1] ?? 0
+          const religiousTractate = resources['74284']?.[1] ?? 0
+          const ollympusTorch = resources['701216']?.[1] ?? 0
+          const chronogliphFragment = resources['701220']?.[1] ?? 0
+
+          results.players36.push({
+            objectId,
+            silver,
+            food,
+            goldIngots
+          })
+        }
+      }
+    }
+
+    // Si no fue ninguna estructura conocida, avanzamos 1 byte y seguimos buscando
+    decoder.off = startOfEntry + 1
+  }
+  return results
 }
 
 function scanPacket24301(buffer) {

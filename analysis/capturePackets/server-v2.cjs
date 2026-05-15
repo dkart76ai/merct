@@ -1236,7 +1236,7 @@ app.post('/api/refreshPlayerCoords', async (req, res) => {
     const result = await refreshPlayerInfo402(playerId, kingdom)
     console.log('[server.v2]refreshPlayerCoords', result)
 
-    await getResourceInfo601(playerId, objectId, kingdom) //TODO: testing 601
+    await getResourceInfo601(objectId, kingdom) //TODO: testing 601
     //! 601 USES OBJECTID (not PLAYERID)
 
     res.json({ success: true })

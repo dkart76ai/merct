@@ -450,9 +450,7 @@ function getPlayersIdFromKingdom(kingdom) {
 }
 function getPlayersObjectIdFromKingdom(kingdom) {
   const database = getDb()
-  return database
-    .prepare('SELECT playerId, objectId FROM players where hasShield=0 AND kingdom=?')
-    .all(kingdom)
+  return database.prepare('SELECT playerId, objectId FROM players where kingdom=?').all(kingdom)
 }
 
 function savePlayerFlagCount(playerId, flagCount) {
@@ -469,20 +467,29 @@ function savePlayerFlagCount(playerId, flagCount) {
   return { success: true }
 }
 
-function savePlayerResources(playerId, silver = 0, food = 0, goldIngots = 0) {
+function savePlayerResources(playersData) {
   const database = getDb()
+  if (playersData.length > 0) {
+    // 1. Preparar la sentencia SQL de actualización
+    const updatePlayer = database.prepare(`
+        UPDATE players
+        Set silver = ?, food = ?, goldIngots = ?
+        WHERE objectId = ?
+      `)
 
-  const update = database.prepare(`
-    UPDATE players SET
-      silver = ?, food = ?, goldIngots = ?
-    WHERE playerId = ?
-  `)
+    // 2. Crear la transacción para procesar el array
+    const updatePlayersTransaction = database.transaction(dataArray => {
+      for (const player of dataArray) {
+        updatePlayer.run(player.silver, player.food, player.goldIngots, player.objectId)
+      }
+    })
 
-  console.log('[database][savePlayerResources]', playerId, typeof playerId)
-
-  const result = update.run(silver, food, goldIngots, String(playerId))
-  console.log('[database] update player resources', result)
-  return { success: true }
+    // 3. Ejecutar la transacción
+    const result = updatePlayersTransaction(playersData)
+    console.log('[database] update player resources', result)
+    return { success: true, result }
+  }
+  return { success: false }
 }
 
 function getPlayers(
