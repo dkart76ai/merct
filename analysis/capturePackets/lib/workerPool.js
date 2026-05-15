@@ -169,7 +169,7 @@ async function processPacket({ request, response, shouldSaveObjects = false }) {
     // Aquí puedes procesar el resultado
     return { success: true, data: result }
   } catch (e) {
-    console.error('[workerPool][scanKingdomWorker], error', e.message)
+    console.error('[workerPool][scanKingdomWorker]1, error', e.message)
     // Al lanzar el error, BullMQ marcará el job como "Failed" y podrá reintentarlo
     throw e
   }
@@ -205,7 +205,7 @@ async function scanKingdomWorker(kingdom, shouldSaveObjects = false, checkFlags 
     // Aquí puedes procesar el resultado
     return { success: true, data: result }
   } catch (e) {
-    console.error('[workerPool][scanKingdomWorker], error', e.message)
+    console.error('[workerPool][scanKingdomWorker]2, error', e.message)
     // Al lanzar el error, BullMQ marcará el job como "Failed" y podrá reintentarlo
     throw e
   }

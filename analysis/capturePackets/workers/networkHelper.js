@@ -8,11 +8,20 @@ async function sendPacket(url, payload) {
   if (!url) throw new Error(`no url param`)
   if (!payload) throw new Error(`no payload param`)
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: HEADERS,
-    body: payload
-  })
+  let response = null
+
+  try {
+    // console.log('[networkHelper][sendPacket] ', url)
+    // console.log('[networkHelper][sendPacket] ', payload)
+    response = await fetch(url, {
+      method: 'POST',
+      headers: HEADERS,
+      body: payload
+    })
+  } catch (e) {
+    console.error('[networkHelper][sendPacket] error', e.message)
+    throw new Error(e.message)
+  }
 
   // console.log('[getPlayerInfo402] respnse', response402)
 

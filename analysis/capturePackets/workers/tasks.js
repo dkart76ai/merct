@@ -42,7 +42,7 @@ const {
 // Task handlers for Piscina
 //---------------------------------
 
-const generateArrays = (start = 9, end = 2396, step = 50, groupSize = 12) => {
+const generateArrays = (start = 0, end = 2499, step = 50, groupSize = 12) => {
   const allNumbers = []
   const used = new Set()
 
@@ -435,7 +435,7 @@ async function send312packet(url, tiles, token1, token2, shouldSaveObjects) {
   // console.log('[312] encoded request base64', encodeBase64(encoded312))
 
   // Send to server
-  // console.log(`[tasks][scanKingdomTask] Sending packet312 to ${url}  `)
+  // console.log(`[tasks][send312packet] Sending packet312 to ${url}  `)
 
   const bytes312 = await sendPacket(url, encoded312)
   // console.log('[312]encoded result base64', encodeBase64(bytes312))
@@ -705,7 +705,8 @@ async function scanKingdomTask(data) {
 
   if (!kingdom) {
     console.log('[tasks][scanKingdomTask] No kingdom provided')
-    return { success: false, error: 'no kingdom' }
+    // return { success: false, error: 'no kingdom' }
+    throw new Error('no kingdom')
   }
 
   const redisClient = getRedis()
@@ -756,20 +757,20 @@ async function scanKingdomTask(data) {
 
     await delay(200)
     //---------- send packet 22
-    const packetData22 = buildPacket22Payload(token1, token2)
+    // const packetData22 = buildPacket22Payload(token1, token2)
 
-    // Encode the packet
-    const encoded22 = encodeMsgPack2MultiFragments(packetData22)
-    // console.log('[22] encoded request base64', encodeBase64(encoded22))
-    // Send to server
-    // console.log(`[tasks][scanKingdomTask] Sending packet22 to ${url}  `)
+    // // Encode the packet
+    // const encoded22 = encodeMsgPack2MultiFragments(packetData22)
+    // // console.log('[22] encoded request base64', encodeBase64(encoded22))
+    // // Send to server
+    // // console.log(`[tasks][scanKingdomTask] Sending packet22 to ${url}  `)
 
-    const bytes22 = await sendPacket(url, encoded22)
-    await delay(200)
+    // const bytes22 = await sendPacket(url, encoded22)
+    // await delay(200)
 
     //------ send packet 312
 
-    const tilesArray = generateArrays(9, 2396, 50, 12)
+    const tilesArray = generateArrays(0, 2499, 50, 12)
 
     let objects = 0
     let players = 0

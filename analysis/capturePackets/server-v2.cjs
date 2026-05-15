@@ -65,7 +65,7 @@ const {
 
 const opCodeInfo = {
   2: 'appear when click on clan button/claim chest',
-  24: 'appear when click on clan button',
+  24: 'resources details',
   203: 'account info',
   208: 'gift ?',
   311: 'something with tiles',
@@ -74,7 +74,7 @@ const opCodeInfo = {
   318: 'ping/servertime',
   402: 'player detail',
   403: 'resource detail ? / info-guide?',
-  601: 'target army detail/list',
+  601: 'target resources',
   603: 'city teleport inside kingdom? with 204?',
   701: 'attack/send caravan/crypt exploration',
   707: 'enemy/my troops detail/ clan member portals ?',
@@ -753,14 +753,6 @@ async function handleScanKingdom(req, res) {
     .then(res => console.log(`[main][handleScanKingdom] Kingdom ${kingdom} completed`))
     .catch(err => console.error(`[main][handleScanKingdom] Kingdom ${kingdom} error:`, err.message))
 
-  // try {
-  //   //llama directo al worker thread
-  //   scanKingdomWorker(kingdom, true /* save objects */)
-  // } catch (error) {
-  //   console.log('error', error.message)
-  //   return res.json({ success: false, error: error.message })
-  // }
-
   res.json({
     success: true,
     message: `kingdom ${kingdom} enqueued`
@@ -783,7 +775,8 @@ async function handleStartTimer(req, res) {
 
   const payload = {
     kingdom,
-    shouldSaveObjects: true
+    shouldSaveObjects: true,
+    checkFlags: false
   }
   const timerKey = `kingdom:${kingdom}`
   await timerManager.scheduleCustom(timerKey, parseInt(interval), JOB_TYPES.SCAN_KINGDOM, payload, {
@@ -813,7 +806,7 @@ async function handleStopTimer(req, res) {
 
 // Scan for other kingdoms timer
 app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
-  const { interval = 60000, kingdoms, key, checkFlags = false } = req.body
+  const { interval = 60000, kingdoms = '', key = '', checkFlags = false } = req.body
   console.log('kingdom', req.body)
 
   if (!kingdoms || kingdoms.trim() === '') {
