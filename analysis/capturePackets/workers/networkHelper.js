@@ -1,8 +1,10 @@
-const HEADERS = {
-  'Content-Type': 'application/octet-stream',
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
-  Referer: 'https://totalbattle.com/'
-}
+const { Agent } = require('undici')
+
+// Reuse connections, timing out idle ones after 10 seconds
+const persistentAgent = new Agent({
+  keepAliveTimeout: 10000,
+  connections: 10 // Max concurrent connections per worker thread
+})
 
 async function sendPacket(url, payload) {
   if (!url) throw new Error(`no url param`)
@@ -10,30 +12,40 @@ async function sendPacket(url, payload) {
 
   let response = null
 
+  const HEADERS = {
+    'Content-Type': 'application/octet-stream',
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0',
+    Referer: 'https://totalbattle.com/'
+  }
+
   try {
-    // console.log('[networkHelper][sendPacket] ', url)
-    // console.log('[networkHelper][sendPacket] ', payload)
     response = await fetch(url, {
       method: 'POST',
       headers: HEADERS,
-      body: payload
+      body: payload,
+      dispatcher: persistentAgent
     })
   } catch (e) {
     console.error('[networkHelper][sendPacket] error', e.message)
-    throw new Error(e.message)
+    console.log('[networkHelper][sendPacket] ', url)
+    console.log('[networkHelper][sendPacket] ', payload.length)
+    //throw new Error(e.message)
+    if (e.cause) {
+      console.error('-> Root Cause:', e.cause)
+    }
   }
 
   // console.log('[getPlayerInfo402] respnse', response402)
 
-  if (!response.ok) {
-    throw new Error(`Server returned ${response.status}: ${response.statusText}`)
+  if (response && response.ok) {
+    // Get response buffer
+    const buffer = await response.arrayBuffer()
+    const bytes = new Uint8Array(buffer)
+
+    return bytes
   }
-
-  // Get response buffer
-  const buffer = await response.arrayBuffer()
-  const bytes = new Uint8Array(buffer)
-
-  return bytes
+  return null
 }
 
 function buildPacket41000Payload(tokenBigInt, token) {
@@ -91,11 +103,11 @@ function buildPacket402Payload(playerIds, tokenBigInt, token) {
   return packetData
 }
 
-function buildPacket24301Payload(playerId, tokenBigInt, token) {
+function buildPacket24301Payload(objectId, tokenBigInt, token) {
   if (!tokenBigInt || !token) return null
 
   const randomSeq = Math.floor(Math.random() * 32000) + 1
-  const packetData = [[24301, randomSeq, [[tokenBigInt], token], ''], [[playerId]]]
+  const packetData = [[24301, randomSeq, [[tokenBigInt], token], ''], [[objectId]]]
 
   return packetData
 }

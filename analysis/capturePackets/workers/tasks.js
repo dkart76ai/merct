@@ -475,8 +475,8 @@ async function send601packet(url, objectIdArr, token1, token2) {
 
   const result601 = extractDataFrom601(bytes601)
   // if (result601.success) {
-  console.log(styleText('yellow', '[601] encoded request base64'), encodeBase64(encoded601))
-  console.log(styleText('red', '[601]encoded result base64'), encodeBase64(bytes601))
+  // console.log(styleText('yellow', '[601] encoded request base64'), encodeBase64(encoded601))
+  // console.log(styleText('red', '[601]encoded result base64'), encodeBase64(bytes601))
   // }
   return result601
 }
@@ -487,17 +487,17 @@ async function sendPacket24301(url, objectId, playerId, token1, token2) {
 
   // Encode the packet
   const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
-  // console.log(
-  //   '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
-  //   encodeBase64(encoded24301)
-  // )
+  console.log(
+    '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
+    encodeBase64(encoded24301)
+  )
 
   // Send to server
   // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
 
   const bytes24301 = await sendPacket(url, encoded24301)
 
-  // console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
+  console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
 
   // ?  use playerId to save in DB
   const result24301 = extractDataFrom24301(playerId, bytes24301)
@@ -738,8 +738,11 @@ async function scanKingdomTask(data) {
     // Encode the packet
     const encoded313 = encodeMsgPack2MultiFragments(packetData313)
     // console.log('[313] encoded request base64', encodeBase64(encoded313))
-
-    const bytes313 = await sendPacket(url, encoded313)
+    try {
+      const bytes313 = await sendPacket(url, encoded313)
+    } catch (e) {
+      console.error('[tasks][scanKingdomTask] errorsending 313')
+    }
     // Decode 313 response to get new session tokens
     // const { results: results313 } = multiDecodeMsgPack2(bytes313)
     // console.log('decoded', JSON.stringify(results313[1]))
@@ -777,7 +780,7 @@ async function scanKingdomTask(data) {
     for (const tiles of tilesArray) {
       await delay(200)
 
-      const result312 = send312packet(url, tiles, token1, token2, shouldSaveObjects)
+      const result312 = await send312packet(url, tiles, token1, token2, shouldSaveObjects)
 
       objects += result312.objects12?.length || 0
       players += result312.players42?.length || 0
@@ -803,7 +806,7 @@ async function scanKingdomTask(data) {
       ///! flag info start
       ///! flag info start
 
-      if (checkFlags) {
+      if (checkFlags && result312.players42?.length > 0) {
         for (const player of result312.players42) {
           // extract flag info
           await delay(200)
@@ -833,7 +836,7 @@ async function scanKingdomTask(data) {
 }
 
 async function scanRefreshPlayerInfoTask(data) {
-  const { kingdom } = data
+  const { kingdom, checkFlags = false } = data
 
   if (!kingdom) {
     console.log('[tasks][scanRefreshPlayerInfoTask] No kingdom provided')
@@ -886,6 +889,25 @@ async function scanRefreshPlayerInfoTask(data) {
       playersCount += result402.players23.length
     }
 
+    ///! flag info start
+    if (checkFlags) {
+      for (const player of playerObjIdsDB) {
+        // extract flag info
+        await delay(200)
+
+        const result24301 = await sendPacket24301(
+          url,
+          player.objectId,
+          player.playerId,
+          token1,
+          token2
+        )
+
+        console.log('[tasks][scanRefreshPlayerInfoTask] checkflags', result24301)
+      }
+    }
+    ///! flag info end
+
     // send 601 packets to get player resources and update db
     const playerOIdsArray = []
     const groupSize2 = 11
@@ -893,10 +915,10 @@ async function scanRefreshPlayerInfoTask(data) {
       playerOIdsArray.push(objectIds.slice(i, i + groupSize2))
     }
 
-    for (const objIds of playerOIdsArray) {
-      //! TODO: send objectid as array, multiples ids
-      const result601 = await send601packet(url, objIds, token1, token2)
-    }
+    // for (const objIds of playerOIdsArray) {
+    //   //! TODO: send objectid as array, multiples ids
+    //   const result601 = await send601packet(url, objIds, token1, token2)
+    // }
 
     // console.log(`[tasks][scanRefreshPlayerInfoTask] Success objects ${objects}, players ${players} `)
     return { success: true, players: playersCount }

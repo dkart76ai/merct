@@ -855,6 +855,25 @@ app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
   }
 })
 
+app.post('/api/timer/stop-kingdom', async (req, res) => {
+  const { kingdom } = req.body
+
+  const timerManager = await getTimerManager()
+
+  if (!kingdomUrls[kingdom]) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  try {
+    const timerKey = `kingdom:${kingdom}`
+    await timerManager.stopByKey(timerKey)
+    res.json({ success: true, message: `${kingdom} Kingdom scanner stopped` })
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+})
+
 app.post('/api/timer/stop-scan-other-kingdoms', async (req, res) => {
   const { key } = req.body
   const kingdoms = await redisClient.get(SCAN_OTHER_KINGDOMS_KEY + key)
@@ -997,8 +1016,8 @@ app.post('/api/timer/stop', handleStopTimer)
 
 app.post('/api/scanKingdom402', async (req, res) => {
   // manual scan any kingdoms, use worker_threads, no jobs
-  const { kingdoms } = req.body
-
+  const { kingdoms, checkFlags } = req.body
+  //! TODO process chkflags
   console.log('kingsomd', req.body)
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
@@ -1016,7 +1035,7 @@ app.post('/api/scanKingdom402', async (req, res) => {
 
   //?set and forget (callback will handle the result)
   kingdomList.forEach(kingdom => {
-    scanRefreshPlayerInfoWorker(kingdom)
+    scanRefreshPlayerInfoWorker(kingdom, checkFlags)
       .then(res => console.log(`[main][scanKingdom402] Kingdom ${kingdom} completed`))
       .catch(err => console.error(`[main][scanKingdom402] Kingdom ${kingdom} error:`, err.message))
   })
@@ -1037,9 +1056,9 @@ app.post('/api/scanKingdom402', async (req, res) => {
 })
 
 app.post('/api/timer/start402', async (req, res) => {
-  const { interval = 60000, kingdoms, key } = req.body
+  const { interval = 60000, kingdoms, key, checkFlags = false } = req.body
   console.log('kingdom', req.body)
-
+  //! TODO: process checkFlags
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
   }
@@ -1060,7 +1079,8 @@ app.post('/api/timer/start402', async (req, res) => {
   try {
     for (const kingdom of kingdomList) {
       const payload = {
-        kingdom
+        kingdom,
+        checkFlags
       }
       const timerKey = `kingdom:${kingdom}:player_info`
       await timerManager.scheduleCustom(
@@ -1212,9 +1232,11 @@ const VALID_PLAYER_SORT_COLUMNS = [
   'clanName',
   'kingdom',
   'might',
-  'gold',
+  'goldIngots',
+  'silver',
+  'food',
   'hasShield',
-  'x',
+  'flagCount',
   'y',
   'cityLevel',
   'heroLevel'

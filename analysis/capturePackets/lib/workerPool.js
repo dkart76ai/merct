@@ -211,7 +211,7 @@ async function scanKingdomWorker(kingdom, shouldSaveObjects = false, checkFlags 
   }
 }
 
-async function scanRefreshPlayerInfoWorker(kingdom) {
+async function scanRefreshPlayerInfoWorker(kingdom, checkFlags = false) {
   if (!kingdom) {
     console.log('[worker pool], no kingdom provided')
     throw new Error('[Worker Pool] No kingdom provided')
@@ -222,13 +222,13 @@ async function scanRefreshPlayerInfoWorker(kingdom) {
     console.log(
       '[worker pool][scanRefreshPlayerInfoWorker], no workers, calling scanRefreshPlayerInfoTask directly'
     )
-    return await scanRefreshPlayerInfoTask({ kingdom })
+    return await scanRefreshPlayerInfoTask({ kingdom, checkFlags })
   }
 
   try {
     // ESPERAMOS a que Piscina termine para que BullMQ sepa el resultado real
     console.log('[worker pool][scanRefreshPlayerInfoWorker]', kingdom)
-    const result = await p.run({ kingdom }, { name: 'scanRefreshPlayerInfoTask' })
+    const result = await p.run({ kingdom, checkFlags }, { name: 'scanRefreshPlayerInfoTask' })
     console.log('[worker pool][scanRefreshPlayerInfoWorker]', result)
 
     // Aquí puedes procesar el resultado

@@ -30,7 +30,7 @@ function startWorker(queueName, handler, config = {}) {
   worker.on('failed', (job, err) => {
     console.log(` [Worker][${queueName}] Job ${job.id} failed: ${err.message}`)
   })
-  worker.on('error', (job, err) => {
+  worker.on('error', err => {
     console.log(` [Worker][${queueName}] Error: ${err.message}`)
   })
 
@@ -42,7 +42,11 @@ function initializeWorkers() {
   try {
     // Worker dedicado solo a escanear (Sin limitadores si tu DB lo aguanta)
     workerScanKingdom = startWorker(QUEUE_NAMES.SCAN_KINGDOM, scanKingdomHandler, {
-      concurrency: 3
+      concurrency: 2, // Process one job at a time to prevent overlapping Piscina floods
+      limiter: {
+        max: 5, // Adjust this based on how many packets one job sends
+        duration: 1000 // Maximum 5 jobs executing per second
+      }
     })
 
     workerScanKingdomRefreshPlayerInfo = startWorker(

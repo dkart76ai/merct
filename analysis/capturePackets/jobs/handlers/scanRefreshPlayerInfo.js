@@ -2,7 +2,7 @@ const { scanRefreshPlayerInfoWorker } = require('../../lib/workerPool')
 
 //? MUST be async, bullmq handles it
 async function scanRefreshPlayerInfoHandler(job) {
-  const { kingdom } = job.data
+  const { kingdom, checkFlags } = job.data
 
   if (!kingdom) {
     console.log('[scanRefreshPlayerInfoHandler] No kingdom provided')
@@ -10,7 +10,7 @@ async function scanRefreshPlayerInfoHandler(job) {
   }
 
   try {
-    const result = await scanRefreshPlayerInfoWorker(kingdom)
+    const result = await scanRefreshPlayerInfoWorker(kingdom, checkFlags)
     return result
   } catch (error) {
     console.error(`[scanRefreshPlayerInfoHandler] Error:`, error.message)

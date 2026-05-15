@@ -447,7 +447,7 @@
               Check for gold/update player info(coords)
             </button>
             <label>
-              <input type="checkbox" id="cbCheckFlags" disabled />
+              <input type="checkbox" id="cbCheckFlags" />
               <span>Check flags</span>
             </label>
             <div style="margin-left: 32px">
@@ -675,6 +675,24 @@
         }
       }
 
+      window.stopKingdomTimer = async function (kingdom) {
+        try {
+          const res = await fetch(API + '/timer/stop-kingdom', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ kingdom })
+          })
+          const data = await res.json()
+          if (data.success) {
+            log(data.message)
+          } else {
+            log('Error: ' + data.error)
+          }
+        } catch (e) {
+          log('Error: ' + e.message)
+        }
+      }
+
       async function refreshTimers() {
         try {
           const res = await fetch(API + '/timers')
@@ -689,8 +707,9 @@
                 .map(
                   t => `
                 <div class="list-item">
-                  <span>Kingdom: ${t.kingdom || 'N/A'}</span>
-                  <span>${t.name}</span>
+                  <span>${t.key || 'N/A'}</span>
+                  <span><button onClick="stopKingdomTimer(${t.kingdom})">stop</button></span>
+                  <span>${t.name}-${t.kingdom}</span>
                   <span style="color:#aabb33">Next: ${t.nextRunAt}</span>
                   <span style="color:#569cd6">${t.interval}</span>
                 </div>
@@ -1376,10 +1395,11 @@
       // Other kingdoms scanner handlers
       document.getElementById('btnScanOtherKingdomsNow').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms').value
+        const cbCheckFlags = document.getElementById('cbCheckFlags').checked
         const res = await fetch(API + '/scan-other-kingdoms-now', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kingdoms: otherKingdoms })
+          body: JSON.stringify({ kingdoms: otherKingdoms, checkFlags: cbCheckFlags })
         })
         const data = await res.json()
         if (data.success) {
@@ -1656,9 +1676,11 @@
           'clanName',
           'kingdom',
           'might',
-          'gold',
+          'goldIngots',
           'hasShield',
-          'flagCount'
+          'flagCount',
+          'silver',
+          'food'
         ]
         cols.forEach(function (col) {
           const el = document.getElementById('sort-' + col)

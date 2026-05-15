@@ -40,8 +40,7 @@ class TimerManager {
 
   //updated
   async stopByKey(timerKey) {
-    const timer = this.timers.get(timerKey)
-    if (!timer) return false
+    if (!timerKey) return false
 
     try {
       // Borrado exacto en BullMQ
@@ -49,10 +48,13 @@ class TimerManager {
 
       // En la nueva API, solo necesitas el ID del scheduler
       await this.queue.removeJobScheduler(timerKey)
-      this.timers.delete(timerKey)
+      const timer = this.timers.get(timerKey)
+      if (timer) {
+        this.timers.delete(timerKey)
+      }
       console.log(`[Timer] Stopped: ${timerKey}`)
     } catch (e) {
-      console.error(`[Timer] Error in Redis for ${timerKey}:`, e.message)
+      console.error(`[Timer] timer ${timerKey} already removed`, e.message)
     }
 
     return true
@@ -192,14 +194,45 @@ class TimerManager {
     // 1. Obtenemos los programadores activos (fuente de verdad en Redis)
     const repeatableJobs = await this.queue.getJobSchedulers()
     // console.log('RAW DATA FROM REDIS:', JSON.stringify(repeatableJobs, null, 2))
+    /**
+  {
+    "key": "kingdom:146",
+    "name": "scan-kingdom",
+    "next": 1778856307223,
+    "iterationCount": 9,
+    "every": 600000,
+    "offset": 307223,
+    "template": {
+      "data": {
+        "kingdom": "146",
+        "shouldSaveObjects": true,
+        "checkFlags": false
+      },
+      "opts": {
+        "priority": 3,
+        "removeOnFail": {
+          "count": 100
+        },
+        "removeOnComplete": {
+          "count": 50
+        },
+        "backoff": {
+          "delay": 2000,
+          "type": "exponential"
+        },
+        "attempts": 3
+      }
+    }
+  }
 
+ */
     return repeatableJobs.map(job => {
       // BullMQ guarda la configuración de tiempo en propiedades específicas
       const frequency = job.every ? `${job.every}ms` : job.pattern
       const jobData = job.template?.data || {}
 
       return {
-        id: job.id,
+        key: job.key,
         kingdom: jobData.kingdom || null,
         name: job.name,
         interval: frequency,
