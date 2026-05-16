@@ -551,8 +551,7 @@
             <table class="players-table">
               <thead>
                 <tr>
-                  <th>refresh coords</th>
-                  <th>post coords</th>
+                  <th>refresh</th>
                   <th onclick="sortPlayers('playerName')">
                     Name <span class="sort-arrow" id="sort-playerName"></span>
                   </th>
@@ -600,6 +599,8 @@
             <span class="page-info" id="pageInfo">Page 0 of 0</span>
             <button id="btnNextPage" disabled>Next</button>
           </div>
+
+          <div id="clansBody" style="display: flex; flex-wrap: wrap; gap: 2px">flags per clan</div>
         </div>
         <!-- Log -->
         <div class="panel">
@@ -802,6 +803,22 @@
       async function refreshPlayerCoords(playerId, objectId, kingdom) {
         try {
           const res = await fetch(API + '/refreshPlayerCoords', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerId, objectId, kingdom })
+          })
+          const data = await res.json()
+          if (data.success) {
+            log(`player with id ${playerId} refreshed`)
+            loadPlayers(1)
+          }
+        } catch (e) {
+          log('Browser status error: ' + e.message)
+        }
+      }
+      async function refreshPlayerFlags(playerId, objectId, kingdom) {
+        try {
+          const res = await fetch(API + '/refreshPlayerFlags', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ playerId, objectId, kingdom })
@@ -1411,12 +1428,18 @@
 
       document.getElementById('btnScanOtherKingdomStart').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms').value
+        const cbCheckFlags = document.getElementById('cbCheckFlags').checked
         const interval =
           parseInt(document.getElementById('timerIntervalOtherKingdoms').value) || 300000
         const res = await fetch(API + '/timer/scan-other-kingdoms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ interval, kingdoms: otherKingdoms, key: '1' })
+          body: JSON.stringify({
+            interval,
+            kingdoms: otherKingdoms,
+            key: '1',
+            checkFlags: cbCheckFlags
+          })
         })
         const data = await res.json()
         if (data.success) {
@@ -1574,8 +1597,10 @@
         try {
           const res = await fetch(API + '/players?' + params.toString())
           const data = await res.json()
-          if (data.success) renderPlayers(data)
-          else log('Players error: ' + (data.error || 'unknown'))
+          if (data.success) {
+            renderPlayers(data)
+            renderClanFlags(data)
+          } else log('Players error: ' + (data.error || 'unknown'))
         } catch (e) {
           log('Players fetch error: ' + e.message)
         }
@@ -1622,10 +1647,10 @@
 
             // const customDate = `${day}-${month}-${year}` // "2026-05-08"
             return (
-              '<tr><td>' +
-              `<button style="padding:5px;font-size:11px" onclick="refreshPlayerCoords(${p.playerId},${p.objectId},${p.kingdom})">refresh</button>` +
-              '<td>' +
-              `<button style="padding:5px;font-size:11px" onclick="reportPlayerCoords(${p.playerId})">coord</button>` +
+              '<tr><td style="display:flex;gap:1px">' +
+              `<button style="padding:5px;font-size:11px" onclick="refreshPlayerCoords(${p.playerId},${p.objectId},${p.kingdom})">coords</button>` +
+              `<button style="padding:5px;font-size:11px" onclick="refreshPlayerFlags(${p.playerId},${p.objectId},${p.kingdom})">flag</button>` +
+              `<button style="padding:5px;font-size:11px" onclick="reportPlayerCoords(${p.playerId})">post.coord</button>` +
               '</td><td>' +
               (p.playerName || '-') +
               '</td><td>' +
@@ -1653,6 +1678,28 @@
               '</td><td>' +
               (p.y || 0) +
               '</td></tr>'
+            )
+          })
+          .join('')
+        body.innerHTML = rows
+        updateSortIndicators()
+      }
+
+      function renderClanFlags(data) {
+        const body = document.getElementById('clansBody')
+        if (!data.clans || data.clans.length === 0) {
+          body.innerHTML =
+            '<div><span style="text-align:center;color:#888;padding:20px">No clan Flags found</span></div>'
+          return
+        }
+        const rows = data.clans
+          .map(function (p) {
+            return (
+              '<di style="border:1px solid green;border-radius:10px;padding:0 5px"><span>' +
+              (p.clanName || '-') +
+              '</span>:<span>' +
+              (p.totalFlags || 0) +
+              '</span></di>'
             )
           })
           .join('')

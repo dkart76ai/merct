@@ -537,6 +537,36 @@ function getPlayers(
   return { success: true, players, total }
 }
 
+function getClanFlags(clanFilter, kingdomFilter, shieldFilter) {
+  const db = getDb()
+  const whereClauses = []
+  const params = []
+  if (clanFilter) {
+    whereClauses.push('LOWER(clanName) LIKE LOWER(?)')
+    params.push('%%' + clanFilter + '%%')
+  }
+  if (kingdomFilter) {
+    whereClauses.push('kingdom = ?')
+    params.push(kingdomFilter)
+  }
+  if (shieldFilter === 'true') {
+    whereClauses.push('hasShield = 1')
+  } else if (shieldFilter === 'false') {
+    whereClauses.push('hasShield = 0')
+  }
+  const whereSql = whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''
+  const countSql = 'SELECT COUNT(*) as total FROM players ' + whereSql
+  const { total } = db.prepare(countSql).get(...params)
+  const dataSql =
+    'SELECT clanName, SUM(flagCount) AS totalFlags FROM players ' +
+    whereSql +
+    ' GROUP BY clanName ' +
+    ' HAVING totalFlags > 1 ' +
+    ' ORDER BY totalFlags DESC '
+  const clans = db.prepare(dataSql).all(...params)
+  return { success: true, clans, total }
+}
+
 function getStats() {
   const database = getDb()
 
@@ -657,6 +687,7 @@ module.exports = {
   getPlayersIdFromKingdom,
   getPlayersObjectIdFromKingdom,
   getPlayers,
+  getClanFlags,
   savePlayerFlagCount,
   savePlayerResources,
   saveUserPosition,

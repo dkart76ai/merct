@@ -50,6 +50,7 @@ const {
   getStats,
   getAllObjects,
   getPlayers,
+  getClanFlags,
   getPlayerById,
   startCleanup,
   closeDb
@@ -60,6 +61,7 @@ const { getRedis } = require('./lib/redis.js')
 const {
   getPlayerInfo402,
   getResourceInfo601,
+  refreshPlayerFlags,
   refreshPlayerInfo402 /*, getPlayerFlagsKvK24301 */
 } = require('./workers/tasks.js')
 
@@ -807,7 +809,7 @@ async function handleStopTimer(req, res) {
 // Scan for other kingdoms timer
 app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
   const { interval = 60000, kingdoms = '', key = '', checkFlags = false } = req.body
-  console.log('kingdom', req.body)
+  console.log('/api/timer/scan-other-kingdoms', req.body)
 
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
@@ -911,7 +913,7 @@ async function handleScanOtherKingdom(req, res) {
   // manual scan any kingdoms, use worker_threads, no jobs
   const { kingdoms, checkFlags = false } = req.body
 
-  console.log('kingsomd', req.body)
+  console.log('/api/scan-other-kingdoms-now params', req.body)
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
   }
@@ -1261,6 +1263,22 @@ app.post('/api/refreshPlayerCoords', async (req, res) => {
   }
 })
 
+app.post('/api/refreshPlayerFlags', async (req, res) => {
+  try {
+    const playerId = parseInt(req.body.playerId)
+    const objectId = parseInt(req.body.objectId)
+    const kingdom = parseInt(req.body.kingdom)
+
+    const result = await refreshPlayerFlags(playerId, objectId, kingdom)
+    console.log('[server.v2]refreshPlayerCoords', result)
+
+    res.json({ success: true })
+  } catch (e) {
+    console.error('Players API error:', e.message)
+    res.status(500).json({ success: false, error: e.message })
+  }
+})
+
 app.post('/api/reportPlayerCoords', async (req, res) => {
   try {
     const playerId = String(req.body.playerId)
@@ -1311,7 +1329,17 @@ app.get('/api/players', (req, res) => {
       limit,
       offset
     )
-    res.json({ success: true, players, total, page, limit, totalPages: Math.ceil(total / limit) })
+
+    const { clans } = getClanFlags(clanFilter, kingdomFilter, shieldFilter)
+    res.json({
+      success: true,
+      players,
+      clans,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    })
   } catch (e) {
     console.error('Players API error:', e.message)
     res.status(500).json({ success: false, error: e.message })

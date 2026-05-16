@@ -487,17 +487,17 @@ async function sendPacket24301(url, objectId, playerId, token1, token2) {
 
   // Encode the packet
   const encoded24301 = encodeMsgPack2MultiFragments(packetData24301)
-  console.log(
-    '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
-    encodeBase64(encoded24301)
-  )
+  // console.log(
+  //   '[tasks][getPlayerFlagsKvK24301]24301 encoded request base64',
+  //   encodeBase64(encoded24301)
+  // )
 
   // Send to server
   // console.log(`[tasks][getPlayerInfo402] Sending packet402 to ${url}  `)
 
   const bytes24301 = await sendPacket(url, encoded24301)
 
-  console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
+  // console.log('[tasks][getPlayerFlagsKvK24301]encoded result base64', encodeBase64(bytes24301))
 
   // ?  use playerId to save in DB
   const result24301 = extractDataFrom24301(playerId, bytes24301)
@@ -568,6 +568,51 @@ function getRegionIdFromCoords(x, y) {
 
   // Fórmula de aplanamiento
   return regionY * regionsPerRow + regionX
+}
+
+async function refreshPlayerFlags(playerId, objectId, kingdom) {
+  // console.log('[tasks][refreshPlayerInfo402]', { playerId })
+  if (!kingdom) {
+    console.log('[tasks][refreshPlayerFlags] No kingdom provided')
+    return { success: false, error: 'no kingdom' }
+  }
+
+  if (!playerId) {
+    console.log('[tasks][refreshPlayerFlags] No playerid provided')
+    return { success: false, error: 'no playerid' }
+  }
+  if (!objectId) {
+    console.log('[tasks][refreshPlayerFlags] No objectId provided')
+    return { success: false, error: 'no objectId' }
+  }
+
+  const redisClient = getRedis()
+
+  const _token1 = await redisClient.get('myPlayerId:BigInt')
+  if (!_token1) {
+    throw new Error('no session token1')
+  }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    throw new Error('no session token2')
+  }
+
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    throw new Error('invalid kingdom')
+  }
+
+  // console.log(`[tasks] [refreshPlayerFlags] Sending packets to ${url}  `)
+  try {
+    const token1 = BigInt(_token1)
+    const token2 = new Uint8Array(_token2)
+
+    const result24301 = await sendPacket24301(url, objectId, playerId, token1, token2)
+    return { success: true, player: result24301 }
+  } catch (error) {
+    console.error(`[tasks][refreshPlayerFlags] Error:`, error.message)
+  }
 }
 
 async function refreshPlayerInfo402(playerId, kingdom) {
@@ -701,7 +746,7 @@ async function getPlayerInfo402(kingdom) {
 async function scanKingdomTask(data) {
   // console.log('[tasks] [scanKingdomTask] data', data)
   const { kingdom, shouldSaveObjects = false, checkFlags = false } = data
-  // console.log('[tasks][scanKingdomTask]', { kingdom, shouldSaveObjects })
+  console.log('[tasks][scanKingdomTask] params', data)
 
   if (!kingdom) {
     console.log('[tasks][scanKingdomTask] No kingdom provided')
@@ -805,21 +850,31 @@ async function scanKingdomTask(data) {
       ///! flag info start
       ///! flag info start
       ///! flag info start
-
       if (checkFlags && result312.players42?.length > 0) {
-        for (const player of result312.players42) {
-          // extract flag info
-          await delay(200)
+        // TODO group promises by 10, and loop 2d array instead of one by one
+        const playerGroup = []
+        const groupSize = 10
+        for (let i = 0; i < result312.players42.length; i += groupSize) {
+          playerGroup.push(result312.players42.slice(i, i + groupSize))
+        }
 
-          const result24301 = await sendPacket24301(
-            url,
-            player.objectId,
-            player.playerId,
-            token1,
-            token2
+        for (const players of playerGroup) {
+          // extract flag info
+          const promises = players.map(player =>
+            sendPacket24301(url, player.objectId, player.playerId, token1, token2)
           )
 
-          console.log('[tasks][scankingdomtask] checkflags', result24301)
+          const groupResult = await Promise.all(promises)
+          console.log('[tasks][scankingdomtask] checkflagsaaa', groupResult)
+          await delay(200)
+
+          // const result24301 = await sendPacket24301(
+          //   url,
+          //   player.objectId,
+          //   player.playerId,
+          //   token1,
+          //   token2
+          // )
         }
       }
       ///! flag info end
@@ -887,23 +942,24 @@ async function scanRefreshPlayerInfoTask(data) {
         result402.players23.length
       )
       playersCount += result402.players23.length
-    }
 
-    ///! flag info start
-    if (checkFlags) {
-      for (const player of playerObjIdsDB) {
-        // extract flag info
-        await delay(200)
+      ///! flag info start
+      if (checkFlags && result402.players23.length > 0) {
+        // for (const player of playerObjIdsDB) { //? de la db parece que no trae flags
+        for (const player of result402.players23) {
+          // extract flag info
+          await delay(200)
 
-        const result24301 = await sendPacket24301(
-          url,
-          player.objectId,
-          player.playerId,
-          token1,
-          token2
-        )
+          const result24301 = await sendPacket24301(
+            url,
+            player.objectId,
+            player.playerId,
+            token1,
+            token2
+          )
 
-        console.log('[tasks][scanRefreshPlayerInfoTask] checkflags', result24301)
+          console.log('[tasks][scanRefreshPlayerInfoTask] checkflags', result24301)
+        }
       }
     }
     ///! flag info end
@@ -931,6 +987,7 @@ module.exports = {
   processPacket,
   getPlayerInfo402,
   refreshPlayerInfo402,
+  refreshPlayerFlags,
   // getPlayerFlagsKvK24301,
   scanRefreshPlayerInfoTask,
   scanKingdomTask,

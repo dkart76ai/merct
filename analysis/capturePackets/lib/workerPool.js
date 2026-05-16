@@ -176,6 +176,8 @@ async function processPacket({ request, response, shouldSaveObjects = false }) {
 }
 
 async function scanKingdomWorker(kingdom, shouldSaveObjects = false, checkFlags = false) {
+  console.log('scanKingdomWorker params', kingdom, shouldSaveObjects, checkFlags)
+  console.log('[workerPool][scanKingdomWorker]', kingdom, shouldSaveObjects, checkFlags)
   if (!kingdom) {
     console.log('[worker pool], no kingdom provided')
     throw new Error('[Worker Pool] No kingdom provided')
@@ -194,7 +196,7 @@ async function scanKingdomWorker(kingdom, shouldSaveObjects = false, checkFlags 
 
   try {
     // ESPERAMOS a que Piscina termine para que BullMQ sepa el resultado real
-    console.log('[workerPool][scanKingdomWorker]', kingdom, shouldSaveObjects, checkFlags)
+
     const result = await p.run(
       { kingdom, shouldSaveObjects, checkFlags },
       { name: 'scanKingdomTask' }

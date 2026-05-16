@@ -42,7 +42,7 @@ function initializeWorkers() {
   try {
     // Worker dedicado solo a escanear (Sin limitadores si tu DB lo aguanta)
     workerScanKingdom = startWorker(QUEUE_NAMES.SCAN_KINGDOM, scanKingdomHandler, {
-      concurrency: 2, // Process one job at a time to prevent overlapping Piscina floods
+      concurrency: 5, // Process one job at a time to prevent overlapping Piscina floods
       limiter: {
         max: 5, // Adjust this based on how many packets one job sends
         duration: 1000 // Maximum 5 jobs executing per second
@@ -53,7 +53,7 @@ function initializeWorkers() {
       QUEUE_NAMES.SCAN_REFRESH_PLAYER_INFO,
       scanRefreshPlayerInfoHandler,
       {
-        concurrency: 1,
+        concurrency: 2,
         limiter: {
           max: 10, // Máximo de trabajos
           duration: 60000 // Por cada 60,000 ms (1 minuto)
