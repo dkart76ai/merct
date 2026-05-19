@@ -225,6 +225,38 @@ function getChestCode(buffer) {
 
   return { chestCode }
 }
+function getChestData(buffer) {
+  const decoder = getDecoder(buffer)
+  decoder.off = 8 //skip packet length
+  decoder.skip() //skip header, opcode,seq,sessiondata
+  decoder.skip() // valor 3
+  const someval = decoder.decode() // 29 or 45
+
+  for (let i = 3; i <= 29; i++) decoder.skip()
+
+  //[30] inner packet type example 15000
+  decoder.readArrayHeader() // Entra al primer nivel [...]
+  const innerOpCode = decoder.decode()
+  decoder.skip() //sequence
+
+  let chestData = null
+  if (innerOpCode === 15000) {
+    //[31] contains clan info + chest collected
+    decoder.readArrayHeader()
+    decoder.readArrayHeader()
+    const clanInfoLen = decoder.readArrayHeader() //15 items
+    console.log('15000 found, getting clan chests, len 15==', clanInfoLen)
+    if (clanInfoLen == 15) {
+      for (let i = 0; i <= 12; i++) decoder.skip()
+      //[13] chest data
+      chestData = decoder.decode() // Lee {"strChestCode":count}
+
+      //[14] false
+    }
+  }
+
+  return chestData
+}
 
 function getTroopTrainCode(buffer) {
   //! this is not chest code, seems more like clan whealth counter
@@ -1088,6 +1120,7 @@ module.exports = {
   findMyValuesInPacket,
   getRequestHeader,
   getChestCode,
+  getChestData,
   getChestCodeResponse,
   getTroopTrainCode,
   getMsgPack2ndBlockRequest,
