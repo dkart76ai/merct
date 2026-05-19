@@ -614,6 +614,11 @@ class MsgPackLazyDecoder extends MsgPackTurboDecoder {
     return (b >= 0xa0 && b <= 0xbf) || b === 0xd9 || b === 0xda || b === 0xdb
   }
 
+  isNextBoolean() {
+    const b = this.buf[this.off]
+    return b11 == 0xc2 || b11 == 0xc3
+  }
+
   isNextNumber() {
     const b = this.buf[this.off]
     return (
