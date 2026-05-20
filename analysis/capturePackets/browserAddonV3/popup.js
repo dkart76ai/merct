@@ -15,6 +15,7 @@ const api = typeof browser !== 'undefined' ? browser : chrome
           <button id="getCryptL20">crypts lvl 20</button>
           <button id="getCryptL25">crypts lvl 25</button>
           <button id="getCitadelL15">citadel lvl 15</button>
+          <button id="getCitadelCL20">cursed citadel lvl 20</button>
           <button id="getRaidRunicL25">raid runic lvl 25</button>
       </div>
       <div class="slider-row">
@@ -54,6 +55,9 @@ const api = typeof browser !== 'undefined' ? browser : chrome
     })
     document.getElementById('getCitadelL15').addEventListener('click', () => {
       api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 %citadel lvl 15' })
+    })
+    document.getElementById('getCitadelCL20').addEventListener('click', () => {
+      api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 cursed%citadel lvl 20' })
     })
     document.getElementById('getRaidRunicL25').addEventListener('click', () => {
       api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 raid runic lvl 25' })
