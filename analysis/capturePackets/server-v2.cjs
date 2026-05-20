@@ -2,6 +2,7 @@ const express = require('express')
 const path = require('path')
 const fs = require('fs')
 const { firefox } = require('playwright')
+const { styleText } = require('node:util')
 const { loadEnvFile } = require('node:process')
 const { createStream } = require('rotating-file-stream')
 const msgpack = require('@msgpack/msgpack')
@@ -21,6 +22,7 @@ const {
   encodeBase64,
   scanPacket402
 } = require('./lib/messagePack.js')
+const { tbObjects } = require('./tbobjects.js')
 
 const { initializeWorkers, stopWorkers } = require('./jobs/index.js')
 const {
@@ -76,6 +78,7 @@ const opCodeInfo = {
   311: 'something with tiles',
   312: 'list object/cities in area',
   313: 'change kingdom',
+  315: ' cities list',
   318: 'ping/servertime',
   402: 'player detail',
   403: 'resource detail ? / info-guide?',
@@ -92,6 +95,7 @@ const opCodeInfo = {
   1004: 'complete troop training/equipment',
   1005: 'speedup troop training/equipment',
   1007: 'create equipment',
+  1008: 'combine material',
   1101: 'create building/caravan',
   1102: 'upgrade building/capitol',
   1103: 'speedup building/capitol',
@@ -548,15 +552,19 @@ function setupPacketCaptureListener() {
 
         if (opCode === 1003) {
           //!troop train
-          // const troop = getTroopTrainCode(postDataBuff)
+          const troop = getTroopTrainCode(postDataBuff)
           console.log('troop training ', troop.troopType, 'amount ', troop.troopAmount)
         }
 
         if (opCode === 701) {
-          // console.log(
-          //   'attack request data',
-          //   JSON.stringify(getMsgPack2ndBlockRequest(postDataBuff))
-          // )
+          console.log(
+            styleText('green', 'attack request data'),
+            '\n\n',
+            JSON.stringify(getMsgPack2ndBlockRequest(postDataBuff)),
+            styleText('red', 'post data'),
+            '\n\n',
+            encodeBase64(postDataBuff)
+          )
         }
 
         if (opCode === 15009) {
@@ -581,7 +589,7 @@ function setupPacketCaptureListener() {
               const chestCode = c[2]
               const player = getPlayerById(playerId)
               const playerName = player?.playerName || 'unknown'
-              const chestName = chests[chestCode] || ''
+              const chestName = tbObjects[chestCode] || ''
               return `${playerName} ${chestCode} = ${chestName}`
             })
             console.log('chests', JSON.stringify(data, null, 2))

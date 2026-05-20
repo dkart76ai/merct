@@ -394,14 +394,14 @@ function getMsgPack2ndBlockRequest(buffer) {
 
   // 3. Entramos al array principal del segundo mensaje
 
-  const mainArrayLen = decoder.readArrayHeader() // debería ser 4
-  if (mainArrayLen > 0) {
-    // 4. El primer elemento es el array que buscas [ 170, 270, 171, 221, 271 ]
-    // Usamos decode() aquí porque queremos los valores reales dentro del array
-    return decoder.decode()
-  }
+  // const mainArrayLen = decoder.readArrayHeader() // debería ser 4
+  // if (mainArrayLen > 0) {
+  // 4. El primer elemento es el array que buscas [ 170, 270, 171, 221, 271 ]
+  // Usamos decode() aquí porque queremos los valores reales dentro del array
+  return decoder.decode()
+  // }
 
-  return undefined
+  // return undefined
 }
 
 // Busca el primer número real ignorando la profundidad de los arreglos

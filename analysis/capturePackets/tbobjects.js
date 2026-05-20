@@ -1,3 +1,53 @@
+const HERO = {
+  1: 'Garvel',
+  2: 'Alrick',
+  3: 'Thaddeus',
+  4: 'Matenhaim',
+  5: 'Haemon',
+  6: 'Meriones',
+  7: 'Faron',
+  8: 'Thelensia',
+  9: 'Eirin',
+  10: 'Svyatogor',
+  11: 'Ryjong',
+  12: 'Julia',
+  20: 'Guan Yu',
+  21: 'Yamato',
+  22: 'Nectarius'
+}
+
+const captains = {
+  1: { name: 'Hero', maxLvl: 500, type: 0 },
+  2: { name: 'Logos', maxLvl: 500, type: 1 },
+  3: { name: 'Aydae', maxLvl: 500, type: 1 },
+  4: { name: 'Proscope', maxLvl: 500, type: 1 },
+  5: { name: 'Tengel', maxLvl: 500, type: 1 },
+  6: { name: 'Doria', maxLvl: 500, type: 1 },
+  7: { name: 'Stror', maxLvl: 500, type: 1 },
+  8: { name: 'Carter', maxLvl: 500, type: 1 },
+  9: { name: 'Dustan', maxLvl: 500, type: 1 },
+  10: { name: 'Ingrid', maxLvl: 500, type: 1 },
+  11: { name: 'Brann', maxLvl: 500, type: 1 },
+  12: { name: 'Ye Ho-Sung', maxLvl: 500, type: 1 },
+  13: { name: 'Bernard', maxLvl: 500, type: 1 },
+  14: { name: 'Lucius', maxLvl: 500, type: 1 },
+  15: { name: 'Brunhild', maxLvl: 500, type: 1 },
+  16: { name: 'Aurora', maxLvl: 500, type: 1 },
+  17: { name: 'Sofia', maxLvl: 500, type: 1 },
+  18: { name: 'Xi Guiying', maxLvl: 500, type: 1 },
+  19: { name: 'Farhad', maxLvl: 500, type: 1 },
+  20: { name: 'Cleopatra', maxLvl: 500, type: 1 },
+  21: { name: 'Alexander', maxLvl: 500, type: 1 },
+  22: { name: 'Minamoto', maxLvl: 500, type: 1 },
+  23: { name: 'Ramses II', maxLvl: 500, type: 1 },
+  24: { name: 'Wu Zetian', maxLvl: 500, type: 1 },
+  25: { name: 'Amanitore', maxLvl: 500, type: 1 },
+  26: { name: 'Leonidas', maxLvl: 500, type: 1 },
+  27: { name: 'Hercules', maxLvl: 500, type: 1 },
+  28: { name: 'Helen', maxLvl: 500, type: 1 },
+  29: { name: 'Beowulf', maxLvl: 500, type: 1 }
+}
+
 const tbObjects = {
   1: 'Gold',
   2: 'Silver',
@@ -3351,6 +3401,7 @@ const tbObjects = {
   14103: 'Experience points bonus',
   15000: 'Burning Crown',
   16236: "Ezor's Chest",
+  //! captains
   17001: 'Captain Aydae',
   17002: 'Captain Tengel',
   17003: 'Captain Logos',
@@ -3459,11 +3510,16 @@ const tbObjects = {
   21133: 'Bear',
   21134: 'Ent',
   21135: 'Life Dragon',
+  21201: 'Archer I',
   21202: 'Archer II',
+  21206: 'Spearman I',
   21207: 'Spearman II',
+  21211: 'Rider I',
   21212: 'Rider II',
   21217: 'Catapult II',
+  21221: 'Swordsman I',
   21222: 'Swordsman II',
+  21226: 'Spy I',
   21227: 'Spy II',
   22996: 'Arbalester II',
   22997: 'Arbalester III',
@@ -5301,8 +5357,8 @@ const chests = {
   310060: 'cofre del minotauro, crypt epic lvl 15',
   310061: 'cofre del minotauro, crypt epic lvl 20',
   310062: 'cofre del minotauro, crypt epic lvl 25',
-  310063: 'cofre del minotauro, crypt epic lvl 30 *'
-  310064: 'cofre del minotauro, crypt epic lvl 35 *'
+  310063: 'cofre del minotauro, crypt epic lvl 30 *',
+  310064: 'cofre del minotauro, crypt epic lvl 35 *',
 
   603103: 'cofre zafiro, boveda antiguos 15-19',
   603104: 'cofre zafiro, boveda antiguos 20-24',
@@ -5312,5 +5368,7 @@ const chests = {
 }
 
 module.exports = {
-  tbObjects
+  tbObjects,
+  captains,
+  HERO
 }
