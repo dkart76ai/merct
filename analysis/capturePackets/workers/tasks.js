@@ -745,7 +745,7 @@ async function getPlayerInfo402(kingdom) {
 
 async function scanKingdomTask(data) {
   // console.log('[tasks] [scanKingdomTask] data', data)
-  const { kingdom, shouldSaveObjects = false, checkFlags = false } = data
+  const { kingdom, shouldSaveObjects = false } = data
   console.log('[tasks][scanKingdomTask] params', data)
 
   if (!kingdom) {
@@ -818,7 +818,7 @@ async function scanKingdomTask(data) {
 
     //------ send packet 312
 
-    const tilesArray = generateArrays(0, 2499, 50, 12)
+    const tilesArray = generateArrays(0, 2499, 50, 24)
 
     let objects = 0
     let players = 0
@@ -829,59 +829,7 @@ async function scanKingdomTask(data) {
 
       objects += result312.objects12?.length || 0
       players += result312.players42?.length || 0
-
-      // if (result312.players42.length > 0) {
-      //   // get all objectids from players42 array
-      //   // generate a 402 packet and send to server
-      //   const allPlayersIds = result312.players42.map(p => p.playerId).filter(Boolean)
-      //   console.log(
-      //     styleText(
-      //       'magenta',
-      //       `building 402 packet with ${result312.players42.length} players from 312`
-      //     )
-      //   )
-      //   const result402 = await send402packet(url, allPlayersIds, token1, token2)
-
-      //   console.log(
-      //     styleText('green', '[getPlayerInfo402] extract data, total players'),
-      //     result402.players23.length
-      //   )
-
-      ///! flag info start
-      ///! flag info start
-      ///! flag info start
-      if (checkFlags && result312.players42?.length > 0) {
-        // TODO group promises by 10, and loop 2d array instead of one by one
-        const playerGroup = []
-        const groupSize = 10
-        for (let i = 0; i < result312.players42.length; i += groupSize) {
-          playerGroup.push(result312.players42.slice(i, i + groupSize))
-        }
-
-        for (const players of playerGroup) {
-          // extract flag info
-          const promises = players.map(player =>
-            sendPacket24301(url, player.objectId, player.playerId, token1, token2)
-          )
-
-          const groupResult = await Promise.all(promises)
-          console.log('[tasks][scankingdomtask] checkflagsaaa', groupResult)
-          await delay(200)
-
-          // const result24301 = await sendPacket24301(
-          //   url,
-          //   player.objectId,
-          //   player.playerId,
-          //   token1,
-          //   token2
-          // )
-        }
-      }
-      ///! flag info end
-      ///! flag info end
-      ///! flag info end
-      // } //endif 671
-    } //end for 641
+    }
 
     // console.log(`[tasks][scanKingdomTask] Success objects ${objects}, players ${players} `)
     return { success: true, objects, players }
@@ -891,7 +839,7 @@ async function scanKingdomTask(data) {
 }
 
 async function scanRefreshPlayerInfoTask(data) {
-  const { kingdom, checkFlags = false } = data
+  const { kingdom } = data
 
   if (!kingdom) {
     console.log('[tasks][scanRefreshPlayerInfoTask] No kingdom provided')
@@ -934,37 +882,21 @@ async function scanRefreshPlayerInfoTask(data) {
     }
     // console.log('[scanRefreshPlayerInfoTask] playersIds', playerArray)
 
+    console.log(
+      styleText('green', '[tasks][scanRefreshPlayerInfoTask] start scanning, total players'),
+      playerObjIdsDB.length
+    )
     let playersCount = 0
     for (const players of playerArray) {
       const result402 = await send402packet(url, players, token1, token2)
-      console.log(
-        styleText('green', '[scanRefreshPlayerInfoTask] extract data, total players'),
-        result402.players23.length
-      )
+      // console.log(
+      //   styleText('green', '[scanRefreshPlayerInfoTask] extract data, total players'),
+      //   result402.players23.length
+      // )
       playersCount += result402.players23.length
-
-      ///! flag info start
-      if (checkFlags && result402.players23.length > 0) {
-        // for (const player of playerObjIdsDB) { //? de la db parece que no trae flags
-        for (const player of result402.players23) {
-          // extract flag info
-          await delay(200)
-
-          const result24301 = await sendPacket24301(
-            url,
-            player.objectId,
-            player.playerId,
-            token1,
-            token2
-          )
-
-          console.log('[tasks][scanRefreshPlayerInfoTask] checkflags', result24301)
-        }
-      }
     }
-    ///! flag info end
 
-    // send 601 packets to get player resources and update db
+    //! test 601 packets to get player resources and update db
     const playerOIdsArray = []
     const groupSize2 = 11
     for (let i = 0; i < objectIds.length; i += groupSize2) {
@@ -983,6 +915,67 @@ async function scanRefreshPlayerInfoTask(data) {
   }
 }
 
+async function scanRefreshPlayerFlagsTask(data) {
+  const { kingdom } = data
+
+  if (!kingdom) {
+    console.log('[tasks][scanRefreshPlayerFlagsTask] No kingdom provided')
+    return { success: false, error: 'no kingdom' }
+  }
+
+  const redisClient = getRedis()
+
+  const _token1 = await redisClient.get('myPlayerId:BigInt')
+  if (!_token1) {
+    throw new Error('no session token1')
+  }
+
+  const _token2 = await redisClient.getBuffer('mysession:token2:Uint8Array')
+  if (!_token2) {
+    throw new Error('no session token2')
+  }
+
+  const url = kingdomUrls[kingdom]
+  if (!url) {
+    throw new Error('invalid kingdom')
+  }
+
+  // console.log(`[tasks][scanRefreshPlayerFlagsTask] Sending packets to ${url}  `)
+
+  try {
+    let token1 = BigInt(_token1)
+    let token2 = new Uint8Array(_token2)
+
+    const playerObjIdsDB = getPlayersObjectIdFromKingdom(kingdom) // [ { playerId: '609885609857' }]
+    // console.log('players from db obj+id', playerObjIdsDB)
+    console.log(
+      styleText('yellow', '[tasks][scanRefreshPlayerFlagsTask] start scanning, total players '),
+      playerObjIdsDB.length
+    )
+    let flagsCount = 0
+    for (const player of playerObjIdsDB) {
+      // extract flag info
+      await delay(200)
+
+      const result24301 = await sendPacket24301(
+        url,
+        player.objectId,
+        player.playerId,
+        token1,
+        token2
+      )
+      if (result24301.totalFlags > 0) {
+        console.log('[tasks][scanRefreshPlayerFlagsTask] checkflags', result24301)
+      }
+      flagsCount += result24301.totalFlags
+    }
+    // console.log(`[tasks][scanRefreshPlayerFlagsTask] Success objects ${objects}, players ${players} `)
+    return { success: true, flags: flagsCount }
+  } catch (error) {
+    console.error(`[tasks][scanRefreshPlayerFlagsTask] Error:`, error.message)
+  }
+}
+
 module.exports = {
   processPacket,
   getPlayerInfo402,
@@ -990,6 +983,7 @@ module.exports = {
   refreshPlayerFlags,
   // getPlayerFlagsKvK24301,
   scanRefreshPlayerInfoTask,
+  scanRefreshPlayerFlagsTask,
   scanKingdomTask,
   getResourceInfo601
 }

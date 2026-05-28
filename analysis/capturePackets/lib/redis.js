@@ -1,10 +1,15 @@
 const Redis = require('ioredis')
-
+const { loadEnvFile } = require('node:process')
+loadEnvFile()
 let redis = null
+
+console.log('redis', process.env.REDIS_HOST, process.env.REDIS_PORT)
 
 function getRedis() {
   if (!redis) {
     redis = new Redis({
+      username: process.env.REDIS_USERNAME,
+      password: process.env.REDIS_PASSWORD,
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
       // Minimal retry settings

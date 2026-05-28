@@ -17,6 +17,8 @@ const api = typeof browser !== 'undefined' ? browser : chrome
           <button id="getCitadelL15">citadel lvl 15</button>
           <button id="getCitadelCL20">cursed citadel lvl 20</button>
           <button id="getRaidRunicL25">raid runic lvl 25</button>
+          <button id="getWellspring5">wellspring lvl 5</button>
+          <button id="getdragonmound5">dragonmound lvl 5</button>
       </div>
       <div class="slider-row">
         <label>Level:</label>
@@ -61,6 +63,12 @@ const api = typeof browser !== 'undefined' ? browser : chrome
     })
     document.getElementById('getRaidRunicL25').addEventListener('click', () => {
       api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 raid runic lvl 25' })
+    })
+    document.getElementById('getWellspring5').addEventListener('click', () => {
+      api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 wellspring lvl 5' })
+    })
+    document.getElementById('getdragonmound5').addEventListener('click', () => {
+      api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 dragon lvl 5' })
     })
   }
 

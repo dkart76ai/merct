@@ -205,8 +205,7 @@ class TimerManager {
     "template": {
       "data": {
         "kingdom": "146",
-        "shouldSaveObjects": true,
-        "checkFlags": false
+        "shouldSaveObjects": true
       },
       "opts": {
         "priority": 3,

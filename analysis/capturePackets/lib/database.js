@@ -463,7 +463,7 @@ function savePlayerFlagCount(playerId, flagCount) {
   `)
 
   const result = update.run(flagCount, String(playerId))
-  console.log('[database] update flagcount', result)
+  // console.log('[database] update flagcount', result)
   return { success: true }
 }
 
@@ -514,8 +514,9 @@ function getPlayers(
     params.push('%%' + clanFilter + '%%')
   }
   if (kingdomFilter) {
-    whereClauses.push('kingdom = ?')
-    params.push(kingdomFilter)
+    const placeholders = kingdomFilter.map(() => '?').join(',')
+    whereClauses.push(` kingdom IN (${placeholders}) `)
+    params.push(...kingdomFilter)
   }
   if (shieldFilter === 'true') {
     whereClauses.push('hasShield = 1')
@@ -545,10 +546,13 @@ function getClanFlags(clanFilter, kingdomFilter, shieldFilter) {
     whereClauses.push('LOWER(clanName) LIKE LOWER(?)')
     params.push('%%' + clanFilter + '%%')
   }
+
   if (kingdomFilter) {
-    whereClauses.push('kingdom = ?')
-    params.push(kingdomFilter)
+    const placeholders = kingdomFilter.map(() => '?').join(',')
+    whereClauses.push(` kingdom IN (${placeholders}) `)
+    params.push(...kingdomFilter)
   }
+
   if (shieldFilter === 'true') {
     whereClauses.push('hasShield = 1')
   } else if (shieldFilter === 'false') {

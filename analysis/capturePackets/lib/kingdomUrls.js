@@ -289,7 +289,7 @@ export const kingdomUrls = {
   299: 'https://game-us43.totalbattle.com/rubens-realm299',
   300: 'https://game-us44.totalbattle.com/rubens-realm300',
   301: 'https://game-us47.totalbattle.com/rubens-realm301',
-  302: 'https://game-us48.totalbattle.com/rubens-realm302',
+  302: 'https://game-us52.totalbattle.com/rubens-realm302',
   303: 'https://game-us49.totalbattle.com/rubens-realm303',
   304: 'https://game-us50.totalbattle.com/rubens-realm304',
   305: 'https://game-us47.totalbattle.com/rubens-realm305',

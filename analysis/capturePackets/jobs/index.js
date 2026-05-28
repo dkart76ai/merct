@@ -6,7 +6,8 @@ const {
   findObjectsHandler,
   discordNotificationHandler,
   gameNotificationHandler,
-  scanRefreshPlayerInfoHandler
+  scanRefreshPlayerInfoHandler,
+  scanRefreshPlayerFlagsHandler
 } = require('./handlers/index.js')
 const { QUEUE_NAMES } = require('./constants.js')
 
@@ -15,6 +16,7 @@ let workerNotificationDiscord = null
 let workerNotificationGame = null
 let workerScanKingdom = null
 let workerScanKingdomRefreshPlayerInfo = null
+let workerScanKingdomRefreshPlayerFlags = null
 
 //--------------------
 function startWorker(queueName, handler, config = {}) {
@@ -44,7 +46,7 @@ function initializeWorkers() {
     workerScanKingdom = startWorker(QUEUE_NAMES.SCAN_KINGDOM, scanKingdomHandler, {
       concurrency: 5, // Process one job at a time to prevent overlapping Piscina floods
       limiter: {
-        max: 5, // Adjust this based on how many packets one job sends
+        max: 20, // Adjust this based on how many packets one job sends
         duration: 1000 // Maximum 5 jobs executing per second
       }
     })
@@ -52,6 +54,18 @@ function initializeWorkers() {
     workerScanKingdomRefreshPlayerInfo = startWorker(
       QUEUE_NAMES.SCAN_REFRESH_PLAYER_INFO,
       scanRefreshPlayerInfoHandler,
+      {
+        concurrency: 2,
+        limiter: {
+          max: 10, // Máximo de trabajos
+          duration: 60000 // Por cada 60,000 ms (1 minuto)
+        }
+      }
+    )
+
+    workerScanKingdomRefreshPlayerFlags = startWorker(
+      QUEUE_NAMES.SCAN_REFRESH_PLAYER_FLAGS,
+      scanRefreshPlayerFlagsHandler,
       {
         concurrency: 2,
         limiter: {
@@ -98,6 +112,11 @@ async function stopWorkers() {
     await workerScanKingdomRefreshPlayerInfo.close()
     workerScanKingdomRefreshPlayerInfo = null
     console.log('[Worker] workerScanKingdomRefreshPlayerInfo stoped')
+  }
+  if (workerScanKingdomRefreshPlayerFlags) {
+    await workerScanKingdomRefreshPlayerFlags.close()
+    workerScanKingdomRefreshPlayerFlags = null
+    console.log('[Worker] workerScanKingdomRefreshPlayerFlags stoped')
   }
   if (workerNotificationDiscord) {
     await workerNotificationDiscord.close()

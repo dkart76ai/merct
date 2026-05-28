@@ -5,6 +5,7 @@ const { QUEUE_NAMES, JOB_TYPES, PRIORITY } = require('./constants.js')
 const queues = {}
 let timerManager = null
 let timerManagerRefreshPlayer = null
+let timerManagerRefreshPlayerFlags = null
 
 function getQueue(name) {
   if (queues[name]) return queues[name]
@@ -169,6 +170,19 @@ async function getTimerManagerRefreshPlayerInstance() {
 
   return timerManagerRefreshPlayer
 }
+async function getTimerManagerRefreshPlayerFlagsInstance() {
+  const { TimerManager } = require('./TimerManager')
+
+  if (!timerManagerRefreshPlayerFlags) {
+    const queueInstance = getQueue(QUEUE_NAMES.SCAN_REFRESH_PLAYER_FLAGS)
+    timerManagerRefreshPlayerFlags = new TimerManager(queueInstance)
+
+    // Es vital esperar a que se rehidrate antes de empezar a programar nuevos
+    await timerManagerRefreshPlayerFlags.rehydrate()
+  }
+
+  return timerManagerRefreshPlayerFlags
+}
 
 module.exports = {
   addScanKingdomJob,
@@ -181,5 +195,6 @@ module.exports = {
   getQueueStatus,
   getQueue,
   getTimerManager: getTimerManagerInstance,
-  getTimerManagerRefreshPlayer: getTimerManagerRefreshPlayerInstance
+  getTimerManagerRefreshPlayer: getTimerManagerRefreshPlayerInstance,
+  getTimerManagerRefreshPlayerFlags: getTimerManagerRefreshPlayerFlagsInstance
 }

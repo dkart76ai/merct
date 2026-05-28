@@ -3,7 +3,8 @@ const QUEUE_NAMES = {
   NOTIFICATION_DISCORD: 'notification-discord',
   NOTIFICATION_GAME: 'notification-in-game',
   SCAN_KINGDOM: 'scan-kingdom',
-  SCAN_REFRESH_PLAYER_INFO: 'refresh-player-info'
+  SCAN_REFRESH_PLAYER_INFO: 'refresh-player-info',
+  SCAN_REFRESH_PLAYER_FLAGS: 'refresh-player-flags'
 }
 
 const JOB_TYPES = QUEUE_NAMES

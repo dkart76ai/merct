@@ -29,6 +29,7 @@ const {
   addJob,
   getTimerManager,
   getTimerManagerRefreshPlayer,
+  getTimerManagerRefreshPlayerFlags,
   addGameNotificationJob,
   cleanOldJobs,
   getQueueStatus,
@@ -86,6 +87,7 @@ const opCodeInfo = {
   603: 'city teleport inside kingdom? with 204?',
   701: 'attack/send caravan/crypt exploration',
   707: 'enemy/my troops detail/ clan member portals ?',
+  911: 'revive captain with silver?, 911 followed by 801',
   801: 'repair building status ?/temple troops revive',
   804: 'repair building/revive wuth gold ',
   805: 'revive with sacred pots ',
@@ -567,6 +569,39 @@ function setupPacketCaptureListener() {
           )
         }
 
+        if (opCode === 911) {
+          console.log(
+            styleText('green', '911 troop revive request data'),
+            '\n\n',
+            JSON.stringify(getMsgPack2ndBlockRequest(postDataBuff)),
+            styleText('red', 'post data'),
+            '\n\n',
+            encodeBase64(postDataBuff)
+          )
+        }
+
+        if (opCode === 801) {
+          console.log(
+            styleText('green', '801 troop revive request data'),
+            '\n\n',
+            JSON.stringify(getMsgPack2ndBlockRequest(postDataBuff)),
+            styleText('red', 'post data'),
+            '\n\n',
+            encodeBase64(postDataBuff)
+          )
+        }
+
+        if (opCode === 804) {
+          console.log(
+            styleText('green', '804 troop revive withSILVER request data'),
+            '\n\n',
+            JSON.stringify(getMsgPack2ndBlockRequest(postDataBuff)),
+            styleText('red', 'post data'),
+            '\n\n',
+            encodeBase64(postDataBuff)
+          )
+        }
+
         if (opCode === 15009) {
           // console.log('help request data', JSON.stringify(getMsgPack2ndBlockRequest(postDataBuff)))
         }
@@ -817,8 +852,7 @@ async function handleStartTimer(req, res) {
 
   const payload = {
     kingdom,
-    shouldSaveObjects: true,
-    checkFlags: false
+    shouldSaveObjects: true
   }
   const timerKey = `kingdom:${kingdom}`
   await timerManager.scheduleCustom(timerKey, parseInt(interval), JOB_TYPES.SCAN_KINGDOM, payload, {
@@ -848,7 +882,7 @@ async function handleStopTimer(req, res) {
 
 // Scan for other kingdoms timer
 app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
-  const { interval = 60000, kingdoms = '', key = '', checkFlags = false } = req.body
+  const { interval = 60000, kingdoms = '', key = '' } = req.body
   console.log('/api/timer/scan-other-kingdoms', req.body)
 
   if (!kingdoms || kingdoms.trim() === '') {
@@ -872,8 +906,7 @@ app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
     for (const kingdom of kingdomList) {
       const payload = {
         kingdom,
-        shouldSaveObjects: false,
-        checkFlags
+        shouldSaveObjects: false
       }
       const timerKey = `kingdom:${kingdom}`
       await timerManager.scheduleCustom(
@@ -951,7 +984,7 @@ app.post('/api/timer/stop-scan-other-kingdoms', async (req, res) => {
 // Manual find and queue notification
 async function handleScanOtherKingdom(req, res) {
   // manual scan any kingdoms, use worker_threads, no jobs
-  const { kingdoms, checkFlags = false } = req.body
+  const { kingdoms } = req.body
 
   console.log('/api/scan-other-kingdoms-now params', req.body)
   if (!kingdoms || kingdoms.trim() === '') {
@@ -970,7 +1003,7 @@ async function handleScanOtherKingdom(req, res) {
 
   try {
     for (const kingdom of kingdomList) {
-      scanKingdomWorker(kingdom, false /* dont save objects */, checkFlags)
+      scanKingdomWorker(kingdom, false /* dont save objects */)
     }
   } catch (error) {
     console.log('error', error.message)
@@ -1058,7 +1091,7 @@ app.post('/api/timer/stop', handleStopTimer)
 
 app.post('/api/scanKingdom402', async (req, res) => {
   // manual scan any kingdoms, use worker_threads, no jobs
-  const { kingdoms, checkFlags } = req.body
+  const { kingdoms } = req.body
   //! TODO process chkflags
   console.log('kingsomd', req.body)
   if (!kingdoms || kingdoms.trim() === '') {
@@ -1077,7 +1110,7 @@ app.post('/api/scanKingdom402', async (req, res) => {
 
   //?set and forget (callback will handle the result)
   kingdomList.forEach(kingdom => {
-    scanRefreshPlayerInfoWorker(kingdom, checkFlags)
+    scanRefreshPlayerInfoWorker(kingdom)
       .then(res => console.log(`[main][scanKingdom402] Kingdom ${kingdom} completed`))
       .catch(err => console.error(`[main][scanKingdom402] Kingdom ${kingdom} error:`, err.message))
   })
@@ -1097,10 +1130,92 @@ app.post('/api/scanKingdom402', async (req, res) => {
   })
 })
 
-app.post('/api/timer/start402', async (req, res) => {
-  const { interval = 60000, kingdoms, key, checkFlags = false } = req.body
+//!flags inicio
+
+app.post('/api/timer/startScanFlags', async (req, res) => {
+  const { interval = 60000, kingdoms } = req.body
   console.log('kingdom', req.body)
-  //! TODO: process checkFlags
+
+  if (!kingdoms || kingdoms.trim() === '') {
+    return res.json({ success: false, error: 'enter kingdom' })
+  }
+
+  const kingdomList = kingdoms
+    .split(',')
+    .map(k => parseInt(k.trim()))
+    .filter(k => kingdomUrls[k])
+
+  if (kingdomList.length === 0) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  await redisClient.set(SCAN_OTHER_KINGDOMS_KEY + ':player_flags', kingdoms)
+
+  const timerManager = await getTimerManagerRefreshPlayerFlags()
+
+  try {
+    for (const kingdom of kingdomList) {
+      const payload = {
+        kingdom
+      }
+      const timerKey = `kingdom:${kingdom}:player_flags`
+      await timerManager.scheduleCustom(
+        timerKey,
+        parseInt(interval),
+        JOB_TYPES.SCAN_REFRESH_PLAYER_FLAGS,
+        payload,
+        {
+          priority: PRIORITY.NORMAL
+        }
+      )
+    }
+    res.json({
+      success: true,
+      message: `kingdom ${kingdoms} scanner started every ${interval}ms`,
+      interval
+    })
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+})
+
+app.post('/api/timer/stopScanFlags', async (req, res) => {
+  const kingdoms = await redisClient.get(SCAN_OTHER_KINGDOMS_KEY + ':player_flags')
+  if (!kingdoms) {
+    return res.json({ success: false, error: 'no kingdoms, already stoped' })
+  }
+
+  const timerManager = await getTimerManagerRefreshPlayerFlags()
+
+  const kingdomList = kingdoms
+    .split(',')
+    .map(k => parseInt(k.trim()))
+    .filter(k => kingdomUrls[k])
+
+  if (kingdomList.length === 0) {
+    return res.json({ success: false, error: 'no valid kingdoms' })
+  }
+
+  try {
+    for (const kingdom of kingdomList) {
+      const timerKey = `kingdom:${kingdom}:player_flags`
+      await timerManager.stopByKey(timerKey)
+    }
+
+    await redisClient.del(SCAN_OTHER_KINGDOMS_KEY + ':player_flags')
+    res.json({ success: true, message: `${kingdoms} Kingdoms scanner stopped` })
+  } catch (error) {
+    console.log('error', error.message)
+    return res.json({ success: false, error: error.message })
+  }
+})
+//!flags fin
+
+app.post('/api/timer/start402', async (req, res) => {
+  const { interval = 60000, kingdoms, key } = req.body
+  console.log('kingdom', req.body)
+
   if (!kingdoms || kingdoms.trim() === '') {
     return res.json({ success: false, error: 'enter kingdom' })
   }
@@ -1121,8 +1236,7 @@ app.post('/api/timer/start402', async (req, res) => {
   try {
     for (const kingdom of kingdomList) {
       const payload = {
-        kingdom,
-        checkFlags
+        kingdom
       }
       const timerKey = `kingdom:${kingdom}:player_info`
       await timerManager.scheduleCustom(
@@ -1219,9 +1333,11 @@ app.get('/api/pool/status', async (req, res) => {
 app.post('/api/timer/stop-all', async (req, res) => {
   const timerManager = await getTimerManager()
   const timerManagerRefreshPlayer = await getTimerManagerRefreshPlayer()
+  const timerManagerFlags = await getTimerManagerRefreshPlayerFlags()
 
   await timerManager.stopAll()
   await timerManagerRefreshPlayer.stopAll()
+  await timerManagerFlags.stopAll()
 
   res.json({ success: true, message: 'All timers stopped' })
 })
@@ -1233,7 +1349,14 @@ app.get('/api/timers', async (req, res) => {
 
     const timerManagerRefreshPlayer = await getTimerManagerRefreshPlayer()
     const activeRefreshPlayers = await timerManagerRefreshPlayer.getActiveTimers()
-    res.json({ success: true, timers: [...active, ...activeRefreshPlayers] })
+
+    const timerManagerRefreshPlayerFlags = await getTimerManagerRefreshPlayerFlags()
+    const activeRefreshPlayersFlags = await timerManagerRefreshPlayerFlags.getActiveTimers()
+
+    res.json({
+      success: true,
+      timers: [...active, ...activeRefreshPlayers, ...activeRefreshPlayersFlags]
+    })
   } catch (error) {
     console.error('[API] /api/timers error:', error.message)
     res.status(500).json({ success: false, error: error.message })
@@ -1298,7 +1421,7 @@ app.post('/api/refreshPlayerCoords', async (req, res) => {
 
     res.json({ success: true })
   } catch (e) {
-    console.error('Players API error:', e.message)
+    console.error('Players API error 1:', e.message)
     res.status(500).json({ success: false, error: e.message })
   }
 })
@@ -1314,7 +1437,7 @@ app.post('/api/refreshPlayerFlags', async (req, res) => {
 
     res.json({ success: true })
   } catch (e) {
-    console.error('Players API error:', e.message)
+    console.error('Players API error 2:', e.message)
     res.status(500).json({ success: false, error: e.message })
   }
 })
@@ -1340,7 +1463,7 @@ app.post('/api/reportPlayerCoords', async (req, res) => {
 
     res.json({ success: true })
   } catch (e) {
-    console.error('Players API error:', e.message)
+    console.error('Players API error 3:', e.message)
     res.status(500).json({ success: false, error: e.message })
   }
 })
@@ -1356,7 +1479,9 @@ app.get('/api/players', (req, res) => {
       : 'DESC'
     const nameFilter = req.query.name || ''
     const clanFilter = req.query.clan || ''
-    const kingdomFilter = req.query.kingdom ? parseInt(req.query.kingdom) : null
+    const kingdomFilter = req.query.kingdom
+      ? req.query.kingdom.split(',').filter(Boolean).map(Number)
+      : null
     const shieldFilter = req.query.shield
 
     const { success, players, total } = getPlayers(
@@ -1381,7 +1506,7 @@ app.get('/api/players', (req, res) => {
       totalPages: Math.ceil(total / limit)
     })
   } catch (e) {
-    console.error('Players API error:', e.message)
+    console.error('Players API error 4:', e.message)
     res.status(500).json({ success: false, error: e.message })
   }
 })
@@ -1588,7 +1713,7 @@ app.post('/api/chat/channelMembers', async (req, res) => {
 
   console.log('channel url', channelUrl)
   const result = await page.evaluate(
-    async ({ channelUrl }) => {
+    async ({ channelUrl, chatBannedMemberList }) => {
       try {
         // use game's own SendBirdHelper — no new connection needed
         if (!window.SendBirdHelper?.sb) {
@@ -1630,7 +1755,7 @@ app.post('/api/chat/channelMembers', async (req, res) => {
         return { channelUrl, success: false, error: err.message }
       }
     },
-    { channelUrl }
+    { channelUrl, chatBannedMemberList }
   )
   console.log('al final de api/chat/getAllChannels', JSON.stringify(result, null, 2))
   /** {
@@ -1916,7 +2041,7 @@ app.post('/api/chat/banUser', async (req, res) => {
 
   console.log('channel url', channelUrl, userId)
   const result = await page.evaluate(
-    async ({ channelUrl, userId }) => {
+    async ({ channelUrl, userId, chatBannedMemberList }) => {
       try {
         // use game's own SendBirdHelper — no new connection needed
         if (!window.SendBirdHelper?.sb) {
@@ -1951,7 +2076,7 @@ app.post('/api/chat/banUser', async (req, res) => {
         return { success: false, error: err.message }
       }
     },
-    { channelUrl, userId }
+    { channelUrl, userId, chatBannedMemberList }
   )
   console.log('al final de api/chat/muteUser', result)
   /**
@@ -1976,7 +2101,7 @@ app.post('/api/chat/unBanUser', async (req, res) => {
 
   console.log('channel url', channelUrl, userId)
   const result = await page.evaluate(
-    async ({ channelUrl, userId }) => {
+    async ({ channelUrl, userId, chatBannedMemberList }) => {
       try {
         // use game's own SendBirdHelper — no new connection needed
         if (!window.SendBirdHelper?.sb) {
@@ -2011,7 +2136,7 @@ app.post('/api/chat/unBanUser', async (req, res) => {
         return { success: false, error: err.message }
       }
     },
-    { channelUrl, userId }
+    { channelUrl, userId, chatBannedMemberList }
   )
   console.log('al final de api/chat/muteUser', result)
   /**
@@ -2096,12 +2221,14 @@ async function main() {
     // await staticIdRedis.dump()
     //await staticIdRedis.close()
     flushToDisk()
-    await stopWorkers()
-    await cleanOldJobs()
+    await stopWorkers() //? queue workers bullmq
+    await cleanOldJobs() //? clean redis
     console.log('[Main] Cleaning Redis...')
     await closeQueue()
     closeDb()
+    getPool().close() //?piscina workers
     if (browser) await browser.close()
+
     process.exit(0)
   })
 
@@ -2110,12 +2237,13 @@ async function main() {
     // await staticIdRedis.dump()
     //await staticIdRedis.close()
     flushToDisk()
-    await stopWorkers()
-    await cleanOldJobs()
+    await stopWorkers() //? queue workers bullmq
+    await cleanOldJobs() //? clean redis
     console.log('[Main] Cleaning Redis...')
     await closeQueue()
     closeDb()
     if (browser) await browser.close()
+    getPool().close() //?piscina workers
     process.exit(0)
   })
 }

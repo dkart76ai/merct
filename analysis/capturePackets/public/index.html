@@ -443,13 +443,8 @@
             <button id="btnScanOtherKingdomStop" class="danger">Stop Timer</button>
           </div>
           <div class="controls" style="padding: 15px">
-            <button id="btnScanKingdom402" disabled>
-              Check for gold/update player info(coords)
-            </button>
-            <label>
-              <input type="checkbox" id="cbCheckFlags" />
-              <span>Check flags</span>
-            </label>
+            <button id="btnScanKingdom402" disabled>Check player info (gold/coords)</button>
+
             <div style="margin-left: 32px">
               <span class="section-title">Interval (ms):</span>
               <input
@@ -460,8 +455,14 @@
                 onchange="saveValue(this.value, 'scanKingdomTimer402')"
               />
             </div>
-            <button id="btnTimerStart402" disabled>Start Timer</button>
-            <button id="btnTimerStop402" class="danger" disabled>Stop Timer</button>
+            <button id="btnTimerStart402" disabled>Start Timer (player info)</button>
+            <button id="btnTimerStop402" class="danger" disabled>Stop Timer (player info)</button>
+          </div>
+          <div class="controls" style="padding: 15px">
+            <button id="btnTimerStartFlags" disabled>Start Timer (player flags)</button>
+            <button id="btnTimerStopFlags" class="danger" disabled>
+              Stop Timer (player flags)
+            </button>
           </div>
         </div>
 
@@ -538,7 +539,12 @@
           <div class="players-filters">
             <input type="text" id="filterName" placeholder="Player name..." />
             <input type="text" id="filterClan" placeholder="Clan name..." />
-            <input type="number" id="filterKingdom" placeholder="Kingdom" style="width: 90px" />
+            <input
+              type="text"
+              id="filterKingdom"
+              placeholder="140,141,145..."
+              style="width: 200px"
+            />
             <select id="filterShield">
               <option value="">All Shields</option>
               <option value="true">Shield ON</option>
@@ -745,6 +751,9 @@
             document.getElementById('btnScanKingdom312').disabled = data?.kingdom?.trim() == ''
             document.getElementById('btnTimerStart312').disabled = data?.kingdom?.trim() == ''
             document.getElementById('btnTimerStop312').disabled = data?.kingdom?.trim() == ''
+
+            document.getElementById('btnTimerStartFlags').disabled = data?.kingdom?.trim() == ''
+            document.getElementById('btnTimerStopFlags').disabled = data?.kingdom?.trim() == ''
 
             document.getElementById('btnScanKingdom402').disabled = data?.kingdom?.trim() == ''
             document.getElementById('btnTimerStart402').disabled = data?.kingdom?.trim() == ''
@@ -1357,11 +1366,10 @@
       // Kingdom scanner handlers 402
       document.getElementById('btnScanKingdom402').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms').value
-        const cbCheckFlags = document.getElementById('cbCheckFlags').checked
         const res = await fetch(API + '/scanKingdom402', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kingdoms: otherKingdoms, checkFlags: cbCheckFlags })
+          body: JSON.stringify({ kingdoms: otherKingdoms })
         })
 
         const data = await res.json()
@@ -1372,9 +1380,39 @@
         }
       })
 
+      document.getElementById('btnTimerStartFlags').addEventListener('click', async () => {
+        const otherKingdoms = document.getElementById('otherKingdoms').value
+        const interval = parseInt(document.getElementById('timerInterval402').value) || 300000
+
+        const res = await fetch(API + '/timer/startScanFlags', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ interval, kingdoms: otherKingdoms })
+        })
+
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+      document.getElementById('btnTimerStopFlags').addEventListener('click', async () => {
+        const res = await fetch(API + '/timer/stopScanFlags', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+          // body: JSON.stringify({  })
+        })
+        const data = await res.json()
+        if (data.success) {
+          log(data.message)
+        } else {
+          log('Error: ' + data.error)
+        }
+      })
+
       document.getElementById('btnTimerStart402').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms').value
-        const cbCheckFlags = document.getElementById('cbCheckFlags').checked
 
         const interval = parseInt(document.getElementById('timerInterval402').value) || 300000
         const res = await fetch(API + '/timer/start402', {
@@ -1383,7 +1421,6 @@
           body: JSON.stringify({
             interval,
             kingdoms: otherKingdoms,
-            checkFlags: cbCheckFlags,
             key: '1'
           })
         })
@@ -1412,11 +1449,10 @@
       // Other kingdoms scanner handlers
       document.getElementById('btnScanOtherKingdomsNow').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms').value
-        const cbCheckFlags = document.getElementById('cbCheckFlags').checked
         const res = await fetch(API + '/scan-other-kingdoms-now', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kingdoms: otherKingdoms, checkFlags: cbCheckFlags })
+          body: JSON.stringify({ kingdoms: otherKingdoms })
         })
         const data = await res.json()
         if (data.success) {
@@ -1428,7 +1464,7 @@
 
       document.getElementById('btnScanOtherKingdomStart').addEventListener('click', async () => {
         const otherKingdoms = document.getElementById('otherKingdoms').value
-        const cbCheckFlags = document.getElementById('cbCheckFlags').checked
+
         const interval =
           parseInt(document.getElementById('timerIntervalOtherKingdoms').value) || 300000
         const res = await fetch(API + '/timer/scan-other-kingdoms', {
@@ -1437,8 +1473,7 @@
           body: JSON.stringify({
             interval,
             kingdoms: otherKingdoms,
-            key: '1',
-            checkFlags: cbCheckFlags
+            key: '1'
           })
         })
         const data = await res.json()
