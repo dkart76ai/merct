@@ -11,9 +11,13 @@ const api = typeof browser !== 'undefined' ? browser : chrome
       <div class="slider-row">
         <input type="text" id="search" placeholder="Search...">
         <button class="btn" id="searchBtn">Search</button>
-         <button id="getVillageL25">villages lvl 25</button>
+
+      </div>
+      <div class="slider-row">
+           <button id="getVillageL25">villages lvl 25</button>
           <button id="getCryptL20">crypts lvl 20</button>
           <button id="getCryptL25">crypts lvl 25</button>
+             <button id="getRareCryptL15">rare crypts lvl 15</button>
           <button id="getCitadelL15">citadel lvl 15</button>
           <button id="getCitadelCL20">cursed citadel lvl 20</button>
           <button id="getRaidRunicL25">raid runic lvl 25</button>
@@ -30,7 +34,7 @@ const api = typeof browser !== 'undefined' ? browser : chrome
         <input type="text" id="serverUrl" value="http://localhost:3001">
       </div>
     `
-
+    // localstorage
     api.storage.local.get(['lastSearch'], result => {
       if (result.lastSearch) {
         document.getElementById('search').value = result.lastSearch
@@ -41,6 +45,40 @@ const api = typeof browser !== 'undefined' ? browser : chrome
     searchInput.addEventListener('input', () => {
       api.storage.local.set({ lastSearch: searchInput.value })
     })
+    //------
+    api.storage.local.get(['lastMinLevel'], result => {
+      if (result.lastMinLevel) {
+        document.getElementById('minLevel').value = result.lastMinLevel
+      }
+    })
+    const minLevelInput = document.getElementById('minLevel')
+
+    minLevelInput.addEventListener('input', () => {
+      api.storage.local.set({ lastMinLevel: minLevelInput.value })
+    })
+    //------
+    api.storage.local.get(['lastMaxLevel'], result => {
+      if (result.lastMaxLevel) {
+        document.getElementById('maxLevel').value = result.lastMaxLevel
+      }
+    })
+    const maxLevelInput = document.getElementById('maxLevel')
+
+    maxLevelInput.addEventListener('input', () => {
+      api.storage.local.set({ lastMaxLevel: maxLevelInput.value })
+    })
+    //------
+    api.storage.local.get(['lastServerUrl'], result => {
+      if (result.lastServerUrl) {
+        document.getElementById('serverUrl').value = result.lastServerUrl
+      }
+    })
+    const serverUrlInput = document.getElementById('serverUrl')
+
+    serverUrlInput.addEventListener('input', () => {
+      api.storage.local.set({ lastServerUrl: serverUrlInput.value })
+    })
+    //------
 
     document.getElementById('searchBtn').addEventListener('click', searchObjects)
     document.getElementById('closeBtn').addEventListener('click', () => {
@@ -51,6 +89,9 @@ const api = typeof browser !== 'undefined' ? browser : chrome
     })
     document.getElementById('getCryptL20').addEventListener('click', () => {
       api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 crypt lvl 20' })
+    })
+    document.getElementById('getRareCryptL15').addEventListener('click', () => {
+      api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 rare crypt lvl 15' })
     })
     document.getElementById('getCryptL25').addEventListener('click', () => {
       api.runtime.sendMessage({ action: 'SEND_TO_DISCORD', data: '#find 10 crypt lvl 25' })

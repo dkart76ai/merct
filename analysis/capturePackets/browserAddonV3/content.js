@@ -35,8 +35,8 @@ function toggleScanner() {
   position: fixed !important;
   top: 50px !important;
   right: 20px !important;
-  width: 620px !important;
-  min-width: 620px !important; /* Añade esta línea */
+  width: 800px !important;
+  min-width: 800px !important; /* Añade esta línea */
   height: 600px !important;
   min-height: 600px !important; /* Añade esta línea */
   box-sizing: border-box !important; /* Añade esta línea */
