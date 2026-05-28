@@ -930,19 +930,18 @@ app.post('/api/timer/scan-other-kingdoms', async (req, res) => {
   }
 })
 
-app.post('/api/timer/stop-kingdom', async (req, res) => {
-  const { kingdom } = req.body
+app.post('/api/timer/stop-timer', async (req, res) => {
+  const { key } = req.body
 
   const timerManager = await getTimerManager()
 
-  if (!kingdomUrls[kingdom]) {
-    return res.json({ success: false, error: 'no valid kingdoms' })
+  if (!key) {
+    return res.json({ success: false, error: 'no valid key' })
   }
 
   try {
-    const timerKey = `kingdom:${kingdom}`
-    await timerManager.stopByKey(timerKey)
-    res.json({ success: true, message: `${kingdom} Kingdom scanner stopped` })
+    await timerManager.stopByKey(key)
+    res.json({ success: true, message: `timer: ${key} scanner stopped` })
   } catch (error) {
     console.log('error', error.message)
     return res.json({ success: false, error: error.message })

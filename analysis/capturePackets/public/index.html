@@ -682,12 +682,12 @@
         }
       }
 
-      window.stopKingdomTimer = async function (kingdom) {
+      window.stopTimerByKey = async function (key) {
         try {
-          const res = await fetch(API + '/timer/stop-kingdom', {
+          const res = await fetch(API + '/timer/stop-timer', {
             method: 'post',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ kingdom })
+            body: JSON.stringify({ key })
           })
           const data = await res.json()
           if (data.success) {
@@ -715,7 +715,7 @@
                   t => `
                 <div class="list-item">
                   <span>${t.key || 'N/A'}</span>
-                  <span><button onClick="stopKingdomTimer(${t.kingdom})">stop</button></span>
+                  <span><button onClick="stopTimerByKey(${t.key})">stop</button></span>
                   <span>${t.name}-${t.kingdom}</span>
                   <span style="color:#aabb33">Next: ${t.nextRunAt}</span>
                   <span style="color:#569cd6">${t.interval}</span>
